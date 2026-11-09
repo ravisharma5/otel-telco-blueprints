@@ -10,11 +10,11 @@ These are the starting points for blueprint authors. Copy the raw file from the 
 ## Platform blueprint template
 
 ````markdown
---8<-- "templates/platform-blueprint.md"
+--8<-- "platform-blueprint.md"
 ````
 
 ## Use-case blueprint template
 
 ````markdown
---8<-- "templates/use-case-blueprint.md"
+--8<-- "use-case-blueprint.md"
 ````
