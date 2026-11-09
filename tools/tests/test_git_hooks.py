@@ -375,6 +375,110 @@ def test_pre_push_scans_only_target_remote(scratch):
     assert "framework/" + AGENT in proc.stderr
 
 
+# pre-push: ref names and annotated tag messages.
+ID_D = "D" + "-12"
+
+
+def _tag_on_remote(scratch, tag: str) -> bool:
+    return ("refs/tags/" + tag) in _remote_refs(scratch, "origin")
+
+
+def test_pre_push_rejects_annotated_tag_message_mention(scratch):
+    _bare(scratch, "origin")
+    scratch.git("tag", "-a", "v0", "-m", "See " + PLAN_DIR + "/MILESTONES.md for details", check=True)
+    proc = scratch.git("push", "-q", "origin", "v0")
+    assert proc.returncode != 0
+    assert "mention" in proc.stderr
+    assert not _tag_on_remote(scratch, "v0")
+
+
+def test_pre_push_rejects_annotated_tag_message_planning_id(scratch):
+    _bare(scratch, "origin")
+    scratch.git("tag", "-a", "v0", "-m", "Closes " + ID_D + " for this release", check=True)
+    proc = scratch.git("push", "-q", "origin", "v0")
+    assert proc.returncode != 0
+    assert "planning-id" in proc.stderr
+    assert not _tag_on_remote(scratch, "v0")
+
+
+def test_pre_push_tag_message_term_masked(scratch):
+    _bare(scratch, "origin")
+    scratch.configure_terms()
+    scratch.git("tag", "-a", "v0", "-m", "Release for " + SYNTH_TERM, check=True)
+    proc = scratch.git("push", "-q", "origin", "v0")
+    _assert_masked(proc)
+    assert not _tag_on_remote(scratch, "v0")
+
+
+def test_pre_push_rejects_nested_tag_message(scratch):
+    _bare(scratch, "origin")
+    scratch.git("tag", "-a", "inner", "-m", "See " + PLAN_DIR + "/MILESTONES.md", check=True)
+    scratch.git("tag", "-a", "v0", "-m", "Clean outer message", "inner", check=True)
+    proc = scratch.git("push", "-q", "origin", "refs/tags/v0")
+    assert proc.returncode != 0
+    assert "mention" in proc.stderr
+    assert not _tag_on_remote(scratch, "v0")
+
+
+def test_pre_push_rejects_id_bearing_branch_name(scratch):
+    _bare(scratch, "origin")
+    scratch.git("checkout", "-q", "-b", "gsd/phase-01.1-" + ID_D + "-work", check=True)
+    proc = scratch.git("push", "-q", "origin", "HEAD")
+    assert proc.returncode != 0
+    assert "planning-id" in proc.stderr
+    assert _remote_refs(scratch, "origin") == ""
+
+
+def test_pre_push_rejects_id_bearing_remote_ref(scratch):
+    _bare(scratch, "origin")
+    proc = scratch.git("push", "-q", "origin", "main:refs/heads/fix-" + ID_D)
+    assert proc.returncode != 0
+    assert "planning-id" in proc.stderr
+    assert _remote_refs(scratch, "origin") == ""
+
+
+def test_pre_push_branch_name_term_masked(scratch):
+    _bare(scratch, "origin")
+    scratch.configure_terms()
+    scratch.git("checkout", "-q", "-b", SYNTH_TERM + "-work", check=True)
+    proc = scratch.git("push", "-q", "origin", "HEAD")
+    _assert_masked(proc)
+    assert _remote_refs(scratch, "origin") == ""
+
+
+def test_pre_push_rejects_bad_lightweight_tag_name_on_pushed_commit(scratch):
+    _bare(scratch, "origin")
+    assert scratch.git("push", "-q", "origin", "main").returncode == 0
+    scratch.git("tag", "release-" + ID_D, check=True)
+    proc = scratch.git("push", "-q", "origin", "release-" + ID_D)
+    assert proc.returncode != 0
+    assert "planning-id" in proc.stderr
+    assert not _tag_on_remote(scratch, "release-" + ID_D)
+
+
+def test_pre_push_accepts_clean_tags(scratch):
+    _bare(scratch, "origin")
+    scratch.configure_terms()
+    assert scratch.git("push", "-q", "origin", "main").returncode == 0
+    scratch.git("tag", "-a", "v1.0", "-m", "First public release", check=True)
+    scratch.git("tag", "stable", check=True)
+    proc = scratch.git("push", "-q", "origin", "v1.0", "stable")
+    assert proc.returncode == 0, proc.stderr
+    assert _tag_on_remote(scratch, "v1.0")
+    assert _tag_on_remote(scratch, "stable")
+
+
+def test_pre_push_allows_tag_deletion(scratch):
+    _bare(scratch, "origin")
+    name = "release-" + ID_D
+    scratch.git("tag", name, check=True)
+    assert scratch.git("push", "-q", "--no-verify", "origin", "main", name).returncode == 0
+    assert _tag_on_remote(scratch, name)
+    proc = scratch.git("push", "-q", "origin", ":refs/tags/" + name)
+    assert proc.returncode == 0, proc.stderr
+    assert not _tag_on_remote(scratch, name)
+
+
 # Installer.
 def _exclude_path(scratch) -> Path:
     rel = scratch.git("rev-parse", "--git-path", "info/exclude", check=True).stdout.strip()
