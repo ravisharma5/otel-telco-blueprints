@@ -37,6 +37,7 @@ def _env(tmp_path: Path) -> dict:
         {
             "GIT_CONFIG_GLOBAL": str(gconf),
             "GIT_CONFIG_NOSYSTEM": "1",
+            "PYTHONDONTWRITEBYTECODE": "1",
             "GIT_AUTHOR_NAME": "Test",
             "GIT_AUTHOR_EMAIL": "test@example.com",
             "GIT_COMMITTER_NAME": "Test",
@@ -78,7 +79,8 @@ class Scratch:
 
     def commit_file(self, rel: str, data, msg: str = "docs: add file", *, no_verify=False):
         self.write(rel, data)
-        self.git("add", "--", rel, check=True)
+        # -f: exclude lines must not hide a path; the hooks are the gate under test.
+        self.git("add", "-f", "--", rel, check=True)
         args = ["commit", "-q", "-m", msg]
         if no_verify:
             args.append("--no-verify")
