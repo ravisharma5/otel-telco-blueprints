@@ -3,98 +3,46 @@
 Four checks run over `git ls-files`:
 
 - test_no_internal_paths_tracked: no planning, context, agent, personal, or
-  register-era path is tracked.
-- test_no_sensitive_terms: no tracked public file names internal documents,
-  people, local paths, or product release numbers.
+  register-era path is tracked, at any depth and in any letter case.
+- test_no_sensitive_terms: no tracked public file contains a private term.
 - test_no_internal_path_mentions: no tracked public file points at the
-  planning folder or the agent instructions file.
-- test_no_planning_ids: no tracked public file cites planning ids (decisions,
-  requirements, review findings, threats, roadmap criteria, plan numbers);
-  public text states the rule itself instead.
+  planning folder, the planning repository, or the agent instructions file.
+- test_no_planning_ids: no tracked public file cites planning ids; public text
+  states the rule itself instead.
 
-The path check is marked as a strict xfail before the release, because the
-planning folder is still tracked in the working repository. The marker lives on
-the two lines that end with the pre-release marker comment. The release export
-deletes exactly those lines, so the check is enforced in the
-public commit and in CI from then on. The xfail is deliberately not conditional
-on repository state: a condition such as "is the planning folder tracked" would
-switch the backstop off exactly when it matters.
+The generic patterns come from tools/guards/patterns.py, which the git hooks
+share, so the rules cannot drift. Private terms are never stored in this
+repository. They are read at run time from a local file when GUARDS_EXTRA_TERMS
+or the `guards.extraTerms` git config key names one; otherwise the term check
+is skipped and the other three checks still run.
 
-Every pattern is built from string fragments so this file never matches itself.
-The content scans also skip this file by path.
+Internal names are built from string fragments; the content scans also skip
+this file by path.
 """
 
 from __future__ import annotations
 
-import re
 import subprocess
 
 import pytest
 
+from tools.guards.patterns import (
+    FORBIDDEN_PATH_RE,
+    MENTIONS_RE,
+    PLANNING_ID_RE,
+    SELF_EXCLUDED,
+    forbidden_path,
+    load_extra_terms,
+    resolve_extra_terms_path,
+    scan_text,
+)
 from tools.tests.conftest import REPO_ROOT
 
-SELF = "tools/tests/test_public_tree.py"
-PLANNING = "." + "planning"
+PLAN_DIR = "." + "plan" + "ning"
 AGENT_FILE = "CLAU" + "DE.md"
 CONTEXT_DIR = "con" + "text/"
 
-FORBIDDEN_PATHS = [
-    re.escape(PLANNING + "/"),
-    re.escape(CONTEXT_DIR),
-    re.escape(AGENT_FILE) + "$",
-    re.escape("." + "gitignore") + "$",
-    re.escape("NOTES" + ".md") + "$",
-    re.escape("docs/" + "blog-"),
-    re.escape("." + "claude/"),
-    re.escape("architecture/support" + "-status."),
-    re.escape("schemas/support" + "-status.schema.json") + "$",
-    re.escape("tools/render_support" + "_status.py") + "$",
-    re.escape("tools/bplint/checks/" + "register.py") + "$",
-    re.escape("tools/tests/test_" + "register.py") + "$",
-    re.escape("tools/tests/test_" + "register_checks.py") + "$",
-    re.escape("tools/tests/test_" + "render.py") + "$",
-    re.escape("tools/tests/fixtures/" + "register.yaml") + "$",
-    re.escape("tools/tests/fixtures/support" + "-status.md") + "$",
-    re.escape("tools/tests/fixtures/broken/" + "stale-register/"),
-    re.escape("tools/tests/fixtures/broken/" + "unknown-component/"),
-    re.escape("tools/tests/fixtures/broken/" + "weakest-mismatch/"),
-]
-# Anchored at the start of the repo-relative path; nested copies also count.
-FORBIDDEN_PATH_RE = re.compile(r"(?:^|/)(?:" + "|".join(FORBIDDEN_PATHS) + ")")
-
-# Public model namespace on Hugging Face; stripped before the term scan.
-PUBLIC_MODEL_NS = re.compile(re.escape("huggingface.co/" + "far" + "bod" + "tavakkoli/"), re.IGNORECASE)
-SENSITIVE_TERMS = [
-    "hybrid-" + "inferenc",
-    "far" + "bod",
-    "fat" + "ih",
-    "ai-" + "grid",
-    "research-" + "findings",
-    "/Us" + "ers/",
-    "rav" + "sharm",
-    "RHOAI" + " 3.",
-    "RHAII" + " 3.",
-]
-SENSITIVE_RE = re.compile("|".join(re.escape(t) for t in SENSITIVE_TERMS), re.IGNORECASE)
-
-MENTIONS = [PLANNING + "/", PLANNING + "/**", AGENT_FILE]
-
-# Planning references (decision, requirement, review, and threat ids, roadmap
-# criteria, plan numbers) mean nothing to a public reader. Linter codes such as
-# FM001 or CR001 and the E/M levels have no hyphen-digit form, so they never match.
-# Platform blueprint ids are public schema ids and are not in this list.
-PLANNING_ID_PATTERNS = [
-    r"\b" + "D" + r"-\d{2}\b",
-    r"\b(?:" + "|".join(["FN" + "D", "AR" + "CH", "U" + "C", "PR" + "OP", "IM" + "PL", "SI" + "TE", "PU" + "B", "W" + "R", "C" + "R"]) + r")-\d{2}\b",
-    r"\b" + "T" + r"-\d{2}(?:\.\d+)?-[A-Z0-9]",
-    r"\b" + "S" + r"C\d\b",
-    r"\b" + "ROAD" + "MAP" + r"\b",
-    "REV" + r"IEW\.md",
-    r"\b" + "pl" + r"an \d{2}\b",
-    r"\b\d{2}\.\d" + r"-\d{2}\b",
-]
-PLANNING_ID_RE = re.compile("|".join(PLANNING_ID_PATTERNS))
-
+__all__ = ["FORBIDDEN_PATH_RE", "MENTIONS_RE", "PLANNING_ID_RE"]
 
 
 def _tracked():
@@ -110,9 +58,9 @@ def _tracked():
 
 def _excluded(path):
     return (
-        path == SELF
+        path in SELF_EXCLUDED
         or path == AGENT_FILE
-        or path.startswith(PLANNING + "/")
+        or path.startswith(PLAN_DIR + "/")
         or path.startswith(CONTEXT_DIR)
     )
 
@@ -128,29 +76,30 @@ def _public_texts():
 
 
 def test_no_internal_paths_tracked():
-    hits = [p for p in _tracked() if FORBIDDEN_PATH_RE.search(p)]
+    hits = [p for p in _tracked() if forbidden_path(p)]
     assert not hits, f"internal paths tracked: {hits[:20]}"
 
 
 def test_no_sensitive_terms():
+    terms_path = resolve_extra_terms_path(REPO_ROOT)
+    if terms_path is None:
+        pytest.skip("no local private terms configured (GUARDS_EXTRA_TERMS / guards.extraTerms unset)")
+    extra = load_extra_terms(terms_path)  # a missing file fails, it does not skip
     hits = []
     for path, text in _public_texts():
-        scrubbed = PUBLIC_MODEL_NS.sub("", text)
-        for lineno, line in enumerate(scrubbed.splitlines(), 1):
-            match = SENSITIVE_RE.search(line)
-            if match:
-                hits.append(f"{path}:{lineno}: {match.group(0)}")
-    assert not hits, "sensitive terms in public files:\n" + "\n".join(hits)
+        for lineno, kind, match in scan_text(text, extra):
+            if kind == "term":
+                hits.append(f"{path}:{lineno}: {match}")
+    assert not hits, "private terms in public files:\n" + "\n".join(hits)
 
 
 def test_no_internal_path_mentions():
     hits = []
     for path, text in _public_texts():
         for lineno, line in enumerate(text.splitlines(), 1):
-            for needle in MENTIONS:
-                if needle in line:
-                    hits.append(f"{path}:{lineno}: {needle}")
-                    break
+            match = MENTIONS_RE.search(line)
+            if match:
+                hits.append(f"{path}:{lineno}: {match.group(0)}")
     assert not hits, "internal path mentions in public files:\n" + "\n".join(hits)
 
 
