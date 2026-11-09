@@ -38,6 +38,7 @@ You need `uv` and Vale 3.26.0.
 | `make ci` | Runs tests, Vale rule tests, `make lint`, and `make site`, the same as CI |
 | `make site` | Builds the docs site in strict mode |
 | `make serve` | Previews the docs site at `http://127.0.0.1:8000` |
+| `make hooks` | Installs the git guards that stop internal files and messages from being committed or pushed |
 
 ## License
 

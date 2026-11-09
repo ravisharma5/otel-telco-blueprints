@@ -8,7 +8,7 @@
 DOC_DIRS := README.md site-src framework architecture platform catalog templates
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale site serve ci
+.PHONY: setup lint lint-structure lint-prose test test-vale site serve ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -36,3 +36,7 @@ serve:
 	NO_MKDOCS_2_WARNING=1 uv run mkdocs serve --strict
 
 ci: test test-vale lint site
+
+# Installs the versioned git guards (core.hooksPath = tools/git-hooks); not part of `ci`.
+hooks:
+	sh tools/git-hooks/install.sh
