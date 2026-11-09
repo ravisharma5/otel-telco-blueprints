@@ -1,0 +1,3 @@
+{"case": 1, "input": "Fictional widget alarm A", "expected": "REVIEW", "got": "REVIEW", "pass": true}
+{"case": 2, "input": "Fictional widget alarm B", "expected": "NOTIFY", "got": "NOTIFY", "pass": true}
+{"case": 3, "input": "Fictional widget alarm C", "expected": "STOP", "got": "REVIEW", "pass": false}

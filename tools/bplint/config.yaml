@@ -1,0 +1,22 @@
+# bplint repository configuration. Paths are relative to the repo root.
+schemas_dir: schemas
+budgets: tools/bplint/budgets.yaml
+validation_table: schemas/validation-table.yaml
+
+blueprint_globs:
+  - "platform/*/README.md"
+  - "catalog/*/*/README.md"
+doc_globs:
+  - "README.md"
+  - "framework/*.md"
+  - "architecture/*.md"
+exclude_globs:
+  - "templates/**"
+  - "tools/tests/fixtures/**"
+
+# Schema errors on these fields map to RF001; others map to FM002.
+facet_fields:
+  - model_readiness
+  - evidence_level
+  - autonomy_ceiling
+  - placement_tier

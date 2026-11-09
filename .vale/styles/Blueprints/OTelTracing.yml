@@ -1,0 +1,40 @@
+# In this repo "OTel" names the model family. Tracing must be written "OpenTelemetry".
+# "OTel agent" and "OTel metrics" are not flagged: they describe model-family traffic
+# and scores. Metrics only count as tracing before pipeline, exporter, or SDK.
+# The [ -] separator catches hyphenated forms (OTel-Collector); .vale.ini TokenIgnores
+# skips checkpoint names only.
+extends: existence
+message: "'%s' reads as tracing. In this repo 'OTel' means the model family; write 'OpenTelemetry' for tracing."
+level: error
+nonword: true
+raw:
+  - '\bOTel[ -](?:[Cc]ollector|[Tt]races?|[Tt]racing|[Ss]pans?|SDK|[Ee]xporters?|[Ii]nstrumentation|[Mm]etrics[ -](?:[Pp]ipelines?|[Ee]xporters?|SDK)|[Ll]ogs|[Ss]emantic [Cc]onventions|[Ss]emconv)\b'
+  - '|\b(?:OTLP|opentelemetry-\w+)\b'
+tests:
+  - name: flags tracing usage
+    input: The OTel collector ships OTel traces over OTLP.
+    contains: ["'OTel collector'", "'OTel traces'", "'OTLP'"]
+  - name: leaves the model family alone
+    input: The OTel Decision model and OTel 2.5 run on vLLM.
+    absent: Blueprints.OTelTracing
+  - name: leaves checkpoint names alone
+    input: OTel-2.0-LLM-31B-IT serves answers.
+    absent: Blueprints.OTelTracing
+  - name: flags hyphenated collector
+    input: The OTel-Collector ships data.
+    contains: "'OTel-Collector'"
+  - name: flags hyphenated SDK
+    input: Install the OTel-SDK.
+    contains: "'OTel-SDK'"
+  - name: flags hyphenated traces
+    input: Send OTel-traces upstream.
+    contains: "'OTel-traces'"
+  - name: flags metrics pipeline
+    input: Wire the OTel metrics pipeline.
+    contains: "'OTel metrics pipeline'"
+  - name: allows OTel agent traffic
+    input: Our OTel agent traffic is high.
+    absent: Blueprints.OTelTracing
+  - name: allows OTel metrics as model scores
+    input: OTel metrics on TeleQnA improved.
+    absent: Blueprints.OTelTracing

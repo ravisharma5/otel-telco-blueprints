@@ -1,0 +1,19 @@
+Vendored Vale style: Google developer documentation style
+
+Upstream repo:   https://github.com/vale-cli/Google
+Release tag:     v0.7.1
+Asset URL:       https://github.com/vale-cli/Google/releases/download/v0.7.1/Google.zip
+Google.zip SHA-256: 4b67fca1f2a88595b2a578ab98bbf3017a23af677b04f93e862843f3ea1a9a0b
+License:         MIT (LICENSE in this folder, fetched from
+                 https://raw.githubusercontent.com/vale-cli/Google/v0.7.1/LICENSE)
+LICENSE SHA-256: f661986be23c000812a439e03dfed8d16ff23117e8d1219fc2beb7cd01393640
+Retrieved:       2026-11-08
+
+Every file except LICENSE and PROVENANCE.txt is byte-identical to the Google/
+folder inside the release zip. .vale.ini has no Packages line, so no make
+target or Vale run downloads styles.
+
+Re-verify:
+  curl -fsSLO https://github.com/vale-cli/Google/releases/download/v0.7.1/Google.zip
+  shasum -a 256 Google.zip   # must match the SHA-256 above
+  unzip -q Google.zip -d /tmp/g && diff -r -x LICENSE -x PROVENANCE.txt /tmp/g/Google .vale/styles/Google

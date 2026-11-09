@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://otel-telco-blueprints.invalid/schemas/common.schema.json",
+  "title": "Shared definitions for blueprint front matter",
+  "description": "Single source of truth for every enum.",
+  "x-claim-term-map": {
+    "described": "E0",
+    "designed": "E1",
+    "deployed": "E2",
+    "exercised": "E3",
+    "evaluated": "E3 (evaluated)",
+    "operator-validated": "E4"
+  },
+  "$defs": {
+    "e_level": {
+      "description": "Evidence level: how far a claim has been validated.",
+      "type": "string",
+      "enum": ["E0", "E1", "E2", "E3", "E4"]
+    },
+    "m_level": {
+      "description": "Model readiness level: how ready the model is for the task.",
+      "type": "string",
+      "enum": ["M0", "M1", "M2", "M3"]
+    },
+    "autonomy_ceiling": {
+      "type": "string",
+      "enum": ["inform", "notify", "recommend-with-approval", "act-within-policy"]
+    },
+    "otel_slot": {
+      "type": "string",
+      "enum": ["llm", "embedding", "reranker", "safety", "decision", "classification"]
+    },
+    "placement_tier": {
+      "type": "string",
+      "enum": ["far-edge", "regional", "core"]
+    },
+    "doc_status": {
+      "type": "string",
+      "enum": ["draft", "review", "done"]
+    },
+    "date": {
+      "description": "ISO date as a quoted string. Unquoted YAML dates load as date objects and fail.",
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "agent_school_course": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 999
+    }
+  }
+}

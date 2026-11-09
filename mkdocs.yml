@@ -1,0 +1,61 @@
+# Docs site. Build: `make site` (strict). Preview: `make serve`.
+# Pages come from site-src/ plus framework/, architecture/, platform/ and
+# catalog/ (added in place by tools/site/hooks.py). Every page needs a nav line.
+site_name: OTel Telco Production Blueprints
+site_url: https://ravisharma5.github.io/otel-telco-blueprints/
+repo_url: https://github.com/ravisharma5/otel-telco-blueprints
+docs_dir: site-src
+site_dir: site
+strict: true
+hooks:
+  - tools/site/hooks.py
+copyright: Docs CC BY 4.0, code Apache-2.0
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+plugins:
+  - search
+markdown_extensions:
+  - tables
+  - attr_list
+  - admonition
+  - toc:
+      permalink: true
+      # Same anchors as GitHub and bplint (tools/bplint/slug.py).
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+      restrict_base_path: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+not_in_nav: |
+  /platform/*/evidence/
+  /catalog/*/*/evidence/
+nav:
+  - Start here: index.md
+  - Framework:
+      - Overview: framework/index.md
+      - Definitions: framework/definitions.md
+      - Glossary: framework/glossary.md
+      - Style guide: framework/style-guide.md
+      - Review checklist: framework/review-checklist.md
+  - Architecture: architecture/index.md
+  - Catalog: catalog/index.md
+  - Platform: platform/index.md
+  - Templates: templates.md

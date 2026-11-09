@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://otel-telco-blueprints.invalid/schemas/platform.schema.json",
+  "title": "Platform blueprint front matter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type",
+    "title",
+    "readiness_question",
+    "doc_status",
+    "otel_slots",
+    "model_readiness",
+    "evidence_level",
+    "placement_tier",
+    "honest_one_liner",
+    "top_decisions",
+    "agent_school"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^PB-[0-9]{2}$" },
+    "type": { "const": "platform" },
+    "title": { "type": "string", "minLength": 1 },
+    "readiness_question": { "type": "string", "minLength": 1 },
+    "doc_status": { "$ref": "common.schema.json#/$defs/doc_status" },
+    "layers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^L[0-9]{1,2}$" }
+    },
+    "table1_rows": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "integer" }
+    },
+    "extension_rows": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^E[0-9]+$" }
+    },
+    "otel_slots": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/otel_slot" }
+    },
+    "model_readiness": {
+      "description": "Platform blueprints do not carry a model-readiness level; it applies to use cases only.",
+      "const": "n/a"
+    },
+    "evidence_level": { "$ref": "common.schema.json#/$defs/e_level" },
+    "placement_tier": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/placement_tier" }
+    },
+    "honest_one_liner": { "type": "string", "minLength": 10 },
+    "top_decisions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "agent_school": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/agent_school_course" }
+    },
+    "clarity_reviewed": { "$ref": "common.schema.json#/$defs/date" }
+  }
+}

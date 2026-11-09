@@ -1,0 +1,100 @@
+# Section order, at-a-glance labels, and size budgets for blueprint templates.
+# Tunable without code changes. Extra topics fold into existing sections; use-case
+# pages have page budgets; platform at-a-glance lists the top 3 decisions; there is
+# no weakest-status row, because components are named by role and Red Hat product.
+
+# Assumption: about 450 prose words per page. Tune after first real blueprint.
+words_per_page: 450
+
+# Units used in section limits:
+#   rows       = data rows per table (header and separator rows excluded)
+#   tables     = table count in the section
+#   steps      = top-level ordered-list items
+#   bullets    = top-level unordered or task-list items
+#   lines      = non-blank paragraph source lines, excluding tables, lists,
+#                headings, images, and HTML comments
+#   diagrams   = image count in the section
+#   page_words = prose words in paragraphs and list items across the doc,
+#                excluding tables, code, front matter, and HTML comments
+units: [rows, tables, steps, bullets, lines, diagrams, page_words]
+
+# A section whose body starts with this marker is a declared stub.
+stub_marker: "_Stub:"
+
+types:
+  platform:
+    page_words: 1800
+    validation_section: "Validation and acceptance"
+    at_a_glance_rows:
+      - Honest one-liner
+      - Question answered
+      - Audience
+      - OTel slots
+      - Placement tier
+      - Top 3 decisions
+      - Agent-school courses
+    sections:
+      - title: At a glance
+        tables: 1
+        rows: 7
+      - title: The operator question
+        lines: 3
+      - title: Decisions you must make
+        tables: 1
+      - title: Reference design
+        diagrams: 1
+        steps: 8
+        bullets: 8          # config-artifact links
+      - title: Components
+        tables: 1
+      - title: OTel slot guidance
+        tables: 1
+      - title: Validation and acceptance
+        tables: 1
+        bullets: 10
+      - title: Operating model
+        tables: 1
+      - title: Risks and limitations
+        tables: 1
+      - title: Used by and next steps
+        bullets: 12         # related work: agent-school, NVIDIA/Databricks, LFN
+
+  use-case:
+    page_words:
+      flagship: 1350
+      catalog: 450
+    validation_section: "Validation"
+    at_a_glance_rows:
+      - Honest one-liner
+      - Problem
+      - Audience
+      - OTel slots
+      - Model readiness and evidence
+      - Placement tier
+      - Agent-school courses
+    # Catalog (non-flagship) entries must fill these; others may be stubs.
+    catalog_required:
+      - At a glance
+      - Governance
+      - Validation
+      - Limitations
+    sections:
+      - title: At a glance
+        tables: 1
+        rows: 7
+      - title: Problem and value
+        lines: 5
+      - title: How it works
+        diagrams: 1
+        steps: 8
+      - title: What you need
+        bullets: 12         # models, platform blueprints, integrations, tools/data, adaptation, prerequisites
+      - title: Governance
+        tables: 1
+      - title: Validation
+        tables: 1
+      - title: Deploy and verify
+        lines: 5
+        bullets: 5          # related work links
+      - title: Limitations
+        bullets: 6

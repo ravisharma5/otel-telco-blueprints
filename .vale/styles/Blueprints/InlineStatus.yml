@@ -1,0 +1,96 @@
+# Blueprints describe an open-source solution. The Red Hat products they name are
+# replaceable reference choices, so no document makes a product support claim
+# or uses a support-status label. Name the component's role and the Red Hat product used instead.
+#
+# To quote a label on purpose, put it in a code span (IgnoredScopes = code), or wrap
+# the prose in a `vale-exception` comment pair that states the reason.
+#
+# Bare "supported", "unsupported", and "community" are not tokens on purpose:
+# hardware and kernel facts use them ("FP8 is not supported on A100"), and those
+# are not product support claims. The TP/DP lookaheads keep tensor- and
+# data-parallel notation legal: TP-2, TP=2, TP 2, TP x2, DP×4.
+extends: existence
+message: "Blueprints make no product support claims. Remove '%s' and name the component's role and the Red Hat product used."
+level: error
+ignorecase: false
+tokens:
+  - (?i:general(?:ly)? availab(?:le|ility))
+  - (?i:tech(?:nology)?[- ]preview)
+  - (?i:dev(?:eloper)?[- ]preview)
+  - (?i:production[- ]supported)
+  - GA
+  - TP(?![-= ]?\d)(?! *[x×] *\d)
+  - DP(?![-= ]?\d)(?! *[x×] *\d)
+  - (?i:partner[- ]certified)
+  - (?i:community[- ]supported)
+  - (?i:(?:fully|officially|commercially) supported)
+  - (?i:supported by Red Hat)
+  - (?i:Red Hat[- ]supported)
+  - (?i:(?:not )?supported (?:for|in) production)
+tests:
+  - name: flags generally available
+    input: The gateway is generally available.
+    contains: "'generally available'"
+  - name: flags Technology Preview
+    input: The runtime is a Technology Preview.
+    contains: "'Technology Preview'"
+  - name: flags Developer Preview
+    input: The router is a Developer Preview.
+    contains: "'Developer Preview'"
+  - name: flags GA
+    input: The gateway is GA today.
+    contains: "'GA'"
+  - name: flags TP
+    input: The scheduler is TP today.
+    contains: "'TP'"
+  - name: flags DP
+    input: The router is DP today.
+    contains: "'DP'"
+  - name: flags partner-certified
+    input: The operator is partner-certified.
+    contains: "'partner-certified'"
+  - name: flags fully supported
+    input: The runtime is fully supported.
+    contains: "'fully supported'"
+  - name: flags supported by Red Hat
+    input: The runtime is supported by Red Hat.
+    contains: "'supported by Red Hat'"
+  - name: flags supported for production
+    input: The gateway is supported for production.
+    contains: "'supported for production'"
+  - name: allows tensor-parallel notation
+    input: Use TP-2 tensor parallelism.
+    absent: Blueprints.InlineStatus
+  - name: allows hardware facts
+    input: FP8 is not supported on A100.
+    absent: Blueprints.InlineStatus
+  - name: allows metric names
+    input: Watch TPOT and GAIE.
+    absent: Blueprints.InlineStatus
+  - name: allows the word community
+    input: A community of operators reviews it.
+    absent: Blueprints.InlineStatus
+  - name: flags general availability
+    input: The gateway reached general availability.
+    contains: "'general availability'"
+  - name: flags hyphenated Tech-Preview
+    input: The router is a Tech-Preview.
+    contains: "'Tech-Preview'"
+  - name: flags Dev Preview
+    input: The router is a Dev Preview.
+    contains: "'Dev Preview'"
+  - name: flags hyphenated Developer-Preview
+    input: It is a Developer-Preview.
+    contains: "'Developer-Preview'"
+  - name: flags hyphenated Technology-Preview
+    input: It is a Technology-Preview.
+    contains: "'Technology-Preview'"
+  - name: flags production-supported
+    input: The runtime is production-supported.
+    contains: "'production-supported'"
+  - name: allows equals and space parallel notation
+    input: Use TP=2 and DP 4.
+    absent: Blueprints.InlineStatus
+  - name: allows multiplier parallel notation
+    input: Run TP x2 with DP×4.
+    absent: Blueprints.InlineStatus

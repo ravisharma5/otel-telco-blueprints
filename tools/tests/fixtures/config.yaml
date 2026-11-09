@@ -1,0 +1,15 @@
+# bplint test configuration: no discovery globs; tests pass fixture paths.
+schemas_dir: schemas
+budgets: tools/bplint/budgets.yaml
+validation_table: schemas/validation-table.yaml
+
+blueprint_globs: []
+doc_globs: []
+exclude_globs:
+  - "templates/**"
+
+facet_fields:
+  - model_readiness
+  - evidence_level
+  - autonomy_ceiling
+  - placement_tier

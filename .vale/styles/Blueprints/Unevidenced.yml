@@ -1,0 +1,36 @@
+# Claims need an evidence level or a link, not an adjective.
+# "operator-validated" is a defined claim term; "Validated Patterns" is a Red Hat product name.
+# Honest negations ("not validated", "not yet validated", "never validated") are allowed.
+extends: existence
+message: "Avoid '%s'. State the evidence level (E0-E4) or link the evidence instead."
+level: error
+ignorecase: true
+tokens:
+  - proven
+  - (?<!operator-)(?<!not )(?<!not yet )(?<!never )validated(?! Patterns)
+  - production[- ]ready
+  - seamless(?:ly)?
+  - robust
+  - cutting-edge
+tests:
+  - name: flags bare validated
+    input: The model is validated.
+    contains: "'validated'"
+  - name: allows the claim term operator-validated
+    input: This claim is operator-validated (E4).
+    absent: Blueprints.Unevidenced
+  - name: allows the product name Validated Patterns
+    input: Red Hat Validated Patterns use tiers.
+    absent: Blueprints.Unevidenced
+  - name: flags marketing adjectives
+    input: A seamless, production-ready, robust design.
+    contains: ["'seamless'", "'production-ready'", "'robust'"]
+  - name: allows not validated
+    input: The Decision model is not validated on this engine.
+    absent: Blueprints.Unevidenced
+  - name: allows not yet validated
+    input: It is not yet validated.
+    absent: Blueprints.Unevidenced
+  - name: allows never validated
+    input: It was never validated.
+    absent: Blueprints.Unevidenced

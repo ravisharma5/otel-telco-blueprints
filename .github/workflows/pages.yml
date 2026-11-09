@@ -1,0 +1,50 @@
+# Builds the docs site on every push to main, but deploys it only after the user
+# enables GitHub Pages and sets the PAGES_ENABLED repo variable to "true" on the
+# public repo. Until then the upload and deploy steps are skipped.
+# Security: triggers are push to main and manual dispatch only (no PR events),
+# read-only token by default,
+# pages/id-token write only on the deploy job, every action pinned by commit SHA.
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: "3.12"
+          # Same uv version that produced uv.lock.
+          version: "0.9.28"
+      # --locked fails instead of re-resolving when uv.lock is stale.
+      - run: uv sync --all-extras --locked
+      - run: make site
+        env:
+          NO_MKDOCS_2_WARNING: "1"
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        if: vars.PAGES_ENABLED == 'true' && github.event.repository.visibility == 'public'
+        with:
+          path: site/
+  deploy:
+    needs: build
+    if: vars.PAGES_ENABLED == 'true' && github.event.repository.visibility == 'public'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
