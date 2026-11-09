@@ -8,9 +8,11 @@ Modes:
   planning ids, or configured private terms.
 - commit-msg FILE: rejects messages with planning-id scopes, internal mentions,
   planning ids, or configured private terms.
-- pre-push REMOTE: checks only the commits new to REMOTE (tree paths,
-  private terms in those paths, messages, and the content each commit
-  introduces).
+- pre-push REMOTE: checks every pushed ref name (local and remote side,
+  branches and tags) and every annotated tag message in the pushed tag chain,
+  then the commits new to REMOTE (tree paths, private terms in those paths,
+  messages, and the content each commit introduces). Ref deletions are
+  allowed.
 - tree [REV]: path (internal paths and private terms) and content checks over
   every file at REV (default HEAD).
 - install [--check] [--extra-terms PATH]: points core.hooksPath at
@@ -187,6 +189,50 @@ def _push_commits(top: str, remote: str, local_sha: str, remote_sha: str) -> Lis
     return out.decode().split()
 
 
+MAX_TAG_DEPTH = 10
+NOT_A_REF = ("HEAD", "(delete)")
+
+
+def _ref_label(ref: str, extra) -> str:
+    """The ref name, or a masked label when it holds a private term."""
+    n = patterns.term_number(ref, extra)
+    return ref if n is None else f"<ref name with private term #{n}>"
+
+
+def _check_ref_names(rep: Report, extra, refs: Tuple[str, ...]) -> None:
+    for ref in dict.fromkeys(refs):
+        if ref in NOT_A_REF:
+            continue
+        label = _ref_label(ref, extra)
+        for _lineno, kind, match in patterns.scan_text(ref, extra, joined=False):
+            rep.hit(f"ref {label}", kind, match)
+
+
+def _check_tag_chain(rep: Report, top: str, extra, sha: str, label: str) -> None:
+    """Scan the message and name header of every tag object from sha down."""
+    obj = sha
+    for depth in range(MAX_TAG_DEPTH + 1):
+        if git("cat-file", "-t", obj, cwd=top).strip() != b"tag":
+            return
+        if depth == MAX_TAG_DEPTH:
+            rep.hit(label, "tag chain too deep", f"(more than {MAX_TAG_DEPTH} nested tags)")
+            return
+        body = git("cat-file", "tag", obj, cwd=top).decode("utf-8", "replace")
+        headers, _, message = body.partition("\n\n")
+        next_obj = None
+        for header in headers.splitlines():
+            if header.startswith("object "):
+                next_obj = header[len("object "):].strip()
+            elif header.startswith("tag "):
+                name = header[len("tag "):]
+                for _lineno, kind, match in patterns.scan_text(name, extra, joined=False):
+                    rep.hit(f"{label} (tag name)", kind, match)
+        rep.text_hits(label, patterns.scan_message(message, extra))
+        if not next_obj:
+            return
+        obj = next_obj
+
+
 def cmd_pre_push(top: str, extra, remote: str, stdin_text: str) -> int:
     rep = Report("pre-push")
     if extra is None:
@@ -197,9 +243,12 @@ def cmd_pre_push(top: str, extra, remote: str, stdin_text: str) -> int:
         fields = line.split()
         if len(fields) < 4:
             continue
-        _local_ref, local_sha, _remote_ref, remote_sha = fields[:4]
+        local_ref, local_sha, remote_ref, remote_sha = fields[:4]
         if _is_zero(local_sha):
-            continue  # branch deletion
+            continue  # ref deletion (branch or tag): allowed, nothing is published
+        _check_ref_names(rep, extra, (local_ref, remote_ref))
+        tag_ref = local_ref if local_ref not in NOT_A_REF else remote_ref
+        _check_tag_chain(rep, top, extra, local_sha, _ref_label(tag_ref, extra) + " tag message")
         for c in _push_commits(top, remote, local_sha, remote_sha):
             if c in seen_commits:
                 continue
