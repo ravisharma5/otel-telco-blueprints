@@ -27,6 +27,7 @@ import subprocess
 import pytest
 
 from tools.guards.patterns import (
+    compile_extra_terms,
     FORBIDDEN_PATH_RE,
     MENTIONS_RE,
     PLANNING_ID_RE,
@@ -111,3 +112,16 @@ def test_no_planning_ids():
             if match:
                 hits.append(f"{path}:{lineno}: {match.group(0)}")
     assert not hits, "planning ids in public files:\n" + "\n".join(hits)
+
+
+def test_term_scan_covers_paths():
+    term = "zz" + "pathterm"
+    extra = compile_extra_terms([term])
+    entries = [
+        ("architecture/" + term + "-notes.md", "Clean text.\n"),
+        ("docs/clean.md", "Clean text.\n"),
+    ]
+    hits = _term_hits(entries, extra)
+    assert hits == ["<path with private term #1>"]
+    assert all(term not in h.lower() for h in hits)
+    assert _term_hits([("docs/clean.md", "Clean text.\n")], extra) == []

@@ -234,6 +234,70 @@ def test_terms_fail_closed_when_file_missing(scratch):
     assert "guards.extraTerms" in proc.stderr
 
 
+# Private terms in file paths: rejected and masked.
+def _assert_masked(proc, n=1):
+    assert proc.returncode != 0
+    assert f"private term #{n}" in proc.stderr
+    assert SYNTH_TERM not in proc.stderr.lower()
+
+
+def test_pre_commit_rejects_term_in_path(scratch):
+    scratch.configure_terms()
+    before = scratch.head()
+    proc = scratch.commit_file("architecture/" + SYNTH_TERM + "-notes.md", "Clean text.\n")
+    _assert_masked(proc)
+    assert scratch.head() == before
+
+
+def test_pre_commit_rejects_rename_to_term_path(scratch):
+    scratch.configure_terms()
+    assert scratch.commit_file("ok.md", "fine\n").returncode == 0
+    (scratch.root / "docs").mkdir()
+    scratch.git("mv", "ok.md", "docs/" + SYNTH_TERM + ".md", check=True)
+    proc = scratch.git("commit", "-q", "-m", "docs: move")
+    _assert_masked(proc)
+
+
+def test_pre_commit_rejects_regex_term_in_path(scratch):
+    scratch.configure_terms()
+    proc = scratch.commit_file("docs/zz-rel9-notes.md", "Clean text.\n")
+    _assert_masked(proc, 2)
+
+
+def test_pre_commit_masks_forbidden_term_path(scratch):
+    scratch.configure_terms()
+    proc = scratch.commit_file(PLAN_DIR + "/" + SYNTH_TERM + ".md", "Clean text.\n")
+    assert proc.returncode != 0
+    assert SYNTH_TERM not in proc.stderr.lower()
+
+
+def test_pre_commit_accepts_allowlisted_term_path(scratch):
+    scratch.configure_terms()
+    proc = scratch.commit_file(SYNTH_TERM + ".example/ok/a.md", "Clean text.\n")
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_term_path_skipped_when_unset(scratch):
+    proc = scratch.commit_file("architecture/" + SYNTH_TERM + "-notes.md", "Clean text.\n")
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_pre_push_rejects_term_in_path(scratch):
+    _bare(scratch, "origin")
+    scratch.configure_terms()
+    scratch.commit_file("architecture/" + SYNTH_TERM + "-notes.md", "Clean text.\n", no_verify=True)
+    proc = scratch.git("push", "-q", "origin", "main")
+    _assert_masked(proc)
+    assert _remote_refs(scratch, "origin") == ""
+
+
+def test_tree_rejects_term_in_path(scratch):
+    scratch.configure_terms()
+    scratch.commit_file("architecture/" + SYNTH_TERM + "-notes.md", "Clean text.\n", no_verify=True)
+    proc = scratch.run(sys.executable, CHECK, "tree", "HEAD")
+    _assert_masked(proc)
+
+
 # commit-msg.
 @pytest.mark.parametrize("msg", ["feat(02" + "-01): x", "docs(01.1" + "): x"])
 def test_commit_msg_rejects_id_scope(scratch, msg):
@@ -261,6 +325,11 @@ def _bare(scratch, name: str) -> None:
     bare = scratch.tmp / (name + ".git")
     scratch.run("git", "init", "-q", "--bare", str(bare), cwd=scratch.tmp, check=True)
     scratch.git("remote", "add", name, str(bare), check=True)
+
+
+def _remote_refs(scratch, name: str) -> str:
+    bare = scratch.tmp / (name + ".git")
+    return scratch.run("git", "--git-dir", str(bare), "show-ref", cwd=scratch.tmp).stdout
 
 
 def test_pre_push_accepts_clean_history(scratch):

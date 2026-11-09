@@ -182,6 +182,28 @@ def test_invalid_regex_names_line_not_text():
     assert bad not in str(exc.value)
 
 
+# Shared helper for paths and ref names: number only, never the text.
+def test_term_number_plain_term_in_path(extra):
+    assert patterns.term_number("architecture/" + TERM + "-notes.md", extra) == 1
+
+
+def test_term_number_regex_term_in_path(extra):
+    assert patterns.term_number("docs/zz-rel9-notes.md", extra) == 2
+
+
+def test_term_number_clean_path(extra):
+    assert patterns.term_number("docs/clean-notes.md", extra) is None
+
+
+@pytest.mark.parametrize("value", [None, patterns.ExtraTerms((), (), ())])
+def test_term_number_without_terms(value):
+    assert patterns.term_number("architecture/" + TERM + "-notes.md", value) is None
+
+
+def test_term_number_allowlisted_path(extra):
+    assert patterns.term_number("docs/" + ALLOWED + "/a.md", extra) is None
+
+
 @pytest.fixture
 def clean_git_env(tmp_path, monkeypatch):
     empty = tmp_path / "empty-gitconfig"
