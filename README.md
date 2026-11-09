@@ -14,6 +14,7 @@ clarity_reviewed: "2026-11-09"
 | Who | GSMA members and telecom operators |
 | Honesty rules | Every blueprint states model readiness, evidence level, and the evidence behind each claim |
 | Open source | Red Hat products show how the solution works. Any component can be replaced (no product support claims) |
+| Website | [Docs site on GitHub Pages](https://ravisharma5.github.io/otel-telco-blueprints/) |
 | Start here | [Definitions](framework/definitions.md), then the [glossary](framework/glossary.md) |
 
 In this repository, "OTel" means the OTel model family, not OpenTelemetry.
