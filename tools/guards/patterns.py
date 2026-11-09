@@ -32,6 +32,8 @@ Extra-terms file format, one entry per line:
 
 A term hit is reported as "private term #<n>" (1-based, plain terms first, then
 regexes, each in file order), never as the term text, so no log can echo it.
+term_number() is the shared helper for file paths and ref names: it returns
+that number (or None) so callers can print a masked label instead of the name.
 
 Internal names below are built from string fragments so this file passes the
 content checks it defines.
@@ -209,6 +211,21 @@ def _term_hit(line: str, extra: ExtraTerms) -> Optional[int]:
     for j, rx in enumerate(extra.regexes, len(extra.terms) + 1):
         if rx.search(line):
             return j
+    return None
+
+
+def term_number(text: str, extra: Optional[ExtraTerms]) -> Optional[int]:
+    """Return the 1-based number of the first private term in text, else None.
+
+    For file paths and ref names: no fragment joining, since they are not code.
+    Callers print "private term #<n>" in a masked label, never the text.
+    """
+    if not extra:
+        return None
+    for line in text.splitlines():
+        n = _term_hit(_strip_allowed(line, extra.allow), extra)
+        if n is not None:
+            return n
     return None
 
 

@@ -3,13 +3,16 @@
 
 Modes:
 
-- pre-commit: rejects staged internal paths (renames included) and staged text
-  with internal mentions, planning ids, or configured private terms.
+- pre-commit: rejects staged internal paths (renames included), staged paths
+  with a configured private term, and staged text with internal mentions,
+  planning ids, or configured private terms.
 - commit-msg FILE: rejects messages with planning-id scopes, internal mentions,
   planning ids, or configured private terms.
 - pre-push REMOTE: checks only the commits new to REMOTE (tree paths,
-  messages, and the content each commit introduces).
-- tree [REV]: path and content checks over every file at REV (default HEAD).
+  private terms in those paths, messages, and the content each commit
+  introduces).
+- tree [REV]: path (internal paths and private terms) and content checks over
+  every file at REV (default HEAD).
 - install [--check] [--extra-terms PATH]: points core.hooksPath at
   tools/git-hooks, makes the hooks executable, and adds the local exclude
   lines. --check changes nothing and reports drift.
@@ -19,7 +22,8 @@ in this repository: they load at run time from the file named by
 GUARDS_EXTRA_TERMS or the local git config key guards.extraTerms. If neither
 is set, term checks are skipped and every other check still runs. If one is
 set but the file is missing or invalid, every mode fails closed. A term hit
-prints as "private term #n", never as the term text.
+prints as "private term #n", never as the term text; a path with a private
+term prints only as "<path with private term #n>".
 
 Standard library only; Python 3.9 or later.
 """
@@ -98,7 +102,13 @@ class Report:
         for lineno, kind, match in found:
             self.hit(f"{where}:{lineno}", kind, match)
 
-    def path(self, where: str, name: str) -> bool:
+    def path(self, where: str, name: str, extra=None) -> bool:
+        n = patterns.term_number(name, extra)
+        if n is not None:
+            # Checked first so a forbidden, term-bearing path is never printed.
+            label = f"<path with private term #{n}>"
+            self.hit(label if where == name else where, "internal path", label)
+            return True
         if patterns.forbidden_path(name):
             self.hit(where, "internal path", name)
             return True
@@ -148,7 +158,7 @@ def cmd_pre_commit(top: str, extra) -> int:
     rep = Report("pre-commit")
     out = git("diff", "--cached", "--raw", "-z", "--no-renames", "--diff-filter=ACMRT", cwd=top)
     for mode, sha, _status, name in parse_raw(out):
-        if rep.path(name, name):
+        if rep.path(name, name, extra):
             continue
         if mode == GITLINK_MODE:
             continue
@@ -199,7 +209,7 @@ def cmd_pre_push(top: str, extra, remote: str, stdin_text: str) -> int:
             for raw_name in names:
                 if raw_name:
                     name = raw_name.decode("utf-8", "surrogateescape")
-                    rep.path(f"commit {short}", name)
+                    rep.path(f"commit {short}", name, extra)
             message = git("log", "-1", "--format=%B", c, cwd=top).decode("utf-8", "replace")
             rep.text_hits(f"commit {short} message", patterns.scan_message(message, extra))
             out = git(
@@ -207,8 +217,12 @@ def cmd_pre_push(top: str, extra, remote: str, stdin_text: str) -> int:
                 "--raw", "-z", "--diff-filter=AMT", c, cwd=top,
             )
             for mode, sha, _status, name in parse_raw(out):
-                if mode == GITLINK_MODE or patterns.forbidden_path(name):
-                    continue  # paths are reported from the tree listing above
+                if (
+                    mode == GITLINK_MODE
+                    or patterns.forbidden_path(name)
+                    or patterns.term_number(name, extra) is not None
+                ):
+                    continue  # paths are reported (masked) from the tree listing above
                 if (sha, name) in seen_blobs:
                     continue
                 seen_blobs.add((sha, name))
@@ -225,7 +239,7 @@ def cmd_tree(top: str, extra, rev: str) -> int:
         meta, _, raw_name = entry.partition(b"\t")
         mode, kind, sha = meta.decode().split()
         name = raw_name.decode("utf-8", "surrogateescape")
-        if rep.path(name, name):
+        if rep.path(name, name, extra):
             continue
         if kind != "blob":
             continue

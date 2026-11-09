@@ -4,7 +4,8 @@ Four checks run over `git ls-files`:
 
 - test_no_internal_paths_tracked: no planning, context, agent, personal, or
   register-era path is tracked, at any depth and in any letter case.
-- test_no_sensitive_terms: no tracked public file contains a private term.
+- test_no_sensitive_terms: no tracked path, and no tracked public file,
+  contains a private term; hits print masked.
 - test_no_internal_path_mentions: no tracked public file points at the
   planning folder, the planning repository, or the agent instructions file.
 - test_no_planning_ids: no tracked public file cites planning ids; public text
@@ -36,6 +37,7 @@ from tools.guards.patterns import (
     load_extra_terms,
     resolve_extra_terms_path,
     scan_text,
+    term_number,
 )
 from tools.tests.conftest import REPO_ROOT
 
@@ -81,17 +83,36 @@ def test_no_internal_paths_tracked():
     assert not hits, f"internal paths tracked: {hits[:20]}"
 
 
+def _term_hits(entries, extra):
+    """Masked term hits over (path, text) entries; text None checks the path only.
+
+    A term-bearing path prints as "<path with private term #n>" and labels its
+    content hits too, so no hit string carries the path or the term.
+    """
+    hits = []
+    for path, text in entries:
+        n = term_number(path, extra)
+        label = path
+        if n is not None:
+            label = f"<path with private term #{n}>"
+            hits.append(label)
+        if text is None:
+            continue
+        for lineno, kind, match in scan_text(text, extra):
+            if kind == "term":
+                hits.append(f"{label}:{lineno}: {match}")
+    return hits
+
+
 def test_no_sensitive_terms():
     terms_path = resolve_extra_terms_path(REPO_ROOT)
     if terms_path is None:
         pytest.skip("no local private terms configured (GUARDS_EXTRA_TERMS / guards.extraTerms unset)")
     extra = load_extra_terms(terms_path)  # a missing file fails, it does not skip
-    hits = []
-    for path, text in _public_texts():
-        for lineno, kind, match in scan_text(text, extra):
-            if kind == "term":
-                hits.append(f"{path}:{lineno}: {match}")
-    assert not hits, "private terms in public files:\n" + "\n".join(hits)
+    texts = dict(_public_texts())
+    entries = [(path, texts.get(path)) for path in _tracked()]
+    hits = _term_hits(entries, extra)
+    assert not hits, "private terms in public paths or files:\n" + "\n".join(hits)
 
 
 def test_no_internal_path_mentions():
