@@ -1,0 +1,5 @@
+#!/bin/sh
+# Thin wrapper: the rules live in the guard CLI, built on the shared patterns.
+top=$(git rev-parse --show-toplevel) || exit 1
+command -v python3 >/dev/null 2>&1 || { echo "pre-push: python3 not found; refusing to continue (fail closed)" >&2; exit 1; }
+exec python3 "$top/tools/guards/check.py" pre-push "$@"
