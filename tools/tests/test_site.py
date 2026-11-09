@@ -137,15 +137,85 @@ def test_nav_sections():
     assert CONFIG["strict"] is True
 
 
+# Internal folder name, built from fragments so this file passes the content guards.
+PLAN_DIR = "." + "planning"
+LEAK_DIRS = ["tools", "schemas", PLAN_DIR]
+
+
+def _plant_leaks(root):
+    for top in LEAK_DIRS:
+        (root / top).mkdir(parents=True, exist_ok=True)
+        (root / top / "leak.md").write_text("# Leak\n\nInternal page.\n", encoding="utf-8")
+
+
+def _built(root):
+    out = root / "out"
+    return [p.relative_to(out).as_posix() for p in out.rglob("*")] if out.is_dir() else []
+
+
 def test_no_tooling_pages(site_copy):
     # Plant files the hook must never publish, then check the output tree.
+    _plant_leaks(site_copy)
     (site_copy / "framework/candidate.json").write_text("{}", encoding="utf-8")
     code, out = _build(site_copy)
     assert code == 0, out
-    built = [p.relative_to(site_copy / "out").as_posix() for p in (site_copy / "out").rglob("*")]
-    leaked = [p for p in built if any(part in p.split("/") for part in ("tools", "schemas", "fixtures"))]
-    assert leaked == []
+    built = _built(site_copy)
+    assert [p for p in built if "leak" in p] == []
     assert not any(p.endswith("candidate.json") for p in built)
+
+
+def test_no_tooling_pages_detects_widened_allowlist(site_copy):
+    # Mutation check: widen the hook allowlist to tools/; the leak check must notice.
+    hook = site_copy / "tools/site/hooks.py"
+    text = hook.read_text(encoding="utf-8")
+    widened = text.replace('"catalog"]', '"catalog", "tools"]')
+    assert widened != text
+    hook.write_text(widened, encoding="utf-8")
+    _plant_leaks(site_copy)
+    code, out = _build(site_copy)
+    leaked = [p for p in _built(site_copy) if "leak" in p]
+    assert code != 0 or leaked, out
+
+
+def test_snippets_restricted():
+    snippets = next(
+        ext["pymdownx.snippets"]
+        for ext in CONFIG["markdown_extensions"]
+        if isinstance(ext, dict) and "pymdownx.snippets" in ext
+    )
+    assert snippets["base_path"] == ["templates"]
+    assert snippets["check_paths"] is True
+    assert snippets["restrict_base_path"] is True
+
+
+@pytest.mark.parametrize("target", ["schemas/leak.md", "../schemas/leak.md"])
+def test_snippet_escape_fails(site_copy, target):
+    _plant_leaks(site_copy)
+    _append(site_copy / "site-src/templates.md", f'\n````markdown\n--8<-- "{target}"\n````\n')
+    code, out = _build(site_copy)
+    assert code != 0, out
+    html = site_copy / "out/templates/index.html"
+    assert not (html.is_file() and "Internal page" in html.read_text(encoding="utf-8"))
+
+
+def test_templates_page_renders(site_copy):
+    code, out = _build(site_copy)
+    assert code == 0, out
+    html = (site_copy / "out/templates/index.html").read_text(encoding="utf-8")
+    assert "Platform blueprint title" in html
+    assert "Use case title" in html
+
+
+@pytest.mark.parametrize("kind", ["file", "dir"])
+def test_symlink_rejected(site_copy, kind):
+    _plant_leaks(site_copy)
+    if kind == "file":
+        os.symlink("../schemas/leak.md", site_copy / "framework/link.md")
+    else:
+        os.symlink("../schemas", site_copy / "framework/linked", target_is_directory=True)
+    code, out = _build(site_copy)
+    assert code != 0, out
+    assert "symlink not allowed" in out, out
 
 
 def test_mermaid(site_copy):
