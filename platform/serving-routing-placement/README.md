@@ -224,7 +224,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [Architecture overview](../../architecture/index.md): the model endpoint, AI Gateway, and placement layers this page details
 - [Placement tiers](../../architecture/placement.md): the tier rules this page sizes and serves
 - [Decision gate](../../architecture/decision-gate.md): the gate the Decision slot serves
-- PB-05: integration reaches the slots served here through the same front door
+- [PB-05 Integration](../integration/README.md): integration reaches the slots served here through the same front door
 - PB-06: safety and autonomy gating uses the Safety and Decision slots placed here
 - PB-07: the action layer runs behind the gate at the regional site and the core
 - PB-02: evaluation and acceptance gates every quantized build before placement

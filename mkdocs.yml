@@ -65,4 +65,5 @@ nav:
   - Platform:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md
+      - Integration: platform/integration/README.md
   - Templates: templates.md

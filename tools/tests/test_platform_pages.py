@@ -31,7 +31,10 @@ from tools.tests.test_reference_pages import (  # noqa: F401  (shared with per-p
 
 # Grows by one entry per landed blueprint ({slug: id}), so a lost or renamed
 # page fails here instead of quietly dropping out of every check.
-EXPECTED_PLATFORM_PAGES: dict[str, str] = {"serving-routing-placement": "PB-04"}
+EXPECTED_PLATFORM_PAGES: dict[str, str] = {
+    "serving-routing-placement": "PB-04",
+    "integration": "PB-05",
+}
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
 PARAM_TABLE_HEADER = ["Parameter", "What it controls", "Who sets it", "How to calibrate"]
@@ -234,3 +237,60 @@ def test_serving_edge_options():
     for want in ("Podman", "Device Edge", "single-node OpenShift"):
         assert want.lower() in text.lower(), want
     assert any("one AI model" in cell for row in table[1:] for cell in row)
+
+
+# ---------- integration ----------
+
+INTEGRATION = REPO_ROOT / "platform/integration/README.md"
+TOOL_ACCESS = {"read", "notify", "action request"}
+
+
+def test_integration_standards_named():
+    text = body(INTEGRATION)
+    for want in ("TMF642", "TMF628", "TMF621", "TMF639", "CAMARA", "3GPP", "NWDAF", "command line"):
+        assert want in text, want
+
+
+def test_integration_tools_table():
+    table = table_with_header(INTEGRATION, "Reference design", ["Tool", "Standard", "Access"])
+    col = table[0].index("Access")
+    rows = table[1:]
+    assert rows
+    for row in rows:
+        assert row[col] in TOOL_ACCESS, row
+    assert sum(row[col] == "action request" for row in rows) == 1
+    tmf621 = [row for row in rows if any("TMF621" in cell for cell in row)]
+    assert tmf621 and all(row[col] == "read" for row in tmf621)
+
+
+def test_integration_gateway_component():
+    rows = tables(sections(body(INTEGRATION)).get("Components", []))[0][1:]
+    assert any("MCP" in row[0] and "Connectivity Link" in row[1] for row in rows)
+    assert any("Keycloak" in row[1] for row in rows)
+
+
+def test_integration_per_tool_authorization():
+    text = body(INTEGRATION)
+    for want in ("x-mcp-toolname", "deny", "token exchange", "audit"):
+        assert want in text, want
+
+
+def test_integration_conformance_gate():
+    text = section_text(INTEGRATION, "Sources and acceptance")
+    gates = [ln for ln in text.splitlines() if ln.startswith("- Gate:")]
+    assert any("Conformance Test Kit" in ln for ln in gates)
+
+
+def test_integration_usage_rights():
+    assert any(
+        "Usage rights" in table[0]
+        for table in tables(sections(body(INTEGRATION)).get("Reference design", []))
+    )
+
+
+def test_integration_stateful_mocks():
+    assert "stateful mock" in body(INTEGRATION)
+
+
+def test_integration_writes_through_action_request():
+    assert "submit_action_request" in body(INTEGRATION)

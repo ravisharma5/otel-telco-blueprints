@@ -438,6 +438,7 @@ def test_nav_order():
     assert _nav_children("Platform") == [
         "platform/index.md",
         "platform/serving-routing-placement/README.md",
+        "platform/integration/README.md",
     ]
 
 
