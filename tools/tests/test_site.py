@@ -7,10 +7,12 @@ missing file. Builds run on a copy in tmp_path, so faults never touch the repo.
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import shutil
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -250,3 +252,82 @@ def test_hook_collision(site_copy):
     code, out = _build(site_copy)
     assert code != 0, out
     assert "collides" in out, out
+
+
+def _load_hooks():
+    spec = importlib.util.spec_from_file_location("site_hooks", REPO_ROOT / "tools/site/hooks.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _banner(markdown, meta):
+    return _load_hooks().on_page_markdown(markdown, SimpleNamespace(meta=meta), None, None)
+
+
+def _line_after_h1(text, h1):
+    lines = text.splitlines()
+    idx = lines.index(h1)
+    return next(ln for ln in lines[idx + 1 :] if ln.strip())
+
+
+def test_banner_unit_draft():
+    out = _banner("# Title\n\nBody\n", {"type": "reference", "doc_status": "draft"})
+    assert _line_after_h1(out, "# Title") == '!!! warning "Draft: content may change"'
+
+
+def test_banner_unit_review():
+    out = _banner("# Title\n\nBody\n", {"type": "reference", "doc_status": "review"})
+    assert _line_after_h1(out, "# Title") == '!!! warning "In review"'
+
+
+@pytest.mark.parametrize("status", ["done", "weird"])
+def test_banner_unit_done_and_unknown(status):
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"type": "reference", "doc_status": status}) == src
+
+
+def test_banner_unit_non_reference():
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"doc_status": "draft"}) == src
+
+
+@pytest.mark.parametrize("fence", ["```", "~~~"])
+def test_banner_unit_skips_fenced_h1(fence):
+    src = f"{fence}text\n# not a heading\n{fence}\n\n# Real\n\nBody\n"
+    out = _banner(src, {"type": "reference", "doc_status": "draft"})
+    assert _line_after_h1(out, "# not a heading") == fence
+    assert _line_after_h1(out, "# Real") == '!!! warning "Draft: content may change"'
+    assert out.count("!!! warning") == 1
+
+
+def _make_reference(root, status):
+    page = root / "framework/glossary.md"
+    text = page.read_text(encoding="utf-8")
+    new = text.replace("doc_status: done\n", f"type: reference\ndoc_status: {status}\n", 1)
+    assert new != text
+    page.write_text(new, encoding="utf-8")
+
+
+def _html(root, rel):
+    return (root / "out" / rel / "index.html").read_text(encoding="utf-8")
+
+
+def test_banner_build(site_copy):
+    _make_reference(site_copy, "draft")
+    code, out = _build(site_copy)
+    assert code == 0, out
+    html = _html(site_copy, "framework/glossary")
+    title = '<p class="admonition-title">Draft: content may change</p>'
+    assert title in html
+    assert html.index(title) > html.index("<h1")
+    assert 'admonition-title">Draft' not in _html(site_copy, "framework/definitions")
+
+
+def test_banner_build_done(site_copy):
+    _make_reference(site_copy, "done")
+    code, out = _build(site_copy)
+    assert code == 0, out
+    html = _html(site_copy, "framework/glossary")
+    assert 'admonition-title">Draft' not in html
+    assert 'admonition-title">In review' not in html
