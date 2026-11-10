@@ -334,3 +334,54 @@ def test_banner_build_done(site_copy):
     html = _html(site_copy, "framework/glossary")
     assert 'admonition-title">Draft' not in html
     assert 'admonition-title">In review' not in html
+
+
+def _nav_children(section):
+    entry = next(item for item in CONFIG["nav"] if next(iter(item)) == section)
+    return [next(iter(child.values())) for child in entry[section]]
+
+
+def test_nav_order():
+    assert _nav_children("Architecture") == [
+        "architecture/index.md",
+        "architecture/decision-gate.md",
+        "architecture/adaptation-ladder.md",
+        "architecture/placement.md",
+        "architecture/crosswalk.md",
+    ]
+    assert _nav_children("Framework") == [
+        "framework/index.md",
+        "framework/definitions.md",
+        "framework/glossary.md",
+        "framework/style-guide.md",
+        "framework/review-checklist.md",
+    ]
+
+
+def test_start_here_labels():
+    text = (REPO_ROOT / "site-src/index.md").read_text(encoding="utf-8")
+    assert "[Readiness questions](framework/index.md)" in text
+    assert "[Architecture overview](architecture/index.md)" in text
+
+
+def test_overview_links_pages():
+    text = (REPO_ROOT / "architecture/index.md").read_text(encoding="utf-8")
+    for target in (
+        "decision-gate.md",
+        "adaptation-ladder.md",
+        "placement.md",
+        "crosswalk.md",
+        "../framework/index.md",
+    ):
+        assert f"]({target})" in text, target
+
+
+def test_readiness_links_architecture_pages():
+    text = (REPO_ROOT / "framework/index.md").read_text(encoding="utf-8")
+    for target in (
+        "../architecture/index.md",
+        "../architecture/decision-gate.md",
+        "../architecture/adaptation-ladder.md",
+        "../architecture/placement.md",
+    ):
+        assert f"]({target})" in text, target
