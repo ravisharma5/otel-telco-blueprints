@@ -3,7 +3,7 @@ id: "PB-05"
 type: "platform"
 title: "Integration"
 readiness_question: "Integration: how do agents reach your network and business systems?"
-doc_status: draft
+doc_status: done
 layers: ["network-capabilities", "mcp-gateway", "data-knowledge"]
 table1_rows: [11, 12, 13]
 extension_rows: ["E1"]
@@ -15,6 +15,7 @@ top_decisions:
   - "Deny every tool unless a role allows it"
   - "Route every write through the action request"
 agent_school: [301, 302, 303, 401]
+clarity_reviewed: "2026-11-10"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -60,13 +61,13 @@ flowchart LR
     AR --> AO["Action orchestration"]
 ```
 
-One `tools/call` takes these steps:
+Each `tools/call` follows these steps:
 
 1. The agent gets a token from the authorization server. The token carries the agent's roles, grouped by MCP server, with one role per tool, such as `tool:list_alarms` on the TMF642 server.
 2. The agent sends a JSON-RPC `tools/call` to the MCP Gateway. The router reads the body and sets the `x-mcp-servername` and `x-mcp-toolname` headers itself, so the client can't choose them.
 3. The authorization rule allows the call only if `tool:` plus `x-mcp-toolname` is among the token's roles for that server. It denies every other call.
 4. The gateway uses token exchange to swap the agent's token for one scoped to the backend server, so no backend receives a token that works anywhere else.
-5. Guardrails screen the request before it reaches the backend and the response before it reaches the agent. If the guardrail service fails, the call fails.
+5. Guardrails screen the request before it reaches the backend, and the response before it reaches the agent. If the guardrail service is down, the call fails closed.
 6. The router writes an audit entry with the user, server, tool, status, request ID, and session ID, and writes one for early rejections too.
 7. The agent gets the response. To change anything, its only path is `submit_action_request`.
 
@@ -110,7 +111,7 @@ One `tools/call` takes these steps:
 
 ### Knowledge sources and usage rights
 
-Keep a corpus register. Record the licence of every corpus before you index it; a source with an empty usage-rights entry stays out of the index.
+Keep a corpus register, and record the licence of every corpus before you index it. A source with an empty usage-rights entry stays out of the index.
 
 | Source | Owner | Usage rights | Refresh | Used by slot |
 |---|---|---|---|---|
@@ -121,7 +122,7 @@ Keep a corpus register. Record the licence of every corpus before you index it; 
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` holds roles for TMF642 list and get, TMF628 read, TMF621 search, the device `show interface` command, and `submit_action_request`. It holds no other roles, so the gateway denies and audits any other call.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` holds roles for TMF642 list and get, TMF628 read, TMF621 search, the device `show interface` command, and `submit_action_request`. The gateway denies and audits every other call.
 
 The agent reads the alarms, the CRC counters on eth1, and the inventory links to r3, then searches for an open ticket. Creating the ticket for `inc-2041` and restarting eth1 on r2 both go through the action request, as `req-0001` in the [decision gate](../../architecture/decision-gate.md) page shows. If triage needs a customer line's network state, the CAMARA call carries its declared purpose, and consent stays in CAMARA's own flow. PB-10 covers customer consent design.
 
