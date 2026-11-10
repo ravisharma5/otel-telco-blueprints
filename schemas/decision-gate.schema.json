@@ -163,7 +163,7 @@
       "allOf": [
         {
           "if": { "properties": { "outcome": { "const": "REVIEW" } } },
-          "then": { "properties": { "required_approver": { "type": "string", "minLength": 1 } } }
+          "then": { "properties": { "required_approver": { "type": "string", "pattern": "\\S" } } }
         },
         {
           "if": { "properties": { "policy_ceiling": { "const": "LOOK" } } },
