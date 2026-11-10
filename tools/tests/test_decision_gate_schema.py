@@ -199,3 +199,9 @@ def test_outcome_above_model_label_is_rejected(gate_validator):
 def test_policy_cannot_raise_look_to_act(gate_validator):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
     assert not gate_validator.is_valid({**base, "model_label": "LOOK", "outcome": "ACT"})
+
+
+@pytest.mark.parametrize("approver", [" ", "\t", "\n", ""])
+def test_review_rejects_blank_approver(gate_validator, approver):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-review.json")
+    assert not gate_validator.is_valid({**base, "required_approver": approver}), repr(approver)
