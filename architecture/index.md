@@ -43,6 +43,8 @@ The design names model slots, not checkpoints, because OTel checkpoints keep cha
 | Decision | Labels each request or proposed step as LOOK, NOTIFY, REVIEW, ACT, or STOP with label probabilities, and picks the model size for content routing | Red Hat AI Inference (vLLM) on KServe, with log probabilities turned on |
 | Classification | Assigns fixed root-cause labels, offered to the agent as a governed tool | Red Hat AI Inference (vLLM) in pooling mode on KServe |
 
+![Architecture overview: inputs pass guardrails to the agent runtime, which reaches models through the AI Gateway, tools through the MCP Gateway, and the network only through the Decision gate](diagrams/overview.svg)
+
 ### Layers
 
 The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). The data and execution plane runs from data and knowledge to action, placement puts that plane on sites, the lifecycle plane evaluates, adapts, and observes, and the control plane deploys everything.
