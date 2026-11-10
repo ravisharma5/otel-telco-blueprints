@@ -14,11 +14,14 @@ is skipped as a second line of defence.
 Reference pages (front matter ``type: reference``) get a banner right after
 the H1, chosen by ``doc_status``: draft and review pages show a fixed warning,
 done pages show none. The text comes only from the BANNERS map, never from
-front matter, and other doc types are left untouched.
+front matter, and other doc types are left untouched. The H1 search skips
+code fences (CommonMark rules: a fence closes only on a bare run of the same
+character at least as long as the opener) and HTML comment blocks.
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from mkdocs.structure.files import File
@@ -27,6 +30,10 @@ ROOT = Path(__file__).resolve().parents[2]
 INCLUDE = ["framework", "architecture", "platform", "catalog"]
 SUFFIXES = {".md", ".svg", ".png", ".jpg", ".jpeg"}
 BANNERS = {"draft": "Draft: content may change", "review": "In review"}
+# A code fence line: up to 3 spaces, a run of 3+ backticks or tildes, then the rest.
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+# An HTML comment block starts with up to 3 spaces and "<!--".
+COMMENT = re.compile(r"^ {0,3}<!--")
 
 
 def _refuse_symlink(path):
@@ -84,17 +91,27 @@ def on_page_markdown(markdown, page, config, files):
         return markdown
     banner = f'!!! warning "{text}"\n\n'
     lines = markdown.splitlines(keepends=True)
-    fence = None
+    fence = None  # opening run of the current code fence, e.g. "````"
+    in_comment = False
     for i, line in enumerate(lines):
-        stripped = line.lstrip()
-        marker = stripped[:3]
-        if marker in ("```", "~~~"):
-            if fence is None:
-                fence = marker
-            elif marker == fence:
+        if in_comment:
+            in_comment = "-->" not in line
+            continue
+        m = FENCE.match(line.rstrip("\r\n"))
+        if fence is not None:
+            # CommonMark: only a bare fence of the same character, at least as
+            # long as the opener, closes it. An info string never closes one.
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) and not m.group(2).strip():
                 fence = None
             continue
-        if fence is None and line.startswith("# "):
+        if m and not (m.group(1)[0] == "`" and "`" in m.group(2)):
+            fence = m.group(1)
+            continue
+        c = COMMENT.match(line)
+        if c:
+            in_comment = "-->" not in line[c.end() :]
+            continue
+        if line.startswith("# "):
             head = "".join(lines[: i + 1])
             if not head.endswith("\n"):
                 head += "\n"
