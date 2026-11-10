@@ -578,13 +578,27 @@ def _published_docs() -> list[Path]:
 
 
 @pytest.mark.parametrize(
-    "sample", ["L0 to L7", "layer L9a", "| L10 |", "L9c observability"]
+    "sample", ["L0 to L7", "layer L9a", "| L10 |", "L9c observability", "the L4 layer", "L3 --> L4"]
 )
 def test_layer_code_regex_catches(sample):
     assert LAYER_CODE.search(sample), sample
 
 
-@pytest.mark.parametrize("sample", ["LLM slot", "L40S GPUs", "Layer 1", "PB-10", "OTel-LLM-12B"])
+@pytest.mark.parametrize(
+    "sample",
+    [
+        "LLM slot",
+        "L40S GPUs",
+        "Layer 1",
+        "PB-10",
+        "OTel-LLM-12B",
+        "NVIDIA L4",
+        "1x L4 or 1x L40S",
+        "2x L4",
+        "an L4 GPU",
+        "L4 GPUs",
+    ],
+)
 def test_layer_code_regex_allows(sample):
     assert not LAYER_CODE.search(sample), sample
 
