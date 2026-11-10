@@ -142,3 +142,12 @@ def test_cr001_is_error_per_d33():
 def test_checklist_lists_io001():
     # IO001 lives in tools/bplint/cli.py, so it is outside EXPECTED_CODES.
     assert _checklist_row("IO001")[1] == "error"
+
+
+def test_style_guide_has_no_readiness_levels():
+    assert not re.search(r"E-level|M-level|evidence level|\bE[0-4]\b|\bM[0-3]\b", STYLE, re.I)
+    assert "Every factual claim links its source" in STYLE
+
+
+def test_checklist_lists_validation_status_rule():
+    assert "Blueprints.ValidationStatus" in CHECKLIST

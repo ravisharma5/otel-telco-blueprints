@@ -63,7 +63,7 @@ source: ["<source-id>"]  # optional; where the use case came from
 
 - [ ] Models: <OTel slot and minimum size, as a slot, not a fixed checkpoint>
 - [ ] Platform blueprints: <PB-nn links>
-- [ ] Components: <role in this design>: <Red Hat product used>, one per load-bearing component
+- [ ] Components: <role in this design>: <Red Hat product used>, one per key component
 - [ ] Integrations: <MCP capabilities with risk class; standards such as TMF, CAMARA, 3GPP>
 - [ ] Tools and data: <data sources, consent and privacy notes>
 - [ ] Data and adaptation: <task data, SDG recipe, adapter strategy, license and sovereignty>

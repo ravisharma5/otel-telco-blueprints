@@ -12,7 +12,7 @@ clarity_reviewed: "2026-11-09"
 |---|---|
 | What | Blueprints for running the OTel model family in production for telecom use cases, on Red Hat products |
 | Who | GSMA members and telecom operators |
-| Honesty rules | Every blueprint states model readiness, evidence level, and the evidence behind each claim |
+| Sources | Every blueprint links the source for each key claim: model card, research, Red Hat guidance, or industry use case |
 | Open source | Red Hat products show how the solution works. Any component can be replaced (no product support claims) |
 | Website | [Docs site on GitHub Pages](https://ravisharma5.github.io/otel-telco-blueprints/) |
 | Start here | [Definitions](framework/definitions.md), then the [glossary](framework/glossary.md) |
@@ -21,7 +21,7 @@ In this repository, "OTel" means the OTel model family, not OpenTelemetry.
 
 ## How to read
 
-- [Definitions](framework/definitions.md): claim terms, evidence levels (E0-E4), model readiness (M0-M3), and component naming.
+- [Definitions](framework/definitions.md): claim basis, the Sources table, autonomy ceiling, and component naming.
 - [Glossary](framework/glossary.md): one meaning per term.
 - [Style guide](framework/style-guide.md): page skeletons, budgets, and writing rules.
 - [Review checklist](framework/review-checklist.md): what a doc needs before it's done.

@@ -43,7 +43,8 @@ Run `make lint` from the repo root. Fix every error, and fix or justify every wa
 | XR001 | error | `platform_blueprints` names a platform with no blueprint (full-repo runs) |
 | IO001 | error | File cannot be read as UTF-8 text |
 | `Blueprints.OTelTracing` | error | "OTel" used to mean tracing, for example `OTel collector` or `OTLP` |
-| `Blueprints.Unevidenced` | error | Claim words with no evidence, for example `proven` or bare `validated` |
+| `Blueprints.Unevidenced` | error | Claim words with no source, for example `proven` or bare `validated` |
+| `Blueprints.ValidationStatus` | error | Validation-status wording, for example `unverified` or `not yet validated`. Blueprints are recipes: link the source instead |
 | `Blueprints.InlineStatus` | error | Product support label in a doc, for example `GA` or `Technology Preview`. Blueprints make no product support claims |
 | `Google.*` | per rule level | Google developer style rules (v0.7.1), with overrides commented in `.vale.ini` |
 

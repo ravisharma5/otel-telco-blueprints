@@ -76,3 +76,19 @@ def test_glossary_local_anchors_resolve():
 def test_replaceable_component_row_exists():
     row = next(r for r in _rows(GLOSSARY) if r[0] == "Replaceable component")
     assert "definitions.md#component-naming" in row[2]
+
+
+def test_sources_terms_rows_exist():
+    rows = {r[0]: r for r in _rows(GLOSSARY)}
+    for term, anchor in (
+        ("Basis", "claim-basis"),
+        ("Recipe", "claim-basis"),
+        ("Sources table", "sources-table"),
+        ("One-liner", "one-liner"),
+    ):
+        assert f"definitions.md#{anchor}" in rows[term][2], term
+
+
+def test_retired_readiness_terms_are_gone():
+    terms = {r[0] for r in _rows(GLOSSARY)}
+    assert not terms & {"E-level", "M-level", "Headline level", "Load-bearing claim", "Validation table", "Claim terms"}
