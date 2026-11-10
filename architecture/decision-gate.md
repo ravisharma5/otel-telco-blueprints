@@ -2,7 +2,8 @@
 type: "reference"
 title: "Decision gate"
 question: "How does an agent's proposed change become an executed, blocked, or human-approved action?"
-doc_status: "draft"
+doc_status: done
+clarity_reviewed: "2026-11-10"
 platform_blueprints: ["PB-02", "PB-06", "PB-07"]
 otel_slots: ["llm", "decision"]
 ---
@@ -27,7 +28,7 @@ Without one gate, every agent decides for itself when to change the network, and
 ## The principle
 
 The agent recommends and the orchestrator decides. The model never holds write credentials.
-The authoritative gate call runs inside the orchestrator, and the agent's own label is advisory only, so a prompt-injected agent cannot skip the gate.
+The gate call that counts runs inside the orchestrator. The agent's own label is advisory, so a prompt-injected agent cannot skip the gate.
 
 ## The design
 
@@ -46,7 +47,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 2. The OTel Decision model labels each request as LOOK, NOTIFY, REVIEW, ACT, or STOP.
 3. AAP, the automation layer, follows the label: it executes, routes REVIEW to a human, or blocks. It then verifies and audits.
 
-Ansible Automation Platform (AAP) is a runtime component of this design. It is the only part that holds write credentials.
+Ansible Automation Platform (AAP) is the only part of this design that holds write credentials.
 
 For example, an alarm reports link errors on a router. The agent investigates with read-only tools and proposes to restart interface eth1 on router r2. The Decision model labels the request, and AAP executes the restart, routes it to a human, or blocks it. AAP then checks that the interface is healthy and writes the audit record.
 
@@ -80,7 +81,7 @@ Both paths re-run the gate on the request. Neither trusts the agent's advisory l
 | False-ACT budget | How many wrong ACT labels the operator accepts on state-changing requests | Operator risk owner | PB-02 calibration method: count false ACT labels on state-changing gate cases, with a set large enough to bound the rate |
 | Ceiling per risk class | The highest outcome allowed for read, notify, low-risk write, and high-risk write | Operator, with SME sign-off | PB-02 calibration method: raise a ceiling only after a canary window with no false ACT labels |
 
-No default values are recommended. The operator sets each parameter with SME sign-off and versions the set as the policy that `policy_version` names.
+This page gives no default values. You set each parameter with SME sign-off and version the set as the policy that `policy_version` names.
 
 ### Message examples
 

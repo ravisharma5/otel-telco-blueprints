@@ -2,7 +2,8 @@
 type: "reference"
 title: "Readiness questions"
 question: "What must an operator answer before running OTel models in production?"
-doc_status: "draft"
+doc_status: done
+clarity_reviewed: "2026-11-10"
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
@@ -22,11 +23,11 @@ otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classificati
 ## The question
 
 What must you answer before an OTel-based use case leaves the pilot?
-Without a fixed list, teams skip the hard parts, such as evaluation on their own data, autonomy gating, and compliance, and find the gaps in production.
+Without a fixed list, teams skip the hard parts (evaluation on their own data, autonomy gating, compliance) and find the gaps in production.
 
 ## The principle
 
-Each question has a "ready" criterion that you can check: you show a reviewer the artifact that proves it.
+Each question has a "ready" criterion you can check: you show a reviewer the artifact that proves it.
 A platform blueprint answers each question with a design and its acceptance checks.
 A use case is ready for production when all ten criteria hold for that use case.
 
@@ -47,7 +48,7 @@ A use case is ready for production when all ten criteria hold for that use case.
 | 9 | Compliance and sovereignty: can you show the use case meets the rules and keeps data where it must stay? | Each use case has an EU AI Act classification record, a GDPR, NIS2, and CAMARA consent mapping, and a data residency statement backed by in-country inference | PB-10 |
 | 10 | Operating model: who owns the use case, and how does it grow? | The use case has a named accountable owner, a RACI, a staged rollout plan (shadow, assist, recommend, act), and a measured value case | PB-10 |
 
-PB-06 and PB-07 together answer autonomy gating: PB-06 sets the gate described on the [decision gate](../architecture/decision-gate.md) page, and PB-07 runs the action layer behind it. PB-10 answers both compliance and the operating model.
+Autonomy gating takes two blueprints. PB-06 sets the gate described on the [decision gate](../architecture/decision-gate.md) page, and PB-07 runs the action layer behind it. PB-10 answers both compliance and the operating model.
 
 ### How to use the questions
 

@@ -2,7 +2,8 @@
 type: "reference"
 title: "Placement tiers"
 question: "Which OTel slots run at the far edge, regional sites, and the core, and what latency can each tier support?"
-doc_status: "draft"
+doc_status: done
+clarity_reviewed: "2026-11-10"
 platform_blueprints: ["PB-04", "PB-08", "PB-10"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
@@ -42,7 +43,7 @@ Each use case answers the serving and placement question in the [readiness quest
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
 
-Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanced Cluster Management: the core builds, evaluates, and versions each model, and the fleet hub copies it to each site before rollout.
+Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanced Cluster Management. The core builds, evaluates, and versions each model, and the fleet hub copies it to each site before rollout.
 
 ## Trade-offs and limits
 

@@ -2,7 +2,8 @@
 type: "reference"
 title: "Architecture overview"
 question: "How do the six OTel model slots map onto Red Hat products, and how do requests flow?"
-doc_status: "draft"
+doc_status: done
+clarity_reviewed: "2026-11-10"
 platform_blueprints: ["PB-04", "PB-05", "PB-06", "PB-07"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
@@ -47,7 +48,7 @@ The design names model slots, not checkpoints, because OTel checkpoints keep cha
 
 ### Layers
 
-The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). The data and execution plane runs from data and knowledge to action, placement puts that plane on sites, the lifecycle plane evaluates, adapts, and observes, and the control plane deploys everything. The [crosswalk](crosswalk.md) maps each Table 1 row to a layer here.
+The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). Four planes group the layers. The data and execution plane runs from data and knowledge to action, and placement puts it on sites. The lifecycle plane evaluates, adapts, and observes, and the control plane deploys everything. The [crosswalk](crosswalk.md) maps each Table 1 row to a layer here.
 
 | Layer | Plane | Role | Red Hat product used |
 |---|---|---|---|
@@ -109,7 +110,7 @@ flowchart TD
   BL --> AU
 ```
 
-The agent reads and notifies through the MCP Gateway, and asks for a change through one action-request tool. The orchestrator runs the gate itself, so a prompt-injected agent cannot skip it, and only the automation platform holds write credentials. The [decision gate](decision-gate.md) page gives the label policy.
+The agent reads and notifies through the MCP Gateway and asks for a change through one action-request tool. The orchestrator runs the gate itself, so a prompt-injected agent cannot skip it. Only the automation platform holds write credentials. The [decision gate](decision-gate.md) page gives the label policy.
 
 ## Trade-offs and limits
 

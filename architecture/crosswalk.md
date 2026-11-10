@@ -2,7 +2,8 @@
 type: "reference"
 title: "Crosswalk to the agent blueprint table"
 question: "How does this design line up with the 13-component agent blueprint table that agent-school uses?"
-doc_status: "draft"
+doc_status: draft
+clarity_reviewed: "2026-11-10"
 platform_blueprints: ["PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
@@ -28,7 +29,7 @@ This page is a draft pending review by the agent-school maintainers, who keep th
 ## The principle
 
 Compose, do not contradict. The 13 rows of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents) keep their numbers and names.
-This design adds extension rows for what telecom production needs, and never renames or merges a row.
+This design adds extension rows for what telecom production needs. It never renames or merges a row.
 
 ## The design
 

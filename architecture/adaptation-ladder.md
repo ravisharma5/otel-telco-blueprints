@@ -2,7 +2,8 @@
 type: "reference"
 title: "Adaptation ladder"
 question: "How far should an operator customise an OTel model, and when should they go further?"
-doc_status: "draft"
+doc_status: done
+clarity_reviewed: "2026-11-10"
 platform_blueprints: ["PB-02", "PB-03", "PB-09"]
 otel_slots: ["llm", "decision", "classification", "embedding", "reranker"]
 ---
@@ -22,12 +23,12 @@ otel_slots: ["llm", "decision", "classification", "embedding", "reranker"]
 ## The question
 
 How far should an operator customise an OTel model for its own network, and when is the next step worth its cost?
-Without a rule, teams fine-tune first, then retrain every adapter each time a new OTel base model ships.
+Without a rule, teams fine-tune first and then retrain every adapter each time a new OTel base model ships.
 
 ## The principle
 
 Start at retrieval. Climb one rung only when a measured evaluation gap on the operator's task suite shows the current rung is not enough.
-Each rung up costs more to build and more to redo when the base model changes, so the evaluation result, not a preference, decides the climb.
+Each rung costs more to build, and more to redo when the base model changes. Let the evaluation result decide the climb, not preference.
 
 ## The design
 
