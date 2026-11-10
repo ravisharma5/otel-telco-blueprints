@@ -702,3 +702,19 @@ def test_crosswalk_no_extension_ids_in_prose():
     text = FENCE.sub("", body(CROSSWALK))
     prose = [ln for ln in text.splitlines() if not ln.lstrip().startswith("|")]
     assert re.findall(r"\bE[1-7]\b", "\n".join(prose)) == []
+
+
+# ---------- final status after the clarity pass ----------
+
+ISO_QUOTED = re.compile(r'^clarity_reviewed: "\d{4}-\d{2}-\d{2}"$', re.M)
+DONE_PAGES = [READINESS, OVERVIEW, GATE, LADDER, PLACEMENT]
+
+
+@pytest.mark.parametrize(
+    "path", [*DONE_PAGES, CROSSWALK], ids=lambda p: str(p.relative_to(REPO_ROOT))
+)
+def test_reference_status(path):
+    text = path.read_text(encoding="utf-8")
+    assert ISO_QUOTED.search(text), "clarity_reviewed must be a quoted ISO date"
+    expected = "draft" if path == CROSSWALK else "done"
+    assert front_matter(path)["doc_status"] == expected
