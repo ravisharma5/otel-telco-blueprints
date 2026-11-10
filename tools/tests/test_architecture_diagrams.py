@@ -81,3 +81,18 @@ def test_diagram_candidate_names_capabilities():
     texts = list(_candidate_strings(candidate))
     for tier in ("Far edge", "Regional", "Core"):
         assert tier in texts, tier
+
+
+# The viewer draws the sublabel at mid-height + 14 and a tag 8 above the box
+# bottom. Below this height the tag line overlaps the sublabel.
+TAGGED_MIN_HEIGHT = 64
+
+
+def test_tagged_boxes_tall_enough_for_three_lines():
+    candidate = json.loads((DIAGRAMS / "candidate.json").read_text(encoding="utf-8"))
+    short = [
+        c["id"]
+        for c in candidate["components"]
+        if c.get("tag") and c["size"][1] < TAGGED_MIN_HEIGHT
+    ]
+    assert short == []

@@ -61,7 +61,7 @@
       ],
       "size": [
         136,
-        56
+        76
       ],
       "tag": "log probabilities"
     },
@@ -76,7 +76,7 @@
       ],
       "size": [
         136,
-        56
+        76
       ]
     },
     {
@@ -90,7 +90,7 @@
       ],
       "size": [
         136,
-        56
+        76
       ],
       "tag": "pooling mode"
     },
@@ -105,7 +105,7 @@
       ],
       "size": [
         136,
-        56
+        76
       ],
       "tag": "large model in the core"
     },
@@ -120,7 +120,7 @@
       ],
       "size": [
         136,
-        56
+        76
       ],
       "tag": "pooling mode"
     },
@@ -135,7 +135,7 @@
       ],
       "size": [
         136,
-        56
+        76
       ],
       "tag": "pooling mode"
     },
@@ -146,7 +146,7 @@
       "sublabel": "NOC, care, or field staff",
       "pos": [
         2,
-        330
+        350
       ],
       "size": [
         140,
@@ -160,7 +160,7 @@
       "sublabel": "alarm, KPI breach, or ticket",
       "pos": [
         2,
-        430
+        450
       ],
       "size": [
         140,
@@ -174,7 +174,7 @@
       "sublabel": "screens input and output",
       "pos": [
         170,
-        380
+        400
       ],
       "size": [
         120,
@@ -188,7 +188,7 @@
       "sublabel": "plans and calls tools",
       "pos": [
         366,
-        380
+        400
       ],
       "size": [
         160,
@@ -202,7 +202,7 @@
       "sublabel": "access, quotas, routing",
       "pos": [
         622,
-        380
+        400
       ],
       "size": [
         170,
@@ -216,7 +216,7 @@
       "sublabel": "vector store and data pipelines",
       "pos": [
         815,
-        380
+        400
       ],
       "size": [
         250,
@@ -230,7 +230,7 @@
       "sublabel": "tool access and policy",
       "pos": [
         346,
-        530
+        550
       ],
       "size": [
         200,
@@ -244,7 +244,7 @@
       "sublabel": "network APIs as MCP tools",
       "pos": [
         684,
-        530
+        550
       ],
       "size": [
         180,
@@ -258,7 +258,7 @@
       "sublabel": "network and business systems",
       "pos": [
         924,
-        530
+        550
       ],
       "size": [
         160,
@@ -272,11 +272,11 @@
       "sublabel": "workflow orchestration",
       "pos": [
         356,
-        680
+        700
       ],
       "size": [
         180,
-        60
+        76
       ]
     },
     {
@@ -286,11 +286,11 @@
       "sublabel": "Decision slot labels the step",
       "pos": [
         648,
-        680
+        700
       ],
       "size": [
         170,
-        60
+        76
       ]
     },
     {
@@ -300,11 +300,11 @@
       "sublabel": "only path with write access",
       "pos": [
         919,
-        680
+        700
       ],
       "size": [
         170,
-        60
+        76
       ],
       "tag": "rollback and audit"
     },
@@ -315,7 +315,7 @@
       "sublabel": "synthetic data, fine-tuning, registry",
       "pos": [
         200,
-        850
+        890
       ],
       "size": [
         230,
@@ -329,7 +329,7 @@
       "sublabel": "gates every promotion",
       "pos": [
         555,
-        850
+        890
       ],
       "size": [
         200,
@@ -343,7 +343,7 @@
       "sublabel": "traces, metrics, run tracking",
       "pos": [
         800,
-        850
+        890
       ],
       "size": [
         232,
@@ -357,11 +357,11 @@
       "sublabel": "single host with containers",
       "pos": [
         200,
-        1010
+        1050
       ],
       "size": [
         200,
-        60
+        76
       ],
       "tag": "one small model"
     },
@@ -372,11 +372,11 @@
       "sublabel": "single-node cluster",
       "pos": [
         470,
-        1010
+        1050
       ],
       "size": [
         215,
-        60
+        76
       ],
       "tag": "closed loop, several slots"
     },
@@ -387,11 +387,11 @@
       "sublabel": "multi-node cluster",
       "pos": [
         750,
-        1010
+        1050
       ],
       "size": [
         240,
-        60
+        76
       ],
       "tag": "large LLM, adaptation, evaluation"
     }
