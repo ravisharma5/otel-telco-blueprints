@@ -86,6 +86,35 @@ def _check_vt_spec(spec: dict) -> None:
         )
 
 
+# Glob groups in match order, and whether each group's pages are blueprints
+# (full structural pipeline) or plain docs (general checks only).
+GROUPS = (
+    ("blueprint_globs", True),
+    ("reference_globs", True),
+    ("doc_globs", False),
+)
+
+
+def _check_group_types(config: dict, validators: dict) -> None:
+    """Every glob group in use needs a `group_types` entry of known types."""
+    bindings = config.get("group_types") or {}
+    if not isinstance(bindings, dict):
+        raise ConfigError("config 'group_types' must map glob group names to type lists")
+    names = [name for name, _ in GROUPS]
+    for group in bindings:
+        if group not in names:
+            raise ConfigError(f"config group_types names unknown glob group '{group}'")
+    for group in names:
+        if config.get(group) and group not in bindings:
+            raise ConfigError(f"config group_types has no entry for '{group}'")
+    for group, types in bindings.items():
+        if not isinstance(types, list) or not all(isinstance(t, str) for t in types):
+            raise ConfigError(f"config group_types '{group}' must be a list of type names")
+        unknown = [t for t in types if t not in validators]
+        if unknown:
+            raise ConfigError(f"config group_types '{group}' lists unknown type(s): {unknown}")
+
+
 def build_context(args) -> checks.Context:
     config = _load_yaml_dict(_resolve(args.config), "config")
     for key in ("schemas_dir", "budgets", "validation_table"):
@@ -100,6 +129,7 @@ def build_context(args) -> checks.Context:
         enums = load_enums(schema_dir)
     except Exception as exc:
         raise ConfigError(f"cannot load schemas from {schema_dir}: {exc}") from exc
+    _check_group_types(config, validators)
     try:
         today = date.fromisoformat(args.today) if args.today else date.today()
     except ValueError as exc:
@@ -148,30 +178,59 @@ def _excluded(rel: str, patterns) -> bool:
     return any(_glob_match(rel, pat) for pat in patterns)
 
 
-def discover(config) -> list[tuple[Path, bool]]:
-    """Return (path, is_blueprint) for files matching the config globs.
+def _path_match(rel: str, pattern: str) -> bool:
+    """Match like Path.glob: `*` never crosses a `/` (a trailing `/**` is a subtree)."""
+    if pattern.endswith("/**"):
+        return _glob_match(rel, pattern)
+    rel_parts, pat_parts = rel.split("/"), pattern.split("/")
+    return len(rel_parts) == len(pat_parts) and all(
+        fnmatch.fnmatchcase(r, p) for r, p in zip(rel_parts, pat_parts)
+    )
+
+
+def group_of(rel: str, config) -> str | None:
+    """First glob group that matches repo-relative `rel`, or None (also when excluded)."""
+    if _excluded(rel, config.get("exclude_globs") or []):
+        return None
+    for group, _ in GROUPS:
+        if any(_path_match(rel, pat) for pat in config.get(group) or []):
+            return group
+    return None
+
+
+def allowed_types(config, group: str | None) -> tuple[str, ...] | None:
+    """Types a page found by `group` may declare; None means any known type."""
+    if group is None:
+        return None
+    types = (config.get("group_types") or {}).get(group)
+    return None if types is None else tuple(types)
+
+
+def discover_groups(config) -> list[tuple[Path, str]]:
+    """Return (path, glob group name) for files matching the config globs.
 
     Glob groups are tried in order: blueprint_globs, reference_globs, then
     doc_globs. The first group that matches a path wins, so reference pages
     get the full structural pipeline even when a doc glob also matches them.
     """
     excludes = config.get("exclude_globs") or []
-    seen: dict[Path, bool] = {}
-    groups = (
-        (config.get("blueprint_globs") or [], True),
-        (config.get("reference_globs") or [], True),
-        (config.get("doc_globs") or [], False),
-    )
-    for globs, is_bp in groups:
-        for pattern in globs:
+    seen: dict[Path, str] = {}
+    for group, _ in GROUPS:
+        for pattern in config.get(group) or []:
             for p in sorted(REPO_ROOT.glob(pattern)):
                 if not p.is_file():
                     continue
                 rel = p.relative_to(REPO_ROOT).as_posix()
                 if _excluded(rel, excludes):
                     continue
-                seen.setdefault(p, is_bp)
+                seen.setdefault(p, group)
     return sorted(seen.items())
+
+
+def discover(config) -> list[tuple[Path, bool]]:
+    """Return (path, is_blueprint) for files matching the config globs."""
+    is_bp = dict(GROUPS)
+    return [(p, is_bp[group]) for p, group in discover_groups(config)]
 
 
 def main(argv=None) -> int:
@@ -190,13 +249,21 @@ def main(argv=None) -> int:
             if not p.is_file():
                 print(f"bplint: no such file: {raw}", file=sys.stderr)
                 return 2
-            targets.append((p, True))
+            try:
+                group = group_of(p.resolve().relative_to(REPO_ROOT).as_posix(), ctx.config)
+            except ValueError:  # outside the repo: no glob group applies
+                group = None
+            targets.append((p, True, allowed_types(ctx.config, group)))
     else:
-        targets = discover(ctx.config)
+        is_bp = dict(GROUPS)
+        targets = [
+            (p, is_bp[group], allowed_types(ctx.config, group))
+            for p, group in discover_groups(ctx.config)
+        ]
         ctx.discovery = True  # full-repo run: XR001 may treat absent platforms as dangling
 
     findings = []
-    for p, is_bp in targets:
+    for p, is_bp, allowed in targets:
         try:
             text = p.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
@@ -212,7 +279,9 @@ def main(argv=None) -> int:
                 )
             )
             continue
-        ctx.docs.append(parse_doc(p, text, display=display_path(p), is_blueprint=is_bp))
+        doc = parse_doc(p, text, display=display_path(p), is_blueprint=is_bp)
+        doc.allowed_types = allowed
+        ctx.docs.append(doc)
 
     for doc in ctx.docs:
         for check in checks.DOC_CHECKS:

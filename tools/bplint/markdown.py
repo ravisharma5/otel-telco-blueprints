@@ -62,6 +62,8 @@ class Doc:
     fm_lines: list[str] = field(default_factory=list)  # raw front matter lines
     fm_error: tuple[int, str] | None = None  # (line, message) for FM001
     flags: set[str] = field(default_factory=set)
+    # Front matter types the page's glob group accepts; None accepts any known type.
+    allowed_types: tuple[str, ...] | None = None
 
     def section(self, title: str) -> Section | None:
         for s in self.sections:

@@ -19,6 +19,16 @@ exclude_globs:
   - "templates/**"
   - "tools/tests/fixtures/**"
 
+# Front matter `type` values each glob group accepts. The group that finds a
+# page decides which types it may declare, so a blueprint cannot declare
+# `reference` to skip the validation table. An empty list means pages in that
+# group must not declare a type. Explicit CLI paths inside a group follow the
+# same rule; other explicit paths accept any known type.
+group_types:
+  blueprint_globs: ["platform", "use-case"]
+  reference_globs: ["reference"]
+  doc_globs: []
+
 # Schema errors on these fields map to RF001; others map to FM002.
 facet_fields:
   - model_readiness

@@ -53,6 +53,7 @@ from . import repo  # noqa: E402
 
 DOC_CHECKS.extend(
     [
+        frontmatter.check_type_binding,
         frontmatter.check,
         sections.check,
         budgets.check,
@@ -67,7 +68,7 @@ DOC_CHECKS.extend(
 REPO_CHECKS.extend([repo.check_ids, repo.check_refs])
 
 # Non-blueprint docs (config doc_globs) run only these checks.
-GENERAL_DOC_CHECKS = (links.check, diagrams.check, clarity.check)
+GENERAL_DOC_CHECKS = (frontmatter.check_type_binding, links.check, diagrams.check, clarity.check)
 
 
 def applies(check, doc) -> bool:
