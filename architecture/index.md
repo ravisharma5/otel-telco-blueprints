@@ -47,7 +47,7 @@ The design names model slots, not checkpoints, because OTel checkpoints keep cha
 
 ### Layers
 
-The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). The data and execution plane runs from data and knowledge to action, placement puts that plane on sites, the lifecycle plane evaluates, adapts, and observes, and the control plane deploys everything.
+The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). The data and execution plane runs from data and knowledge to action, placement puts that plane on sites, the lifecycle plane evaluates, adapts, and observes, and the control plane deploys everything. The [crosswalk](crosswalk.md) maps each Table 1 row to a layer here.
 
 | Layer | Plane | Role | Red Hat product used |
 |---|---|---|---|
@@ -67,7 +67,7 @@ The layers extend the components of Table 1 in the [Red Hat Developer blueprint 
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
 
-Placement uses three tiers: the far edge runs one small model per site, the regional tier runs a closed loop with several slots, and the core runs the large LLM, adaptation, and evaluation. The placement page lists what runs where.
+Placement uses three tiers: the far edge runs one small model per site, the regional tier runs a closed loop with several slots, and the core runs the large LLM, adaptation, and evaluation. The [placement tiers](placement.md) page lists what runs where.
 
 ### Flow: grounded answer
 
@@ -109,7 +109,7 @@ flowchart TD
   BL --> AU
 ```
 
-The agent reads and notifies through the MCP Gateway, and asks for a change through one action-request tool. The orchestrator runs the gate itself, so a prompt-injected agent cannot skip it, and only the automation platform holds write credentials. The decision gate page gives the label policy.
+The agent reads and notifies through the MCP Gateway, and asks for a change through one action-request tool. The orchestrator runs the gate itself, so a prompt-injected agent cannot skip it, and only the automation platform holds write credentials. The [decision gate](decision-gate.md) page gives the label policy.
 
 ## Trade-offs and limits
 
@@ -125,4 +125,7 @@ The agent reads and notifies through the MCP Gateway, and asks for a change thro
 
 - PB-04, PB-05, PB-06, PB-07: serving, integration, gating, and the action layer build on this map
 - [Readiness questions](../framework/index.md): what each part of this design must show before production
-- The decision gate, adaptation ladder, placement, and crosswalk pages in this section
+- [Decision gate](decision-gate.md): the label policy behind the investigate-then-act flow
+- [Adaptation ladder](adaptation-ladder.md): how each slot is fitted to an operator's network
+- [Placement tiers](placement.md): which slots run at the far edge, regional sites, and the core
+- [Crosswalk](crosswalk.md): how these layers line up with Table 1 of the agent blueprint article

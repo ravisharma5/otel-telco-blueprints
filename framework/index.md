@@ -47,7 +47,7 @@ A use case is ready for production when all ten criteria hold for that use case.
 | 9 | Compliance and sovereignty: can you show the use case meets the rules and keeps data where it must stay? | Each use case has an EU AI Act classification record, a GDPR, NIS2, and CAMARA consent mapping, and a data residency statement backed by in-country inference | PB-10 |
 | 10 | Operating model: who owns the use case, and how does it grow? | The use case has a named accountable owner, a RACI, a staged rollout plan (shadow, assist, recommend, act), and a measured value case | PB-10 |
 
-PB-06 and PB-07 together answer autonomy gating: PB-06 sets the gate, and PB-07 runs the action layer behind it. PB-10 answers both compliance and the operating model.
+PB-06 and PB-07 together answer autonomy gating: PB-06 sets the gate described on the [decision gate](../architecture/decision-gate.md) page, and PB-07 runs the action layer behind it. PB-10 answers both compliance and the operating model.
 
 ### How to use the questions
 
@@ -68,7 +68,11 @@ PB-06 and PB-07 together answer autonomy gating: PB-06 sets the gate, and PB-07 
 ## Used by
 
 - PB-01 to PB-10: each platform blueprint answers one or two of these questions
-- The architecture overview: the six OTel slots mapped onto Red Hat products
+- [Architecture overview](../architecture/index.md): the six OTel slots mapped onto Red Hat products
+- [Decision gate](../architecture/decision-gate.md): the gate that answers autonomy gating
+- [Adaptation ladder](../architecture/adaptation-ladder.md): the climb that answers adaptation
+- [Placement tiers](../architecture/placement.md): the tiers that answer serving and placement
+- [Crosswalk](../architecture/crosswalk.md): how this design lines up with the agent blueprint table
 - [Definitions](definitions.md): the autonomy ceiling and component naming
 - [Glossary](glossary.md): the terms used on this page
 - [Style guide](style-guide.md): the shape of each blueprint page

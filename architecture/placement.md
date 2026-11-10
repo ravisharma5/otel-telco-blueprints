@@ -62,3 +62,4 @@ Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanc
 - [Decision gate](decision-gate.md): the gate model that runs closest to the network
 - [Adaptation ladder](adaptation-ladder.md): the adaptation work that stays in the core
 - [Readiness questions](../framework/index.md): the serving and placement question this page answers
+- [Crosswalk](crosswalk.md): where placement sits among the extension rows
