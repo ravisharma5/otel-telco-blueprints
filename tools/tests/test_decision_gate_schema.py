@@ -61,7 +61,7 @@ def _keys(node):
 
 def test_fixture_counts():
     assert len(VALID) == 4
-    assert len(INVALID) == 8
+    assert len(INVALID) == 10
 
 
 def test_schema_is_valid_draft_2020_12(schema):
@@ -125,3 +125,35 @@ def test_outcome_above_ceiling_is_rejected(gate_validator):
 def test_stop_ceiling_rejects_act(gate_validator):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
     assert not gate_validator.is_valid({**base, "policy_ceiling": "STOP", "outcome": "ACT"})
+
+
+@pytest.mark.parametrize(
+    "stamp",
+    [
+        "2026-11-09T10:15:01Z\n",
+        "2026-13-09T10:15:01Z",
+        "2026-11-32T10:15:01Z",
+        "2026-11-09T24:00:00Z",
+        "2026-11-09T10:61:00Z",
+        "2026-11-09T10:15:01+25:00",
+        "\u0662\u0660\u0662\u0666-11-09T10:15:01Z",
+    ],
+)
+def test_timestamp_rejects_malformed_values(gate_validator, stamp):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-review.json")
+    assert not gate_validator.is_valid({**base, "decided_at": stamp}), repr(stamp)
+
+
+@pytest.mark.parametrize(
+    "stamp",
+    ["2026-11-09T10:15:01Z", "2026-11-09T23:59:59.250+05:30", "2026-02-28T00:00:00-08:00"],
+)
+def test_timestamp_accepts_rfc3339_values(gate_validator, stamp):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-review.json")
+    assert gate_validator.is_valid({**base, "decided_at": stamp}), stamp
+
+
+@pytest.mark.parametrize("field", ["decision_id", "request_id", "correlation_id"])
+def test_ids_reject_a_trailing_newline(gate_validator, field):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-review.json")
+    assert not gate_validator.is_valid({**base, field: base[field] + "\n"}), field
