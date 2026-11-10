@@ -1,5 +1,5 @@
 """Drift tests: templates and valid fixtures stay locked to budgets.yaml,
-validation-table.yaml, and the front-matter JSON Schemas.
+sources-table.yaml, and the front-matter JSON Schemas.
 
 Does not import tools.bplint on purpose (the templates must not depend on the linter).
 """
@@ -23,7 +23,7 @@ FIXTURES = REPO_ROOT / "tools/tests/fixtures"
 VALID = FIXTURES / "valid"
 
 BUDGETS = yaml.safe_load((REPO_ROOT / "tools/bplint/budgets.yaml").read_text())
-VT = yaml.safe_load((SCHEMAS / "validation-table.yaml").read_text())
+SOURCES = yaml.safe_load((SCHEMAS / "sources-table.yaml").read_text())
 
 TEMPLATE_FILES = {
     "use-case": TEMPLATES / "use-case-blueprint.md",
@@ -158,8 +158,8 @@ def section_titles(kind: str) -> list[str]:
     return [s["title"] for s in BUDGETS["types"][kind]["sections"]]
 
 
-def validation_section(kind: str) -> str:
-    return BUDGETS["types"][kind]["validation_section"]
+def sources_section(kind: str) -> str:
+    return BUDGETS["types"][kind]["sources_section"]
 
 
 # ---------- templates ----------
@@ -172,11 +172,25 @@ def test_template_h2_titles_match_budgets(kind):
 
 
 @pytest.mark.parametrize("kind", TEMPLATE_FILES)
-def test_template_validation_header_matches_canonical(kind):
+def test_template_sources_header_matches_canonical(kind):
     _, body = split_doc(TEMPLATE_FILES[kind])
-    tbls = tables(section(body, validation_section(kind)))
+    tbls = tables(section(body, sources_section(kind)))
     assert len(tbls) == 1
-    assert tbls[0][0] == VT["columns"]
+    assert tbls[0][0] == SOURCES["columns"]
+    basis = {b.lower() for b in SOURCES["basis_values"]}
+    assert tbls[0][1] and all(r[2].lower() in basis for r in tbls[0][1])
+
+
+@pytest.mark.parametrize("kind", TEMPLATE_FILES)
+def test_template_links_the_sources_table_definition(kind):
+    _, body = split_doc(TEMPLATE_FILES[kind])
+    assert any(h.endswith("framework/definitions.md#sources-table") for h in links(body))
+
+
+@pytest.mark.parametrize("kind", TEMPLATE_FILES)
+def test_template_has_no_readiness_or_validation_wording(kind):
+    text = TEMPLATE_FILES[kind].read_text()
+    assert not re.search(r"E-level|M-level|evidence|validat|not yet|honest", text, re.I)
 
 
 @pytest.mark.parametrize("kind", TEMPLATE_FILES)
@@ -247,7 +261,7 @@ def test_fixture_structure_matches_template(name):
     _, tbody = split_doc(TEMPLATE_FILES[kind])
     _, fbody = split_doc(VALID / name / "README.md")
     assert [t for t, _ in sections(fbody)] == [t for t, _ in sections(tbody)]
-    vsec = validation_section(kind)
+    vsec = sources_section(kind)
     assert tables(section(fbody, vsec))[0][0] == tables(section(tbody, vsec))[0][0]
     labels = [r[0] for r in tables(section(fbody, "At a glance"))[0][1]]
     assert labels == BUDGETS["types"][kind]["at_a_glance_rows"]
@@ -273,14 +287,13 @@ def test_fixture_is_marked_fictional(name):
 
 
 @pytest.mark.parametrize("name", VALID_FIXTURES)
-def test_fixture_headline_is_minimum_of_load_bearing(name):
+def test_fixture_sources_rows_cover_url_and_repo_file(name):
     kind = VALID_FIXTURES[name]
-    fm, body = split_doc(VALID / name / "README.md")
-    head, rows = tables(section(body, validation_section(kind)))[0]
-    idx_lb, idx_e = head.index("Load-bearing"), head.index("E-level")
-    levels = [r[idx_e].split()[0] for r in rows if r[idx_lb] == "yes"]
-    assert levels
-    assert fm["evidence_level"] == min(levels)
+    _, body = split_doc(VALID / name / "README.md")
+    toks = section(body, sources_section(kind))
+    hrefs = links("".join(t.content + "\n" for t in toks if t.type == "inline"))
+    assert any(h.startswith("https://") for h in hrefs)
+    assert any(h.startswith("../../sources/") for h in hrefs)
 
 
 @pytest.mark.parametrize("name", VALID_FIXTURES)

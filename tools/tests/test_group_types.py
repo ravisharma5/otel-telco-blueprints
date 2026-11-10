@@ -1,6 +1,6 @@
 """Each glob group binds the front matter `type` values its pages may declare.
 
-The page's own `type` picks its schema, budgets, and validation-table rule.
+The page's own `type` picks its schema, budgets, and Sources table rule.
 Without a binding, a blueprint could declare `type: reference` and skip the
 validation table and readiness facets. These tests pin the binding for
 discovery runs and for explicit paths inside a glob group.
@@ -36,13 +36,13 @@ def _config(tmp_path, **groups):
     cfg = {
         "schemas_dir": "schemas",
         "budgets": "tools/bplint/budgets.yaml",
-        "validation_table": "schemas/validation-table.yaml",
+        "sources_table": "schemas/sources-table.yaml",
         "blueprint_globs": [],
         "reference_globs": [],
         "doc_globs": [],
         "exclude_globs": [],
         "group_types": GROUP_TYPES,
-        "facet_fields": ["model_readiness", "evidence_level", "autonomy_ceiling", "placement_tier"],
+        "facet_fields": ["autonomy_ceiling", "placement_tier"],
     }
     cfg.update(groups)
     path = tmp_path / "config.yaml"

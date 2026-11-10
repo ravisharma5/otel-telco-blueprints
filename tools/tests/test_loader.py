@@ -56,10 +56,10 @@ def test_load_yaml_keeps_dates_as_strings(tmp_path):
 
 
 def test_duplicate_key_raises_with_line_of_second_occurrence():
-    text = '---\nid: x\nevidence_level: "E0"\nevidence_level: "E1"\n---\n'
+    text = '---\nid: x\ndoc_status: "draft"\ndoc_status: "done"\n---\n'
     with pytest.raises(FrontMatterError) as exc:
         split_front_matter(text)
-    assert "duplicate key 'evidence_level'" in exc.value.message
+    assert "duplicate key 'doc_status'" in exc.value.message
     assert exc.value.line == 4
 
 

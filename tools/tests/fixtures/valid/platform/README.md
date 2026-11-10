@@ -5,10 +5,8 @@ title: "Fictional platform capability (test fixture)"
 readiness_question: "What does it take to serve the fictional demo slot?"
 doc_status: "review"
 otel_slots: ["llm"]
-model_readiness: "n/a"
-evidence_level: "E1"
 placement_tier: ["regional"]
-honest_one_liner: "E1. Fictional sample. Acceptance method defined, not yet run."
+one_liner: "Serves the fictional demo slot on one regional node. Depends on the demo runtime."
 top_decisions:
   - "Pick a fictional runtime"
   - "Pick a placement tier"
@@ -24,7 +22,7 @@ agent_school: [201]
 
 | Field | Value |
 |---|---|
-| Honest one-liner | E1. Fictional sample. Acceptance method defined, not yet run. |
+| One-liner | Serves the fictional demo slot on one regional node. Depends on the demo runtime. |
 | Question answered | What does it take to serve the fictional demo slot? |
 | Audience | Fictional demo platform engineers |
 | OTel slots | `llm` |
@@ -53,7 +51,7 @@ Until you answer it, the fictional use case has nowhere to run.
 2. The demo runtime loads the fictional model.
 3. Callers send requests to the demo runtime endpoint.
 
-- Config artifact: [acceptance spec](evidence/eval-spec.md)
+- Config artifact: [acceptance spec](../../sources/acceptance-spec.md)
 
 ## Components
 
@@ -70,14 +68,14 @@ Any component can be replaced. The Red Hat products named here show one way to b
 |---|---|---|
 | `llm` | Fictional model, pinned by revision | Fictional sizing only |
 
-## Validation and acceptance
+## Sources and acceptance
 
-The headline E-level is the minimum over load-bearing rows, as set out in [the minimum rule](../../../../../framework/definitions.md#headline-level-the-minimum-rule).
+Each key claim links its source, as set out in [the Sources table](../../../../../framework/definitions.md#sources-table).
 
-| # | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external | Our operator-task eval | E-level | Evidence | Result | Date | Release / revision |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Demo runtime answers within 200 ms at p95 | demo-runtime | yes | — | — | spec written | E1 | [spec](evidence/eval-spec.md) | — | 2026-11-07 | — |
-| 2 | Demo runtime handles 100 requests per second | demo-runtime | no | vendor says 100 rps | — | — | E0 | [notes](https://example.invalid/demo-runtime) | — | 2026-11-07 | — |
+| # | Claim | Basis | Source |
+|---|---|---|---|
+| 1 | The fictional model fits on one demo accelerator | model card | [fictional card](https://example.invalid/card) |
+| 2 | Demo runtime targets 200 ms at p95 | Red Hat guidance | [acceptance spec](../../sources/acceptance-spec.md) |
 
 - Gate: p95 latency under 200 ms on 100 fictional requests.
 
@@ -91,7 +89,7 @@ The headline E-level is the minimum over load-bearing rows, as set out in [the m
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| The acceptance method has not been run | High | Run it once a cluster exists |
+| The fictional runtime drops requests under load | Medium | Add a second replica |
 
 ## Used by and next steps
 

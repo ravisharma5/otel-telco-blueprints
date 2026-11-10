@@ -1,7 +1,7 @@
 # bplint repository configuration. Paths are relative to the repo root.
 schemas_dir: schemas
 budgets: tools/bplint/budgets.yaml
-validation_table: schemas/validation-table.yaml
+sources_table: schemas/sources-table.yaml
 
 blueprint_globs:
   - "platform/*/README.md"
@@ -21,7 +21,7 @@ exclude_globs:
 
 # Front matter `type` values each glob group accepts. The group that finds a
 # page decides which types it may declare, so a blueprint cannot declare
-# `reference` to skip the validation table. An empty list means pages in that
+# `reference` to skip the Sources table. An empty list means pages in that
 # group must not declare a type. Explicit CLI paths inside a group follow the
 # same rule; other explicit paths accept any known type.
 group_types:
@@ -31,7 +31,5 @@ group_types:
 
 # Schema errors on these fields map to RF001; others map to FM002.
 facet_fields:
-  - model_readiness
-  - evidence_level
   - autonomy_ceiling
   - placement_tier

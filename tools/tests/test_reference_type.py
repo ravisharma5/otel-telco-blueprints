@@ -47,10 +47,10 @@ def test_reference_gets_no_vt001():
     assert "VT001" not in {f["code"] for f in findings}
 
 
-def test_reference_budgets_have_no_validation_section():
+def test_reference_budgets_have_no_sources_section():
     budgets = load_yaml(REPO_ROOT / "tools/bplint/budgets.yaml")
     spec = budgets["types"]["reference"]
-    assert "validation_section" not in spec
+    assert "sources_section" not in spec
     titles = [s["title"] for s in spec["sections"]]
     assert titles == [
         "At a glance",
@@ -161,14 +161,14 @@ def test_reference_template_front_matter():
     assert list(_reference_validator().iter_errors(fm)) == []
 
 
-def test_reference_template_no_validation_table():
+def test_reference_template_no_sources_or_validation_table():
     import re
 
     text = TEMPLATE.read_text(encoding="utf-8")
     headings_and_headers = [
         line for line in text.splitlines() if line.startswith("#") or line.startswith("|")
     ]
-    assert not any("Validation" in line for line in headings_and_headers)
+    assert not any("Validation" in line or "Sources" in line for line in headings_and_headers)
     assert not re.search(r"\b(E[0-4]|M[0-3])\b", text)
 
 

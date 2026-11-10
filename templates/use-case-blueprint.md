@@ -6,12 +6,10 @@ doc_status: "draft"  # draft | review | done
 domain: "network-operations"  # standards-knowledge | network-software | network-operations | agentic-operations | business-assurance | security | research (demo is reserved for test fixtures)
 flagship: true  # false = catalog entry
 otel_slots: ["llm", "safety"]  # llm | embedding | reranker | safety | decision | classification
-model_readiness: "M2"  # M0 | M1 | M2 | M3
-evidence_level: "E1"  # E0 | E1 | E2 | E3 | E4; minimum over load-bearing validation rows
 autonomy_ceiling: "recommend-with-approval"  # inform | notify | recommend-with-approval | act-within-policy
 tmf_an_level_target: 3  # optional; 0-5; a target, never a claim
 placement_tier: ["regional"]  # far-edge | regional | core
-honest_one_liner: "M2 / E1 / recommend-with-approval. Needs a tool-calling slot. Method defined, not yet run."  # M / E / ceiling. Main blocker. What has been shown.
+one_liner: "Recommends fixes with human approval. Needs a tool-calling LLM slot."  # what the use case does, its autonomy ceiling in words, then its main dependency
 platform_blueprints: ["PB-04"]  # PB-<nn> ids this use case depends on
 agent_school: [301]  # agent-school course numbers (100-999)
 clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
@@ -19,7 +17,7 @@ source: ["<source-id>"]  # optional; where the use case came from
 ---
 
 <!-- One template serves flagships and catalog entries.
-     Catalog entries (flagship: false) must fill At a glance, Governance, Validation, and Limitations.
+     Catalog entries (flagship: false) must fill At a glance, Governance, Sources, and Limitations.
      The other sections may contain only a line that starts with _Stub: <reason>_.
      Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
@@ -27,15 +25,15 @@ source: ["<source-id>"]  # optional; where the use case came from
 
 ## At a glance
 
-<!-- budget: 1 table, 7 rows ; purpose: the whole readiness story before any prose -->
+<!-- budget: 1 table, 7 rows ; purpose: the whole use case before any prose -->
 
 | Field | Value |
 |---|---|
-| Honest one-liner | M2 / E1 / recommend-with-approval. Needs a tool-calling slot. Method defined, not yet run. |
+| One-liner | Recommends fixes with human approval. Needs a tool-calling LLM slot. |
 | Problem | <One line: the operator pain and the KPI it moves> |
 | Audience | <Who reads and runs this, for example NOC engineers> |
 | OTel slots | <slot: role, for example `llm: tool-calling`; `safety: abstain`> |
-| Model readiness and evidence | <M-level and E-level, for example M2 / E1> |
+| Autonomy ceiling | <inform, notify, recommend with approval, or act within policy> |
 | Placement tier | <far-edge, regional, or core> |
 | Agent-school courses | <Course numbers with links> |
 
@@ -81,23 +79,24 @@ Any component can be replaced. The Red Hat products named here show one way to b
 |---|---|---|---|
 | <Action the agent can take> | <REVIEW> | <Role that approves> | <Class> |
 
-## Validation
+## Sources
 
-<!-- budget: 1 table ; purpose: the canonical validation table; Vendor-reported and GSMA external are context and never raise the E-level -->
+<!-- budget: 1 table ; purpose: the canonical Sources table, one row per key claim -->
 
-<!-- Evidence files go in evidence/ next to the blueprint or in a parent evidence/ folder up to the repo root, never the blueprint itself. Load-bearing is exactly yes or no. -->
+<!-- One row per key claim. Basis is model card, research, Red Hat guidance, or industry use case. Source links the URL or repo file; never this page. -->
 
-The headline E-level is the minimum over load-bearing rows, as set out in [the minimum rule](../../../framework/definitions.md#headline-level-the-minimum-rule).
+Each key claim links its source, as set out in [the Sources table](../../../framework/definitions.md#sources-table).
 
-| # | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external | Our operator-task eval | E-level | Evidence | Result | Date | Release / revision |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | <Claim> | <slot or component id> | yes | <vendor figure or —> | <GSMA figure or —> | <operator-task result or —> | E1 | [<spec>](evidence/<file>) | <result or —> | <YYYY-MM-DD> | <release or revision; required from E2> |
+| # | Claim | Basis | Source |
+|---|---|---|---|
+| 1 | <Claim the model card reports, for example tool-calling support> | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT) |
+| 2 | <Claim Red Hat documentation recommends> | Red Hat guidance | [<Red Hat doc or article title>](https://docs.redhat.com/<path>) |
 
 ## Deploy and verify
 
-<!-- budget: 5 lines, 5 bullets ; purpose: link the how-to and state reference implementation status; related-work links -->
+<!-- budget: 5 lines, 5 bullets ; purpose: link the how-to and the reference implementation; related-work links -->
 
-<Link to the how-to steps. State whether a reference implementation exists and at which E-level.>
+Link the how-to steps and the reference implementation, if one exists.
 
 - Agent-school: <course link>
 - NVIDIA or Databricks equivalent: <link>
@@ -105,8 +104,8 @@ The headline E-level is the minimum over load-bearing rows, as set out in [the m
 
 ## Limitations
 
-<!-- budget: 6 bullets ; purpose: what it does not do and what has not been shown -->
+<!-- budget: 6 bullets ; purpose: what it does not do and what it does not cover -->
 
 - <What this use case never does on its own>
-- <What has not been run or measured>
+- <What this design does not cover>
 - <Known gap or open question>

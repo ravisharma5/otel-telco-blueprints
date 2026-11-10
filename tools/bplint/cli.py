@@ -59,31 +59,21 @@ def _load_yaml_dict(path: Path, what: str) -> dict:
     return data
 
 
-# Column names validation_table.py reads by name. A spec without them
+# Column names sources_table.py reads by name. A spec without them
 # would raise KeyError mid-run, so reject it up front as a config error.
-VT_REQUIRED_COLUMNS = ("Load-bearing", "E-level", "Evidence", "Release / revision")
+SOURCES_REQUIRED_COLUMNS = ("Claim", "Basis", "Source")
 
 
-def _check_vt_spec(spec: dict) -> None:
+def _check_sources_spec(spec: dict) -> None:
     columns = spec.get("columns")
     if not isinstance(columns, list) or not all(isinstance(c, str) for c in columns):
-        raise ConfigError("validation table spec 'columns' must be a list of column names")
-    missing = [c for c in VT_REQUIRED_COLUMNS if c not in columns]
+        raise ConfigError("Sources table spec 'columns' must be a list of column names")
+    missing = [c for c in SOURCES_REQUIRED_COLUMNS if c not in columns]
     if missing:
-        raise ConfigError(f"validation table spec columns are missing required column(s): {missing}")
-    raising = spec.get("raising_column")
-    if raising is not None and raising not in columns:
-        raise ConfigError(
-            f"validation table spec raising_column '{raising}' is not one of the columns"
-        )
-    context = spec.get("context_columns") or []
-    if not isinstance(context, list):
-        raise ConfigError("validation table spec 'context_columns' must be a list")
-    unknown = [c for c in context if c not in columns]
-    if unknown:
-        raise ConfigError(
-            f"validation table spec context_columns {unknown} are not in the columns"
-        )
+        raise ConfigError(f"Sources table spec columns are missing required column(s): {missing}")
+    basis = spec.get("basis_values")
+    if basis is not None and (not isinstance(basis, list) or not all(isinstance(b, str) for b in basis)):
+        raise ConfigError("Sources table spec 'basis_values' must be a list of strings")
 
 
 # Glob groups in match order, and whether each group's pages are blueprints
@@ -99,7 +89,7 @@ def _check_budget_types(budgets: dict, validators: dict) -> None:
     """Every schema type needs a budgets entry, and the reverse.
 
     A type with a schema but no budgets entry would pass FM002 and then skip
-    the section, budget, and validation-table checks without a finding.
+    the section, budget, and Sources table checks without a finding.
     """
     types = budgets.get("types")
     if not isinstance(types, dict):
@@ -134,12 +124,12 @@ def _check_group_types(config: dict, validators: dict) -> None:
 
 def build_context(args) -> checks.Context:
     config = _load_yaml_dict(_resolve(args.config), "config")
-    for key in ("schemas_dir", "budgets", "validation_table"):
+    for key in ("schemas_dir", "budgets", "sources_table"):
         if key not in config:
             raise ConfigError(f"config is missing key '{key}'")
     budgets = _load_yaml_dict(_resolve(config["budgets"]), "budgets")
-    vt_spec = _load_yaml_dict(_resolve(config["validation_table"]), "validation table spec")
-    _check_vt_spec(vt_spec)
+    sources_spec = _load_yaml_dict(_resolve(config["sources_table"]), "Sources table spec")
+    _check_sources_spec(sources_spec)
     schema_dir = _resolve(config["schemas_dir"])
     try:
         validators = load_validators(schema_dir)
@@ -157,7 +147,7 @@ def build_context(args) -> checks.Context:
         repo_root=REPO_ROOT,
         config=config,
         budgets=budgets,
-        vt_spec=vt_spec,
+        sources_spec=sources_spec,
         schemas=validators,
         enums=enums,
         today=today,

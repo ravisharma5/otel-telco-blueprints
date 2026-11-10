@@ -6,11 +6,9 @@ doc_status: "review"
 domain: "demo"
 flagship: false
 otel_slots: ["llm"]
-model_readiness: "M3"
-evidence_level: "E0"
 autonomy_ceiling: "inform"
 placement_tier: ["core"]
-honest_one_liner: "M3 / E0 / inform. Fictional sample. Described from a fictional card only."
+one_liner: "Answers fictional widget questions and only informs. Needs an LLM slot."
 platform_blueprints: ["PB-99"]
 agent_school: []
 ---
@@ -23,11 +21,11 @@ agent_school: []
 
 | Field | Value |
 |---|---|
-| Honest one-liner | M3 / E0 / inform. Fictional sample. Described from a fictional card only. |
+| One-liner | Answers fictional widget questions and only informs. Needs an LLM slot. |
 | Problem | Fictional engineers look up widget facts by hand |
 | Audience | Fictional demo NOC engineers |
 | OTel slots | `llm` |
-| Model readiness and evidence | M3 / E0 |
+| Autonomy ceiling | Inform |
 | Placement tier | Core |
 | Agent-school courses | None |
 
@@ -49,13 +47,14 @@ _Stub: fictional catalog entry._
 |---|---|---|---|
 | Answer a widget question | LOOK | None | Minimal risk (fictional) |
 
-## Validation
+## Sources
 
-The headline E-level is the minimum over load-bearing rows, as set out in [the minimum rule](../../../../../framework/definitions.md#headline-level-the-minimum-rule).
+Each key claim links its source, as set out in [the Sources table](../../../../../framework/definitions.md#sources-table).
 
-| # | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external | Our operator-task eval | E-level | Evidence | Result | Date | Release / revision |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Model answers widget questions | `llm` | yes | card says 0.8 | — | — | E0 | [card](https://example.invalid/card) | — | 2026-11-07 | — |
+| # | Claim | Basis | Source |
+|---|---|---|---|
+| 1 | The fictional model answers widget questions | model card | [fictional card](https://example.invalid/card) |
+| 2 | Demo teams look up widget facts with a replay set | industry use case | [replay set](../../sources/replay.jsonl) |
 
 ## Deploy and verify
 
@@ -64,4 +63,4 @@ _Stub: fictional catalog entry._
 ## Limitations
 
 - This fictional entry only informs; it takes no action.
-- Nothing has been run for this fictional entry.
+- This fictional entry covers widget facts only.

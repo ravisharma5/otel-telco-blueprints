@@ -6,11 +6,11 @@
 
 | Field | Value |
 |---|---|
-| Honest one-liner | M2 / E1 / recommend-with-approval. Fictional sample. Method defined, not yet run. |
+| One-liner | Drafts fictional triage labels with human approval. Needs a tool-calling LLM slot. |
 | Problem | Fictional widget alarms pile up faster than the demo team can sort them |
 | Audience | Fictional demo NOC engineers |
 | OTel slots | `llm`: triage summary; `safety`: abstain on unclear alarms |
-| Model readiness and evidence | M2 / E1 |
+| Autonomy ceiling | Recommend with approval |
 | Placement tier | Regional |
 | Agent-school courses | 301 |
 
@@ -45,20 +45,20 @@ The target KPI is time to first triage, stated here as a target only.
 | Draft a triage label | REVIEW | Demo NOC engineer | Limited risk (fictional) |
 | Close an alarm | STOP | Not allowed | Not applicable (fictional) |
 
-## Validation
+## Sources
 
-The headline E-level is the minimum over load-bearing rows, as set out in [the minimum rule](../../../../../framework/definitions.md#headline-level-the-minimum-rule).
+Each key claim links its source, as set out in [the Sources table](../../../../../framework/definitions.md#sources-table).
 
-| # | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external | Our operator-task eval | E-level | Evidence | Result | Date | Release / revision |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Gate labels match expected labels on replay | `llm` | yes | — | — | replay set, 20 cases | E2 | [replay](../../evidence/replay.jsonl) | 2 of 3 shown cases pass | 2026-11-07 | fictional-model rev 0000000 |
-| 2 | Safety slot abstains on unclear alarms | `safety` | yes | — | — | spec written | E1 | [spec](../../evidence/eval-spec.md) | — | 2026-11-07 | — |
-| 3 | Model scores 0.9 on a vendor benchmark | `llm` | no | card says 0.9 | — | — | E0 | [card](https://example.invalid/card) | — | 2026-11-07 | — |
+| # | Claim | Basis | Source |
+|---|---|---|---|
+| 1 | The fictional model supports tool calling | model card | [fictional card](https://example.invalid/card) |
+| 2 | Demo teams triage widget alarms with a replay set | industry use case | [replay set](../../sources/replay.jsonl) |
+| 3 | An abstain step lowers wrong triage labels | research | [eval spec](../../sources/eval-spec.md) |
 
 ## Deploy and verify
 
 No reference implementation exists for this fictional sample.
-Run the fictional replay set to repeat row 1.
+Run the fictional replay set in row 2 to check the gate labels.
 
 - Agent-school: course 301 (fictional link target)
 - NVIDIA or Databricks equivalent: none for this fictional sample
@@ -66,5 +66,5 @@ Run the fictional replay set to repeat row 1.
 ## Limitations
 
 - This fictional use case never closes an alarm on its own.
-- The safety abstain method is defined but not yet run.
+- The safety slot abstains on unclear alarms instead of guessing.
 - The replay set holds 20 fictional cases only.

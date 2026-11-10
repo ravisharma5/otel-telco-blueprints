@@ -2,6 +2,8 @@
 # Tunable without code changes. Extra topics fold into existing sections; use-case
 # pages have page budgets; platform at-a-glance lists the top 3 decisions; there is
 # no weakest-status row, because components are named by role and Red Hat product.
+# sources_section names the section that holds the Sources table
+# (schemas/sources-table.yaml) for that type.
 
 # Assumption: about 450 prose words per page. Tune after first real blueprint.
 words_per_page: 450
@@ -24,9 +26,9 @@ stub_marker: "_Stub:"
 types:
   platform:
     page_words: 1800
-    validation_section: "Validation and acceptance"
+    sources_section: "Sources and acceptance"
     at_a_glance_rows:
-      - Honest one-liner
+      - One-liner
       - Question answered
       - Audience
       - OTel slots
@@ -49,7 +51,7 @@ types:
         tables: 1
       - title: OTel slot guidance
         tables: 1
-      - title: Validation and acceptance
+      - title: Sources and acceptance
         tables: 1
         bullets: 10
       - title: Operating model
@@ -63,20 +65,20 @@ types:
     page_words:
       flagship: 1350
       catalog: 450
-    validation_section: "Validation"
+    sources_section: "Sources"
     at_a_glance_rows:
-      - Honest one-liner
+      - One-liner
       - Problem
       - Audience
       - OTel slots
-      - Model readiness and evidence
+      - Autonomy ceiling
       - Placement tier
       - Agent-school courses
     # Catalog (non-flagship) entries must fill these; others may be stubs.
     catalog_required:
       - At a glance
       - Governance
-      - Validation
+      - Sources
       - Limitations
     sections:
       - title: At a glance
@@ -91,7 +93,7 @@ types:
         bullets: 12         # models, platform blueprints, integrations, tools/data, adaptation, prerequisites
       - title: Governance
         tables: 1
-      - title: Validation
+      - title: Sources
         tables: 1
       - title: Deploy and verify
         lines: 5
@@ -99,8 +101,8 @@ types:
       - title: Limitations
         bullets: 6
 
-  # Reference pages: principles and recipes. No validation table, so no
-  # validation_section key. Mermaid fences are code and are not counted.
+  # Reference pages: principles and recipes. No Sources table, so no
+  # sources_section key. Mermaid fences are code and are not counted.
   reference:
     page_words: 1350
     at_a_glance_rows:

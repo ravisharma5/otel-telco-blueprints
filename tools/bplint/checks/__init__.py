@@ -20,7 +20,7 @@ class Context:
     repo_root: Path
     config: dict
     budgets: dict
-    vt_spec: dict
+    sources_spec: dict
     schemas: dict  # validators by type: "platform", "use-case", "reference"
     enums: dict  # enum lists from common.schema.json $defs, in schema order
     today: date = field(default_factory=date.today)
@@ -47,7 +47,7 @@ DOC_CHECKS: list = []
 REPO_CHECKS: list = []
 
 # Registration order matters: frontmatter sets the flags later checks read.
-from . import frontmatter, sections, budgets, validation_table  # noqa: E402
+from . import frontmatter, sections, budgets, sources_table  # noqa: E402
 from . import links, diagrams, clarity  # noqa: E402
 from . import repo  # noqa: E402
 
@@ -57,7 +57,7 @@ DOC_CHECKS.extend(
         frontmatter.check,
         sections.check,
         budgets.check,
-        validation_table.check,
+        sources_table.check,
         links.check,
         diagrams.check,
         clarity.check,

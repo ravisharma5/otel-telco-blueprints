@@ -1,4 +1,4 @@
-"""Tests for SC001, SC002, AG001, AG002, and BG001."""
+"""Tests for SC001, SC002, AG001, and BG001."""
 
 from __future__ import annotations
 
@@ -107,114 +107,35 @@ def test_at_a_glance_without_table_is_ag001(tmp_path):
     assert "AG001" in codes(lint(tmp_path, render(use_case_fm(), secs)))
 
 
-# ---- AG002 --------------------------------------------------------------
+# ---- at-a-glance values carry no readiness codes -------------------------
 
 
-def _ag002(tmp_path, fm, secs):
-    text = render(fm, secs)
-    return text, [f for f in lint(tmp_path, text) if f.code == "AG002"]
-
-
-def _row_line(text, label):
-    return next(i for i, ln in enumerate(text.splitlines(), 1) if ln.startswith(f"| **{label}** |"))
-
-
-def _key_line(text, key):
-    return next(i for i, ln in enumerate(text.splitlines(), 1) if ln.startswith(f"{key}:"))
-
-
-def _uc(values):
+def test_one_liner_values_are_not_compared_with_facets(tmp_path):
+    """No readiness codes are left to compare, so any one-liner text passes."""
     secs = use_case_sections()
-    secs["At a glance"] = glance_table(UC_AT_A_GLANCE, {**UC_GLANCE_VALUES, **values})
-    return secs
-
-
-def _pb(values):
+    secs["At a glance"] = glance_table(
+        UC_AT_A_GLANCE, {**UC_GLANCE_VALUES, "One-liner": "Answers widget questions. Needs an LLM slot."}
+    )
+    assert lint(tmp_path, render(use_case_fm(), secs)) == []
     secs = platform_sections()
-    secs["At a glance"] = glance_table(PB_AT_A_GLANCE, {**PB_GLANCE_VALUES, **values})
-    return secs
+    secs["At a glance"] = glance_table(PB_AT_A_GLANCE, {**PB_GLANCE_VALUES, "One-liner": "Serves a slot."})
+    assert lint(tmp_path, render(platform_fm(), secs)) == []
 
 
-def test_defaults_have_no_ag002(tmp_path):
-    assert _ag002(tmp_path, use_case_fm(), use_case_sections())[1] == []
-    assert _ag002(tmp_path, platform_fm(), platform_sections())[1] == []
-
-
-def test_platform_one_liner_wrong_e_is_ag002(tmp_path):
-    text, out = _ag002(
-        tmp_path,
-        platform_fm(evidence_level="E1", honest_one_liner="E1. Method defined."),
-        _pb({"Honest one-liner": "E4 operator-validated."}),
-    )
-    assert len(out) == 1
-    assert out[0].line == _row_line(text, "Honest one-liner")
-    assert "E4" in out[0].message and "E1" in out[0].message
-
-
-def test_platform_one_liner_without_e_is_ag002(tmp_path):
-    _, out = _ag002(tmp_path, platform_fm(), _pb({"Honest one-liner": "Described only."}))
-    assert len(out) == 1 and "must state the E-level" in out[0].message
-
-
-def test_platform_one_liner_with_m_code_is_ag002(tmp_path):
-    _, out = _ag002(tmp_path, platform_fm(), _pb({"Honest one-liner": "E0. Model is M2."}))
-    assert len(out) == 1 and "M2" in out[0].message
-
-
-def test_markup_is_stripped_and_later_codes_ignored(tmp_path):
-    _, out = _ag002(
-        tmp_path, platform_fm(), _pb({"Honest one-liner": "**E0**. Target is E3 after the pilot."})
-    )
-    assert out == []
-
-
-def test_use_case_one_liner_wrong_e_is_ag002(tmp_path):
-    text, out = _ag002(
-        tmp_path,
-        use_case_fm(evidence_level="E1", honest_one_liner="M2 / E1 / x."),
-        _uc({"Honest one-liner": "M2 / E4 / x.", "Model readiness and evidence": "M2 / E1"}),
-    )
-    assert len(out) == 1
-    assert out[0].line == _row_line(text, "Honest one-liner")
-
-
-def test_use_case_readiness_row_wrong_m_is_ag002(tmp_path):
-    text, out = _ag002(tmp_path, use_case_fm(), _uc({"Model readiness and evidence": "M3 / E0"}))
-    assert len(out) == 1
-    assert out[0].line == _row_line(text, "Model readiness and evidence")
-    assert "M3" in out[0].message and "M2" in out[0].message
-
-
-def test_use_case_missing_codes_are_ag002(tmp_path):
-    _, out = _ag002(tmp_path, use_case_fm(), _uc({"Model readiness and evidence": "E0"}))
-    assert len(out) == 1 and "M-level" in out[0].message
-    _, out = _ag002(tmp_path, use_case_fm(), _uc({"Honest one-liner": "M2 / recommend."}))
-    assert len(out) == 1 and "E-level" in out[0].message
-
-
-def test_front_matter_one_liner_mismatch_is_ag002_at_key(tmp_path):
-    fm = use_case_fm(honest_one_liner="M3 / E0 / x.")
-    text, out = _ag002(tmp_path, fm, use_case_sections())
-    assert len(out) == 1
-    assert out[0].line == _key_line(text, "honest_one_liner")
-    text, out = _ag002(tmp_path, platform_fm(honest_one_liner="E2. Done."), platform_sections())
-    assert len(out) == 1
-    assert out[0].line == _key_line(text, "honest_one_liner")
-
-
-def test_no_ag002_when_facet_invalid_or_missing(tmp_path):
-    _, out = _ag002(tmp_path, use_case_fm(evidence_level="E9"), use_case_sections())
-    assert out == []
-    _, out = _ag002(tmp_path, use_case_fm(model_readiness=None), use_case_sections())
-    assert out == []
-
-
-def test_missing_row_is_ag001_not_ag002(tmp_path):
+def test_missing_one_liner_row_is_ag001(tmp_path):
     secs = use_case_sections()
-    labels = [x for x in UC_AT_A_GLANCE if x != "Honest one-liner"]
+    labels = [x for x in UC_AT_A_GLANCE if x != "One-liner"]
     secs["At a glance"] = glance_table(labels, UC_GLANCE_VALUES)
     findings = lint(tmp_path, render(use_case_fm(), secs))
-    assert "AG001" in codes(findings) and "AG002" not in codes(findings)
+    assert codes(findings, "AG001") == ["AG001"]
+
+
+def test_old_glance_labels_are_ag001(tmp_path):
+    secs = use_case_sections()
+    labels = ["Honest one-liner" if x == "One-liner" else x for x in UC_AT_A_GLANCE]
+    secs["At a glance"] = glance_table(labels)
+    findings = [f for f in lint(tmp_path, render(use_case_fm(), secs)) if f.code == "AG001"]
+    assert len(findings) == 1 and "One-liner" in findings[0].message
 
 
 # ---- BG001 ---------------------------------------------------------------

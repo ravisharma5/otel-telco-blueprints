@@ -50,11 +50,9 @@ USE_CASE = {
     "domain": "demo",
     "flagship": False,
     "otel_slots": ["llm", "safety"],
-    "model_readiness": "M2",
-    "evidence_level": "E1",
     "autonomy_ceiling": "recommend-with-approval",
     "placement_tier": ["regional"],
-    "honest_one_liner": "M2 / E1 / recommend-with-approval. Method defined, not yet run.",
+    "one_liner": "Drafts triage labels with human approval. Needs a tool-calling LLM slot.",
     "platform_blueprints": ["PB-04"],
     "agent_school": [301],
 }
@@ -66,10 +64,8 @@ PLATFORM = {
     "readiness_question": "What does it take to serve the demo slot?",
     "doc_status": "draft",
     "otel_slots": ["llm"],
-    "model_readiness": "n/a",
-    "evidence_level": "E0",
     "placement_tier": ["core"],
-    "honest_one_liner": "E0. Described from vendor docs only.",
+    "one_liner": "Serves the demo slot from one endpoint. Depends on a model runtime.",
     "top_decisions": ["Pick a runtime", "Pick a tier"],
     "agent_school": [201],
 }
@@ -82,26 +78,33 @@ def test_schema_is_valid_draft_2020_12(name):
     assert schema["$id"] == f"https://otel-telco-blueprints.invalid/schemas/{name}"
 
 
-def test_claim_term_map_present():
+def test_common_schema_has_no_readiness_levels():
     common = json.loads((SCHEMAS / "common.schema.json").read_text())
-    assert common["x-claim-term-map"]["operator-validated"] == "E4"
-    assert common["x-claim-term-map"]["evaluated"] == "E3 (evaluated)"
+    assert "x-claim-term-map" not in common
+    assert not {"e_level", "m_level"} & set(common["$defs"])
 
 
 def test_valid_use_case_passes():
     assert _error_paths(_validator("use-case.schema.json"), USE_CASE) == []
 
 
-def test_use_case_bad_model_readiness_fails_on_path():
+def test_use_case_bad_autonomy_ceiling_fails_on_path():
     v = _validator("use-case.schema.json")
-    bad = dict(USE_CASE, model_readiness="M5")
-    assert "model_readiness" in _error_paths(v, bad)
+    bad = dict(USE_CASE, autonomy_ceiling="act-alone")
+    assert "autonomy_ceiling" in _error_paths(v, bad)
 
 
-def test_use_case_rejects_na_model_readiness():
-    v = _validator("use-case.schema.json")
-    bad = dict(USE_CASE, model_readiness="n/a")
-    assert "model_readiness" in _error_paths(v, bad)
+@pytest.mark.parametrize("field", ["model_readiness", "evidence_level", "honest_one_liner"])
+def test_retired_readiness_fields_rejected(field):
+    for name, sample in (("use-case.schema.json", USE_CASE), ("platform.schema.json", PLATFORM)):
+        errors = list(_validator(name).iter_errors(dict(sample, **{field: "E1"})))
+        assert any(e.validator == "additionalProperties" for e in errors), (name, field)
+
+
+def test_one_liner_is_required():
+    for name, sample in (("use-case.schema.json", USE_CASE), ("platform.schema.json", PLATFORM)):
+        bad = {k: v for k, v in sample.items() if k != "one_liner"}
+        assert not _validator(name).is_valid(bad), name
 
 
 def test_use_case_rejects_unknown_key():
@@ -119,7 +122,7 @@ def test_use_case_date_object_fails():
     assert isinstance(loaded["d"], datetime.date)
 
 
-def test_valid_platform_with_na_passes():
+def test_valid_platform_passes():
     assert _error_paths(_validator("platform.schema.json"), PLATFORM) == []
 
 
@@ -138,13 +141,11 @@ def test_legacy_register_fields_rejected():
         assert any(e.validator == "additionalProperties" for e in errors), name
 
 
-def test_validation_table_columns():
-    vt = yaml.safe_load((SCHEMAS / "validation-table.yaml").read_text())
-    cols = vt["columns"]
-    assert len(cols) == 12
-    for c in ("Vendor-reported", "GSMA external", "Our operator-task eval"):
-        assert c in cols
-    assert vt["load_bearing_values"] == ["yes", "no"]
+def test_sources_table_columns():
+    spec = yaml.safe_load((SCHEMAS / "sources-table.yaml").read_text())
+    assert spec["columns"] == ["#", "Claim", "Basis", "Source"]
+    assert spec["basis_values"] == ["model card", "research", "Red Hat guidance", "industry use case"]
+    assert not (SCHEMAS / "validation-table.yaml").exists()
 
 
 def test_platform_layers_use_names_not_codes():

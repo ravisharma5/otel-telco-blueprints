@@ -12,11 +12,9 @@
     "domain",
     "flagship",
     "otel_slots",
-    "model_readiness",
-    "evidence_level",
     "autonomy_ceiling",
     "placement_tier",
-    "honest_one_liner",
+    "one_liner",
     "platform_blueprints",
     "agent_school"
   ],
@@ -46,8 +44,6 @@
       "uniqueItems": true,
       "items": { "$ref": "common.schema.json#/$defs/otel_slot" }
     },
-    "model_readiness": { "$ref": "common.schema.json#/$defs/m_level" },
-    "evidence_level": { "$ref": "common.schema.json#/$defs/e_level" },
     "autonomy_ceiling": { "$ref": "common.schema.json#/$defs/autonomy_ceiling" },
     "tmf_an_level_target": {
       "description": "A target, never a claim.",
@@ -61,7 +57,7 @@
       "uniqueItems": true,
       "items": { "$ref": "common.schema.json#/$defs/placement_tier" }
     },
-    "honest_one_liner": { "type": "string", "minLength": 10 },
+    "one_liner": { "type": "string", "minLength": 10 },
     "platform_blueprints": {
       "type": "array",
       "uniqueItems": true,

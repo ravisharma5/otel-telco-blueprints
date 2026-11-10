@@ -8,10 +8,8 @@ layers: ["safety-governance", "action"]  # optional; layer names from the archit
 table1_rows: [13]  # optional; row numbers in the readiness table
 extension_rows: ["E2"]  # optional; extension rows E<n>
 otel_slots: ["llm"]  # llm | embedding | reranker | safety | decision | classification
-model_readiness: "n/a"  # always n/a: platform blueprints carry no model-readiness level
-evidence_level: "E1"  # E0 | E1 | E2 | E3 | E4; minimum over load-bearing validation rows
 placement_tier: ["core"]  # far-edge | regional | core
-honest_one_liner: "E1. Needs a gateway with per-team token limits. Method defined, not yet run."  # E-level. Main blocker. What has been shown.
+one_liner: "Gives each team an OpenAI-compatible endpoint with per-team token limits. Depends on a gateway with token rate limiting."  # what the blueprint does, then its main dependency
 top_decisions:  # 1-3 items; the same three appear in At a glance
   - "<Decision 1>"
   - "<Decision 2>"
@@ -26,11 +24,11 @@ clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 
 ## At a glance
 
-<!-- budget: 1 table, 7 rows ; purpose: question answered, audience, evidence, top 3 decisions -->
+<!-- budget: 1 table, 7 rows ; purpose: one-liner, question answered, audience, top 3 decisions -->
 
 | Field | Value |
 |---|---|
-| Honest one-liner | E1. Needs a gateway with per-team token limits. Method defined, not yet run. |
+| One-liner | Gives each team an OpenAI-compatible endpoint with per-team token limits. Depends on a gateway with token rate limiting. |
 | Question answered | <The readiness question in one line> |
 | Audience | <Platform engineers, architects, or both> |
 | OTel slots | <Slots this capability serves> |
@@ -50,7 +48,7 @@ clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 
 | Decision | Options | Recommendation | Because |
 |---|---|---|---|
-| <Decision 1> | <Option A; option B> | <Option A> | <Reason, with E-level or link> |
+| <Decision 1> | <Option A; option B> | <Option A> | <Reason, with a source link> |
 
 ## Reference design
 
@@ -84,17 +82,18 @@ Any component can be replaced. The Red Hat products named here show one way to b
 |---|---|---|
 | <slot> | <Checkpoint family, pinned by revision> | <Known limit or sizing note> |
 
-## Validation and acceptance
+## Sources and acceptance
 
-<!-- budget: 1 table, 10 bullets ; purpose: the canonical validation table plus acceptance gates; Vendor-reported and GSMA external never raise the E-level -->
+<!-- budget: 1 table, 10 bullets ; purpose: the canonical Sources table plus operator acceptance gates -->
 
-<!-- Evidence files go in evidence/ next to the blueprint or in a parent evidence/ folder up to the repo root, never the blueprint itself. Load-bearing is exactly yes or no. -->
+<!-- One row per key claim. Basis is model card, research, Red Hat guidance, or industry use case. Source links the URL or repo file; never this page. -->
 
-The headline E-level is the minimum over load-bearing rows, as set out in [the minimum rule](../../framework/definitions.md#headline-level-the-minimum-rule).
+Each key claim links its source, as set out in [the Sources table](../../framework/definitions.md#sources-table).
 
-| # | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external | Our operator-task eval | E-level | Evidence | Result | Date | Release / revision |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | <Claim> | <slot or component id> | yes | <vendor figure or —> | <GSMA figure or —> | <operator-task result or —> | E1 | [<spec>](evidence/<file>) | <result or —> | <YYYY-MM-DD> | <release or revision; required from E2> |
+| # | Claim | Basis | Source |
+|---|---|---|---|
+| 1 | <Claim the model card reports, for example a context length> | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT) |
+| 2 | <Claim Red Hat documentation recommends> | Red Hat guidance | [<Red Hat doc or article title>](https://docs.redhat.com/<path>) |
 
 - Gate: <metric, threshold, and how to run the check>
 

@@ -25,19 +25,15 @@ Run `make lint` from the repo root. Fix every error, and fix or justify every wa
 |---|---|---|
 | FM001 | error | No front matter |
 | FM002 | error | Front matter fails its schema, or its `type` does not belong in the folder it sits in |
-| RF001 | error | Readiness facet missing or invalid |
+| RF001 | error | Facet (autonomy ceiling or placement tier) missing or invalid |
 | SC001 | error | Sections missing or out of order, or at a glance isn't first |
 | SC002 | error | A section a catalog entry must fill is a stub |
 | AG001 | error | A required at-a-glance row is missing |
-| AG002 | error | At-a-glance or `honest_one_liner` M/E code contradicts front matter |
 | BG001 | error | A section or page is over budget |
-| VT001 | error | Validation table missing |
-| VT002 | error | Validation table header isn't canonical |
-| VT003 | error | Headline E doesn't match the validation table |
-| VT004 | error | Evidence link is the wrong tier, is the blueprint itself, or sits outside an `evidence/` folder |
-| VT005 | error | An E2+ row is missing its release or revision |
-| VT006 | error | A row higher than E0 has an empty Our operator-task eval cell |
-| VT007 | error | Load-bearing is not `yes` or `no`; the row still counts toward the minimum |
+| VT001 | error | Sources table missing |
+| VT002 | error | Sources table header isn't canonical |
+| VT004 | error | Source link is missing, does not resolve, leaves the repo, or points at the page itself |
+| VT007 | error | Basis is not model card, research, Red Hat guidance, or industry use case |
 | LK001 | error | Link target missing |
 | LK002 | error | Link anchor missing |
 | DG001 | error | Referenced diagram file missing |

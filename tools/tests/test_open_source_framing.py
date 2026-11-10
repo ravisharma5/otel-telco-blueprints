@@ -26,8 +26,6 @@ REMOVED_PATHS = [
 ]
 LEGACY_FIELDS = ("critical_path_components", "status_verified_on")
 COMMON_DEFS = {
-    "e_level",
-    "m_level",
     "autonomy_ceiling",
     "otel_slot",
     "placement_tier",
@@ -110,6 +108,24 @@ def test_register_machinery_and_legacy_schema_fields_are_gone():
             assert field not in props, (name, field)
     common = json.loads((REPO_ROOT / "schemas/common.schema.json").read_text())
     assert set(common["$defs"]) == COMMON_DEFS
+
+
+def test_readiness_machinery_is_gone():
+    """Blueprints are recipes: no readiness levels, headline rule, or validation table."""
+    common = json.loads((REPO_ROOT / "schemas/common.schema.json").read_text())
+    assert not {"e_level", "m_level"} & set(common["$defs"])
+    assert "x-claim-term-map" not in common
+    for name in ("use-case.schema.json", "platform.schema.json"):
+        schema = json.loads((REPO_ROOT / "schemas" / name).read_text())
+        for field in ("evidence_level", "model_readiness", "honest_one_liner"):
+            assert field not in schema["properties"], (name, field)
+            assert field not in schema["required"], (name, field)
+    assert not (REPO_ROOT / "schemas/validation-table.yaml").exists()
+    assert "validation_section" not in (REPO_ROOT / "tools/bplint/budgets.yaml").read_text()
+    retired = re.compile(r"vt_spec|AG002|VT003|VT005|VT006")
+    for path in sorted((REPO_ROOT / "tools/bplint").rglob("*")):
+        if path.is_file() and path.suffix in (".py", ".yaml"):
+            assert not retired.search(path.read_text()), path.relative_to(REPO_ROOT).as_posix()
 
 
 def _prose_docs():

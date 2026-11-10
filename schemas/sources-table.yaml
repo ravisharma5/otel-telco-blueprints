@@ -1,0 +1,18 @@
+# Canonical Sources table, shared by both blueprint templates and the linter.
+# One row per key claim. Basis names where the claim comes from. Source holds a
+# link to an http(s) URL or to a file in the repository, never the page itself.
+# See framework/definitions.md.
+
+columns:
+  - "#"
+  - "Claim"
+  - "Basis"
+  - "Source"
+
+# Matched case-insensitively after trimming whitespace. Any other value,
+# including a blank cell, is a VT007 error.
+basis_values:
+  - "model card"
+  - "research"
+  - "Red Hat guidance"
+  - "industry use case"

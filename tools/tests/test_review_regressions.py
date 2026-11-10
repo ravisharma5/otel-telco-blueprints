@@ -16,14 +16,8 @@ from tools.tests.conftest import FIXTURES, REPO_ROOT, vale_or_skip
 from tools.tests.test_frontmatter_checks import ctx_for
 
 VALID_PLATFORM = FIXTURES / "valid/platform"
-ROW1 = (
-    "| 1 | Demo runtime answers within 200 ms at p95 | demo-runtime | yes | — | — "
-    "| spec written | E1 | [spec](evidence/eval-spec.md) | — | 2026-11-07 | — |"
-)
-ROW2 = (
-    "| 2 | Demo runtime handles 100 requests per second | demo-runtime | no "
-    "| vendor says 100 rps | — | — | E0 | [notes](https://example.invalid/demo-runtime) | — | 2026-11-07 | — |"
-)
+ROW1 = "| 1 | The fictional model fits on one demo accelerator | model card | [fictional card](https://example.invalid/card) |"
+ROW2 = "| 2 | Demo runtime targets 200 ms at p95 | Red Hat guidance | [acceptance spec](../../sources/acceptance-spec.md) |"
 
 
 def _copy_platform(tmp_path):
@@ -45,34 +39,25 @@ def _codes(findings, code):
     return [f for f in findings if f.code == code]
 
 
-def test_cr01_load_bearing_typo_is_rejected(tmp_path):
-    """Row 2 (E0) with Load-bearing 'Yes (core)' must not drop out of the minimum."""
+def test_cr01_basis_typo_is_rejected(tmp_path):
+    """A Basis cell outside the allowed terms (for example 'Model-card (core)') must fail."""
     readme, text = _copy_platform(tmp_path)
-    text = text.replace(ROW2, ROW2.replace("| demo-runtime | no |", "| demo-runtime | Yes (core) |"))
+    text = text.replace(ROW1, ROW1.replace("| model card |", "| Model-card (core) |"))
     findings = _lint(tmp_path, readme, text)
     assert _codes(findings, "VT007"), findings
-    assert any(
-        "headline E-level is E0" in f.message and "front matter says E1" in f.message
-        for f in _codes(findings, "VT003")
-    ), findings
 
 
-def test_cr02_self_evidence_is_rejected(tmp_path):
-    """An E4 claim linking the blueprint itself, or a non-evidence repo file, must fail."""
+def test_cr02_self_source_is_rejected(tmp_path):
+    """A Source linking the page itself, directly or through a symlink, must fail."""
     readme, text = _copy_platform(tmp_path)
-    text = text.replace('evidence_level: "E1"', 'evidence_level: "E4"')
-    self_row = (
-        ROW1.replace("| E1 |", "| E4 |")
-        .replace("[spec](evidence/eval-spec.md)", "[self](README.md)")
-        .replace("| 2026-11-07 | — |", "| 2026-11-07 | r1 |")
-    )
-    findings = _lint(tmp_path, readme, text.replace(ROW1, self_row))
-    assert any("cannot be the blueprint itself" in f.message for f in _codes(findings, "VT004")), findings
+    self_row = ROW2.replace("[acceptance spec](../../sources/acceptance-spec.md)", "[self](README.md)")
+    findings = _lint(tmp_path, readme, text.replace(ROW2, self_row))
+    assert any("page itself" in f.message for f in _codes(findings, "VT004")), findings
 
-    (tmp_path / "LICENSE").write_text("license text\n", encoding="utf-8")
-    license_row = self_row.replace("[self](README.md)", "[license](../LICENSE)")
-    findings = _lint(tmp_path, readme, text.replace(ROW1, license_row))
-    assert any("evidence/" in f.message for f in _codes(findings, "VT004")), findings
+    (readme.parent / "alias.md").symlink_to(readme)
+    alias_row = ROW2.replace("[acceptance spec](../../sources/acceptance-spec.md)", "[alias](alias.md)")
+    findings = _lint(tmp_path, readme, text.replace(ROW2, alias_row))
+    assert any("page itself" in f.message for f in _codes(findings, "VT004")), findings
 
 
 def _alerts(text):

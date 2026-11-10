@@ -6,8 +6,8 @@ is SafeLoader minus the timestamp implicit resolver. Never call `yaml.load`
 with any other loader.
 
 NoDatesLoader also rejects duplicate mapping keys. PyYAML keeps the
-last value silently, so a reviewer could read `evidence_level: "E0"` while the
-linter uses a later `evidence_level: "E1"`. A duplicate raises ConstructorError
+last value silently, so a reviewer could read `doc_status: "draft"` while the
+linter uses a later `doc_status: "done"`. A duplicate raises ConstructorError
 (a yaml.YAMLError) at the second key, which split_front_matter reports as
 FM001 and the CLI reports as a config error. Keys pulled in by a YAML merge key
 (`<<`) may be overridden explicitly; only repeated explicit keys are rejected.

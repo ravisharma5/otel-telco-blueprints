@@ -95,6 +95,12 @@ Canonical validation-table columns, in order:
 
 `# | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external | Our operator-task eval | E-level | Evidence | Result | Date | Release / revision`
 
+## Sources table
+
+Canonical Sources table columns, in order:
+
+`# | Claim | Basis | Source`
+
 ## Component naming
 
 Blueprints describe an open source solution, and they make no product support claims. Each blueprint names every load-bearing component by its role in the design and the Red Hat product the reference architecture uses for that role. Platform blueprints use a `Component role | Red Hat product used` table; use-case blueprints list components under What you need.

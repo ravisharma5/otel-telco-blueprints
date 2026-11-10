@@ -81,7 +81,7 @@ def test_repo_root_is_project_root():
 
 def test_duplicate_front_matter_key_is_fm001(tmp_path):
     src = (FIXTURES / "valid/use-case/README.md").read_text()
-    dup = src.replace('evidence_level: "E1"\n', 'evidence_level: "E0"\nevidence_level: "E1"\n', 1)
+    dup = src.replace('doc_status: "review"\n', 'doc_status: "draft"\ndoc_status: "review"\n', 1)
     assert dup != src
     p = tmp_path / "README.md"
     p.write_text(dup)
@@ -91,8 +91,8 @@ def test_duplicate_front_matter_key_is_fm001(tmp_path):
     # appear; only the front-matter finding matters here.
     fm = [f for f in findings if f["code"] == "FM001"]
     assert len(fm) == 1
-    assert "duplicate key 'evidence_level'" in fm[0]["message"]
-    assert fm[0]["line"] == 11
+    assert "duplicate key 'doc_status'" in fm[0]["message"]
+    assert fm[0]["line"] == 6
 
 
 def _run_raw(*args):
@@ -104,12 +104,12 @@ def _run_raw(*args):
     )
 
 
-def _write_config(tmp_path, *, budgets=None, vt_spec=None):
+def _write_config(tmp_path, *, budgets=None, sources_spec=None):
     cfg = tmp_path / "config.yaml"
     cfg.write_text(
         f"schemas_dir: {REPO_ROOT / 'schemas'}\n"
         f"budgets: {budgets or REPO_ROOT / 'tools/bplint/budgets.yaml'}\n"
-        f"validation_table: {vt_spec or REPO_ROOT / 'schemas/validation-table.yaml'}\n"
+        f"sources_table: {sources_spec or REPO_ROOT / 'schemas/sources-table.yaml'}\n"
         "blueprint_globs: []\ndoc_globs: []\n"
     )
     return cfg
@@ -132,7 +132,7 @@ def test_duplicate_budgets_key_exits_2(tmp_path):
     assert "bplint:" in proc.stderr and "duplicate key" in proc.stderr
 
 
-# Undecodable files and incomplete validation-table specs.
+# Undecodable files and incomplete Sources table specs.
 
 
 def test_io001_non_utf8_file_is_finding_not_traceback(tmp_path):
@@ -152,33 +152,37 @@ def test_io001_non_utf8_file_is_finding_not_traceback(tmp_path):
     assert "Traceback" not in proc.stderr
 
 
-@pytest.mark.parametrize("drop", ["Load-bearing", "E-level", "Evidence", "Release / revision"])
-def test_vt_spec_missing_required_column_exits_2(tmp_path, drop):
-    src = (REPO_ROOT / "schemas/validation-table.yaml").read_text()
-    spec = tmp_path / "vt.yaml"
+@pytest.mark.parametrize("drop", ["Claim", "Basis", "Source"])
+def test_sources_spec_missing_required_column_exits_2(tmp_path, drop):
+    src = (REPO_ROOT / "schemas/sources-table.yaml").read_text()
+    spec = tmp_path / "sources.yaml"
     spec.write_text(src.replace(f'  - "{drop}"\n', "", 1))
     assert spec.read_text() != src
-    proc = _run_raw("--config", _write_config(tmp_path, vt_spec=spec))
+    proc = _run_raw("--config", _write_config(tmp_path, sources_spec=spec))
     assert proc.returncode == 2
     assert drop in proc.stderr
     assert "Traceback" not in proc.stderr
 
 
-@pytest.mark.parametrize(
-    "old,new,name",
-    [
-        ('raising_column: "Our operator-task eval"', 'raising_column: "Our eval"', "Our eval"),
-        ('  - "GSMA external"\n\n', '  - "GSMA ext"\n\n', "GSMA ext"),
-    ],
-)
-def test_vt_spec_unknown_raising_or_context_column_exits_2(tmp_path, old, new, name):
-    src = (REPO_ROOT / "schemas/validation-table.yaml").read_text()
-    spec = tmp_path / "vt.yaml"
-    spec.write_text(src.replace(old, new, 1))
-    assert spec.read_text() != src
-    proc = _run_raw("--config", _write_config(tmp_path, vt_spec=spec))
+def test_sources_spec_basis_values_not_a_list_exits_2(tmp_path):
+    spec = tmp_path / "sources.yaml"
+    spec.write_text('columns: ["#", "Claim", "Basis", "Source"]\nbasis_values: "model card"\n')
+    proc = _run_raw("--config", _write_config(tmp_path, sources_spec=spec))
     assert proc.returncode == 2
-    assert name in proc.stderr
+    assert "basis_values" in proc.stderr
+
+
+def test_old_validation_table_config_key_exits_2(tmp_path):
+    cfg = tmp_path / "config.yaml"
+    cfg.write_text(
+        f"schemas_dir: {REPO_ROOT / 'schemas'}\n"
+        f"budgets: {REPO_ROOT / 'tools/bplint/budgets.yaml'}\n"
+        "validation_table: schemas/validation-table.yaml\n"
+        "blueprint_globs: []\ndoc_globs: []\n"
+    )
+    proc = _run_raw("--config", cfg)
+    assert proc.returncode == 2
+    assert "sources_table" in proc.stderr
 
 
 def test_schema_type_without_budgets_entry_exits_2(tmp_path):

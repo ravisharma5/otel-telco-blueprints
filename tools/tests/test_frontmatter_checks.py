@@ -1,39 +1,33 @@
 """Tests for FM001, FM002, and RF001, plus shared blueprint builders.
 
 The builders here are reused by test_sections_budgets.py and
-test_validation_table.py: they render a structurally valid blueprint from the
+test_sources_table.py: they render a structurally valid blueprint from the
 real budgets.yaml section order so each test changes one thing.
 """
 
 from __future__ import annotations
 
+import pytest
 import yaml
 
 from tools.bplint.cli import load_context, run_doc_checks
 from tools.bplint.markdown import parse_doc
 from tools.tests.conftest import FIXTURES, FIXED_TODAY
 
-VT_HEADER = (
-    "| # | Claim | Slot / component | Load-bearing | Vendor-reported | GSMA external "
-    "| Our operator-task eval | E-level | Evidence | Result | Date | Release / revision |\n"
-    "|---|---|---|---|---|---|---|---|---|---|---|---|"
-)
-VT_ROW_E0 = (
-    "| 1 | Claim one | llm | yes | — | — | — | E0 | [card](https://example.com/card) "
-    "| — | 2026-11-07 | — |"
-)
+SOURCES_HEADER = "| # | Claim | Basis | Source |\n|---|---|---|---|"
+SOURCES_ROW = "| 1 | Claim one | model card | [card](https://example.com/card) |"
 
 UC_AT_A_GLANCE = [
-    "Honest one-liner",
+    "One-liner",
     "Problem",
     "Audience",
     "OTel slots",
-    "Model readiness and evidence",
+    "Autonomy ceiling",
     "Placement tier",
     "Agent-school courses",
 ]
 PB_AT_A_GLANCE = [
-    "Honest one-liner",
+    "One-liner",
     "Question answered",
     "Audience",
     "OTel slots",
@@ -50,10 +44,10 @@ def glance_table(labels, values=None):
     return "| Field | Value |\n|---|---|\n" + rows
 
 
-UC_ONE_LINER = "M2 / E0 / recommend-with-approval. Described only."
-PB_ONE_LINER = "E0. Described only, nothing deployed."
-UC_GLANCE_VALUES = {"Honest one-liner": UC_ONE_LINER, "Model readiness and evidence": "M2 / E0"}
-PB_GLANCE_VALUES = {"Honest one-liner": PB_ONE_LINER}
+UC_ONE_LINER = "Drafts triage labels with human approval. Needs a tool-calling LLM slot."
+PB_ONE_LINER = "Gives each team a model endpoint. Depends on a gateway."
+UC_GLANCE_VALUES = {"One-liner": UC_ONE_LINER, "Autonomy ceiling": "Recommend with approval"}
+PB_GLANCE_VALUES = {"One-liner": PB_ONE_LINER}
 
 
 def use_case_fm(**overrides):
@@ -65,11 +59,9 @@ def use_case_fm(**overrides):
         "domain": "demo",
         "flagship": False,
         "otel_slots": ["llm"],
-        "model_readiness": "M2",
-        "evidence_level": "E0",
         "autonomy_ceiling": "recommend-with-approval",
         "placement_tier": ["regional"],
-        "honest_one_liner": UC_ONE_LINER,
+        "one_liner": UC_ONE_LINER,
         "platform_blueprints": ["PB-04"],
         "agent_school": [301],
     }
@@ -89,10 +81,8 @@ def platform_fm(**overrides):
         "readiness_question": "What does it take?",
         "doc_status": "draft",
         "otel_slots": ["llm"],
-        "model_readiness": "n/a",
-        "evidence_level": "E0",
         "placement_tier": ["core"],
-        "honest_one_liner": PB_ONE_LINER,
+        "one_liner": PB_ONE_LINER,
         "top_decisions": ["one"],
         "agent_school": [301],
     }
@@ -107,8 +97,8 @@ def use_case_sections():
         "How it works": "1. Step one\n2. Step two",
         "What you need": "- A model slot\n- A platform blueprint",
         "Governance": "| Control | Owner |\n|---|---|\n| Approval | NOC |",
-        "Validation": VT_HEADER + "\n" + VT_ROW_E0,
-        "Deploy and verify": "Not deployed yet.",
+        "Sources": SOURCES_HEADER + "\n" + SOURCES_ROW,
+        "Deploy and verify": "Link the how-to steps.",
         "Limitations": "- One limitation",
     }
 
@@ -121,7 +111,7 @@ def platform_sections():
         "Reference design": "1. Step one",
         "Components": "| Component role | Red Hat product used |\n|---|---|\n| Serves X | Demo runtime |",
         "OTel slot guidance": "| Slot | Guidance |\n|---|---|\n| llm | x |",
-        "Validation and acceptance": VT_HEADER + "\n" + VT_ROW_E0,
+        "Sources and acceptance": SOURCES_HEADER + "\n" + SOURCES_ROW,
         "Operating model": "| Role | Duty |\n|---|---|\n| SRE | run |",
         "Risks and limitations": "| Risk | Mitigation |\n|---|---|\n| R | M |",
         "Used by and next steps": "- Next step",
@@ -210,21 +200,38 @@ def test_docs_are_not_front_matter_checked(tmp_path):
 # ---- RF001 / FM002 ------------------------------------------------------
 
 
-def test_missing_evidence_level_is_rf001(tmp_path):
-    findings = lint(tmp_path, render(use_case_fm(evidence_level=None), use_case_sections()))
+def test_missing_placement_tier_is_rf001(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(placement_tier=None), use_case_sections()))
     rf = [f for f in findings if f.code == "RF001"]
     assert len(rf) == 1
-    assert "evidence_level" in rf[0].message
+    assert "placement_tier" in rf[0].message
     assert "FM002" not in codes(findings)
 
 
-def test_invalid_model_readiness_is_rf001_on_key_line(tmp_path):
-    text = render(use_case_fm(model_readiness="M5"), use_case_sections())
+def test_invalid_autonomy_ceiling_is_rf001_on_key_line(tmp_path):
+    text = render(use_case_fm(autonomy_ceiling="act-alone"), use_case_sections())
     findings = lint(tmp_path, text)
     rf = [f for f in findings if f.code == "RF001"]
-    assert len(rf) == 1 and "model_readiness" in rf[0].message
-    key_line = text.splitlines().index("model_readiness: M5") + 1
+    assert len(rf) == 1 and "autonomy_ceiling" in rf[0].message
+    key_line = text.splitlines().index("autonomy_ceiling: act-alone") + 1
     assert rf[0].line == key_line
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [("evidence_level", "E1"), ("model_readiness", "M2"), ("honest_one_liner", "Old one-liner field.")],
+)
+def test_retired_readiness_field_is_fm002(tmp_path, field, value):
+    findings = lint(tmp_path, render(use_case_fm(**{field: value}), use_case_sections()))
+    fm2 = [f for f in findings if f.code == "FM002"]
+    assert len(fm2) == 1 and field in fm2[0].message
+    assert "RF001" not in codes(findings)
+
+
+@pytest.mark.parametrize("field", ["evidence_level", "model_readiness", "honest_one_liner"])
+def test_retired_readiness_field_is_fm002_on_platform(tmp_path, field):
+    findings = lint(tmp_path, render(platform_fm(**{field: "E1 value"}), platform_sections()))
+    assert codes(findings) == ["FM002"]
 
 
 def test_invalid_placement_tier_item_is_rf001(tmp_path):

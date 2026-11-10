@@ -11,10 +11,8 @@
     "readiness_question",
     "doc_status",
     "otel_slots",
-    "model_readiness",
-    "evidence_level",
     "placement_tier",
-    "honest_one_liner",
+    "one_liner",
     "top_decisions",
     "agent_school"
   ],
@@ -61,18 +59,13 @@
       "uniqueItems": true,
       "items": { "$ref": "common.schema.json#/$defs/otel_slot" }
     },
-    "model_readiness": {
-      "description": "Platform blueprints do not carry a model-readiness level; it applies to use cases only.",
-      "const": "n/a"
-    },
-    "evidence_level": { "$ref": "common.schema.json#/$defs/e_level" },
     "placement_tier": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
       "items": { "$ref": "common.schema.json#/$defs/placement_tier" }
     },
-    "honest_one_liner": { "type": "string", "minLength": 10 },
+    "one_liner": { "type": "string", "minLength": 10 },
     "top_decisions": {
       "type": "array",
       "minItems": 1,
