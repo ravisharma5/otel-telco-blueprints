@@ -4,7 +4,7 @@ type: "platform"  # always platform
 title: "<Platform capability in plain words>"
 readiness_question: "<The operator question this blueprint answers>"
 doc_status: "draft"  # draft | review | done
-layers: ["L6", "L7"]  # optional; reference-architecture layers L<n>
+layers: ["safety-governance", "action"]  # optional; layer names from the architecture overview, in kebab case
 table1_rows: [13]  # optional; row numbers in the readiness table
 extension_rows: ["E2"]  # optional; extension rows E<n>
 otel_slots: ["llm"]  # llm | embedding | reranker | safety | decision | classification

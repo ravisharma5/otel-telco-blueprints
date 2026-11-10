@@ -45,23 +45,23 @@ The design names model slots, not checkpoints, because OTel checkpoints keep cha
 
 ### Layers
 
-The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). L0 to L7 form the data and execution plane, L8 places them on sites, L9a to L9c form the lifecycle plane, and L10 is the control plane.
+The layers extend the components of Table 1 in the [Red Hat Developer blueprint article](https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents). The data and execution plane runs from data and knowledge to action, placement puts that plane on sites, the lifecycle plane evaluates, adapts, and observes, and the control plane deploys everything.
 
-| Layer | Role | Red Hat product used |
-|---|---|---|
-| L0 | Data and knowledge: load, embed, store, and rerank operator knowledge | Vector store; OTel Embedding and Reranker on Red Hat AI Inference (vLLM) with KServe; Data Science Pipelines for loading |
-| L1 | Serving: run every OTel slot behind an OpenAI-compatible API | Red Hat AI Inference (vLLM) on KServe; Distributed Inference with llm-d for generative slots in the core |
-| L2 | Capabilities: read, notify, and action-request tools for network and business systems | Standards-based MCP servers (TM Forum, CAMARA, device command line); classifier-as-tool |
-| L3 | Model gateway: who may call which model, which slot handles a request, and which replica serves it | Models-as-a-Service front door; OTel Decision model for content routing; llm-d scheduler for replica choice |
-| L4 | Tool gateway: authorize every tool call by token claims, and apply rate limits and audit | MCP gateway in Red Hat Connectivity Link with Kuadrant policies and Keycloak |
-| L5 | Agent runtime: own the loop, context, and tool calls inside a sandbox | Harness (LangGraph or custom) in a sandbox on Red Hat OpenShift |
-| L6 | Safety and governance: screen inputs and outputs, abstain without evidence, and gate each step | NeMo Guardrails; OTel Safety slot for abstention; OTel Decision slot as the gate |
-| L7 | Action: the only path to a state change, with gate, approval, execution, verification, and audit | Red Hat Ansible Automation Platform with Automation Orchestrator and Event-Driven Ansible |
-| L8 | Placement: run each slot on the site that fits its latency and data rules | Red Hat OpenShift (core); single-node OpenShift with Red Hat OpenShift AI (regional); RHEL with Podman or Red Hat Device Edge (far edge) |
-| L9a | Evaluation: gate every promotion on measured results | EvalHub in Red Hat OpenShift AI |
-| L9b | Adaptation: generate data, train adapters, and version models | SDG Hub, Training Hub, and Model Registry |
-| L9c | Observability: trace each step, its cost, and drift | OpenTelemetry, MLflow, Prometheus, and Perses |
-| L10 | Control: declare and deploy everything, and give each workload an identity | OpenShift GitOps (Argo CD), Red Hat Advanced Cluster Management, and workload identity with SPIFFE/SPIRE and Keycloak |
+| Layer | Plane | Role | Red Hat product used |
+|---|---|---|---|
+| Data and knowledge | Data and execution | Load, embed, store, and rerank operator knowledge | Vector store; OTel Embedding and Reranker on Red Hat AI Inference (vLLM) with KServe; Data Science Pipelines for loading |
+| Model endpoint inferencing | Data and execution | Run every OTel slot behind an OpenAI-compatible API | Red Hat AI Inference (vLLM) on KServe; Distributed Inference with llm-d for generative slots in the core |
+| Network capabilities | Data and execution | Offer read, notify, and action-request tools for network and business systems | Standards-based MCP servers (TM Forum, CAMARA, device command line); classifier-as-tool |
+| AI Gateway | Data and execution | Decide who may call which model, which slot handles a request, and which replica serves it | Models-as-a-Service front door; OTel Decision model for content routing; llm-d scheduler for replica choice |
+| MCP Gateway | Data and execution | Authorize every tool call by token claims, and apply rate limits and audit | MCP gateway in Red Hat Connectivity Link with Kuadrant policies and Keycloak |
+| Agent runtime | Data and execution | Own the loop, context, and tool calls inside a sandbox | Harness (LangGraph or custom) in a sandbox on Red Hat OpenShift |
+| Safety and governance | Data and execution | Screen inputs and outputs, abstain without evidence, and gate each step | NeMo Guardrails; OTel Safety slot for abstention; OTel Decision slot as the gate |
+| Action | Data and execution | Be the only path to a state change, with gate, approval, execution, verification, and audit | Red Hat Ansible Automation Platform with Automation Orchestrator and Event-Driven Ansible |
+| Placement | Placement | Run each slot on the site that fits its latency and data rules | Red Hat OpenShift (core); single-node OpenShift with Red Hat OpenShift AI (regional); RHEL with Podman or Red Hat Device Edge (far edge) |
+| Evaluation | Lifecycle | Gate every promotion on measured results | EvalHub in Red Hat OpenShift AI |
+| Adaptation | Lifecycle | Generate data, train adapters, and version models | SDG Hub, Training Hub, and Model Registry |
+| Observability | Lifecycle | Trace each step, its cost, and drift | OpenTelemetry, MLflow, Prometheus, and Perses |
+| Control | Control | Declare and deploy everything, and give each workload an identity | OpenShift GitOps (Argo CD), Red Hat Advanced Cluster Management, and workload identity with SPIFFE/SPIRE and Keycloak |
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
 
@@ -71,16 +71,16 @@ Placement uses three tiers: the far edge runs one small model per site, the regi
 
 ```mermaid
 flowchart TD
-  Q["Operator question"] --> GW["Model gateway: identity and quota"]
-  GW --> IG["Input guardrail"]
-  IG --> H["Agent harness rewrites the query"]
+  Q["Operator question"] --> GW["AI Gateway: identity and quota"]
+  GW --> IG["Input guardrails"]
+  IG --> H["Agent runtime rewrites the query"]
   H --> E["Embedding slot retrieves candidates"]
   E --> R["Reranker slot picks the best passages"]
   R --> S{"Safety slot: does the evidence support an answer?"}
   S -- "no" --> AB["Abstain and cite what was searched"]
   S -- "yes" --> D["Decision slot picks the LLM size"]
   D --> L["LLM slot answers with citations"]
-  L --> OG["Output guardrail"]
+  L --> OG["Output guardrails"]
   OG --> A["Answer to the operator"]
 ```
 
@@ -90,11 +90,11 @@ This flow is read-only and needs no tool calling. Each step writes to the trace:
 
 ```mermaid
 flowchart TD
-  T["Trigger: alarm or operator request"] --> AG["Agent harness with the LLM slot"]
-  AG -- "read and notify tools" --> TG["Tool gateway"]
+  T["Trigger: alarm or operator request"] --> AG["Agent runtime with the LLM slot"]
+  AG -- "read and notify tools" --> TG["MCP Gateway"]
   AG -- "one action-request tool" --> TG
   TG -- "reads and notifications" --> SYS["Network and business systems"]
-  TG -- "action request" --> AO["Automation Orchestrator"]
+  TG -- "action request" --> AO["Action orchestration"]
   AO --> DG{"Decision slot labels the request"}
   DG -- "ACT and policy allows" --> EX["Run the approved job"]
   DG -- "REVIEW" --> HU["Human approver"]
@@ -107,7 +107,7 @@ flowchart TD
   BL --> AU
 ```
 
-The agent reads and notifies through the tool gateway, and asks for a change through one action-request tool. The orchestrator runs the gate itself, so a prompt-injected agent cannot skip it, and only the automation platform holds write credentials. The decision gate page gives the label policy.
+The agent reads and notifies through the MCP Gateway, and asks for a change through one action-request tool. The orchestrator runs the gate itself, so a prompt-injected agent cannot skip it, and only the automation platform holds write credentials. The decision gate page gives the label policy.
 
 ## Trade-offs and limits
 

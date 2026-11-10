@@ -34,3 +34,4 @@ CephFS
 MLflow
 Perses
 SMEs?
+[Ii]nferencing

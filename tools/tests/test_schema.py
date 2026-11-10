@@ -150,4 +150,4 @@ def test_validation_table_columns():
 def test_platform_layers_use_names_not_codes():
     v = _validator("platform.schema.json")
     assert _error_paths(v, dict(PLATFORM, layers=["safety-governance", "action"])) == []
-    assert "layers" in _error_paths(v, dict(PLATFORM, layers=["L6"]))
+    assert "layers.0" in _error_paths(v, dict(PLATFORM, layers=["L6"]))

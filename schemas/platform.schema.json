@@ -27,7 +27,23 @@
     "layers": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^L[0-9]{1,2}$" }
+      "items": {
+        "enum": [
+          "data-knowledge",
+          "model-endpoint-inferencing",
+          "network-capabilities",
+          "ai-gateway",
+          "mcp-gateway",
+          "agent-runtime",
+          "safety-governance",
+          "action",
+          "placement",
+          "evaluation",
+          "adaptation",
+          "observability",
+          "control"
+        ]
+      }
     },
     "table1_rows": {
       "type": "array",

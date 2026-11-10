@@ -59,12 +59,12 @@ Manifests follow the 401 skills and capabilities course in the [agent-school roa
 
 ```mermaid
 flowchart TD
-  IN["Case memory, replay tapes, capability manifests, and operator corpora"] --> SDG["SDG Hub generates data, including LOOK, NOTIFY, REVIEW, and STOP cases"]
+  IN["Case memory, replay tapes, capability manifests, and operator corpora"] --> SDG["Synthetic data generation, including LOOK, NOTIFY, REVIEW, and STOP cases"]
   SDG --> QA["Data checks: dedupe, valid tool calls, PII scrub, licence check"]
-  QA --> TR["Training Hub trains a LoRA adapter or runs OSFT"]
+  QA --> TR["Fine-tuning trains a LoRA adapter or runs OSFT"]
   TR --> EG{"Evaluation gate: task suite, regression, and abstention checks"}
   EG -- "fail" --> STOP["Stop and report the gap"]
-  EG -- "pass" --> MR["Model Registry: version, lineage, and evaluation report"]
+  EG -- "pass" --> MR["Model registry: version, lineage, and evaluation report"]
   MR --> GO["GitOps promotes a canary"]
   GO --> CMP["Compare cost and quality with the current model"]
   CMP --> RO["Full rollout"]
@@ -74,7 +74,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  SP["OpenTelemetry spans: model call, tool call, gate decision, action outcome"] --> TRC["MLflow traces"]
+  SP["Trace spans: model call, tool call, gate decision, action outcome"] --> TRC["Observability: traces per episode"]
   TRC --> MET["Metrics: cost per resolved episode, abstention rate, gate-label drift, false-ACT rate, time to resolution"]
   MET --> REP["Regular replay of golden tapes as the regression gate"]
   REP --> GAP{"Measured evaluation gap?"}
@@ -95,4 +95,4 @@ flowchart TD
 
 - PB-02, PB-03, PB-09: evaluation, adaptation, and lifecycle build on this ladder
 - [Decision gate](decision-gate.md): the risk class from each manifest sets its ceiling
-- [Architecture overview](index.md): layers L9a to L9c, where these flows run
+- [Architecture overview](index.md): the evaluation, adaptation, and observability layers, where these flows run
