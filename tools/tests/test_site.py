@@ -305,6 +305,45 @@ def test_banner_unit_skips_fenced_h1(fence):
     assert out.count("!!! warning") == 1
 
 
+def test_banner_unit_nested_longer_fence():
+    src = "````md\n```\n# fake\n```\n````\n\n# Real\n\nBody\n"
+    out = _banner(src, {"type": "reference", "doc_status": "draft"})
+    assert _line_after_h1(out, "# fake") == "```"
+    assert _line_after_h1(out, "# Real") == '!!! warning "Draft: content may change"'
+    assert out.count("!!! warning") == 1
+
+
+def test_banner_unit_info_string_does_not_close_fence():
+    src = "```text\n```python\n# not a heading\n```\n\n# Real\n\nBody\n"
+    out = _banner(src, {"type": "reference", "doc_status": "draft"})
+    assert _line_after_h1(out, "# not a heading") == "```"
+    assert _line_after_h1(out, "# Real") == '!!! warning "Draft: content may change"'
+
+
+def test_banner_unit_other_fence_char_does_not_close():
+    src = "~~~\n```\n# not a heading\n~~~\n\n# Real\n\nBody\n"
+    out = _banner(src, {"type": "reference", "doc_status": "draft"})
+    assert _line_after_h1(out, "# Real") == '!!! warning "Draft: content may change"'
+    assert out.count("!!! warning") == 1
+
+
+@pytest.mark.parametrize(
+    "comment",
+    ["<!--\n# hidden\n-->\n", "<!-- note -->\n", "  <!-- a\n# hidden\nstill hidden -->\n"],
+)
+def test_banner_unit_skips_html_comments(comment):
+    src = f"{comment}\n# Real\n\nBody\n"
+    out = _banner(src, {"type": "reference", "doc_status": "draft"})
+    assert _line_after_h1(out, "# Real") == '!!! warning "Draft: content may change"'
+    assert out.count("!!! warning") == 1
+
+
+@pytest.mark.parametrize("status", [["draft"], {"draft": True}, 3, None])
+def test_banner_unit_non_string_status_gives_no_banner(status):
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"type": "reference", "doc_status": status}) == src
+
+
 def _make_reference(root, status):
     page = root / "framework/glossary.md"
     text = page.read_text(encoding="utf-8")
