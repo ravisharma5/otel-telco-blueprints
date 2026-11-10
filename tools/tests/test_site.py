@@ -249,7 +249,9 @@ def test_slug_parity(text):
 
 
 def test_hook_collision(site_copy):
-    (site_copy / "site-src/framework/definitions.md").write_text("# Stub\n", encoding="utf-8")
+    stub = site_copy / "site-src/framework/definitions.md"
+    stub.parent.mkdir(parents=True, exist_ok=True)
+    stub.write_text("# Stub\n", encoding="utf-8")
     code, out = _build(site_copy)
     assert code != 0, out
     assert "collides" in out, out

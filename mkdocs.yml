@@ -50,7 +50,7 @@ not_in_nav: |
 nav:
   - Start here: index.md
   - Framework:
-      - Overview: framework/index.md
+      - Readiness questions: framework/index.md
       - Definitions: framework/definitions.md
       - Glossary: framework/glossary.md
       - Style guide: framework/style-guide.md
