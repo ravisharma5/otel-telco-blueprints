@@ -455,3 +455,60 @@ def test_gate_runtime_pattern():
 
 def test_gate_links_schema():
     assert GATE_SCHEMA_URL in body(GATE)
+
+
+# ---------- adaptation ladder ----------
+
+LADDER = REPO_ROOT / "architecture/adaptation-ladder.md"
+AGENT_SCHOOL_ROADMAP = "https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md"
+RUNGS = ["Retrieval", "Skills and capability manifests", "LoRA", "OSFT"]
+MANIFEST_FIELDS = [
+    "backend pattern",
+    "I/O schema",
+    "risk class",
+    "allowed identities",
+    "rate class",
+    "data class",
+]
+FOUR_FLOWS = ["grounded answer", "investigate then act", "adaptation loop", "continuous evaluation"]
+
+
+def test_ladder_is_reference():
+    fm = front_matter(LADDER)
+    assert fm["type"] == "reference"
+    assert {"PB-02", "PB-03"} <= set(fm["platform_blueprints"])
+
+
+def test_ladder_rungs():
+    for table in _design_tables(LADDER):
+        if any("Climb when" in cell for cell in table[0]):
+            assert [row[0] for row in table[1:]] == RUNGS
+            return
+    raise AssertionError("no rung table with a Climb when column")
+
+
+def test_ladder_principle():
+    principle = sections(body(LADDER))["The principle"]
+    text = " ".join(t.content for t in principle if t.type == "inline").lower()
+    assert "measured evaluation gap" in text
+
+
+def test_ladder_401():
+    text = body(LADDER)
+    assert AGENT_SCHOOL_ROADMAP in text
+    for field in MANIFEST_FIELDS:
+        assert field.lower() in text.lower(), field
+
+
+def test_ladder_flows():
+    found = flows(body(LADDER))
+    for name in ("adaptation loop", "continuous evaluation"):
+        assert name in found, name
+
+
+def test_flows_four_present():
+    found = {}
+    for path in reference_pages():
+        found.update(flows(body(path)))
+    for name in FOUR_FLOWS:
+        assert name in found, name
