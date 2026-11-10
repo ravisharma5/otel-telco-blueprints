@@ -17,6 +17,7 @@ from tools.tests.conftest import REPO_ROOT, vale_or_skip
 TRACING = "Blueprints.OTelTracing"
 STATUS = "Blueprints.InlineStatus"
 UNEVIDENCED = "Blueprints.Unevidenced"
+VALIDATION = "Blueprints.ValidationStatus"
 
 
 def _alerts(text):
@@ -50,6 +51,14 @@ MUST_FLAG = [
     ("The scheduler is TP today.", STATUS, "TP"),
     ("The gateway is GA today.", STATUS, "GA"),
     ("The model is validated.", UNEVIDENCED, "validated"),
+    ("This claim is operator-validated.", UNEVIDENCED, "validated"),
+    ("The Decision model is not validated on this engine.", VALIDATION, "not validated"),
+    ("It is not yet validated.", VALIDATION, "not yet validated"),
+    ("It was never validated.", VALIDATION, "never validated"),
+    ("This step is unverified.", VALIDATION, "unverified"),
+    ("Method defined, not yet run.", VALIDATION, "not yet run"),
+    ("Each claim has an evidence level.", VALIDATION, "evidence level"),
+    ("State the E-level.", VALIDATION, "E-level"),
 ]
 
 MUST_NOT_FLAG = [
@@ -61,8 +70,11 @@ MUST_NOT_FLAG = [
     ("The Decision model is not validated on this engine.", UNEVIDENCED),
     ("It is not yet validated.", UNEVIDENCED),
     ("It was never validated.", UNEVIDENCED),
-    ("This claim is operator-validated (E4).", UNEVIDENCED),
     ("Red Hat Validated Patterns use tiers.", UNEVIDENCED),
+    ("Red Hat Validated Patterns use tiers.", VALIDATION),
+    ("Do not run batch jobs on the far edge.", VALIDATION),
+    ("Answer the readiness questions first.", VALIDATION),
+    ("Quote `unverified` in a code span.", VALIDATION),
 ]
 
 CHECKPOINTS = [

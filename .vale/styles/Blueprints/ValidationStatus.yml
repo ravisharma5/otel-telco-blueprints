@@ -1,0 +1,52 @@
+# Blueprints are recipes built from telco network expertise, industry use cases,
+# research, and Red Hat recommendations. Link the source for a claim instead of
+# stating how far it has been tested. To quote a word on purpose, put it in a
+# code span (IgnoredScopes = code).
+#
+# Bare "not run" is not a token on purpose: instructions such as "do not run
+# batch jobs on the far edge" use it. The pytest wording ban covers it for
+# blueprint and reference pages.
+extends: existence
+message: "Blueprints are recipes. Remove '%s' and link the source for the claim instead."
+level: error
+ignorecase: true
+tokens:
+  - unverified
+  - unvalidated
+  - untested
+  - not (?:yet )?(?:validated|verified|tested|measured)
+  - not yet run
+  - never (?:validated|verified|tested)
+  - evidence levels?
+  - '[EM]-levels?'
+tests:
+  - name: flags unverified, unvalidated, and untested
+    input: The step is unverified, unvalidated, and untested.
+    contains: ["'unverified'", "'unvalidated'", "'untested'"]
+  - name: flags not validated and not yet validated
+    input: It is not validated. It is not yet validated.
+    contains: ["'not validated'", "'not yet validated'"]
+  - name: flags not verified, not tested, and not measured
+    input: It is not verified, not tested, and not measured.
+    contains: ["'not verified'", "'not tested'", "'not measured'"]
+  - name: flags not yet run
+    input: Method defined, not yet run.
+    contains: "'not yet run'"
+  - name: flags never validated
+    input: It was never validated.
+    contains: "'never validated'"
+  - name: flags evidence levels
+    input: Each claim carries an evidence level.
+    contains: "'evidence level'"
+  - name: flags E-level and M-level
+    input: State the E-level and the M-level.
+    contains: ["'E-level'", "'M-level'"]
+  - name: allows do not run
+    input: Do not run batch jobs on the far edge.
+    absent: Blueprints.ValidationStatus
+  - name: allows the product name Validated Patterns
+    input: Red Hat Validated Patterns use tiers.
+    absent: Blueprints.ValidationStatus
+  - name: allows readiness questions
+    input: The readiness questions come first.
+    absent: Blueprints.ValidationStatus

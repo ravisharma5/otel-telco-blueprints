@@ -1,13 +1,14 @@
-# Claims need an evidence level or a link, not an adjective.
-# "operator-validated" is a defined claim term; "Validated Patterns" is a Red Hat product name.
-# Honest negations ("not validated", "not yet validated", "never validated") are allowed.
+# Claims need a linked source, not an adjective.
+# "Validated Patterns" is a Red Hat product name.
+# Negations ("not validated", "not yet validated", "never validated") are skipped
+# here so they are reported once, by Blueprints.ValidationStatus.
 extends: existence
-message: "Avoid '%s'. State the evidence level (E0-E4) or link the evidence instead."
+message: "Avoid '%s'. Link the source for the claim instead."
 level: error
 ignorecase: true
 tokens:
   - proven
-  - (?<!operator-)(?<!not )(?<!not yet )(?<!never )validated(?! Patterns)
+  - (?<!not )(?<!not yet )(?<!never )validated(?! Patterns)
   - production[- ]ready
   - seamless(?:ly)?
   - robust
@@ -16,21 +17,21 @@ tests:
   - name: flags bare validated
     input: The model is validated.
     contains: "'validated'"
-  - name: allows the claim term operator-validated
-    input: This claim is operator-validated (E4).
-    absent: Blueprints.Unevidenced
+  - name: flags operator-validated
+    input: This claim is operator-validated.
+    contains: "'validated'"
   - name: allows the product name Validated Patterns
     input: Red Hat Validated Patterns use tiers.
     absent: Blueprints.Unevidenced
   - name: flags marketing adjectives
     input: A seamless, production-ready, robust design.
     contains: ["'seamless'", "'production-ready'", "'robust'"]
-  - name: allows not validated
+  - name: leaves not validated to ValidationStatus
     input: The Decision model is not validated on this engine.
     absent: Blueprints.Unevidenced
-  - name: allows not yet validated
+  - name: leaves not yet validated to ValidationStatus
     input: It is not yet validated.
     absent: Blueprints.Unevidenced
-  - name: allows never validated
+  - name: leaves never validated to ValidationStatus
     input: It was never validated.
     absent: Blueprints.Unevidenced
