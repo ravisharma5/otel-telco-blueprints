@@ -1,7 +1,7 @@
 ---
 title: "Glossary"
 doc_status: done
-clarity_reviewed: "2026-11-08"
+clarity_reviewed: "2026-11-10"
 ---
 
 # Glossary
@@ -17,7 +17,7 @@ clarity_reviewed: "2026-11-08"
 
 ## The naming rule
 
-"OTel" means the OTel model family: the GSMA/AT&T open telecom models (LLM, embedding, reranker, safety, decision, classification). You always write tracing, metrics, and logs instrumentation as "OpenTelemetry" in full. The Vale rule `Blueprints.OTelTracing` enforces this and fails the lint.
+"OTel" means the OTel model family: the GSMA/AT&T open telecom models (LLM, embedding, reranker, safety, decision, classification). Always write tracing, metrics, and logs instrumentation as "OpenTelemetry" in full. The Vale rule `Blueprints.OTelTracing` fails the lint when "OTel" means tracing.
 
 | Write | Don't write |
 |---|---|
@@ -27,7 +27,7 @@ clarity_reviewed: "2026-11-08"
 | OpenTelemetry spans | `OTel spans` |
 | OpenTelemetry Protocol | `OTLP` (keep the acronym in code spans only) |
 
-These uses of "OTel" are correct: OTel Decision model, OTel 2.5, OTel-2.0-LLM-31B-IT.
+Correct uses of "OTel": OTel Decision model, OTel 2.5, OTel-2.0-LLM-31B-IT.
 
 ## Terms
 

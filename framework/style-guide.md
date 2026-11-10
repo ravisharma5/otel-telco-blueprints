@@ -1,7 +1,7 @@
 ---
 title: "Style guide"
 doc_status: done
-clarity_reviewed: "2026-11-09"
+clarity_reviewed: "2026-11-10"
 ---
 
 # Style guide
@@ -56,7 +56,7 @@ Page budget: 1350 prose words for a flagship (about 3 pages), 450 prose words fo
 
 ### Reference page
 
-Reference pages define principles and recipes that blueprints build on. They carry no Sources table, and every factual claim links to its source.
+Reference pages define the principles and recipes that blueprints build on. They have no Sources table; instead, every factual claim links to its source.
 
 Page budget: 1350 prose words (about 3 pages). Tables and code, including Mermaid fences, don't count toward prose words.
 
@@ -73,9 +73,7 @@ Put page-specific parts under *The design* as H3 headings. The linter checks onl
 
 ### What the skeletons fold in and leave out
 
-Some topics don't get a section of their own; they fold into these skeletons. Config artifacts become links under *Reference design*. Integrations and data or adaptation needs go into *What you need*. Related work (agent-school, NVIDIA and Databricks blueprints, LFN projects) goes into *Used by and next steps* on platform pages and into the related-work bullets under *Deploy and verify* on use-case pages.
-
-Platform section 6 is *Sources and acceptance*. It carries the canonical Sources table and the operator acceptance gates.
+Some topics have no section of their own. Config artifacts become links under *Reference design*. Integrations and data or adaptation needs go into *What you need*. Related work (agent-school, NVIDIA and Databricks blueprints, LFN projects) goes into *Used by and next steps* on platform pages and into the related-work bullets under *Deploy and verify* on use-case pages.
 
 Flagships and catalog entries share one use-case template. A catalog entry sets `flagship: false` and must fill At a glance, Governance, Sources, and Limitations. It may stub the other sections with a body that starts `_Stub:`. The linter picks budgets from the `flagship` flag.
 
@@ -83,7 +81,7 @@ There's no Sandbox, Tested, or Maintained tier and no readiness level. Blueprint
 
 ## Budget units
 
-Each section uses the unit that fits it. You tune the numbers in [`budgets.yaml`](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/tools/bplint/budgets.yaml) without code changes.
+Each section uses the unit that fits it. Tune the numbers in [`budgets.yaml`](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/tools/bplint/budgets.yaml) without code changes.
 
 | Unit | What counts |
 |---|---|
@@ -132,6 +130,6 @@ Each section uses the unit that fits it. You tune the numbers in [`budgets.yaml`
 
 ## Publishing
 
-- Write plain GitHub markdown. Every push to `main` publishes the pages to the docs site.
+- Write plain GitHub markdown. Each push to `main` publishes the docs site.
 - Commit generated files, such as indexes, as `.md`.
 - Front matter is the data model. `schemas/*.schema.json` validates it, and later generators read it.

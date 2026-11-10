@@ -1,7 +1,7 @@
 ---
 title: "Definitions: sources, autonomy, and naming"
 doc_status: done
-clarity_reviewed: "2026-11-09"
+clarity_reviewed: "2026-11-10"
 ---
 
 # Definitions: sources, autonomy, and naming
@@ -18,7 +18,7 @@ clarity_reviewed: "2026-11-09"
 
 ## Claim basis
 
-Blueprints are recipes built from telecom network expertise, industry use cases, research, and Red Hat recommendations, so they state no validation status. Each key claim names its basis and links its source.
+Blueprints are recipes. They draw on telecom network expertise, industry use cases, research, and Red Hat recommendations, so they state no validation status. Instead, each key claim names its basis and links its source.
 
 | Basis | Use it for | Write it as | Source links to |
 |---|---|---|---|
@@ -29,9 +29,9 @@ Blueprints are recipes built from telecom network expertise, industry use cases,
 
 ## Sources table
 
-Every blueprint carries one Sources table, with one row per key claim. Platform blueprints put it under *Sources and acceptance*; use-case blueprints put it under *Sources*.
+Every blueprint has one Sources table with one row per key claim. Platform blueprints put it under *Sources and acceptance*; use-case blueprints put it under *Sources*.
 
-Canonical columns, in order:
+The canonical columns, in order:
 
 `# | Claim | Basis | Source`
 
@@ -42,7 +42,7 @@ Canonical columns, in order:
 | Basis | One of: model card, research, Red Hat guidance, industry use case (any letter case) |
 | Source | A link to an `http` or `https` URL, or to a file in this repo. Never the page itself |
 
-The linter checks the header (VT002), the Basis value (VT007), and the Source link (VT004). A repo-file link must resolve to a file inside the repo.
+The linter checks the header (VT002), the Basis value (VT007), and the Source link (VT004). A repo-file link must point to a file that exists inside the repo.
 
 Worked example:
 
@@ -66,17 +66,17 @@ A TM Forum Autonomous Networks level is a target, never a claim.
 
 ## Component naming
 
-Blueprints describe an open source solution, and they make no product support claims. Each blueprint names every key component by its role in the design and the Red Hat product the reference architecture uses for that role. Platform blueprints use a `Component role | Red Hat product used` table; use-case blueprints list components under What you need.
+Blueprints describe an open source solution. Each blueprint names every key component by its role in the design and the Red Hat product the reference architecture uses for that role. Platform blueprints use a `Component role | Red Hat product used` table; use-case blueprints list components under What you need.
 
 Every blueprint carries this exact line:
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
 
-Blueprints make no product support claims, so labels such as `GA`, `TP`, `DP`, `community`, or `partner-certified` never appear in prose. Vale enforces this with `Blueprints.InlineStatus`. For supported products and versions, operators engage Red Hat directly.
+Blueprints make no product support claims, so labels like `GA`, `TP`, `DP`, `community`, or `partner-certified` never appear in prose. Vale enforces this with `Blueprints.InlineStatus`. For supported products and versions, operators engage Red Hat directly.
 
 ## One-liner
 
-Every blueprint and catalog card carries one line, in front matter `one_liner` and in the at-a-glance `One-liner` row. It says what the design does and its main dependency. Use-case lines also state the autonomy ceiling in words. The line carries no readiness codes.
+Every blueprint and catalog card has a one-line summary. It goes in the front matter `one_liner` field and in the at-a-glance `One-liner` row, and it says what the design does and what it mainly depends on. Use-case lines also state the autonomy ceiling in words. The line carries no readiness codes.
 
 | Blueprint | Example |
 |---|---|
