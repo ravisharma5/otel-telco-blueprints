@@ -624,3 +624,81 @@ def test_placement_all_slots():
     text = body(PLACEMENT)
     for slot in ("LLM", "Embedding", "Reranker", "Safety", "Decision", "Classification"):
         assert slot in text, slot
+
+
+# ---------- crosswalk to the agent blueprint table ----------
+
+CROSSWALK = REPO_ROOT / "architecture/crosswalk.md"
+ARTICLE = (
+    "https://developers.redhat.com/articles/2026/07/20/architect-open-blueprint-cloud-native-ai-agents"
+)
+AGENT_SCHOOL = "https://github.com/open-experiments/agent-school"
+TABLE1 = [
+    "Agent blueprint / GitOps",
+    "Agent orchestration",
+    "Sandbox runtime (supervisor)",
+    "Harness",
+    "Agentic loop runtime (Agent-as-a-Service)",
+    "Model",
+    "AI gateway (MaaS)",
+    "Semantic routing",
+    "Inference routing",
+    "Model workers",
+    "Skills",
+    "Workload identity",
+    "Tool governance",
+]
+EXTENSIONS = [
+    "knowledge",
+    "guardrails",
+    "decision gate",
+    "action",
+    "evaluation",
+    "adaptation",
+    "placement",
+]
+
+
+def _first_column_table(path, firsts):
+    for table in _design_tables(path):
+        if [row[0] for row in table[1:]] == firsts:
+            return table
+    raise AssertionError(f"no table in The design with first cells {firsts}")
+
+
+def test_crosswalk_is_reference_draft():
+    fm = front_matter(CROSSWALK)
+    assert fm["type"] == "reference"
+    assert fm["doc_status"] == "draft"
+    assert {"PB-04", "PB-05", "PB-06", "PB-07", "PB-08"} <= set(fm["platform_blueprints"])
+
+
+def test_crosswalk_table1_rows():
+    table = _first_column_table(CROSSWALK, [str(i) for i in range(1, 14)])
+    assert [row[1] for row in table[1:]] == TABLE1
+
+
+def test_crosswalk_extension_rows():
+    table = _first_column_table(CROSSWALK, [f"E{i}" for i in range(1, 8)])
+    for row, name in zip(table[1:], EXTENSIONS, strict=True):
+        assert name in row[1].lower(), (name, row)
+
+
+def test_crosswalk_links_and_review_note():
+    text = body(CROSSWALK)
+    targets = [target for _, target in MD_LINK.findall(text)]
+    assert ARTICLE in targets
+    assert AGENT_SCHOOL_ROADMAP in targets
+    assert AGENT_SCHOOL in targets
+    assert "pending review by the agent-school maintainers" in text.lower()
+
+
+def test_crosswalk_numbering_source():
+    text = " ".join(body(CROSSWALK).split()).lower()
+    assert re.search(r"number[^.]{0,120}roadmap|roadmap[^.]{0,120}number", text)
+
+
+def test_crosswalk_no_extension_ids_in_prose():
+    text = FENCE.sub("", body(CROSSWALK))
+    prose = [ln for ln in text.splitlines() if not ln.lstrip().startswith("|")]
+    assert re.findall(r"\bE[1-7]\b", "\n".join(prose)) == []
