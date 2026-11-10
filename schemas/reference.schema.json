@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://otel-telco-blueprints.invalid/schemas/reference.schema.json",
+  "title": "Reference page front matter",
+  "description": "Front matter for reference pages: principles and recipes that blueprints link to. Reference pages carry no validation table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "question", "doc_status"],
+  "properties": {
+    "type": { "const": "reference" },
+    "title": { "type": "string", "minLength": 1 },
+    "question": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The one question this page answers."
+    },
+    "doc_status": { "$ref": "common.schema.json#/$defs/doc_status" },
+    "clarity_reviewed": { "$ref": "common.schema.json#/$defs/date" },
+    "platform_blueprints": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "Platform blueprints that build on this page.",
+      "items": { "type": "string", "pattern": "^PB-[0-9]{2}$" }
+    },
+    "otel_slots": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "OTel model slots this page covers.",
+      "items": { "$ref": "common.schema.json#/$defs/otel_slot" }
+    }
+  }
+}

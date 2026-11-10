@@ -83,7 +83,9 @@ def check(doc, ctx) -> list[Finding]:
     spec = ctx.vt_spec
     order: list[str] = list(ctx.enums.get("e_level") or [])
     section_title = ctx.budgets["types"][btype].get("validation_section")
-    sec = doc.section(section_title) if section_title else None
+    if not section_title:
+        return []  # types without a validation section (reference pages)
+    sec = doc.section(section_title)
     if sec is None or not sec.tables:
         line = sec.line if sec is not None else 1
         return [_err(doc, line, "VT001", f"no validation table in section '{section_title}'")]

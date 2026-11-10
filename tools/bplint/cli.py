@@ -149,10 +149,20 @@ def _excluded(rel: str, patterns) -> bool:
 
 
 def discover(config) -> list[tuple[Path, bool]]:
-    """Return (path, is_blueprint) for files matching the config globs."""
+    """Return (path, is_blueprint) for files matching the config globs.
+
+    Glob groups are tried in order: blueprint_globs, reference_globs, then
+    doc_globs. The first group that matches a path wins, so reference pages
+    get the full structural pipeline even when a doc glob also matches them.
+    """
     excludes = config.get("exclude_globs") or []
     seen: dict[Path, bool] = {}
-    for globs, is_bp in ((config.get("blueprint_globs") or [], True), (config.get("doc_globs") or [], False)):
+    groups = (
+        (config.get("blueprint_globs") or [], True),
+        (config.get("reference_globs") or [], True),
+        (config.get("doc_globs") or [], False),
+    )
+    for globs, is_bp in groups:
         for pattern in globs:
             for p in sorted(REPO_ROOT.glob(pattern)):
                 if not p.is_file():

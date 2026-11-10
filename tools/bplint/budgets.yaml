@@ -98,3 +98,30 @@ types:
         bullets: 5          # related work links
       - title: Limitations
         bullets: 6
+
+  # Reference pages: principles and recipes. No validation table, so no
+  # validation_section key. Mermaid fences are code and are not counted.
+  reference:
+    page_words: 1350
+    at_a_glance_rows:
+      - Question answered
+      - Answer
+      - Audience
+      - OTel slots
+      - Platform blueprints
+    sections:
+      - title: At a glance
+        tables: 1
+        rows: 5
+      - title: The question
+        lines: 3
+      - title: The principle
+        lines: 5
+      - title: The design
+        tables: 4
+        steps: 8
+        diagrams: 1
+      - title: Trade-offs and limits
+        tables: 1
+      - title: Used by
+        bullets: 12

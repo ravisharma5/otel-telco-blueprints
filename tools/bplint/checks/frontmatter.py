@@ -52,10 +52,11 @@ def check(doc, ctx) -> list[Finding]:
         return [Finding(doc.path, line, 1, "error", "FM001", text)]
 
     btype = fm.get("type")
-    validator = ctx.schemas.get(btype) if btype in ("platform", "use-case") else None
+    validator = ctx.schemas.get(btype) if isinstance(btype, str) else None
     if validator is None:
         doc.flags.add("skip_structure")
         what = "missing" if btype is None else f"unknown ('{btype}')"
+        known = ", ".join(f"'{k}'" for k in sorted(ctx.schemas))
         return [
             Finding(
                 doc.path,
@@ -63,7 +64,7 @@ def check(doc, ctx) -> list[Finding]:
                 1,
                 "error",
                 "FM002",
-                f"$.type: blueprint type is {what}; expected 'platform' or 'use-case'",
+                f"$.type: blueprint type is {what}; expected one of {known}",
             )
         ]
 

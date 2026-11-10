@@ -11,6 +11,7 @@ from referencing import Registry, Resource
 SCHEMA_FILES = {
     "platform": "platform.schema.json",
     "use-case": "use-case.schema.json",
+    "reference": "reference.schema.json",
 }
 
 

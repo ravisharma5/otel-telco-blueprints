@@ -14,7 +14,7 @@ clarity_reviewed: "2026-11-09"
 | Rule 1 | The at-a-glance table comes first, before any prose |
 | Rule 2 | Use tables instead of prose for comparisons, components, decisions, and risks |
 | Rule 3 | Every claim carries an evidence level (E0-E4) or a link |
-| Who it's for | Authors and reviewers of platform and use-case blueprints |
+| Who it's for | Authors and reviewers of blueprints and reference pages |
 | Where budgets live | [`tools/bplint/budgets.yaml`](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/tools/bplint/budgets.yaml) |
 | How to check | Run `make lint`, then follow the [review checklist](review-checklist.md) |
 
@@ -53,6 +53,23 @@ Page budget: 1350 prose words for a flagship (about 3 pages), 450 prose words fo
 | 5 | Validation | 1 table (canonical validation table) |
 | 6 | Deploy and verify | 5 lines, 5 bullets (related-work links) |
 | 7 | Limitations | 6 bullets |
+
+### Reference page
+
+Reference pages define principles and recipes that blueprints build on. They carry no validation table, and every factual claim links to its source.
+
+Page budget: 1350 prose words (about 3 pages). Tables and code, including Mermaid fences, don't count toward prose words.
+
+| # | Section | Budget |
+|---|---|---|
+| 0 | At a glance | 1 table, 5 rows: Question answered, Answer, Audience, OTel slots, Platform blueprints |
+| 1 | The question | 3 lines |
+| 2 | The principle | 5 lines |
+| 3 | The design | 4 tables, 8 steps, 1 diagram |
+| 4 | Trade-offs and limits | 1 table |
+| 5 | Used by | 12 bullets (links only) |
+
+Put page-specific parts under *The design* as H3 headings. The linter checks only the order of H2 sections.
 
 ### What the skeletons fold in and leave out
 
@@ -105,7 +122,8 @@ Each section uses the unit that fits it. You tune the numbers in [`budgets.yaml`
 
 ## Diagrams
 
-- Author diagrams with the archify skill.
+- Draw flow diagrams as inline code fences tagged `mermaid`. They render on the docs site and on GitHub.
+- Author architecture diagrams with the archify skill. The architecture overview has one archify diagram.
 - Commit three files in a `diagrams/` folder beside the doc: the archify source HTML, its `candidate.json`, and the exported SVG.
 - Embed the SVG with a relative image link, for example `![Reference design](diagrams/reference-design.svg)`.
 - archify has no command-line export. Export the SVG from the archify viewer.
@@ -113,6 +131,6 @@ Each section uses the unit that fits it. You tune the numbers in [`budgets.yaml`
 
 ## Publishing
 
-- Publish plain GitHub markdown. There's no docs site and no site build.
+- Write plain GitHub markdown. Every push to `main` publishes the pages to the docs site.
 - Commit generated files, such as indexes, as `.md`.
 - Front matter is the data model. `schemas/*.schema.json` validates it, and later generators read it.

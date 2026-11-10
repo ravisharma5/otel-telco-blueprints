@@ -21,7 +21,7 @@ class Context:
     config: dict
     budgets: dict
     vt_spec: dict
-    schemas: dict  # validators by type: "platform", "use-case"
+    schemas: dict  # validators by type: "platform", "use-case", "reference"
     enums: dict  # enum lists from common.schema.json $defs, in schema order
     today: date = field(default_factory=date.today)
     docs: list = field(default_factory=list)

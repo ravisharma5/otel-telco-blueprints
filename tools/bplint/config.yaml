@@ -6,6 +6,11 @@ validation_table: schemas/validation-table.yaml
 blueprint_globs:
   - "platform/*/README.md"
   - "catalog/*/*/README.md"
+# Reference pages get the full structural pipeline; they are matched before
+# doc_globs, so a path listed here is never treated as a plain doc.
+reference_globs:
+  - "framework/index.md"
+  - "architecture/*.md"
 doc_globs:
   - "README.md"
   - "framework/*.md"
