@@ -69,21 +69,32 @@
         "risk_class": { "$ref": "#/$defs/risk_class" },
         "proposed_step": {
           "type": "object",
+          "additionalProperties": false,
           "required": ["summary"],
           "properties": {
             "summary": { "type": "string", "minLength": 1 },
-            "parameters": { "type": "object" }
+            "parameters": {
+              "type": "object",
+              "description": "Job inputs for the playbook. Open by design; the action layer checks them against the playbook before it runs."
+            }
           }
         },
         "evidence_bundle": {
           "type": "object",
+          "additionalProperties": false,
           "required": ["observed", "conclusion_strength"],
           "properties": {
             "observed": { "type": "array", "minItems": 1, "items": { "type": "string" } },
             "conclusion_strength": { "enum": ["proven", "correlated", "hypothesis"] },
-            "blast_radius": { "type": "object" },
+            "blast_radius": {
+              "type": "object",
+              "description": "Opaque context for the gate model and the human reviewer. No consumer branches on its keys."
+            },
             "existing_ticket": { "type": ["string", "null"] },
-            "recent_change": { "type": ["object", "null"] }
+            "recent_change": {
+              "type": ["object", "null"],
+              "description": "Opaque context for the gate model and the human reviewer. No consumer branches on its keys."
+            }
           }
         },
         "state_changing": { "type": "boolean" },
