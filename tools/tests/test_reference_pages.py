@@ -346,3 +346,112 @@ def test_overview_flows():
         assert name in found, name
         first = next(ln.strip() for ln in found[name].splitlines() if ln.strip())
         assert first.split(" ")[0] in MERMAID_KEYWORDS, (name, first)
+
+
+# ---------- decision gate ----------
+
+GATE = REPO_ROOT / "architecture/decision-gate.md"
+GATE_SCHEMA_PATH = REPO_ROOT / "schemas/decision-gate.schema.json"
+GATE_SCHEMA_URL = (
+    "https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json"
+)
+GATE_LABELS = ["LOOK", "NOTIFY", "REVIEW", "ACT", "STOP"]
+NUMERIC_DEFAULT = re.compile(r"\b0?\.\d+\b|\d+\s*%")
+
+
+def _find_table(path, wanted):
+    """First table in The design whose header holds every name in wanted."""
+    for table in _design_tables(path):
+        if set(wanted) <= set(table[0]):
+            return table
+    raise AssertionError(f"no table with header {wanted} in The design")
+
+
+def _gate_examples():
+    return json_fences(body(GATE))
+
+
+def _gate_validator():
+    from jsonschema import Draft202012Validator
+
+    return Draft202012Validator(json.loads(GATE_SCHEMA_PATH.read_text(encoding="utf-8")))
+
+
+def _all_keys(node):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield k
+            yield from _all_keys(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _all_keys(v)
+
+
+def test_gate_is_reference():
+    fm = front_matter(GATE)
+    assert fm["type"] == "reference"
+    assert {"PB-02", "PB-06", "PB-07"} <= set(fm["platform_blueprints"])
+    assert {"decision", "llm"} <= set(fm["otel_slots"])
+
+
+def test_gate_policy_table():
+    table = _find_table(GATE, ["Label", "Who acts", "What runs", "What is logged"])
+    assert table[0][:4] == ["Label", "Who acts", "What runs", "What is logged"]
+    assert [row[0] for row in table[1:]] == GATE_LABELS
+
+
+def test_gate_paths():
+    text = body(GATE)
+    assert "Automation Orchestrator" in text
+    assert "`uri`" in text
+    firsts = [row[0] for table in _design_tables(GATE) for row in table[1:]]
+    assert "Intended" in firsts and "Fallback" in firsts
+
+
+def test_gate_thresholds():
+    table = _find_table(GATE, ["Parameter", "How to calibrate"])
+    params = " ".join(row[0].lower() for row in table[1:])
+    for name in ("minimum act probability", "review band", "false-act budget", "ceiling per risk class"):
+        assert name in params, name
+    for row in table[1:]:
+        for cell in row:
+            assert not NUMERIC_DEFAULT.search(cell), cell
+    text = sections(body(GATE))["The design"]
+    thresholds_text = "".join(t.content for t in text if t.type == "inline")
+    assert "PB-02" in thresholds_text
+
+
+def test_gate_examples_validate():
+    examples = _gate_examples()
+    kinds = sorted(e.get("kind") for e in examples)
+    assert kinds == ["action_request", "gate_decision"]
+    validator = _gate_validator()
+    for example in examples:
+        errors = list(validator.iter_errors(example))
+        assert errors == [], [e.message for e in errors]
+        keys = {k.lower() for k in _all_keys(example)}
+        assert "threshold" not in keys and "default" not in keys
+    decision = next(e for e in examples if e["kind"] == "gate_decision")
+    assert abs(sum(decision["label_probabilities"].values()) - 1) <= 0.01
+
+
+def test_gate_runtime_pattern():
+    tokens = _md().parse(body(GATE))
+    steps, in_list, item = [], False, []
+    for tok in tokens:
+        if tok.type == "ordered_list_open":
+            in_list, steps = True, []
+        elif tok.type == "ordered_list_close":
+            if len(steps) == 3:
+                break
+            in_list = False
+        elif in_list and tok.type == "inline":
+            steps.append(tok.content)
+    assert len(steps) == 3, steps
+    joined = " ".join(steps)
+    for needle in ("action-request tool", "Decision model", "AAP"):
+        assert needle in joined, needle
+
+
+def test_gate_links_schema():
+    assert GATE_SCHEMA_URL in body(GATE)
