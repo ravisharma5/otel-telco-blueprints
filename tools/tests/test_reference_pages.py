@@ -1,9 +1,12 @@
 """Reference pages: per-page content checks and the recipe wording rule.
 
-Reference pages are recipes. They say how to build a design, not how far it
-has been tested, so they carry no validation-status wording and no readiness
-levels. Vale scopes rules by path and the blueprint templates legitimately use
-that wording, so the rule lives here.
+Reference pages, blueprint pages, and the templates they come from are all
+recipes. They say how to build a design, not how far it has been tested, so
+they carry no validation-status wording and no readiness levels. The ban here
+covers reference pages, blueprint pages, the three templates, and the valid
+fixtures. Vale's Blueprints.ValidationStatus rule covers the words across all
+doc dirs; readiness codes live here because the crosswalk's E1-E7
+extension-row cells need the cell exemption.
 
 The helpers below are shared: per-page tests for each reference page go in
 this module and call them.
@@ -22,6 +25,12 @@ from tools.bplint.loader import load_yaml, split_front_matter
 from tools.tests.conftest import REPO_ROOT
 
 TEMPLATE = REPO_ROOT / "templates/reference-page.md"
+TEMPLATES = [
+    TEMPLATE,
+    REPO_ROOT / "templates/platform-blueprint.md",
+    REPO_ROOT / "templates/use-case-blueprint.md",
+]
+VALID_FIXTURES = REPO_ROOT / "tools/tests/fixtures/valid"
 CONFIG = REPO_ROOT / "tools/bplint/config.yaml"
 
 # Words are matched case-insensitively; readiness levels (E0-E4, M0-M3) are
@@ -33,6 +42,9 @@ WORDING = re.compile(
 )
 FENCE = re.compile(r"^(```|~~~).*?^\1[ \t]*$", re.M | re.S)
 EXEMPT_CELL = re.compile(r"^E[1-7]$")
+# Front matter `extension_rows:` lists crosswalk extension-row ids such as E2.
+EXEMPT_FM_LINE = re.compile(r"^extension_rows:")
+FRONT_MATTER = re.compile(r"\A---\n(.*?)^---[ \t]*$", re.M | re.S)
 MERMAID_KEYWORDS = ("flowchart", "graph", "sequenceDiagram")
 
 
@@ -158,18 +170,48 @@ def _drop_exempt_cells(line: str) -> str:
     return "|".join("" if EXEMPT_CELL.match(c.strip()) else c for c in cells)
 
 
+def _drop_exempt_front_matter_lines(text: str) -> str:
+    m = FRONT_MATTER.match(text)
+    if not m:
+        return text
+    kept = "".join(
+        ln for ln in m.group(1).splitlines(keepends=True) if not EXEMPT_FM_LINE.match(ln)
+    )
+    return text[: m.start(1)] + kept + text[m.end(1) :]
+
+
 def wording_hits(text: str) -> list[str]:
     """Validation-status wording and readiness levels outside code fences.
 
-    Table cells that hold only an extension-row id (E1-E7) are allowed.
+    Table cells that hold only an extension-row id (E1-E7) are allowed, and so
+    is a whole front matter line that starts with `extension_rows:`.
     """
+    text = _drop_exempt_front_matter_lines(text)
     text = FENCE.sub("", text)
     text = "\n".join(_drop_exempt_cells(line) for line in text.splitlines())
     return [m.group(0) for m in WORDING.finditer(text)]
 
 
+def blueprint_pages() -> list[Path]:
+    """Every file matched by blueprint_globs (none until the first blueprint lands)."""
+    out = []
+    for pattern in load_yaml(CONFIG).get("blueprint_globs") or []:
+        for path in sorted(REPO_ROOT.glob(pattern)):
+            if path.is_file() and path not in out:
+                out.append(path)
+    return out
+
+
+def valid_fixtures() -> list[Path]:
+    return sorted(p for p in VALID_FIXTURES.glob("*/README.md") if p.is_file())
+
+
 def _scanned_files() -> list[Path]:
-    return [*reference_pages(), TEMPLATE]
+    out: list[Path] = []
+    for path in [*reference_pages(), *TEMPLATES, *valid_fixtures(), *blueprint_pages()]:
+        if path not in out:
+            out.append(path)
+    return out
 
 
 # ---------- the wording rule ----------
@@ -211,6 +253,34 @@ def test_wording_regex_allows(sample):
 def test_wording_exempt_cell_only_when_whole_cell():
     assert wording_hits("| Row E2 here | x |")
     assert wording_hits("The E2 row is optional.")
+
+
+def test_wording_exempt_extension_rows_front_matter_line():
+    text = '---\nid: "PB-04"\nextension_rows: ["E2"]\n---\n\n# Title\n'
+    assert wording_hits(text) == []
+    assert wording_hits(text + "\nThe E2 row is optional.\n")
+    assert wording_hits('# Title\n\nextension_rows: ["E2"]\n')
+    assert wording_hits('---\nnote: "E2"\n---\n')
+
+
+@pytest.mark.parametrize(
+    "sample",
+    ["This step is unverified.", "Method defined, not yet run.", "Rated M2 / E1."],
+)
+def test_wording_flags_blueprint_prose(tmp_path, sample):
+    page = tmp_path / "README.md"
+    page.write_text(f'---\ntype: "use-case"\n---\n\n# Title\n\n{sample}\n', encoding="utf-8")
+    assert wording_hits(page.read_text(encoding="utf-8")), sample
+
+
+def test_scanned_set_covers_templates_fixtures_and_blueprints():
+    scanned = set(_scanned_files())
+    assert set(TEMPLATES) <= scanned
+    fixtures = valid_fixtures()
+    assert len(fixtures) >= 3 and set(fixtures) <= scanned
+    for name in ("platform", "use-case", "catalog-entry"):
+        assert VALID_FIXTURES / name / "README.md" in scanned
+    assert set(blueprint_pages()) <= scanned
 
 
 @pytest.mark.parametrize("path", _scanned_files(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
