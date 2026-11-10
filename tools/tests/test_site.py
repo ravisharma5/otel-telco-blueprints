@@ -223,12 +223,12 @@ def test_symlink_rejected(site_copy, kind):
 
 def test_mermaid(site_copy):
     _append(
-        site_copy / "site-src/framework/index.md",
+        site_copy / "site-src/index.md",
         "\n```mermaid\ngraph LR\n  A --> B\n```\n",
     )
     code, out = _build(site_copy)
     assert code == 0, out
-    html = (site_copy / "out/framework/index.html").read_text(encoding="utf-8")
+    html = (site_copy / "out/index.html").read_text(encoding="utf-8")
     assert 'class="mermaid"' in html
 
 

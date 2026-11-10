@@ -229,3 +229,69 @@ def test_reference_pages_helper_reads_config():
     assert TEMPLATE not in reference_pages()
     for path in reference_pages():
         assert front_matter(path)["type"] == "reference"
+
+
+# ---------- readiness questions (framework landing page) ----------
+
+READINESS = REPO_ROOT / "framework/index.md"
+PB_IDS = [f"PB-{i:02d}" for i in range(1, 11)]
+READINESS_DOMAINS = [
+    "intake",
+    "evaluation",
+    "adaptation",
+    "serving",
+    "integration",
+    "autonomy",
+    "security",
+    "quality",
+    "compliance",
+    "operating model",
+]
+MD_LINK = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
+
+
+def _readiness_rows():
+    """Body rows of the ten-questions table in The design."""
+    design = sections(body(READINESS))["The design"]
+    for table in tables(design):
+        header = table[0]
+        if {"Question", "What ready means", "Answered by"} <= set(header):
+            return header, table[1:]
+    raise AssertionError("no ten-questions table in The design")
+
+
+def _cell(header, row, name):
+    return row[header.index(name)]
+
+
+def test_readiness_is_reference():
+    fm = front_matter(READINESS)
+    assert fm["type"] == "reference"
+    assert fm["platform_blueprints"] == PB_IDS
+
+
+def test_readiness_ten_questions():
+    header, rows = _readiness_rows()
+    assert len(rows) == 10
+    assert [row[0] for row in rows] == [str(i) for i in range(1, 11)]
+
+
+def test_readiness_domains_in_order():
+    header, rows = _readiness_rows()
+    for row, domain in zip(rows, READINESS_DOMAINS, strict=True):
+        assert domain in _cell(header, row, "Question").lower(), (domain, row)
+
+
+def test_readiness_answered_by():
+    header, rows = _readiness_rows()
+    answered = [_cell(header, row, "Answered by") for row in rows]
+    for pb in PB_IDS:
+        assert any(pb in cell for cell in answered), pb
+    assert "PB-06" in answered[5] and "PB-07" in answered[5]
+    assert "PB-10" in answered[8] and "PB-10" in answered[9]
+
+
+def test_readiness_no_pb_links():
+    for text, target in MD_LINK.findall(body(READINESS)):
+        for bad in ("PB-", "platform/"):
+            assert bad not in text and bad not in target, (text, target)
