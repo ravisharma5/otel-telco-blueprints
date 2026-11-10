@@ -157,3 +157,23 @@ def test_timestamp_accepts_rfc3339_values(gate_validator, stamp):
 def test_ids_reject_a_trailing_newline(gate_validator, field):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-review.json")
     assert not gate_validator.is_valid({**base, field: base[field] + "\n"}), field
+
+
+def _request():
+    return _load(GATE_FIXTURES / "valid" / "action-request-restart-interface.json")
+
+
+@pytest.mark.parametrize(
+    "part, extra",
+    [("proposed_step", {"override_gate": True}), ("evidence_bundle", {"x": 1})],
+)
+def test_request_nested_objects_reject_unknown_keys(gate_validator, part, extra):
+    req = _request()
+    req[part] = {**req[part], **extra}
+    assert not gate_validator.is_valid(req), part
+
+
+def test_request_parameters_stay_open(gate_validator):
+    req = _request()
+    req["proposed_step"]["parameters"] = {"device": "r2", "interface": "eth1", "dry_run": True}
+    assert gate_validator.is_valid(req)
