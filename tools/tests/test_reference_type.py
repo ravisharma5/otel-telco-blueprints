@@ -102,3 +102,81 @@ def test_unknown_type_message_lists_known_types(tmp_path):
     _, findings = run_bplint(page)
     msgs = [f["message"] for f in findings if f["code"] == "FM002"]
     assert msgs and "'platform', 'reference', 'use-case'" in msgs[0]
+
+
+# ---------- reference page template ----------
+
+TEMPLATE = REPO_ROOT / "templates/reference-page.md"
+REFERENCE_SPEC = load_yaml(REPO_ROOT / "tools/bplint/budgets.yaml")["types"]["reference"]
+
+
+def _template_parts():
+    from tools.bplint.loader import split_front_matter
+
+    fm, body, _ = split_front_matter(TEMPLATE.read_text(encoding="utf-8"))
+    return fm, body
+
+
+def _template_tokens(body):
+    from markdown_it import MarkdownIt
+
+    return MarkdownIt("commonmark").enable("table").parse(body)
+
+
+def test_reference_template_sections():
+    _, body = _template_parts()
+    toks = _template_tokens(body)
+    titles = [
+        toks[i + 1].content
+        for i, t in enumerate(toks)
+        if t.type == "heading_open" and t.tag == "h2"
+    ]
+    assert titles == [s["title"] for s in REFERENCE_SPEC["sections"]]
+
+
+def test_reference_template_at_a_glance():
+    _, body = _template_parts()
+    toks = _template_tokens(body)
+    start = next(i for i, t in enumerate(toks) if t.type == "table_open")
+    labels, in_body, first_cell = [], False, False
+    for i in range(start, len(toks)):
+        t = toks[i]
+        if t.type == "table_close":
+            break
+        if t.type == "tbody_open":
+            in_body = True
+        elif in_body and t.type == "tr_open":
+            first_cell = True
+        elif in_body and first_cell and t.type == "inline":
+            labels.append(t.content.strip())
+            first_cell = False
+    assert labels == REFERENCE_SPEC["at_a_glance_rows"]
+
+
+def test_reference_template_front_matter():
+    fm, _ = _template_parts()
+    schema = json.loads((SCHEMAS / "reference.schema.json").read_text())
+    assert set(fm) <= set(schema["properties"])
+    assert fm["type"] == "reference"
+    assert list(_reference_validator().iter_errors(fm)) == []
+
+
+def test_reference_template_no_validation_table():
+    import re
+
+    text = TEMPLATE.read_text(encoding="utf-8")
+    headings_and_headers = [
+        line for line in text.splitlines() if line.startswith("#") or line.startswith("|")
+    ]
+    assert not any("Validation" in line for line in headings_and_headers)
+    assert not re.search(r"\b(E[0-4]|M[0-3])\b", text)
+
+
+def test_reference_template_replaceable():
+    assert "Any component can be replaced" in TEMPLATE.read_text(encoding="utf-8")
+
+
+def test_reference_template_lints_clean():
+    _, findings = run_bplint(TEMPLATE, config=REPO_ROOT / "tools/bplint/config.yaml")
+    codes = {f["code"] for f in findings}
+    assert not codes & {"SC001", "AG001", "FM002"}, findings

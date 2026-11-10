@@ -206,6 +206,7 @@ def test_templates_page_renders(site_copy):
     html = (site_copy / "out/templates/index.html").read_text(encoding="utf-8")
     assert "Platform blueprint title" in html
     assert "Use case title" in html
+    assert "Reference page title" in html
 
 
 @pytest.mark.parametrize("kind", ["file", "dir"])

@@ -18,3 +18,9 @@ These are the starting points for blueprint authors. Copy the raw file from the 
 ````markdown
 --8<-- "use-case-blueprint.md"
 ````
+
+## Reference page template
+
+````markdown
+--8<-- "reference-page.md"
+````
