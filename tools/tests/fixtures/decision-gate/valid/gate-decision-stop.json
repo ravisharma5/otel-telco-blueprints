@@ -1,0 +1,24 @@
+{
+  "kind": "gate_decision",
+  "schema_version": "1",
+  "decision_id": "dec-0003",
+  "request_id": "req-0001",
+  "correlation_id": "inc-2041",
+  "decided_at": "2026-11-09T10:15:01Z",
+  "model_label": "STOP",
+  "label_probabilities": {
+    "LOOK": 0.1,
+    "NOTIFY": 0.05,
+    "REVIEW": 0.05,
+    "ACT": 0.02,
+    "STOP": 0.78
+  },
+  "policy_ceiling": "LOOK",
+  "outcome": "STOP",
+  "policy_version": "noc-gate-policy-3",
+  "model_revision": "decision-slot@rev-a1b2c3",
+  "required_approver": null,
+  "reasons": [
+    "Policy ceiling is LOOK"
+  ]
+}
