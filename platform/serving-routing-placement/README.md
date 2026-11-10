@@ -3,7 +3,7 @@ id: "PB-04"
 type: "platform"
 title: "Serving, routing, and placement"
 readiness_question: "Serving and placement: where and how does each slot run?"
-doc_status: "draft"
+doc_status: done
 layers: ["model-endpoint-inferencing", "ai-gateway", "placement"]
 table1_rows: [6, 7, 8, 9, 10]
 extension_rows: ["E7"]
@@ -15,6 +15,7 @@ top_decisions:
   - "Keep the front door, content routing, and replica scheduling separate"
   - "Pick a serving option for each tier"
 agent_school: [104, 203]
+clarity_reviewed: "2026-11-10"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -62,7 +63,7 @@ flowchart LR
 
 1. The caller picks the tier: a far-edge box, the regional site, or the core. None of the routing layers below makes this choice.
 2. The front door checks the caller's API key against a subscription, applies that team's token limit, and routes on the `model` field in the request body.
-3. The app asks the Decision slot about the request and reads its label probabilities. Against your thresholds, it picks the slot: a small LLM, the large LLM, the abstain path, or STOP.
+3. The app asks the Decision slot about the request and reads its label probabilities. It compares them with your thresholds and picks the slot: a small LLM, the large LLM, the abstain path, or STOP.
 4. For a generative slot at the core, the replica scheduler picks the pod by prefix-cache hits, KV cache use, and queue depth, and serves interactive traffic before batch.
 5. The chosen slot answers. The app records the slot, the model revision, and the Decision probabilities with the request.
 
@@ -74,11 +75,11 @@ flowchart LR
 | Content routing | Which slot handles the request: small LLM, large LLM, abstain path, or STOP | Decision label probabilities against your thresholds; an explicit caller override | Your app or agent runtime calling the OTel Decision slot |
 | Replica scheduling | Which pod of the chosen model's pool serves it | Prefix-cache hits, KV cache use, queue depth; priority bands set in an `InferenceObjective`; a weighted canary for a new revision | Distributed Inference with llm-d in Red Hat OpenShift AI, for generative slots at the core |
 
-Tier choice is none of these layers. llm-d schedules within one cluster, so the caller, or multi-cluster DNS policy, picks far edge, regional, or core, as the [placement tiers](../../architecture/placement.md) page sets out.
+None of these layers picks the tier. llm-d schedules within one cluster, so the caller, or multi-cluster DNS policy, picks far edge, regional, or core, as the [placement tiers](../../architecture/placement.md) page sets out.
 
 ### Sizing by hardware class
 
-Weights only. The KV cache comes on top, so leave headroom for your context length and concurrency.
+The figures cover weights only. The KV cache comes on top, so leave headroom for your context length and concurrency.
 
 | Slot | Precision | Weights | Hardware class |
 |---|---|---|---|
@@ -90,7 +91,7 @@ Weights only. The KV cache comes on top, so leave headroom for your context leng
 | Embedding and Reranker, 0.6B to 8B | bf16 | about 1.2 to 16 GB | Small edge GPU, or a slice of a Single large GPU |
 | Small Embedding models up to 335M | bf16 or fp32 | under 1.5 GB | CPU |
 
-Safety and Classification figures assume about 2 bytes per parameter in bf16. The FP8 figure for the 31B follows the FP8 build of its base model.
+Safety and Classification figures assume about 2 bytes per parameter in bf16. The 31B FP8 figure comes from the FP8 build of its base model.
 
 ### Edge options and limits
 
@@ -138,7 +139,7 @@ Load adapters only at start, pinned by digest. Never enable runtime adapter load
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`, and `noc-triage-agent` starts triage at the regional site. That site runs single-node OpenShift with one large GPU and serves Classification for the root-cause label, Decision for the gate and content routing, Safety, a small LLM, and Embedding and Reranker for local retrieval.
 
-When the shift lead asks for a written explanation, the Decision slot routes the request to the 31B at the core, behind the replica scheduler. The front door gives the NOC triage team its own subscription and token limit, and the triage priority band ranks ahead of batch evaluation on the same pool. The gate itself follows the [decision gate](../../architecture/decision-gate.md) page.
+When the shift lead asks for a written explanation, the Decision slot routes the request to the 31B at the core, behind the replica scheduler. The front door gives the NOC triage team its own subscription and token limit, and the triage priority band ranks ahead of batch evaluation on the same pool. The [decision gate](../../architecture/decision-gate.md) page covers the gate itself.
 
 - Config artifact: serving runtime config for each slot with its key flags and pinned revision
 - Config artifact: front-door subscription and token limit for each team, such as the NOC triage team
@@ -193,7 +194,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 14 | Block runtime adapter loading and pin adapters by digest | Red Hat guidance | [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) |
 
 - Gate: after every deploy, ask each generative slot to identify itself, and fail the rollout if the answer is wrong or empty.
-- Gate: on MI350-class GPUs, confirm `VLLM_ROCM_USE_AITER=0` is set and that a fixed prompt returns well-formed text before traffic arrives.
+- Gate: on MI350-class GPUs, confirm the pod sets `VLLM_ROCM_USE_AITER=0` and that a fixed prompt returns well-formed text before traffic arrives.
 - Gate: every quantized build passes your operator acceptance suite (PB-02) before you place it at a regional site.
 - Gate: reranker scores from the serving engine match `sentence-transformers` scores on your held-out pairs before the reranker serves retrieval.
 - Gate: the deployed revision of every slot matches the revision record in the model registry.
