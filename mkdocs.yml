@@ -55,7 +55,8 @@ nav:
       - Glossary: framework/glossary.md
       - Style guide: framework/style-guide.md
       - Review checklist: framework/review-checklist.md
-  - Architecture: architecture/index.md
+  - Architecture:
+      - Overview: architecture/index.md
   - Catalog: catalog/index.md
   - Platform: platform/index.md
   - Templates: templates.md
