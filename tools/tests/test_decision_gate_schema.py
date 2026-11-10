@@ -80,6 +80,51 @@ def test_invalid_payload_fails(gate_validator, path):
     assert not gate_validator.is_valid(_load(path))
 
 
+# The one rule each invalid fixture breaks: (instance path, keyword, rule key).
+# The rule key names the field an allOf `if` keys on (None outside allOf), so a
+# ceiling fixture cannot pass by tripping the model-label rule instead.
+EXPECTED_FAILURE = {
+    "act-above-ceiling.json": (("outcome",), "enum", "policy_ceiling"),
+    "bad-timestamp.json": (("decided_at",), "pattern", None),
+    "extra-key.json": ((), "additionalProperties", None),
+    "id-trailing-newline.json": (("decision_id",), "not", None),
+    "impossible-timestamp.json": (("decided_at",), "pattern", None),
+    "missing-probability.json": (("label_probabilities",), "required", None),
+    "request-without-evidence.json": (("evidence_bundle", "observed"), "minItems", None),
+    "review-without-approver.json": (("required_approver",), "type", "outcome"),
+    "unknown-label.json": (("model_label",), "enum", None),
+    "unknown-risk-class.json": (("risk_class",), "enum", None),
+}
+
+
+def _branch_validator(schema, kind) -> Draft202012Validator:
+    """Validator for one message kind, so errors are not hidden by the root oneOf."""
+    return Draft202012Validator(
+        {"$defs": schema["$defs"], **schema["$defs"][kind]},
+        format_checker=Draft202012Validator.FORMAT_CHECKER,
+    )
+
+
+def _rule_key(schema, kind, error):
+    path = list(error.absolute_schema_path)
+    if path[:1] != ["allOf"]:
+        return None
+    condition = schema["$defs"][kind]["allOf"][path[1]]["if"]["properties"]
+    return next(iter(condition))
+
+
+def test_every_invalid_fixture_names_its_rule():
+    assert {p.name for p in INVALID} == set(EXPECTED_FAILURE)
+
+
+@pytest.mark.parametrize("path", INVALID, ids=lambda p: p.name)
+def test_invalid_payload_breaks_only_its_rule(schema, path):
+    payload = _load(path)
+    errors = list(_branch_validator(schema, payload["kind"]).iter_errors(payload))
+    got = [(tuple(e.absolute_path), e.validator, _rule_key(schema, payload["kind"], e)) for e in errors]
+    assert got == [EXPECTED_FAILURE[path.name]], [e.message for e in errors]
+
+
 def test_no_default_keyword(schema):
     assert "default" not in set(_keys(schema))
 
