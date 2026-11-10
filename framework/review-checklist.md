@@ -24,7 +24,7 @@ Run `make lint` from the repo root. Fix every error, and fix or justify every wa
 | Code | Severity | What it checks |
 |---|---|---|
 | FM001 | error | No front matter |
-| FM002 | error | Front matter fails its schema |
+| FM002 | error | Front matter fails its schema, or its `type` does not belong in the folder it sits in |
 | RF001 | error | Readiness facet missing or invalid |
 | SC001 | error | Sections missing or out of order, or at a glance isn't first |
 | SC002 | error | A section a catalog entry must fill is a stub |
