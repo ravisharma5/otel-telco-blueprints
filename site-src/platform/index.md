@@ -7,17 +7,17 @@ doc_status: draft
 
 # Platform
 
-Platform blueprints cover the shared capabilities every use case depends on. They arrive in Phases 3 and 4.
+Platform blueprints cover the shared capabilities every use case depends on. They arrive in two groups: run and govern first, then adapt, operate, and comply.
 
-| Blueprint | Topic | Phase |
+| Blueprint | Topic | Group |
 |---|---|---|
-| PB-01 | Intake and model selection | Phase 4 |
-| PB-02 | Evaluation and acceptance | Phase 3 |
-| PB-03 | Adaptation | Phase 4 |
-| PB-04 | Serving, routing, and placement | Phase 3 |
-| PB-05 | Integration | Phase 3 |
-| PB-06 | Safety and autonomy gating | Phase 3 |
-| PB-07 | Action layer | Phase 3 |
-| PB-08 | Security, identity, and sandbox | Phase 4 |
-| PB-09 | Quality operations and observability | Phase 4 |
-| PB-10 | Compliance, sovereignty, and operating model | Phase 4 |
+| PB-01 | Intake and model selection | Adapt, operate, and comply |
+| PB-02 | Evaluation and acceptance | Run and govern |
+| PB-03 | Adaptation | Adapt, operate, and comply |
+| PB-04 | Serving, routing, and placement | Run and govern |
+| PB-05 | Integration | Run and govern |
+| PB-06 | Safety and autonomy gating | Run and govern |
+| PB-07 | Action layer | Run and govern |
+| PB-08 | Security, identity, and sandbox | Adapt, operate, and comply |
+| PB-09 | Quality operations and observability | Adapt, operate, and comply |
+| PB-10 | Compliance, sovereignty, and operating model | Adapt, operate, and comply |

@@ -7,7 +7,7 @@ doc_status: draft
 
 # Catalog
 
-The catalog maps operator use cases to OTel model slots and platform blueprints. Four flagship blueprints arrive in Phase 5, and the full use-case catalog arrives in Phase 6.
+The catalog maps operator use cases to OTel model slots and platform blueprints. Four flagship use-case blueprints come first, then the full catalog. Each catalog entry links to its use-case blueprint and to the platform blueprints it depends on.
 
 Planned domains:
 
