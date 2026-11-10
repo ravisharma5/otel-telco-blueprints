@@ -43,13 +43,34 @@ def _md():
     return MarkdownIt("commonmark").enable("table")
 
 
+# Every page reference_globs must find. Page-driven tests take their cases
+# from reference_pages(), so a renamed glob or a lost page fails here instead
+# of quietly collecting zero cases.
+EXPECTED_REFERENCE_PAGES = {
+    "framework/index.md",
+    "architecture/index.md",
+    "architecture/decision-gate.md",
+    "architecture/adaptation-ladder.md",
+    "architecture/placement.md",
+    "architecture/crosswalk.md",
+}
+
+
 def reference_pages() -> list[Path]:
-    """Pages matched by reference_globs whose front matter type is reference."""
+    """Every file matched by reference_globs, whatever its front matter says.
+
+    A page that drops `type: reference` stays in the list, so the type check
+    in the helper test fails rather than the page vanishing from every test.
+    Raises when discovery finds nothing, so parametrized tests cannot pass by
+    collecting zero cases.
+    """
     out = []
     for pattern in load_yaml(CONFIG).get("reference_globs") or []:
         for path in sorted(REPO_ROOT.glob(pattern)):
-            if path.is_file() and (front_matter(path) or {}).get("type") == "reference":
+            if path.is_file() and path not in out:
                 out.append(path)
+    if not out:
+        raise AssertionError("reference_globs in the bplint config matched no pages")
     return out
 
 
@@ -226,9 +247,11 @@ def test_json_fence_helper():
 
 
 def test_reference_pages_helper_reads_config():
-    assert TEMPLATE not in reference_pages()
-    for path in reference_pages():
-        assert front_matter(path)["type"] == "reference"
+    pages = reference_pages()
+    assert TEMPLATE not in pages
+    assert {p.relative_to(REPO_ROOT).as_posix() for p in pages} == EXPECTED_REFERENCE_PAGES
+    for path in pages:
+        assert (front_matter(path) or {}).get("type") == "reference", path.name
 
 
 # ---------- readiness questions (framework landing page) ----------
