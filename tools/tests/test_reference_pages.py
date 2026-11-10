@@ -295,3 +295,54 @@ def test_readiness_no_pb_links():
     for text, target in MD_LINK.findall(body(READINESS)):
         for bad in ("PB-", "platform/"):
             assert bad not in text and bad not in target, (text, target)
+
+
+# ---------- architecture overview (architecture landing page) ----------
+
+OVERVIEW = REPO_ROOT / "architecture/index.md"
+SLOTS = ["llm", "embedding", "reranker", "safety", "decision", "classification"]
+LAYERS = [f"L{i}" for i in range(9)] + ["L9a", "L9b", "L9c", "L10"]
+
+
+def _design_tables(path):
+    return tables(sections(body(path))["The design"])
+
+
+def test_overview_is_reference():
+    fm = front_matter(OVERVIEW)
+    assert fm["type"] == "reference"
+    assert set(SLOTS) <= set(fm["otel_slots"])
+
+
+def test_overview_slots():
+    for table in _design_tables(OVERVIEW):
+        header = " ".join(table[0]).lower()
+        if "slot" not in header or "role" not in header or "red hat product" not in header:
+            continue
+        firsts = [row[0].lower() for row in table[1:]]
+        assert len(firsts) == len(SLOTS), firsts
+        for slot in SLOTS:
+            assert any(slot in cell for cell in firsts), slot
+        return
+    raise AssertionError("no slot, role, and product table in The design")
+
+
+def test_overview_layers():
+    firsts = {row[0] for table in _design_tables(OVERVIEW) for row in table[1:]}
+    for layer in LAYERS:
+        assert layer in firsts, layer
+
+
+def test_overview_tiers_and_replaceable():
+    text = body(OVERVIEW)
+    for tier in ("far edge", "regional", "core"):
+        assert tier in text.lower(), tier
+    assert "Any component can be replaced" in text
+
+
+def test_overview_flows():
+    found = flows(body(OVERVIEW))
+    for name in ("grounded answer", "investigate then act"):
+        assert name in found, name
+        first = next(ln.strip() for ln in found[name].splitlines() if ln.strip())
+        assert first.split(" ")[0] in MERMAID_KEYWORDS, (name, first)
