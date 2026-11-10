@@ -124,7 +124,7 @@
         "label_probabilities": { "$ref": "#/$defs/probabilities" },
         "policy_ceiling": {
           "$ref": "#/$defs/label",
-          "description": "Highest outcome the operator policy allows for this capability and risk class."
+          "description": "Highest outcome the operator policy allows for this capability and risk class. A STOP ceiling allows only a STOP outcome."
         },
         "outcome": {
           "$ref": "#/$defs/label",
@@ -162,6 +162,10 @@
         {
           "if": { "properties": { "policy_ceiling": { "const": "REVIEW" } } },
           "then": { "properties": { "outcome": { "enum": ["LOOK", "NOTIFY", "REVIEW", "STOP"] } } }
+        },
+        {
+          "if": { "properties": { "policy_ceiling": { "const": "STOP" } } },
+          "then": { "properties": { "outcome": { "const": "STOP" } } }
         }
       ]
     }
