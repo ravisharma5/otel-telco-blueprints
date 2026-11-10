@@ -301,7 +301,22 @@ def test_readiness_no_pb_links():
 
 OVERVIEW = REPO_ROOT / "architecture/index.md"
 SLOTS = ["llm", "embedding", "reranker", "safety", "decision", "classification"]
-LAYERS = [f"L{i}" for i in range(9)] + ["L9a", "L9b", "L9c", "L10"]
+LAYERS = [
+    "Data and knowledge",
+    "Model endpoint inferencing",
+    "Network capabilities",
+    "AI Gateway",
+    "MCP Gateway",
+    "Agent runtime",
+    "Safety and governance",
+    "Action",
+    "Placement",
+    "Evaluation",
+    "Adaptation",
+    "Observability",
+    "Control",
+]
+PLANES = ["Data and execution", "Placement", "Lifecycle", "Control"]
 
 
 def _design_tables(path):
@@ -328,9 +343,13 @@ def test_overview_slots():
 
 
 def test_overview_layers():
-    firsts = {row[0] for table in _design_tables(OVERVIEW) for row in table[1:]}
-    for layer in LAYERS:
-        assert layer in firsts, layer
+    for table in _design_tables(OVERVIEW):
+        if table[0][:2] != ["Layer", "Plane"]:
+            continue
+        assert [row[0] for row in table[1:]] == LAYERS
+        assert {row[1] for row in table[1:]} == set(PLANES)
+        return
+    raise AssertionError("no layer table keyed by layer and plane name in The design")
 
 
 def test_overview_tiers_and_replaceable():
@@ -512,3 +531,55 @@ def test_flows_four_present():
         found.update(flows(body(path)))
     for name in FOUR_FLOWS:
         assert name in found, name
+
+
+# ---------- layer codes and product names ----------
+
+# Layers and planes are named in words on every published page. Short layer
+# codes are internal shorthand and never reach readers.
+LAYER_CODE = re.compile(r"\bL(?:10|9[abc]|[0-9])\b")
+# Diagrams name capabilities, never products. Page tables still name the
+# product used for each role, so only diagrams are checked.
+PRODUCT_TERMS = re.compile(
+    r"OpenShift|Red Hat|\bRHEL\b|vLLM|KServe|llm-d|Models-as-a-Service|\bMaaS\b"
+    r"|Argo CD|Keycloak|SPIFFE|SPIRE|NeMo|EvalHub|Kuadrant|Ansible|\bAAP\b"
+    r"|MLflow|Perses|\bACM\b|Prometheus|OpenTelemetry|Podman|SDG Hub|Training Hub"
+    r"|Automation Orchestrator|Connectivity Link|LangGraph|Device Edge"
+    r"|Data Science Pipelines"
+)
+TEMPLATES = sorted((REPO_ROOT / "templates").glob("*.md"))
+
+
+def _published_docs() -> list[Path]:
+    return [*reference_pages(), *TEMPLATES]
+
+
+@pytest.mark.parametrize(
+    "sample", ["L0 to L7", "layer L9a", "| L10 |", "L9c observability"]
+)
+def test_layer_code_regex_catches(sample):
+    assert LAYER_CODE.search(sample), sample
+
+
+@pytest.mark.parametrize("sample", ["LLM slot", "L40S GPUs", "Layer 1", "PB-10", "OTel-LLM-12B"])
+def test_layer_code_regex_allows(sample):
+    assert not LAYER_CODE.search(sample), sample
+
+
+@pytest.mark.parametrize("path", _published_docs(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
+def test_no_layer_codes_in_published_docs(path):
+    assert LAYER_CODE.findall(path.read_text(encoding="utf-8")) == []
+
+
+@pytest.mark.parametrize("path", reference_pages(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
+def test_mermaid_names_capabilities_not_products(path):
+    for fence in mermaid_fences(body(path)):
+        assert PRODUCT_TERMS.findall(fence) == [], path.name
+        assert LAYER_CODE.findall(fence) == [], path.name
+
+
+def test_product_terms_regex():
+    assert PRODUCT_TERMS.search("Red Hat AI Inference (vLLM)")
+    assert PRODUCT_TERMS.search("runs on AAP")
+    assert not PRODUCT_TERMS.search("AI Gateway routes to model endpoint inferencing")
+    assert not PRODUCT_TERMS.search("GitOps promotes a canary")

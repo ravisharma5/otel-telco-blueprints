@@ -145,3 +145,9 @@ def test_validation_table_columns():
     for c in ("Vendor-reported", "GSMA external", "Our operator-task eval"):
         assert c in cols
     assert vt["load_bearing_values"] == ["yes", "no"]
+
+
+def test_platform_layers_use_names_not_codes():
+    v = _validator("platform.schema.json")
+    assert _error_paths(v, dict(PLATFORM, layers=["safety-governance", "action"])) == []
+    assert "layers" in _error_paths(v, dict(PLATFORM, layers=["L6"]))
