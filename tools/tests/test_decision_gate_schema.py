@@ -177,3 +177,25 @@ def test_request_parameters_stay_open(gate_validator):
     req = _request()
     req["proposed_step"]["parameters"] = {"device": "r2", "interface": "eth1", "dry_run": True}
     assert gate_validator.is_valid(req)
+
+
+def _allowed_for_label(label: str, outcome: str) -> bool:
+    if outcome == "STOP":
+        return True
+    if label == "STOP":
+        return False
+    return LABELS.index(outcome) <= LABELS.index(label)
+
+
+def test_outcome_above_model_label_is_rejected(gate_validator):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
+    for label in LABELS:
+        for outcome in LABELS:
+            approver = "noc-shift-lead" if outcome == "REVIEW" else None
+            payload = {**base, "model_label": label, "outcome": outcome, "required_approver": approver}
+            assert gate_validator.is_valid(payload) == _allowed_for_label(label, outcome), (label, outcome)
+
+
+def test_policy_cannot_raise_look_to_act(gate_validator):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
+    assert not gate_validator.is_valid({**base, "model_label": "LOOK", "outcome": "ACT"})
