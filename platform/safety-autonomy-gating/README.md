@@ -3,7 +3,7 @@ id: "PB-06"
 type: "platform"
 title: "Safety and autonomy gating"
 readiness_question: "Autonomy gating: what may the agent do without a human?"
-doc_status: draft
+doc_status: done
 layers: ["safety-governance"]
 extension_rows: ["E2", "E3"]
 otel_slots: ["safety", "decision", "llm"]
@@ -14,6 +14,7 @@ top_decisions:
   - "Set a stage per use case and action class"
   - "Promote a stage only on evidence"
 agent_school: [201, 301, 304]
+clarity_reviewed: "2026-11-10"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -35,13 +36,13 @@ agent_school: [201, 301, 304]
 ## The operator question
 
 What may the agent do without a human, and what evidence lets you raise that limit?
-Until you answer it, nobody agrees on what the agent may do alone, and nobody can show the evidence for letting it do more.
+Until you answer it, teams disagree on what the agent may do alone, and nobody can show the evidence for letting it do more.
 
 ## Decisions you must make
 
 | Decision | Options | Recommendation | Because |
 |---|---|---|---|
-| Place every control where its risk enters | Guardrails at the gateway only; a control on each path | Input guardrails, tool-response guardrails, the Safety slot, the Decision gate, and output guardrails, each on its own path | User text, tool output, retrieved evidence, proposed changes, and final answers each carry a different risk ([MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available)) |
+| Place every control where its risk enters | Guardrails at the gateway only; a control on each path | Input guardrails, tool-response guardrails, the Safety slot, the Decision gate, and output guardrails, each on its own path | Each path carries its own risk. The gateway screens tool traffic that input guardrails never see ([MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available)) |
 | Set a stage per use case and action class | One stage for the whole system; one stage per use case and action class | One stage per use case and action class, kept in a stage register | TM Forum applies autonomy levels to selected scenarios, not whole networks ([TM Forum Autonomous Networks whitepaper](https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf)) |
 | Promote a stage only on evidence | The platform team decides; the operator risk owner decides on evidence | The operator risk owner approves each promotion, with the promotion parameters met and SME sign-off | The Decision model card advises keeping human review for consequential decisions ([Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit)) |
 | Tune the Safety slot before use | Use it as shipped; measure abstention on your own set | Measure correct abstention and answer quality on an operator set before the slot fronts answers | The model card says it may over-abstain or under-abstain, so tune and measure before production use ([Safety model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-12B-Safety)) |
@@ -101,7 +102,7 @@ One triage episode passes these controls in order:
 | Recommend | recommend-with-approval | LOOK, NOTIFY, and REVIEW | The system analyses and proposes each change; people approve each step; the action layer executes | Level 2: partial autonomous network |
 | Act | act-within-policy, for low-risk classes only | ACT for approved playbooks in low-risk classes; REVIEW for every other class | The system decides and executes within policy; people own the policy and every other class | Level 3: conditional autonomous network |
 
-TM Forum sets levels per scenario, so each use case and action class has its own stage. Each level here is a target, never a claim, as the [definitions](../../framework/definitions.md#autonomy-ceiling) page sets out. Level 4 and higher, where the system decides across domains and shares intent, is a later target beyond these blueprints.
+TM Forum applies levels to scenarios, not whole networks, so each use case and action class gets its own stage. Each level here is a target, never a claim, as the [definitions](../../framework/definitions.md#autonomy-ceiling) page sets out. Level 4 and higher, where the system decides across domains and shares intent, is a later target beyond these blueprints.
 
 ### Gate rules
 
@@ -201,4 +202,4 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - PB-02: evaluation supplies the evidence behind each promotion
 - PB-08: security and identity covers prompt injection and workload identity in depth
 - PB-09: quality operations tracks abstention rate, gate labels, and human overrides
-- Agent-school: courses 201, 301, and 304 apply this design; 301 adds an approval gate and 304 covers agent security operations, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
+- Agent-school: courses 201, 301, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate and 304 covers agent security operations
