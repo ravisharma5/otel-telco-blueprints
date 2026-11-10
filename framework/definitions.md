@@ -25,7 +25,8 @@ Blueprints are recipes. They draw on telecom network expertise, industry use cas
 | model card | Numbers and behavior the model card reports | "The model card reports ..." | The model card URL |
 | research | Papers and benchmarks | "Research shows ..." and name the paper | The paper URL |
 | Red Hat guidance | Red Hat documentation, recommendations, and articles | "Red Hat recommends ..." | The doc or article URL |
-| industry use case | Operator and GSMA material, and standards bodies | "Operators use ..." | The source URL or a repo file |
+| industry use case | Operator and GSMA material | "Operators use ..." | The source URL or a repo file |
+| project documentation | Upstream open-source project docs, such as vLLM, llm-d, and KServe, and standards specifications, such as TM Forum and CAMARA | "The vLLM documentation states ..." | The project doc or specification URL |
 
 ## Sources table
 
@@ -39,7 +40,7 @@ The canonical columns, in order:
 |---|---|
 | # | Row number |
 | Claim | The claim in one line |
-| Basis | One of: model card, research, Red Hat guidance, industry use case (any letter case) |
+| Basis | One of: model card, research, Red Hat guidance, industry use case, project documentation (any letter case) |
 | Source | A link to an `http` or `https` URL, or to a file in this repo. Never the page itself |
 
 The linter checks the header (VT002), the Basis value (VT007), and the Source link (VT004). A repo-file link must point to a file that exists inside the repo.

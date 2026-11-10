@@ -43,7 +43,13 @@ def vt(findings, code=None):
 
 def test_spec_columns_and_basis_values():
     assert SPEC["columns"] == ["#", "Claim", "Basis", "Source"]
-    assert SPEC["basis_values"] == ["model card", "research", "Red Hat guidance", "industry use case"]
+    assert SPEC["basis_values"] == [
+        "model card",
+        "research",
+        "Red Hat guidance",
+        "industry use case",
+        "project documentation",
+    ]
 
 
 @pytest.mark.parametrize("drop", ["Basis", "Source", "Claim"])
@@ -175,7 +181,7 @@ def test_bad_basis_is_vt007(tmp_path, basis):
     assert codes(findings) == ["VT007"]
 
 
-@pytest.mark.parametrize("basis", ["Model Card", " research ", "red hat guidance", "INDUSTRY USE CASE"])
+@pytest.mark.parametrize("basis", ["Model Card", " research ", "red hat guidance", "INDUSTRY USE CASE", "Project Documentation"])
 def test_basis_is_case_insensitive(tmp_path, basis):
     assert vt(doc_with(tmp_path, [row(basis=basis)])) == []
 
@@ -192,6 +198,7 @@ def test_missing_basis_values_falls_back_to_defaults(tmp_path):
     (tmp_path / "sources").mkdir()
     secs = use_case_sections()
     secs["Sources"] = SOURCES_HEADER + "\n" + row(basis="vendor blog") + "\n" + row(2, basis="research")
+    secs["Sources"] += "\n" + row(3, basis="project documentation")
     doc = make_doc(tmp_path, render(use_case_fm(), secs))
     ctx = ctx_for(tmp_path)
     ctx.sources_spec = {"columns": SPEC["columns"]}

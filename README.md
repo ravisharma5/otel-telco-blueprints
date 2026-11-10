@@ -12,7 +12,7 @@ clarity_reviewed: "2026-11-09"
 |---|---|
 | What | Blueprints for running the OTel model family in production for telecom use cases, on Red Hat products |
 | Who | GSMA members and telecom operators |
-| Sources | Every blueprint links the source for each key claim: model card, research, Red Hat guidance, or industry use case |
+| Sources | Every blueprint links the source for each key claim: model card, research, Red Hat guidance, industry use case, or project documentation |
 | Open source | Red Hat products show how the solution works. Any component can be replaced (no product support claims) |
 | Website | [Docs site on GitHub Pages](https://ravisharma5.github.io/otel-telco-blueprints/) |
 | Start here | [Definitions](framework/definitions.md), then the [glossary](framework/glossary.md) |

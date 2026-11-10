@@ -118,6 +118,7 @@ Each section uses the unit that fits it. Tune the numbers in [`budgets.yaml`](ht
 | Research source | The paper URL |
 | Red Hat guidance source | The Red Hat doc or article URL |
 | Industry use case source | The source URL, or a repo file that resolves |
+| Project documentation source | The upstream project doc or specification URL |
 
 ## Diagrams
 

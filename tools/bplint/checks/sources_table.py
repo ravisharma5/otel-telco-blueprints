@@ -18,7 +18,13 @@ from . import structure_type
 from ._paths import href_path, is_external, resolve
 
 # Fail closed: a spec without basis_values still enforces these terms.
-DEFAULT_BASIS = ("model card", "research", "Red Hat guidance", "industry use case")
+DEFAULT_BASIS = (
+    "model card",
+    "research",
+    "Red Hat guidance",
+    "industry use case",
+    "project documentation",
+)
 
 
 def _err(doc, line, code, msg) -> Finding:

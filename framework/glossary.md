@@ -36,7 +36,7 @@ Correct uses of "OTel": OTel Decision model, OTel 2.5, OTel-2.0-LLM-31B-IT.
 | AAP (Ansible Automation Platform) | Red Hat automation platform that runs approved actions on network and IT systems | |
 | AI grid tiers | Placement tiers for models: far-edge (cell site, hub), regional (MEC, regional edge), core (central DC) | |
 | Autonomy ceiling | Highest gate outcome a blueprint allows without a human: inform, notify, recommend-with-approval, or act-within-policy | [Autonomy ceiling](definitions.md#autonomy-ceiling) |
-| Basis | Where a key claim comes from: model card, research, Red Hat guidance, or industry use case | [Claim basis](definitions.md#claim-basis) |
+| Basis | Where a key claim comes from: model card, research, Red Hat guidance, industry use case, or project documentation | [Claim basis](definitions.md#claim-basis) |
 | Checkpoint | A published model revision, for example OTel-2.0-LLM-31B-IT at a pinned SHA. Contrast with OTel slot | OTel slot (this table) |
 | EvalHub | OpenShift AI component that runs model evaluations and gates | |
 | Gate outcome | Result of the decision gate: LOOK, NOTIFY, REVIEW, ACT, or STOP | [Autonomy ceiling](definitions.md#autonomy-ceiling) |

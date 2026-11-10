@@ -1,7 +1,7 @@
 ---
 title: "Review checklist"
 doc_status: done
-clarity_reviewed: "2026-11-09"
+clarity_reviewed: "2026-11-10"
 ---
 
 # Review checklist
@@ -33,7 +33,7 @@ Run `make lint` from the repo root. Fix every error, and fix or justify every wa
 | VT001 | error | Sources table missing |
 | VT002 | error | Sources table header isn't canonical |
 | VT004 | error | Source link is missing, does not resolve, leaves the repo, or points at the page itself |
-| VT007 | error | Basis is not model card, research, Red Hat guidance, or industry use case |
+| VT007 | error | Basis is not model card, research, Red Hat guidance, industry use case, or project documentation |
 | LK001 | error | Link target missing |
 | LK002 | error | Link anchor missing |
 | DG001 | error | Referenced diagram file missing |

@@ -86,7 +86,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 <!-- budget: 1 table, 10 bullets ; purpose: the canonical Sources table plus operator acceptance gates -->
 
-<!-- One row per key claim. Basis is model card, research, Red Hat guidance, or industry use case. Source links the URL or repo file; never this page. -->
+<!-- One row per key claim. Basis is model card, research, Red Hat guidance, industry use case, or project documentation. Source links the URL or repo file; never this page. -->
 
 Each key claim links its source, as set out in [the Sources table](../../framework/definitions.md#sources-table).
 

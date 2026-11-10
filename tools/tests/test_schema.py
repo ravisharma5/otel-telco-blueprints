@@ -144,7 +144,13 @@ def test_legacy_register_fields_rejected():
 def test_sources_table_columns():
     spec = yaml.safe_load((SCHEMAS / "sources-table.yaml").read_text())
     assert spec["columns"] == ["#", "Claim", "Basis", "Source"]
-    assert spec["basis_values"] == ["model card", "research", "Red Hat guidance", "industry use case"]
+    assert spec["basis_values"] == [
+        "model card",
+        "research",
+        "Red Hat guidance",
+        "industry use case",
+        "project documentation",
+    ]
     assert not (SCHEMAS / "validation-table.yaml").exists()
 
 
