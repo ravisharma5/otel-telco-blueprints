@@ -17,6 +17,7 @@ SCHEMA_FILES = [
     "common.schema.json",
     "platform.schema.json",
     "use-case.schema.json",
+    "reference.schema.json",
 ]
 
 

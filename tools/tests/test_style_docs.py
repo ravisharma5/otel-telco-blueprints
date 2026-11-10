@@ -17,7 +17,11 @@ BUDGETS = load_yaml(REPO_ROOT / "tools/bplint/budgets.yaml")
 STYLE = (REPO_ROOT / "framework/style-guide.md").read_text(encoding="utf-8")
 CHECKLIST = (REPO_ROOT / "framework/review-checklist.md").read_text(encoding="utf-8")
 MD = MarkdownIt("commonmark").enable("table")
-SKELETON_HEADING = {"platform": "Platform blueprint", "use-case": "Use-case blueprint"}
+SKELETON_HEADING = {
+    "platform": "Platform blueprint",
+    "use-case": "Use-case blueprint",
+    "reference": "Reference page",
+}
 UNIT_WORD = {
     "rows": "row",
     "tables": "table",

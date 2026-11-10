@@ -27,8 +27,8 @@ def _run(d):
 
 
 def test_fixture_sets_exist():
-    assert len(VALID) == 3
-    assert len(BROKEN) == 15
+    assert len(VALID) == 4
+    assert len(BROKEN) == 17
     for d in BROKEN:
         assert (d / "README.md").is_file() and (d / "expected.txt").is_file(), d.name
 
