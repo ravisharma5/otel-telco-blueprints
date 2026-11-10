@@ -10,6 +10,11 @@ Symlinks are refused: a symlinked file or folder anywhere under an allowlisted
 folder (or the folder itself) stops the build, so a link cannot publish
 content from outside the allowlist. Any path that resolves outside its folder
 is skipped as a second line of defence.
+
+Reference pages (front matter ``type: reference``) get a banner right after
+the H1, chosen by ``doc_status``: draft and review pages show a fixed warning,
+done pages show none. The text comes only from the BANNERS map, never from
+front matter, and other doc types are left untouched.
 """
 
 from __future__ import annotations
@@ -21,6 +26,7 @@ from mkdocs.structure.files import File
 ROOT = Path(__file__).resolve().parents[2]
 INCLUDE = ["framework", "architecture", "platform", "catalog"]
 SUFFIXES = {".md", ".svg", ".png", ".jpg", ".jpeg"}
+BANNERS = {"draft": "Draft: content may change", "review": "In review"}
 
 
 def _refuse_symlink(path):
@@ -65,3 +71,31 @@ def on_files(files, config):
                 )
             files.append(new)
     return files
+
+
+def on_page_markdown(markdown, page, config, files):
+    """Reference pages only: a draft or review banner right after the H1."""
+    meta = page.meta or {}
+    if meta.get("type") != "reference":
+        return markdown
+    text = BANNERS.get(meta.get("doc_status"))
+    if text is None:  # done, or anything unexpected: no banner
+        return markdown
+    banner = f'!!! warning "{text}"\n\n'
+    lines = markdown.splitlines(keepends=True)
+    fence = None
+    for i, line in enumerate(lines):
+        stripped = line.lstrip()
+        marker = stripped[:3]
+        if marker in ("```", "~~~"):
+            if fence is None:
+                fence = marker
+            elif marker == fence:
+                fence = None
+            continue
+        if fence is None and line.startswith("# "):
+            head = "".join(lines[: i + 1])
+            if not head.endswith("\n"):
+                head += "\n"
+            return head + "\n" + banner + "".join(lines[i + 1 :])
+    return banner + markdown
