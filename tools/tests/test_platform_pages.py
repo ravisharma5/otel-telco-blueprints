@@ -34,6 +34,7 @@ from tools.tests.test_reference_pages import (  # noqa: F401  (shared with per-p
 EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "serving-routing-placement": "PB-04",
     "integration": "PB-05",
+    "safety-autonomy-gating": "PB-06",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -294,3 +295,89 @@ def test_integration_stateful_mocks():
 
 def test_integration_writes_through_action_request():
     assert "submit_action_request" in body(INTEGRATION)
+
+
+# ---------- safety and autonomy gating ----------
+
+GATING = REPO_ROOT / "platform/safety-autonomy-gating/README.md"
+STAGE_HEADER = ["Stage", "Autonomy ceiling", "Gate outcomes allowed", "Who does what", "TM Forum target"]
+STAGE_TARGETS = {
+    "Shadow": "current level",
+    "Assist": "Level 1",
+    "Recommend": "Level 2",
+    "Act": "Level 3",
+}
+CONTROLS = (
+    "input guardrails",
+    "tool-response guardrails",
+    "safety slot",
+    "decision gate",
+    "output guardrails",
+)
+
+
+def test_gating_stage_table():
+    table = table_with_header(GATING, "Reference design", STAGE_HEADER)
+    assert table[0] == STAGE_HEADER
+    rows = table[1:]
+    assert [row[0] for row in rows] == list(STAGE_TARGETS)
+    col = STAGE_HEADER.index("TM Forum target")
+    for row in rows:
+        assert STAGE_TARGETS[row[0]] in row[col], row
+
+
+def test_gating_controls_table():
+    table = table_with_header(GATING, "Reference design", ["Control", "Position", "Role"])
+    names = [row[0].lower() for row in table[1:]]
+    for want in CONTROLS:
+        assert any(want in name for name in names), want
+
+
+def test_gating_components():
+    rows = tables(sections(body(GATING)).get("Components", []))[0][1:]
+    products = [row[1] for row in rows]
+    assert any("NeMo Guardrails" in cell for cell in products)
+    assert any("OTel Safety" in cell for cell in products)
+    assert any("OTel Decision" in cell for cell in products)
+
+
+def test_gating_mermaid_capabilities():
+    fence = mermaid_fences(body(GATING))[0]
+    for want in ("Safety slot", "Decision gate"):
+        assert want in fence, want
+    assert "guardrails" in fence.lower()
+
+
+def test_gating_tm_forum_source():
+    table = tables(sections(body(GATING)).get("Sources and acceptance", []))[0]
+    basis, source = table[0].index("Basis"), table[0].index("Source")
+    assert any(
+        row[basis].lower() == "project documentation" and "tmforum.org" in row[source]
+        for row in table[1:]
+    )
+
+
+def test_gating_gate_rules():
+    text = body(GATING)
+    assert "policy ceiling" in text
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    assert any("STOP" in s and "forces" in s for s in sentences)
+
+
+def test_gating_promotion_parameters():
+    table = table_with_header(GATING, "Reference design", PARAM_TABLE_HEADER)
+    assert table[0] == PARAM_TABLE_HEADER
+    assert len(table) - 1 >= 3
+
+
+def test_gating_no_deprecated_guardrails():
+    text = body(GATING)
+    assert not re.search(r"\b(FMS|OGX)\b", text)
+    assert not re.search(r"Guardrails Orchestrator|Orchestrator Guardrails", text)
+
+
+def test_gating_alarm_example_review():
+    text = reference_design_text(GATING)
+    example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]
+    for want in ("NOTIFY", "REVIEW", "eth1", "r2"):
+        assert want in example, want

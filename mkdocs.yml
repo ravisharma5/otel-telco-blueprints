@@ -66,4 +66,5 @@ nav:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md
       - Integration: platform/integration/README.md
+      - Safety and autonomy gating: platform/safety-autonomy-gating/README.md
   - Templates: templates.md

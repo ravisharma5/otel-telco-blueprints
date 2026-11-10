@@ -198,7 +198,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 |---|---|---|
 | A changed tool description steers the agent (tool poisoning) | Medium | Generate definitions from a pinned spec, review every description diff, and gate releases on that review |
 | An agent can call tools it doesn't need | High, because the gateway allows every tool by default | Deny unless a role allows, grant the fewest roles per agent, and run the no-role rejection gate |
-| Tool output carries a prompt injection | Medium | Gateway guardrails screen responses and fail closed, and the agent holds no write credentials. PB-06 covers the full safety design |
+| Tool output carries a prompt injection | Medium | Gateway guardrails screen responses and fail closed, and the agent holds no write credentials. [PB-06](../safety-autonomy-gating/README.md) covers the full safety design |
 | A corpus is indexed without usage rights | Medium | Keep the corpus register, gate the index on the rights entry, and remove and re-index when rights lapse |
 | A static mock teaches the model a fake ID | Medium | Use stateful mocks for every API with writes, and gate the evaluation set on them |
 
@@ -207,7 +207,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): serves the LLM, Classification, Embedding, and Reranker slots this page's tools and retrieval use
 - [Architecture overview](../../architecture/index.md): the network capabilities, MCP Gateway, and data and knowledge layers this page details
 - [Decision gate](../../architecture/decision-gate.md): where every `submit_action_request` goes
-- PB-06: safety and autonomy gating builds on the gateway guardrails here
+- [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): builds on the gateway guardrails here
 - PB-07: the action layer completes the write path that starts at the action request
 - PB-08: security and identity covers workload identity and secrets in depth
 - PB-10: compliance covers customer consent and data residency for CAMARA calls and corpora

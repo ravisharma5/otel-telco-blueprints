@@ -151,6 +151,6 @@ Both messages follow the [decision gate schema](https://github.com/ravisharma5/o
 ## Used by
 
 - PB-02: the calibration method behind every threshold
-- PB-06, PB-07: gating and the action layer build on this contract
+- [PB-06](../platform/safety-autonomy-gating/README.md), PB-07: gating and the action layer build on this contract
 - [Architecture overview](index.md): the investigate-then-act flow this page details
 - [Readiness questions](../framework/index.md): the autonomy question this page answers

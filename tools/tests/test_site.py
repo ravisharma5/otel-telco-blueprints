@@ -439,6 +439,7 @@ def test_nav_order():
         "platform/index.md",
         "platform/serving-routing-placement/README.md",
         "platform/integration/README.md",
+        "platform/safety-autonomy-gating/README.md",
     ]
 
 
