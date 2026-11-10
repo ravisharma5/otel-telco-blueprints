@@ -101,15 +101,27 @@ def test_labels_match_policy_order(schema):
 
 def test_stop_is_allowed_under_every_ceiling(gate_validator):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-stop.json")
-    for ceiling in LABELS[:4]:
+    for ceiling in LABELS:
         assert gate_validator.is_valid({**base, "policy_ceiling": ceiling}), ceiling
+
+
+def _allowed_under_ceiling(ceiling: str, outcome: str) -> bool:
+    if outcome == "STOP":
+        return True
+    if ceiling == "STOP":
+        return False
+    return LABELS.index(outcome) <= LABELS.index(ceiling)
 
 
 def test_outcome_above_ceiling_is_rejected(gate_validator):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
-    order = LABELS[:4]
-    for i, ceiling in enumerate(order):
-        for j, outcome in enumerate(order):
+    for ceiling in LABELS:
+        for outcome in LABELS:
             approver = "noc-shift-lead" if outcome == "REVIEW" else None
             payload = {**base, "policy_ceiling": ceiling, "outcome": outcome, "required_approver": approver}
-            assert gate_validator.is_valid(payload) == (j <= i), (ceiling, outcome)
+            assert gate_validator.is_valid(payload) == _allowed_under_ceiling(ceiling, outcome), (ceiling, outcome)
+
+
+def test_stop_ceiling_rejects_act(gate_validator):
+    base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
+    assert not gate_validator.is_valid({**base, "policy_ceiling": "STOP", "outcome": "ACT"})
