@@ -140,16 +140,30 @@
       "tag": "pooling mode"
     },
     {
-      "id": "operator",
+      "id": "ops_user",
       "type": "external",
-      "label": "Operator",
-      "sublabel": "question or alarm",
+      "label": "Operations user",
+      "sublabel": "NOC, care, or field staff",
       "pos": [
-        20,
-        380
+        2,
+        330
       ],
       "size": [
-        96,
+        140,
+        60
+      ]
+    },
+    {
+      "id": "network_event",
+      "type": "external",
+      "label": "Network event",
+      "sublabel": "alarm, KPI breach, or ticket",
+      "pos": [
+        2,
+        430
+      ],
+      "size": [
+        140,
         60
       ]
     },
@@ -453,9 +467,16 @@
   "connections": [
     {
       "id": "ask",
-      "from": "operator",
+      "from": "ops_user",
       "to": "guardrails",
       "label": "asks",
+      "variant": "emphasis"
+    },
+    {
+      "id": "raise",
+      "from": "network_event",
+      "to": "guardrails",
+      "label": "raises",
       "variant": "emphasis"
     },
     {

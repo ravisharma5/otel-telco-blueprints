@@ -71,7 +71,7 @@ Placement uses three tiers: the far edge runs one small model per site, the regi
 
 ```mermaid
 flowchart TD
-  Q["Operator question"] --> GW["AI Gateway: identity and quota"]
+  Q["Operations user asks a question"] --> GW["AI Gateway: identity and quota"]
   GW --> IG["Input guardrails"]
   IG --> H["Agent runtime rewrites the query"]
   H --> E["Embedding slot retrieves candidates"]
@@ -81,7 +81,7 @@ flowchart TD
   S -- "yes" --> D["Decision slot picks the LLM size"]
   D --> L["LLM slot answers with citations"]
   L --> OG["Output guardrails"]
-  OG --> A["Answer to the operator"]
+  OG --> A["Answer to the operations user"]
 ```
 
 This flow is read-only and needs no tool calling. Each step writes to the trace: retrieval ids, rerank scores, the abstain decision, model size, tokens, and latency.
@@ -90,7 +90,7 @@ This flow is read-only and needs no tool calling. Each step writes to the trace:
 
 ```mermaid
 flowchart TD
-  T["Trigger: alarm or operator request"] --> AG["Agent runtime with the LLM slot"]
+  T["Trigger: network event or operations user request"] --> AG["Agent runtime with the LLM slot"]
   AG -- "read and notify tools" --> TG["MCP Gateway"]
   AG -- "one action-request tool" --> TG
   TG -- "reads and notifications" --> SYS["Network and business systems"]

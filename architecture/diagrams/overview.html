@@ -5025,60 +5025,64 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         <!-- Connection paths (before components for correct z-order) -->
         <g data-graph-role="automatic-crossover" style="--step:0">
-          <path data-graph-role="automatic-crossover-underlay" d="M 116 410 L 170 410" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="operator" data-edge-to="guardrails" data-edge-label="asks" data-edge-key="0" data-edge-id="ask" data-composition-points="116,410;170,410" data-composition-crossover="halo" data-composition-independent="true" d="M 116 410 L 170 410" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 142 360 L 149 360 Q 156 360 156 367 L 156 393.9 Q 156 400.9 163 400.9 L 170 400.9" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="ops_user" data-edge-to="guardrails" data-edge-label="asks" data-edge-key="0" data-edge-id="ask" data-composition-points="142,360;156,360;156,400.9;170,400.9" data-composition-crossover="halo" data-composition-independent="true" d="M 142 360 L 149 360 Q 156 360 156 367 L 156 393.9 Q 156 400.9 163 400.9 L 170 400.9" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 290 410 L 366 410" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="guardrails" data-edge-to="agent" data-edge-label="screened" data-edge-key="1" data-edge-id="screened" data-composition-points="290,410;366,410" data-composition-crossover="halo" data-composition-independent="true" d="M 290 410 L 366 410" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 142 460 L 149 460 Q 156 460 156 453 L 156 424 Q 156 417 163 417 L 170 417" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="network_event" data-edge-to="guardrails" data-edge-label="raises" data-edge-key="1" data-edge-id="raise" data-composition-points="142,460;156,460;156,417;170,417" data-composition-crossover="halo" data-composition-independent="true" d="M 142 460 L 149 460 Q 156 460 156 453 L 156 424 Q 156 417 163 417 L 170 417" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 526 410 L 622 410" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="agent" data-edge-to="model_gateway" data-edge-label="model calls" data-edge-key="2" data-edge-id="model_calls" data-composition-points="526,410;622,410" data-composition-crossover="halo" data-composition-independent="true" d="M 526 410 L 622 410" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 290 410 L 366 410" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="guardrails" data-edge-to="agent" data-edge-label="screened" data-edge-key="2" data-edge-id="screened" data-composition-points="290,410;366,410" data-composition-crossover="halo" data-composition-independent="true" d="M 290 410 L 366 410" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 707 380 L 707 276" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="model_gateway" data-edge-to="slot_llm" data-edge-label="routes to a slot" data-edge-key="3" data-edge-id="route_slot" data-composition-points="707,380;707,276" data-composition-crossover="halo" data-composition-independent="true" d="M 707 380 L 707 276" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 526 410 L 622 410" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="agent" data-edge-to="model_gateway" data-edge-label="model calls" data-edge-key="3" data-edge-id="model_calls" data-composition-points="526,410;622,410" data-composition-crossover="halo" data-composition-independent="true" d="M 526 410 L 622 410" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 853 276 L 853 320 Q 853 328 861 328 L 925 328 Q 933 328 933 336 L 933 380" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="slot_embedding" data-edge-to="data" data-edge-label="embeds" data-edge-key="4" data-edge-id="embed" data-composition-points="853,276;853,328;933,328;933,380" data-composition-crossover="halo" data-composition-independent="true" d="M 853 276 L 853 320 Q 853 328 861 328 L 925 328 Q 933 328 933 336 L 933 380" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 707 380 L 707 276" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="model_gateway" data-edge-to="slot_llm" data-edge-label="routes to a slot" data-edge-key="4" data-edge-id="route_slot" data-composition-points="707,380;707,276" data-composition-crossover="halo" data-composition-independent="true" d="M 707 380 L 707 276" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 999 276 L 999 320 Q 999 328 991 328 L 955 328 Q 947 328 947 336 L 947 380" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="slot_reranker" data-edge-to="data" data-edge-label="reranks" data-edge-key="5" data-edge-id="rerank" data-composition-points="999,276;999,328;947,328;947,380" data-composition-crossover="halo" data-composition-independent="true" d="M 999 276 L 999 320 Q 999 328 991 328 L 955 328 Q 947 328 947 336 L 947 380" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 853 276 L 853 320 Q 853 328 861 328 L 925 328 Q 933 328 933 336 L 933 380" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="slot_embedding" data-edge-to="data" data-edge-label="embeds" data-edge-key="5" data-edge-id="embed" data-composition-points="853,276;853,328;933,328;933,380" data-composition-crossover="halo" data-composition-independent="true" d="M 853 276 L 853 320 Q 853 328 861 328 L 925 328 Q 933 328 933 336 L 933 380" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 446 440 L 446 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="agent" data-edge-to="tool_gateway" data-edge-label="tool calls" data-edge-key="6" data-edge-id="tool_calls" data-composition-points="446,440;446,530" data-composition-crossover="halo" data-composition-independent="true" d="M 446 440 L 446 530" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 999 276 L 999 320 Q 999 328 991 328 L 955 328 Q 947 328 947 336 L 947 380" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="slot_reranker" data-edge-to="data" data-edge-label="reranks" data-edge-key="6" data-edge-id="rerank" data-composition-points="999,276;999,328;947,328;947,380" data-composition-crossover="halo" data-composition-independent="true" d="M 999 276 L 999 320 Q 999 328 991 328 L 955 328 Q 947 328 947 336 L 947 380" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:7">
-          <path data-graph-role="automatic-crossover-underlay" d="M 546 560 L 684 560" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="tool_gateway" data-edge-to="capabilities" data-edge-label="reads and notifies" data-edge-key="7" data-edge-id="reads" data-composition-points="546,560;684,560" data-composition-crossover="halo" data-composition-independent="true" d="M 546 560 L 684 560" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 446 440 L 446 530" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="agent" data-edge-to="tool_gateway" data-edge-label="tool calls" data-edge-key="7" data-edge-id="tool_calls" data-composition-points="446,440;446,530" data-composition-crossover="halo" data-composition-independent="true" d="M 446 440 L 446 530" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:8">
-          <path data-graph-role="automatic-crossover-underlay" d="M 864 560 L 924 560" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="capabilities" data-edge-to="systems" data-edge-label="MCP" data-edge-key="8" data-edge-id="mcp" data-composition-points="864,560;924,560" data-composition-crossover="halo" data-composition-independent="true" d="M 864 560 L 924 560" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 546 560 L 684 560" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="tool_gateway" data-edge-to="capabilities" data-edge-label="reads and notifies" data-edge-key="8" data-edge-id="reads" data-composition-points="546,560;684,560" data-composition-crossover="halo" data-composition-independent="true" d="M 546 560 L 684 560" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:9">
-          <path data-graph-role="automatic-crossover-underlay" d="M 446 590 L 446 680" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="tool_gateway" data-edge-to="orchestrator" data-edge-label="action request" data-edge-key="9" data-edge-id="action_request" data-composition-points="446,590;446,680" data-composition-crossover="halo" data-composition-independent="true" d="M 446 590 L 446 680" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 864 560 L 924 560" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="capabilities" data-edge-to="systems" data-edge-label="MCP" data-edge-key="9" data-edge-id="mcp" data-composition-points="864,560;924,560" data-composition-crossover="halo" data-composition-independent="true" d="M 864 560 L 924 560" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:10">
-          <path data-graph-role="automatic-crossover-underlay" d="M 536 710 L 648 710" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="orchestrator" data-edge-to="gate" data-edge-label="label the step" data-edge-key="10" data-edge-id="label_step" data-composition-points="536,710;648,710" data-composition-crossover="halo" data-composition-independent="true" d="M 536 710 L 648 710" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 446 590 L 446 680" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="tool_gateway" data-edge-to="orchestrator" data-edge-label="action request" data-edge-key="10" data-edge-id="action_request" data-composition-points="446,590;446,680" data-composition-crossover="halo" data-composition-independent="true" d="M 446 590 L 446 680" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:11">
-          <path data-graph-role="automatic-crossover-underlay" d="M 818 710 L 919 710" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="gate" data-edge-to="execute" data-edge-label="allowed" data-edge-key="11" data-edge-id="act" data-composition-points="818,710;919,710" data-composition-crossover="halo" data-composition-independent="true" d="M 818 710 L 919 710" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 536 710 L 648 710" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="orchestrator" data-edge-to="gate" data-edge-label="label the step" data-edge-key="11" data-edge-id="label_step" data-composition-points="536,710;648,710" data-composition-crossover="halo" data-composition-independent="true" d="M 536 710 L 648 710" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:12">
-          <path data-graph-role="automatic-crossover-underlay" d="M 1004 680 L 1004 590" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="execute" data-edge-to="systems" data-edge-label="approved change" data-edge-key="12" data-edge-id="change" data-composition-points="1004,680;1004,590" data-composition-crossover="halo" data-composition-independent="true" d="M 1004 680 L 1004 590" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 818 710 L 919 710" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="gate" data-edge-to="execute" data-edge-label="allowed" data-edge-key="12" data-edge-id="act" data-composition-points="818,710;919,710" data-composition-crossover="halo" data-composition-independent="true" d="M 818 710 L 919 710" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:13">
+          <path data-graph-role="automatic-crossover-underlay" d="M 1004 680 L 1004 590" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="execute" data-edge-to="systems" data-edge-label="approved change" data-edge-key="13" data-edge-id="change" data-composition-points="1004,680;1004,590" data-composition-crossover="halo" data-composition-independent="true" d="M 1004 680 L 1004 590" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:14">
           <path data-graph-role="automatic-crossover-underlay" d="M 430 880 L 555 880" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="adaptation" data-edge-to="evaluation" data-edge-label="candidate models" data-edge-key="13" data-edge-id="candidates" data-composition-points="430,880;555,880" data-composition-crossover="halo" data-composition-independent="true" d="M 430 880 L 555 880" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-edge-from="adaptation" data-edge-to="evaluation" data-edge-label="candidate models" data-edge-key="14" data-edge-id="candidates" data-composition-points="430,880;555,880" data-composition-crossover="halo" data-composition-independent="true" d="M 430 880 L 555 880" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
 
         <!-- Components -->
@@ -5187,16 +5191,28 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="fine" x="999" y="268" class="t-backend" font-size="7" text-anchor="middle">pooling mode</text>
         </g>
 
-        <g id="node-operator" data-node-id="operator" data-node-label="Operator" tabindex="0" role="button" aria-label="Focus Operator, question or alarm, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="question or alarm" data-node-context="Architecture component">
-          <title>Operator · question or alarm · Architecture component</title>
-          <rect x="20" y="380" width="96" height="60" rx="6" class="c-mask"/>
-          <rect x="20" y="380" width="96" height="60" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(26 386) scale(0.6875)">
+        <g id="node-ops_user" data-node-id="ops_user" data-node-label="Operations user" tabindex="0" role="button" aria-label="Focus Operations user, NOC, care, or field staff, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="NOC, care, or field staff" data-node-context="Architecture component">
+          <title>Operations user · NOC, care, or field staff · Architecture component</title>
+          <rect x="2" y="330" width="140" height="60" rx="6" class="c-mask"/>
+          <rect x="2" y="330" width="140" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(8 336) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="68" y="408" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Operator</text>
-        <text data-detail="context" x="68" y="424" class="t-muted" font-size="8.6" text-anchor="middle">question or alarm</text>
+          <text data-node-label="" data-detail-anchor="" x="72" y="358" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Operations user</text>
+        <text data-detail="context" x="72" y="374" class="t-muted" font-size="8.8" text-anchor="middle">NOC, care, or field staff</text>
+        </g>
+
+        <g id="node-network_event" data-node-id="network_event" data-node-label="Network event" tabindex="0" role="button" aria-label="Focus Network event, alarm, KPI breach, or ticket, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="alarm, KPI breach, or ticket" data-node-context="Architecture component">
+          <title>Network event · alarm, KPI breach, or ticket · Architecture component</title>
+          <rect x="2" y="430" width="140" height="60" rx="6" class="c-mask"/>
+          <rect x="2" y="430" width="140" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(8 436) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="72" y="458" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Network event</text>
+        <text data-detail="context" x="72" y="474" class="t-muted" font-size="7.8" text-anchor="middle">alarm, KPI breach, or ticket</text>
         </g>
 
         <g id="node-guardrails" data-node-id="guardrails" data-node-label="Guardrails" tabindex="0" role="button" aria-label="Focus Guardrails, screens input and output, Data and execution plane" aria-pressed="false" data-node-kind="security" data-node-sublabel="screens input and output" data-node-context="Data and execution plane">
@@ -5386,59 +5402,63 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
 
         <!-- Connection labels -->
-        <g data-detail="context" data-edge-from="operator" data-edge-to="guardrails" data-edge-label="asks" data-edge-key="0" data-edge-id="ask">
-          <rect x="128" y="390" width="30" height="14" rx="3" class="c-mask"/>
-          <text x="143" y="400" class="t-edge-emphasis" font-size="8" text-anchor="middle">asks</text>
+        <g data-detail="context" data-edge-from="ops_user" data-edge-to="guardrails" data-edge-label="asks" data-edge-key="0" data-edge-id="ask">
+          <rect x="141" y="360.45" width="30" height="14" rx="3" class="c-mask"/>
+          <text x="156" y="370.45" class="t-edge-emphasis" font-size="8" text-anchor="middle">asks</text>
         </g>
-        <g data-detail="context" data-edge-from="guardrails" data-edge-to="agent" data-edge-label="screened" data-edge-key="1" data-edge-id="screened">
+        <g data-detail="context" data-edge-from="network_event" data-edge-to="guardrails" data-edge-label="raises" data-edge-key="1" data-edge-id="raise">
+          <rect x="162" y="442.25" width="38.8" height="14" rx="3" class="c-mask"/>
+          <text x="181.4" y="452.25" class="t-edge-emphasis" font-size="8" text-anchor="middle">raises</text>
+        </g>
+        <g data-detail="context" data-edge-from="guardrails" data-edge-to="agent" data-edge-label="screened" data-edge-key="2" data-edge-id="screened">
           <rect x="303.8" y="390" width="48.4" height="14" rx="3" class="c-mask"/>
           <text x="328" y="400" class="t-edge-emphasis" font-size="8" text-anchor="middle">screened</text>
         </g>
-        <g data-detail="context" data-edge-from="agent" data-edge-to="model_gateway" data-edge-label="model calls" data-edge-key="2" data-edge-id="model_calls">
+        <g data-detail="context" data-edge-from="agent" data-edge-to="model_gateway" data-edge-label="model calls" data-edge-key="3" data-edge-id="model_calls">
           <rect x="542.6" y="390" width="62.8" height="14" rx="3" class="c-mask"/>
           <text x="574" y="400" class="t-edge-emphasis" font-size="8" text-anchor="middle">model calls</text>
         </g>
-        <g data-detail="context" data-edge-from="model_gateway" data-edge-to="slot_llm" data-edge-label="routes to a slot" data-edge-key="3" data-edge-id="route_slot">
+        <g data-detail="context" data-edge-from="model_gateway" data-edge-to="slot_llm" data-edge-label="routes to a slot" data-edge-key="4" data-edge-id="route_slot">
           <rect x="663.6" y="360" width="86.8" height="14" rx="3" class="c-mask"/>
           <text x="707" y="370" class="t-edge-emphasis" font-size="8" text-anchor="middle">routes to a slot</text>
         </g>
-        <g data-detail="context" data-edge-from="slot_embedding" data-edge-to="data" data-edge-label="embeds" data-edge-key="4" data-edge-id="embed">
+        <g data-detail="context" data-edge-from="slot_embedding" data-edge-to="data" data-edge-label="embeds" data-edge-key="5" data-edge-id="embed">
           <rect x="873.6" y="308" width="38.8" height="14" rx="3" class="c-mask"/>
           <text x="893" y="318" class="t-edge-default" font-size="8" text-anchor="middle">embeds</text>
         </g>
-        <g data-detail="context" data-edge-from="slot_reranker" data-edge-to="data" data-edge-label="reranks" data-edge-key="5" data-edge-id="rerank">
+        <g data-detail="context" data-edge-from="slot_reranker" data-edge-to="data" data-edge-label="reranks" data-edge-key="6" data-edge-id="rerank">
           <rect x="951.2" y="308" width="43.6" height="14" rx="3" class="c-mask"/>
           <text x="973" y="318" class="t-edge-default" font-size="8" text-anchor="middle">reranks</text>
         </g>
-        <g data-detail="context" data-edge-from="agent" data-edge-to="tool_gateway" data-edge-label="tool calls" data-edge-key="6" data-edge-id="tool_calls">
+        <g data-detail="context" data-edge-from="agent" data-edge-to="tool_gateway" data-edge-label="tool calls" data-edge-key="7" data-edge-id="tool_calls">
           <rect x="382" y="478" width="58" height="14" rx="3" class="c-mask"/>
           <text x="411" y="488" class="t-edge-default" font-size="8" text-anchor="middle">tool calls</text>
         </g>
-        <g data-detail="context" data-edge-from="tool_gateway" data-edge-to="capabilities" data-edge-label="reads and notifies" data-edge-key="7" data-edge-id="reads">
+        <g data-detail="context" data-edge-from="tool_gateway" data-edge-to="capabilities" data-edge-label="reads and notifies" data-edge-key="8" data-edge-id="reads">
           <rect x="566.8" y="540" width="96.39999999999999" height="14" rx="3" class="c-mask"/>
           <text x="615" y="550" class="t-edge-default" font-size="8" text-anchor="middle">reads and notifies</text>
         </g>
-        <g data-detail="context" data-edge-from="capabilities" data-edge-to="systems" data-edge-label="MCP" data-edge-key="8" data-edge-id="mcp">
+        <g data-detail="context" data-edge-from="capabilities" data-edge-to="systems" data-edge-label="MCP" data-edge-key="9" data-edge-id="mcp">
           <rect x="879" y="540" width="30" height="14" rx="3" class="c-mask"/>
           <text x="894" y="550" class="t-edge-default" font-size="8" text-anchor="middle">MCP</text>
         </g>
-        <g data-detail="context" data-edge-from="tool_gateway" data-edge-to="orchestrator" data-edge-label="action request" data-edge-key="9" data-edge-id="action_request">
+        <g data-detail="context" data-edge-from="tool_gateway" data-edge-to="orchestrator" data-edge-label="action request" data-edge-key="10" data-edge-id="action_request">
           <rect x="362.79999999999995" y="628" width="77.2" height="14" rx="3" class="c-mask"/>
           <text x="401.4" y="638" class="t-edge-security" font-size="8" text-anchor="middle">action request</text>
         </g>
-        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="gate" data-edge-label="label the step" data-edge-key="10" data-edge-id="label_step">
+        <g data-detail="context" data-edge-from="orchestrator" data-edge-to="gate" data-edge-label="label the step" data-edge-key="11" data-edge-id="label_step">
           <rect x="553.4" y="690" width="77.2" height="14" rx="3" class="c-mask"/>
           <text x="592" y="700" class="t-edge-security" font-size="8" text-anchor="middle">label the step</text>
         </g>
-        <g data-detail="context" data-edge-from="gate" data-edge-to="execute" data-edge-label="allowed" data-edge-key="11" data-edge-id="act">
+        <g data-detail="context" data-edge-from="gate" data-edge-to="execute" data-edge-label="allowed" data-edge-key="12" data-edge-id="act">
           <rect x="846.7" y="690" width="43.6" height="14" rx="3" class="c-mask"/>
           <text x="868.5" y="700" class="t-edge-security" font-size="8" text-anchor="middle">allowed</text>
         </g>
-        <g data-detail="context" data-edge-from="execute" data-edge-to="systems" data-edge-label="approved change" data-edge-key="12" data-edge-id="change">
+        <g data-detail="context" data-edge-from="execute" data-edge-to="systems" data-edge-label="approved change" data-edge-key="13" data-edge-id="change">
           <rect x="963" y="660" width="82" height="14" rx="3" class="c-mask"/>
           <text x="1004" y="670" class="t-edge-security" font-size="8" text-anchor="middle">approved change</text>
         </g>
-        <g data-detail="context" data-edge-from="adaptation" data-edge-to="evaluation" data-edge-label="candidate models" data-edge-key="13" data-edge-id="candidates">
+        <g data-detail="context" data-edge-from="adaptation" data-edge-to="evaluation" data-edge-label="candidate models" data-edge-key="14" data-edge-id="candidates">
           <rect x="449.1" y="860" width="86.8" height="14" rx="3" class="c-mask"/>
           <text x="492.5" y="870" class="t-edge-dashed" font-size="8" text-anchor="middle">candidate models</text>
         </g>

@@ -69,6 +69,11 @@ def test_diagram_candidate_names_capabilities():
     labels = {c["label"] for c in candidate["components"]}
     for name in ("AI Gateway", "MCP Gateway", "Guardrails", "Agent runtime", "Decision gate"):
         assert name in labels, name
+    assert {"Operations user", "Network event"} <= labels
+    assert "Operator" not in labels
+    into_guardrails = {c["from"] for c in candidate["connections"] if c["to"] == "guardrails"}
+    entries = {c["id"] for c in candidate["components"] if c["label"] in ("Operations user", "Network event")}
+    assert entries <= into_guardrails
     boundaries = " ".join(b["label"] for b in candidate["boundaries"])
     assert "Model endpoint inferencing" in boundaries
     for plane in ("Control plane", "Data and execution plane", "Lifecycle plane"):
