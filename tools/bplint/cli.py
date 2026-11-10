@@ -95,6 +95,23 @@ GROUPS = (
 )
 
 
+def _check_budget_types(budgets: dict, validators: dict) -> None:
+    """Every schema type needs a budgets entry, and the reverse.
+
+    A type with a schema but no budgets entry would pass FM002 and then skip
+    the section, budget, and validation-table checks without a finding.
+    """
+    types = budgets.get("types")
+    if not isinstance(types, dict):
+        raise ConfigError("budgets 'types' must be a mapping of doc type to rules")
+    no_budget = sorted(set(validators) - set(types))
+    no_schema = sorted(set(types) - set(validators))
+    if no_budget:
+        raise ConfigError(f"schema type(s) with no budgets entry: {no_budget}")
+    if no_schema:
+        raise ConfigError(f"budgets type(s) with no schema: {no_schema}")
+
+
 def _check_group_types(config: dict, validators: dict) -> None:
     """Every glob group in use needs a `group_types` entry of known types."""
     bindings = config.get("group_types") or {}
@@ -129,6 +146,7 @@ def build_context(args) -> checks.Context:
         enums = load_enums(schema_dir)
     except Exception as exc:
         raise ConfigError(f"cannot load schemas from {schema_dir}: {exc}") from exc
+    _check_budget_types(budgets, validators)
     _check_group_types(config, validators)
     try:
         today = date.fromisoformat(args.today) if args.today else date.today()
