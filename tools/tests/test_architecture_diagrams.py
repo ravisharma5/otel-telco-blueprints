@@ -96,3 +96,102 @@ def test_tagged_boxes_tall_enough_for_three_lines():
         if c.get("tag") and c["size"][1] < TAGGED_MIN_HEIGHT
     ]
     assert short == []
+
+
+# The exported SVG is the published file. It is served through an img tag, so
+# a script would not run, but it still must not carry one, nor event handlers,
+# external references, or local paths.
+SVG = DIAGRAMS / "overview.svg"
+SVG_NS = "{http://www.w3.org/2000/svg}"
+VISIBLE_TAGS = {"text", "tspan", "title", "desc"}
+# Font subsets and inline images live in @font-face rules and data URIs.
+# Their base64 bytes can spell short codes by chance, so they are dropped
+# before any word checks.
+FONT_FACE = re.compile(r"@font-face\s*\{[^}]*\}", re.DOTALL)
+DATA_URI = re.compile(r"data:[^\"')\s]+")
+
+
+def _svg_root():
+    from xml.etree import ElementTree
+
+    return ElementTree.parse(SVG).getroot()
+
+
+def _svg_text_without_embeds():
+    text = SVG.read_text(encoding="utf-8")
+    text = FONT_FACE.sub("", text)
+    text = DATA_URI.sub("", text)
+    return BASE64_RUN.sub("", text)
+
+
+def _svg_visible_text():
+    parts = []
+    for el in _svg_root().iter():
+        tag = el.tag.removeprefix(SVG_NS)
+        if tag in VISIBLE_TAGS and el.text:
+            parts.append(el.text)
+        if tag in VISIBLE_TAGS and el.tail:
+            parts.append(el.tail)
+    return "\n".join(parts)
+
+
+def test_overview_svg_parses_with_svg_root():
+    assert _svg_root().tag == SVG_NS + "svg"
+
+
+def test_overview_svg_is_safe():
+    raw = SVG.read_text(encoding="utf-8")
+    assert "<script" not in raw.lower()
+    assert "javascript:" not in raw.lower()
+    assert not LOCAL_PATH_RE.search(raw)
+    assert not re.search(r"""(?:xlink:)?href\s*=\s*["']\s*(?:https?:)?//""", raw)
+    assert not re.search(r"""url\(\s*["']?\s*(?:https?:)?//""", raw)
+    assert not re.search(r"@import", raw)
+
+
+def test_overview_svg_has_no_event_handlers():
+    handlers = [
+        (el.tag, name)
+        for el in _svg_root().iter()
+        for name in el.attrib
+        if name.lower().startswith("on")
+    ]
+    assert handlers == []
+
+
+def test_overview_svg_has_no_planning_ids():
+    from tools.guards.patterns import PLANNING_ID_RE
+
+    assert PLANNING_ID_RE.findall(_svg_text_without_embeds()) == []
+
+
+def test_overview_svg_visible_text_names_capabilities():
+    visible = _svg_visible_text()
+    for name in ("Operations user", "Network event", "Model endpoint inferencing"):
+        assert name in visible, name
+    assert LAYER_CODE.findall(visible) == []
+    assert PRODUCT_TERMS.findall(visible) == []
+
+
+def test_overview_svg_has_no_layer_codes_or_products():
+    text = _svg_text_without_embeds()
+    assert LAYER_CODE.findall(text) == []
+    assert PRODUCT_TERMS.findall(text) == []
+
+
+def _design_section(page):
+    start = page.index("\n## The design\n")
+    end = page.find("\n## ", start + 1)
+    return page[start : end if end != -1 else None]
+
+
+IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
+
+
+def test_overview_embeds_svg():
+    page = (REPO_ROOT / "architecture/index.md").read_text(encoding="utf-8")
+    images = [m for m in IMAGE_RE.finditer(page) if m.group(2) == "diagrams/overview.svg"]
+    assert len(images) == 1
+    assert images[0].group(1).strip()
+    design = _design_section(page)
+    assert "](diagrams/overview.svg)" in design
