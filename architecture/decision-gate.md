@@ -61,7 +61,7 @@ For example, an alarm reports link errors on a router. The agent investigates wi
 | ACT | AAP | The approved job for an approved playbook, then verification and rollback on failure | Request, label probabilities, policy version, job result, and verification result |
 | STOP | AAP | Nothing; the step ends and the agent reports what it found | Request, label probabilities, and the reason |
 
-The outcome never exceeds the policy ceiling for the capability and risk class, and STOP is always allowed. The ceiling follows the [autonomy ceiling](../framework/definitions.md#autonomy-ceiling): inform allows LOOK, notify allows NOTIFY, recommend-with-approval allows REVIEW, and act-within-policy allows ACT.
+The outcome never exceeds the model label or the policy ceiling for the capability and risk class, and STOP is always allowed. The ceiling follows the [autonomy ceiling](../framework/definitions.md#autonomy-ceiling): inform allows LOOK, notify allows NOTIFY, recommend-with-approval allows REVIEW, and act-within-policy allows ACT.
 
 ### How AAP gets the label
 

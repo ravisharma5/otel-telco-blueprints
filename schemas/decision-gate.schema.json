@@ -142,7 +142,7 @@
         },
         "outcome": {
           "$ref": "#/$defs/label",
-          "description": "Final ruling after applying the policy to the model label. Never above the policy ceiling, except STOP."
+          "description": "Final ruling after applying the policy to the model label. Policy only lowers autonomy: never above the model label or the policy ceiling. STOP is always allowed, and a STOP label or ceiling allows only STOP."
         },
         "policy_version": {
           "type": "string",
@@ -179,6 +179,22 @@
         },
         {
           "if": { "properties": { "policy_ceiling": { "const": "STOP" } } },
+          "then": { "properties": { "outcome": { "const": "STOP" } } }
+        },
+        {
+          "if": { "properties": { "model_label": { "const": "LOOK" } } },
+          "then": { "properties": { "outcome": { "enum": ["LOOK", "STOP"] } } }
+        },
+        {
+          "if": { "properties": { "model_label": { "const": "NOTIFY" } } },
+          "then": { "properties": { "outcome": { "enum": ["LOOK", "NOTIFY", "STOP"] } } }
+        },
+        {
+          "if": { "properties": { "model_label": { "const": "REVIEW" } } },
+          "then": { "properties": { "outcome": { "enum": ["LOOK", "NOTIFY", "REVIEW", "STOP"] } } }
+        },
+        {
+          "if": { "properties": { "model_label": { "const": "STOP" } } },
           "then": { "properties": { "outcome": { "const": "STOP" } } }
         }
       ]
