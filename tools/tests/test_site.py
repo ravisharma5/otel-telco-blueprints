@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -385,3 +386,35 @@ def test_readiness_links_architecture_pages():
         "../architecture/placement.md",
     ):
         assert f"]({target})" in text, target
+
+
+# ---------- no internal phase numbers on published pages ----------
+
+PHASE_NUMBER = re.compile(r"(?i)\bphases? [0-9]")
+PUBLISHED_DIRS = ["site-src", "framework", "templates", "architecture", "platform", "catalog"]
+
+
+def _published_markdown():
+    for name in PUBLISHED_DIRS:
+        root = REPO_ROOT / name
+        if root.is_dir():
+            yield from sorted(root.rglob("*.md"))
+
+
+@pytest.mark.parametrize("sample", ["arrive in Phase 5", "in phases 3 and 4", "| Phase 4 |"])
+def test_phase_number_regex_catches(sample):
+    assert PHASE_NUMBER.search(sample), sample
+
+
+@pytest.mark.parametrize("sample", ["in the phase that adds it", "multi-phase rollout", "phase-in"])
+def test_phase_number_regex_allows(sample):
+    assert not PHASE_NUMBER.search(sample), sample
+
+
+def test_no_phase_numbers_on_published_pages():
+    hits = []
+    for path in _published_markdown():
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if PHASE_NUMBER.search(line):
+                hits.append(f"{path.relative_to(REPO_ROOT)}:{n}")
+    assert hits == []
