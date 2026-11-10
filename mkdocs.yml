@@ -58,6 +58,7 @@ nav:
   - Architecture:
       - Overview: architecture/index.md
       - Decision gate: architecture/decision-gate.md
+      - Adaptation ladder: architecture/adaptation-ladder.md
   - Catalog: catalog/index.md
   - Platform: platform/index.md
   - Templates: templates.md
