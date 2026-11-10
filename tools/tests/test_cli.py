@@ -179,3 +179,15 @@ def test_vt_spec_unknown_raising_or_context_column_exits_2(tmp_path, old, new, n
     proc = _run_raw("--config", _write_config(tmp_path, vt_spec=spec))
     assert proc.returncode == 2
     assert name in proc.stderr
+
+
+def test_schema_type_without_budgets_entry_exits_2(tmp_path):
+    import yaml
+
+    data = yaml.safe_load((REPO_ROOT / "tools/bplint/budgets.yaml").read_text())
+    del data["types"]["reference"]
+    budgets = tmp_path / "budgets.yaml"
+    budgets.write_text(yaml.safe_dump(data))
+    proc = _run_raw("--config", _write_config(tmp_path, budgets=budgets))
+    assert proc.returncode == 2
+    assert "bplint:" in proc.stderr and "reference" in proc.stderr
