@@ -559,8 +559,11 @@ def test_flows_four_present():
 # ---------- layer codes and product names ----------
 
 # Layers and planes are named in words on every published page. Short layer
-# codes are internal shorthand and never reach readers.
-LAYER_CODE = re.compile(r"\bL(?:10|9[abc]|[0-9])\b")
+# codes are internal shorthand and never reach readers. The NVIDIA L4 GPU is
+# not a layer code: "NVIDIA L4", a count such as "1x L4", and "L4 GPU" pass.
+LAYER_CODE = re.compile(
+    r"(?<!NVIDIA )(?<![0-9]x )\bL(?:10|9[abc]|[0-9])\b(?!\s+GPUs?\b)"
+)
 # Diagrams name capabilities, never products. Page tables still name the
 # product used for each role, so only diagrams are checked.
 PRODUCT_TERMS = re.compile(
