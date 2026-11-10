@@ -583,3 +583,44 @@ def test_product_terms_regex():
     assert PRODUCT_TERMS.search("runs on AAP")
     assert not PRODUCT_TERMS.search("AI Gateway routes to model endpoint inferencing")
     assert not PRODUCT_TERMS.search("GitOps promotes a canary")
+
+
+# ---------- placement tiers ----------
+
+PLACEMENT = REPO_ROOT / "architecture/placement.md"
+TIERS = ["Far edge", "Regional", "Core"]
+LATENCY_RANGES = [
+    "milliseconds per decision",
+    "sub-second closed loop",
+    "seconds (interactive) to minutes-hours (batch)",
+]
+MS_NUMBER = re.compile(r"\d+\s*ms\b")
+
+
+def test_placement_is_reference():
+    fm = front_matter(PLACEMENT)
+    assert fm["type"] == "reference"
+    assert "PB-04" in fm["platform_blueprints"]
+
+
+def test_placement_tiers():
+    table = _find_table(PLACEMENT, ["Tier", "OTel slots placed here", "Latency range"])
+    header = table[0]
+    assert any(cell.startswith("Platform") for cell in header), header
+    rows = table[1:]
+    assert [row[0] for row in rows] == TIERS
+    latency = header.index("Latency range")
+    assert [row[latency] for row in rows] == LATENCY_RANGES
+    slots = header.index("OTel slots placed here")
+    for row in rows:
+        assert row[slots].strip(), row
+
+
+def test_placement_no_ms_numbers():
+    assert MS_NUMBER.findall(PLACEMENT.read_text(encoding="utf-8")) == []
+
+
+def test_placement_all_slots():
+    text = body(PLACEMENT)
+    for slot in ("LLM", "Embedding", "Reranker", "Safety", "Decision", "Classification"):
+        assert slot in text, slot
