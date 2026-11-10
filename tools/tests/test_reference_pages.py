@@ -384,10 +384,13 @@ def test_readiness_answered_by():
     assert "PB-10" in answered[8] and "PB-10" in answered[9]
 
 
-def test_readiness_no_pb_links():
-    for text, target in MD_LINK.findall(body(READINESS)):
-        for bad in ("PB-", "platform/"):
-            assert bad not in text and bad not in target, (text, target)
+def test_readiness_platform_links_resolve():
+    """Links into platform/ are allowed only once the target page exists."""
+    for _text, target in MD_LINK.findall(body(READINESS)):
+        if "platform/" not in target:
+            continue
+        path = target.split("#", 1)[0]
+        assert (READINESS.parent / path).resolve().is_file(), target
 
 
 # ---------- architecture overview (architecture landing page) ----------
@@ -647,7 +650,7 @@ TEMPLATES = sorted((REPO_ROOT / "templates").glob("*.md"))
 
 
 def _published_docs() -> list[Path]:
-    return [*reference_pages(), *TEMPLATES]
+    return [*reference_pages(), *TEMPLATES, *blueprint_pages()]
 
 
 @pytest.mark.parametrize(
@@ -681,7 +684,11 @@ def test_no_layer_codes_in_published_docs(path):
     assert LAYER_CODE.findall(path.read_text(encoding="utf-8")) == []
 
 
-@pytest.mark.parametrize("path", reference_pages(), ids=lambda p: str(p.relative_to(REPO_ROOT)))
+@pytest.mark.parametrize(
+    "path",
+    [*reference_pages(), *blueprint_pages()],
+    ids=lambda p: str(p.relative_to(REPO_ROOT)),
+)
 def test_mermaid_names_capabilities_not_products(path):
     for fence in mermaid_fences(body(path)):
         assert PRODUCT_TERMS.findall(fence) == [], path.name
