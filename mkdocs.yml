@@ -62,5 +62,6 @@ nav:
       - Placement: architecture/placement.md
       - Crosswalk: architecture/crosswalk.md
   - Catalog: catalog/index.md
-  - Platform: platform/index.md
+  - Platform:
+      - Overview: platform/index.md
   - Templates: templates.md

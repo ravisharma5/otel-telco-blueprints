@@ -106,8 +106,8 @@ def _fault_missing_nav_target(root):
     cfg = root / "mkdocs.yml"
     text = cfg.read_text(encoding="utf-8")
     text = text.replace(
-        "  - Platform: platform/index.md\n",
-        "  - Platform:\n      - Overview: platform/index.md\n      - Missing: platform/missing.md\n",
+        "      - Overview: platform/index.md\n",
+        "      - Overview: platform/index.md\n      - Missing: platform/missing.md\n",
     )
     assert "platform/missing.md" in text
     cfg.write_text(text, encoding="utf-8")
@@ -344,10 +344,39 @@ def test_banner_unit_non_string_status_gives_no_banner(status):
     assert _banner(src, {"type": "reference", "doc_status": status}) == src
 
 
+def test_banner_unit_platform_draft():
+    out = _banner("# Title\n\nBody\n", {"type": "platform", "doc_status": "draft"})
+    assert _line_after_h1(out, "# Title") == '!!! warning "Draft: content may change"'
+
+
+def test_banner_unit_platform_review():
+    out = _banner("# Title\n\nBody\n", {"type": "platform", "doc_status": "review"})
+    assert _line_after_h1(out, "# Title") == '!!! warning "In review"'
+
+
+@pytest.mark.parametrize("status", ["done", "weird", None, 3])
+def test_banner_unit_platform_done_unknown_or_non_string(status):
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"type": "platform", "doc_status": status}) == src
+
+
+def test_banner_unit_use_case_untouched():
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"type": "use-case", "doc_status": "draft"}) == src
+
+
 def _make_reference(root, status):
     page = root / "framework/glossary.md"
     text = page.read_text(encoding="utf-8")
     new = text.replace("doc_status: done\n", f"type: reference\ndoc_status: {status}\n", 1)
+    assert new != text
+    page.write_text(new, encoding="utf-8")
+
+
+def _make_platform(root, status):
+    page = root / "framework/glossary.md"
+    text = page.read_text(encoding="utf-8")
+    new = text.replace("doc_status: done\n", f"type: platform\ndoc_status: {status}\n", 1)
     assert new != text
     page.write_text(new, encoding="utf-8")
 
@@ -376,6 +405,16 @@ def test_banner_build_done(site_copy):
     assert 'admonition-title">In review' not in html
 
 
+def test_banner_build_platform(site_copy):
+    _make_platform(site_copy, "draft")
+    code, out = _build(site_copy)
+    assert code == 0, out
+    html = _html(site_copy, "framework/glossary")
+    title = '<p class="admonition-title">Draft: content may change</p>'
+    assert title in html
+    assert html.index(title) > html.index("<h1")
+
+
 def _nav_children(section):
     entry = next(item for item in CONFIG["nav"] if next(iter(item)) == section)
     return [next(iter(child.values())) for child in entry[section]]
@@ -396,6 +435,7 @@ def test_nav_order():
         "framework/style-guide.md",
         "framework/review-checklist.md",
     ]
+    assert _nav_children("Platform") == ["platform/index.md"]
 
 
 def test_start_here_labels():

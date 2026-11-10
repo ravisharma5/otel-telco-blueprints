@@ -11,10 +11,11 @@ folder (or the folder itself) stops the build, so a link cannot publish
 content from outside the allowlist. Any path that resolves outside its folder
 is skipped as a second line of defence.
 
-Reference pages (front matter ``type: reference``) get a banner right after
-the H1, chosen by ``doc_status``: draft and review pages show a fixed warning,
-done pages show none. The text comes only from the BANNERS map, never from
-front matter, and other doc types are left untouched. The H1 search skips
+Reference and platform pages (front matter ``type: reference`` or
+``type: platform``) get a banner right after the H1, chosen by ``doc_status``:
+draft and review pages show a fixed warning, done pages show none. The text
+comes only from the BANNERS map, never from front matter, and other doc types
+are left untouched. The H1 search skips
 code fences (CommonMark rules: a fence closes only on a bare run of the same
 character at least as long as the opener) and HTML comment blocks.
 """
@@ -30,6 +31,8 @@ ROOT = Path(__file__).resolve().parents[2]
 INCLUDE = ["framework", "architecture", "platform", "catalog"]
 SUFFIXES = {".md", ".svg", ".png", ".jpg", ".jpeg"}
 BANNERS = {"draft": "Draft: content may change", "review": "In review"}
+# Doc types that get a banner; every other type is left untouched.
+BANNER_TYPES = frozenset({"reference", "platform"})
 # A code fence line: up to 3 spaces, a run of 3+ backticks or tildes, then the rest.
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 # An HTML comment block starts with up to 3 spaces and "<!--".
@@ -81,9 +84,9 @@ def on_files(files, config):
 
 
 def on_page_markdown(markdown, page, config, files):
-    """Reference pages only: a draft or review banner right after the H1."""
+    """Reference and platform pages only: a draft or review banner after the H1."""
     meta = page.meta or {}
-    if meta.get("type") != "reference":
+    if meta.get("type") not in BANNER_TYPES:
         return markdown
     status = meta.get("doc_status")
     text = BANNERS.get(status) if isinstance(status, str) else None
