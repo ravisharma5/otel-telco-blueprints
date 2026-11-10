@@ -39,3 +39,4 @@ Garak
 Colang
 Authorino
 logprobs
+ROCm

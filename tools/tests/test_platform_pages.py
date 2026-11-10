@@ -31,7 +31,7 @@ from tools.tests.test_reference_pages import (  # noqa: F401  (shared with per-p
 
 # Grows by one entry per landed blueprint ({slug: id}), so a lost or renamed
 # page fails here instead of quietly dropping out of every check.
-EXPECTED_PLATFORM_PAGES: dict[str, str] = {}
+EXPECTED_PLATFORM_PAGES: dict[str, str] = {"serving-routing-placement": "PB-04"}
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
 PARAM_TABLE_HEADER = ["Parameter", "What it controls", "Who sets it", "How to calibrate"]
@@ -156,3 +156,81 @@ def test_shared_sources_table_rows(path):
     tbls = tables(sections(body(path)).get("Sources and acceptance", []))
     assert tbls, "Sources and acceptance has no table"
     assert len(tbls[0]) - 1 >= MIN_SOURCES_ROWS
+
+
+# ---------- serving, routing, and placement ----------
+
+SERVING = REPO_ROOT / "platform/serving-routing-placement/README.md"
+ACCELERATOR_NAME = re.compile(
+    r"\b(H100|H200|B200|B300|L4|L40S|A100|T4|MI\d{3}[A-Z]?|RTX|GB10|Gaudi)\b"
+)
+HARDWARE_CLASSES = ("CPU", "Small edge GPU", "Single large GPU", "Multi-GPU core node")
+DECISION_CARD = "https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit"
+CODE_FENCE = re.compile(r"^```[^\n]*\n(.*?)^```", re.M | re.S)
+
+
+def test_serving_three_routing_layers():
+    table = table_with_header(SERVING, "Reference design", ["Layer", "Decides"])
+    rows = table[1:]
+    assert len(rows) == 3
+    for row, name in zip(rows, ("Front door", "Content routing", "Replica scheduling"), strict=True):
+        assert name in row[0], row[0]
+    assert any("Decision" in cell for cell in rows[1])
+
+
+def test_serving_sizing_by_class():
+    table = table_with_header(
+        SERVING, "Reference design", ["Slot", "Precision", "Weights", "Hardware class"]
+    )
+    col = table[0].index("Hardware class")
+    assert len(table) > 1
+    for row in table[1:]:
+        for cell in row:
+            assert not ACCELERATOR_NAME.search(cell), cell
+        assert any(name in row[col] for name in HARDWARE_CLASSES), row[col]
+
+
+def test_serving_key_flags():
+    code = "\n".join(CODE_FENCE.findall(body(SERVING)))
+    for flag in (
+        "--revision",
+        "--tool-call-parser gemma4",
+        "--limit-mm-per-prompt",
+        "--max-logprobs 64",
+        "--convert classify",
+        "--convert embed",
+        "--lora-modules",
+    ):
+        assert flag in code, flag
+
+
+def test_serving_hardware_prerequisites():
+    table = table_with_header(SERVING, "Reference design", ["Prerequisite", "Source"])
+    text = "\n".join(" | ".join(row) for row in table)
+    for want in ("VLLM_ROCM_USE_AITER=0", "--moe-backend triton", "INT8", "TRITON_ATTN"):
+        assert want in text, want
+    src = table[0].index("Source")
+    for row in table[1:]:
+        assert "](http" in row[src], row
+
+
+def test_serving_decision_engine_prerequisite():
+    text = body(SERVING)
+    assert "0.26" in text
+    assert DECISION_CARD in text
+
+
+def test_serving_no_runtime_adapter_hot_load():
+    text = SERVING.read_text(encoding="utf-8")
+    assert "VLLM_ALLOW_RUNTIME_LORA_UPDATING=True" not in text
+    for line in text.splitlines():
+        if "VLLM_ALLOW_RUNTIME_LORA_UPDATING" in line:
+            assert re.search(r"(?i)never|block", line), line
+
+
+def test_serving_edge_options():
+    table = table_with_header(SERVING, "Reference design", ["Option", "Limits"])
+    text = "\n".join(" | ".join(row) for row in table[1:])
+    for want in ("Podman", "Device Edge", "single-node OpenShift"):
+        assert want.lower() in text.lower(), want
+    assert any("one AI model" in cell for row in table[1:] for cell in row)

@@ -14,7 +14,7 @@ Platform blueprints cover the shared capabilities every use case depends on. The
 | PB-01 | Intake and model selection | Adapt, operate, and comply |
 | PB-02 | Evaluation and acceptance | Run and govern |
 | PB-03 | Adaptation | Adapt, operate, and comply |
-| PB-04 | Serving, routing, and placement | Run and govern |
+| [PB-04](serving-routing-placement/README.md) | Serving, routing, and placement | Run and govern |
 | PB-05 | Integration | Run and govern |
 | PB-06 | Safety and autonomy gating | Run and govern |
 | PB-07 | Action layer | Run and govern |

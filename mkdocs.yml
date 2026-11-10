@@ -64,4 +64,5 @@ nav:
   - Catalog: catalog/index.md
   - Platform:
       - Overview: platform/index.md
+      - Serving, routing, and placement: platform/serving-routing-placement/README.md
   - Templates: templates.md

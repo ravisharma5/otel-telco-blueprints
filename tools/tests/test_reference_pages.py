@@ -384,6 +384,13 @@ def test_readiness_answered_by():
     assert "PB-10" in answered[8] and "PB-10" in answered[9]
 
 
+def test_readiness_serving_row_uses_hardware_class():
+    header, rows = _readiness_rows()
+    ready = _cell(header, rows[3], "What ready means")
+    assert "hardware class" in ready
+    assert "named hardware" not in ready
+
+
 def test_readiness_platform_links_resolve():
     """Links into platform/ are allowed only once the target page exists."""
     for _text, target in MD_LINK.findall(body(READINESS)):

@@ -435,7 +435,10 @@ def test_nav_order():
         "framework/style-guide.md",
         "framework/review-checklist.md",
     ]
-    assert _nav_children("Platform") == ["platform/index.md"]
+    assert _nav_children("Platform") == [
+        "platform/index.md",
+        "platform/serving-routing-placement/README.md",
+    ]
 
 
 def test_start_here_labels():
