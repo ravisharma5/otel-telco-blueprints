@@ -1,0 +1,590 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "OTel reference architecture on Red Hat products",
+    "output": "overview.html",
+    "locale": "en",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "gitops",
+      "type": "cloud",
+      "label": "L10 GitOps",
+      "sublabel": "OpenShift GitOps (Argo CD)",
+      "pos": [
+        300,
+        40
+      ],
+      "size": [
+        200,
+        60
+      ]
+    },
+    {
+      "id": "fleet",
+      "type": "cloud",
+      "label": "L10 Fleet management",
+      "sublabel": "Advanced Cluster Management",
+      "pos": [
+        580,
+        40
+      ],
+      "size": [
+        200,
+        60
+      ]
+    },
+    {
+      "id": "identity",
+      "type": "security",
+      "label": "L10 Workload identity",
+      "sublabel": "SPIFFE/SPIRE and Keycloak",
+      "pos": [
+        860,
+        40
+      ],
+      "size": [
+        200,
+        60
+      ]
+    },
+    {
+      "id": "slot_decision",
+      "type": "backend",
+      "label": "Decision",
+      "sublabel": "LOOK to STOP labels",
+      "pos": [
+        201,
+        220
+      ],
+      "size": [
+        136,
+        56
+      ],
+      "tag": "log probabilities"
+    },
+    {
+      "id": "slot_safety",
+      "type": "backend",
+      "label": "Safety",
+      "sublabel": "abstains if unsupported",
+      "pos": [
+        347,
+        220
+      ],
+      "size": [
+        136,
+        56
+      ]
+    },
+    {
+      "id": "slot_classification",
+      "type": "backend",
+      "label": "Classification",
+      "sublabel": "root-cause labels",
+      "pos": [
+        493,
+        220
+      ],
+      "size": [
+        136,
+        56
+      ],
+      "tag": "pooling mode"
+    },
+    {
+      "id": "slot_llm",
+      "type": "backend",
+      "label": "LLM",
+      "sublabel": "answers with citations",
+      "pos": [
+        639,
+        220
+      ],
+      "size": [
+        136,
+        56
+      ],
+      "tag": "llm-d in the core"
+    },
+    {
+      "id": "slot_embedding",
+      "type": "backend",
+      "label": "Embedding",
+      "sublabel": "vectors for retrieval",
+      "pos": [
+        785,
+        220
+      ],
+      "size": [
+        136,
+        56
+      ],
+      "tag": "pooling mode"
+    },
+    {
+      "id": "slot_reranker",
+      "type": "backend",
+      "label": "Reranker",
+      "sublabel": "best evidence first",
+      "pos": [
+        931,
+        220
+      ],
+      "size": [
+        136,
+        56
+      ],
+      "tag": "pooling mode"
+    },
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "Operator",
+      "sublabel": "question or alarm",
+      "pos": [
+        20,
+        380
+      ],
+      "size": [
+        96,
+        60
+      ]
+    },
+    {
+      "id": "guardrails",
+      "type": "security",
+      "label": "L6 Guardrails",
+      "sublabel": "NeMo Guardrails",
+      "pos": [
+        170,
+        380
+      ],
+      "size": [
+        120,
+        60
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "L5 Agent runtime",
+      "sublabel": "Harness on OpenShift",
+      "pos": [
+        366,
+        380
+      ],
+      "size": [
+        160,
+        60
+      ]
+    },
+    {
+      "id": "model_gateway",
+      "type": "security",
+      "label": "L3 Model gateway",
+      "sublabel": "Models-as-a-Service + llm-d",
+      "pos": [
+        622,
+        380
+      ],
+      "size": [
+        170,
+        60
+      ]
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "L0 Data and knowledge",
+      "sublabel": "Vector store, Data Science Pipelines",
+      "pos": [
+        815,
+        380
+      ],
+      "size": [
+        250,
+        60
+      ]
+    },
+    {
+      "id": "tool_gateway",
+      "type": "security",
+      "label": "L4 Tool gateway",
+      "sublabel": "Connectivity Link MCP gateway",
+      "pos": [
+        346,
+        530
+      ],
+      "size": [
+        200,
+        60
+      ]
+    },
+    {
+      "id": "capabilities",
+      "type": "backend",
+      "label": "L2 Capabilities",
+      "sublabel": "MCP servers: TM Forum, CAMARA",
+      "pos": [
+        684,
+        530
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "systems",
+      "type": "external",
+      "label": "Network systems",
+      "sublabel": "network and business systems",
+      "pos": [
+        924,
+        530
+      ],
+      "size": [
+        160,
+        60
+      ]
+    },
+    {
+      "id": "orchestrator",
+      "type": "backend",
+      "label": "L7 Action request",
+      "sublabel": "Automation Orchestrator",
+      "pos": [
+        356,
+        680
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "L6 Decision gate",
+      "sublabel": "Decision slot labels the step",
+      "pos": [
+        648,
+        680
+      ],
+      "size": [
+        170,
+        60
+      ]
+    },
+    {
+      "id": "execute",
+      "type": "backend",
+      "label": "L7 Execute and verify",
+      "sublabel": "Ansible Automation Platform",
+      "pos": [
+        919,
+        680
+      ],
+      "size": [
+        170,
+        60
+      ],
+      "tag": "rollback and audit"
+    },
+    {
+      "id": "adaptation",
+      "type": "backend",
+      "label": "L9b Adaptation",
+      "sublabel": "SDG Hub, Training Hub, Model Registry",
+      "pos": [
+        200,
+        850
+      ],
+      "size": [
+        230,
+        60
+      ]
+    },
+    {
+      "id": "evaluation",
+      "type": "backend",
+      "label": "L9a Evaluation",
+      "sublabel": "EvalHub in OpenShift AI",
+      "pos": [
+        555,
+        850
+      ],
+      "size": [
+        200,
+        60
+      ]
+    },
+    {
+      "id": "observability",
+      "type": "backend",
+      "label": "L9c Observability",
+      "sublabel": "OpenTelemetry, MLflow, Prometheus, Perses",
+      "pos": [
+        800,
+        850
+      ],
+      "size": [
+        232,
+        60
+      ]
+    },
+    {
+      "id": "far_edge",
+      "type": "cloud",
+      "label": "L8 Far edge",
+      "sublabel": "RHEL with Podman or Device Edge",
+      "pos": [
+        200,
+        1010
+      ],
+      "size": [
+        200,
+        60
+      ],
+      "tag": "one small model"
+    },
+    {
+      "id": "regional",
+      "type": "cloud",
+      "label": "L8 Regional",
+      "sublabel": "single-node OpenShift + OpenShift AI",
+      "pos": [
+        470,
+        1010
+      ],
+      "size": [
+        215,
+        60
+      ],
+      "tag": "closed loop, several slots"
+    },
+    {
+      "id": "core",
+      "type": "cloud",
+      "label": "L8 Core",
+      "sublabel": "Red Hat OpenShift",
+      "pos": [
+        750,
+        1010
+      ],
+      "size": [
+        240,
+        60
+      ],
+      "tag": "large LLM, adaptation, evaluation"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Control plane: L10",
+      "wraps": [
+        "gitops",
+        "fleet",
+        "identity"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "Data and execution plane: L0 to L7",
+      "wraps": [
+        "slot_decision",
+        "slot_llm",
+        "slot_safety",
+        "slot_embedding",
+        "slot_reranker",
+        "slot_classification",
+        "guardrails",
+        "agent",
+        "model_gateway",
+        "data",
+        "tool_gateway",
+        "capabilities",
+        "systems",
+        "orchestrator",
+        "gate",
+        "execute"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "security-group",
+      "label": "L1 Serving: six OTel slots on Red Hat AI Inference (vLLM) with KServe",
+      "wraps": [
+        "slot_decision",
+        "slot_llm",
+        "slot_safety",
+        "slot_embedding",
+        "slot_reranker",
+        "slot_classification"
+      ],
+      "pad": 12
+    },
+    {
+      "kind": "region",
+      "label": "Lifecycle plane: L9a to L9c",
+      "wraps": [
+        "adaptation",
+        "evaluation",
+        "observability"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "Placement: L8 tiers",
+      "wraps": [
+        "far_edge",
+        "regional",
+        "core"
+      ],
+      "pad": 20
+    }
+  ],
+  "connections": [
+    {
+      "id": "ask",
+      "from": "operator",
+      "to": "guardrails",
+      "label": "asks",
+      "variant": "emphasis"
+    },
+    {
+      "id": "screened",
+      "from": "guardrails",
+      "to": "agent",
+      "label": "screened",
+      "variant": "emphasis"
+    },
+    {
+      "id": "model_calls",
+      "from": "agent",
+      "to": "model_gateway",
+      "label": "model calls",
+      "variant": "emphasis"
+    },
+    {
+      "id": "route_slot",
+      "from": "model_gateway",
+      "to": "slot_llm",
+      "label": "routes to a slot",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "embed",
+      "from": "slot_embedding",
+      "to": "data",
+      "label": "embeds",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "rerank",
+      "from": "slot_reranker",
+      "to": "data",
+      "label": "reranks",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "tool_calls",
+      "from": "agent",
+      "to": "tool_gateway",
+      "label": "tool calls",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "reads",
+      "from": "tool_gateway",
+      "to": "capabilities",
+      "label": "reads and notifies"
+    },
+    {
+      "id": "mcp",
+      "from": "capabilities",
+      "to": "systems",
+      "label": "MCP"
+    },
+    {
+      "id": "action_request",
+      "from": "tool_gateway",
+      "to": "orchestrator",
+      "label": "action request",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "label_step",
+      "from": "orchestrator",
+      "to": "gate",
+      "label": "label the step",
+      "variant": "security"
+    },
+    {
+      "id": "act",
+      "from": "gate",
+      "to": "execute",
+      "label": "allowed",
+      "variant": "security"
+    },
+    {
+      "id": "change",
+      "from": "execute",
+      "to": "systems",
+      "label": "approved change",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "candidates",
+      "from": "adaptation",
+      "to": "evaluation",
+      "label": "candidate models",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Three routing layers",
+      "items": [
+        "Models-as-a-Service decides who may call which model",
+        "The Decision slot picks the slot and the LLM size",
+        "The llm-d scheduler picks the replica"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Action path",
+      "items": [
+        "The agent reads and notifies through the tool gateway",
+        "Only Ansible Automation Platform holds write credentials",
+        "REVIEW waits for a human; LOOK and STOP block the step",
+        "Every step is verified, rolled back on failure, and audited"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Lifecycle and placement",
+      "items": [
+        "EvalHub gates every promotion of a pinned revision",
+        "GitOps and Advanced Cluster Management deploy to every tier",
+        "Any component can be replaced"
+      ]
+    }
+  ]
+}
