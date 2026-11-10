@@ -78,8 +78,9 @@ def on_page_markdown(markdown, page, config, files):
     meta = page.meta or {}
     if meta.get("type") != "reference":
         return markdown
-    text = BANNERS.get(meta.get("doc_status"))
-    if text is None:  # done, or anything unexpected: no banner
+    status = meta.get("doc_status")
+    text = BANNERS.get(status) if isinstance(status, str) else None
+    if text is None:  # done, or anything unexpected (a list, a mapping): no banner
         return markdown
     banner = f'!!! warning "{text}"\n\n'
     lines = markdown.splitlines(keepends=True)
