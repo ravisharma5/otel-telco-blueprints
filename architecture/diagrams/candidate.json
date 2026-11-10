@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "OTel reference architecture on Red Hat products",
+    "title": "OTel reference architecture",
     "output": "overview.html",
     "locale": "en",
     "quality_profile": "showcase"
@@ -11,8 +11,8 @@
     {
       "id": "gitops",
       "type": "cloud",
-      "label": "L10 GitOps",
-      "sublabel": "OpenShift GitOps (Argo CD)",
+      "label": "Declarative deployment",
+      "sublabel": "GitOps with pinned revisions",
       "pos": [
         300,
         40
@@ -25,8 +25,8 @@
     {
       "id": "fleet",
       "type": "cloud",
-      "label": "L10 Fleet management",
-      "sublabel": "Advanced Cluster Management",
+      "label": "Fleet management",
+      "sublabel": "every tier from one hub",
       "pos": [
         580,
         40
@@ -39,8 +39,8 @@
     {
       "id": "identity",
       "type": "security",
-      "label": "L10 Workload identity",
-      "sublabel": "SPIFFE/SPIRE and Keycloak",
+      "label": "Workload identity",
+      "sublabel": "short-lived credentials",
       "pos": [
         860,
         40
@@ -107,7 +107,7 @@
         136,
         56
       ],
-      "tag": "llm-d in the core"
+      "tag": "large model in the core"
     },
     {
       "id": "slot_embedding",
@@ -156,8 +156,8 @@
     {
       "id": "guardrails",
       "type": "security",
-      "label": "L6 Guardrails",
-      "sublabel": "NeMo Guardrails",
+      "label": "Guardrails",
+      "sublabel": "screens input and output",
       "pos": [
         170,
         380
@@ -170,8 +170,8 @@
     {
       "id": "agent",
       "type": "backend",
-      "label": "L5 Agent runtime",
-      "sublabel": "Harness on OpenShift",
+      "label": "Agent runtime",
+      "sublabel": "plans and calls tools",
       "pos": [
         366,
         380
@@ -184,8 +184,8 @@
     {
       "id": "model_gateway",
       "type": "security",
-      "label": "L3 Model gateway",
-      "sublabel": "Models-as-a-Service + llm-d",
+      "label": "AI Gateway",
+      "sublabel": "access, quotas, routing",
       "pos": [
         622,
         380
@@ -198,8 +198,8 @@
     {
       "id": "data",
       "type": "database",
-      "label": "L0 Data and knowledge",
-      "sublabel": "Vector store, Data Science Pipelines",
+      "label": "Knowledge retrieval",
+      "sublabel": "vector store and data pipelines",
       "pos": [
         815,
         380
@@ -212,8 +212,8 @@
     {
       "id": "tool_gateway",
       "type": "security",
-      "label": "L4 Tool gateway",
-      "sublabel": "Connectivity Link MCP gateway",
+      "label": "MCP Gateway",
+      "sublabel": "tool access and policy",
       "pos": [
         346,
         530
@@ -226,8 +226,8 @@
     {
       "id": "capabilities",
       "type": "backend",
-      "label": "L2 Capabilities",
-      "sublabel": "MCP servers: TM Forum, CAMARA",
+      "label": "Network capabilities",
+      "sublabel": "network APIs as MCP tools",
       "pos": [
         684,
         530
@@ -254,8 +254,8 @@
     {
       "id": "orchestrator",
       "type": "backend",
-      "label": "L7 Action request",
-      "sublabel": "Automation Orchestrator",
+      "label": "Action request",
+      "sublabel": "workflow orchestration",
       "pos": [
         356,
         680
@@ -268,7 +268,7 @@
     {
       "id": "gate",
       "type": "security",
-      "label": "L6 Decision gate",
+      "label": "Decision gate",
       "sublabel": "Decision slot labels the step",
       "pos": [
         648,
@@ -282,8 +282,8 @@
     {
       "id": "execute",
       "type": "backend",
-      "label": "L7 Execute and verify",
-      "sublabel": "Ansible Automation Platform",
+      "label": "Execute and verify",
+      "sublabel": "only path with write access",
       "pos": [
         919,
         680
@@ -297,8 +297,8 @@
     {
       "id": "adaptation",
       "type": "backend",
-      "label": "L9b Adaptation",
-      "sublabel": "SDG Hub, Training Hub, Model Registry",
+      "label": "Adaptation",
+      "sublabel": "synthetic data, fine-tuning, registry",
       "pos": [
         200,
         850
@@ -311,8 +311,8 @@
     {
       "id": "evaluation",
       "type": "backend",
-      "label": "L9a Evaluation",
-      "sublabel": "EvalHub in OpenShift AI",
+      "label": "Evaluation",
+      "sublabel": "gates every promotion",
       "pos": [
         555,
         850
@@ -325,8 +325,8 @@
     {
       "id": "observability",
       "type": "backend",
-      "label": "L9c Observability",
-      "sublabel": "OpenTelemetry, MLflow, Prometheus, Perses",
+      "label": "Observability",
+      "sublabel": "traces, metrics, run tracking",
       "pos": [
         800,
         850
@@ -339,8 +339,8 @@
     {
       "id": "far_edge",
       "type": "cloud",
-      "label": "L8 Far edge",
-      "sublabel": "RHEL with Podman or Device Edge",
+      "label": "Far edge",
+      "sublabel": "single host with containers",
       "pos": [
         200,
         1010
@@ -354,8 +354,8 @@
     {
       "id": "regional",
       "type": "cloud",
-      "label": "L8 Regional",
-      "sublabel": "single-node OpenShift + OpenShift AI",
+      "label": "Regional",
+      "sublabel": "single-node cluster",
       "pos": [
         470,
         1010
@@ -369,8 +369,8 @@
     {
       "id": "core",
       "type": "cloud",
-      "label": "L8 Core",
-      "sublabel": "Red Hat OpenShift",
+      "label": "Core",
+      "sublabel": "multi-node cluster",
       "pos": [
         750,
         1010
@@ -385,7 +385,7 @@
   "boundaries": [
     {
       "kind": "region",
-      "label": "Control plane: L10",
+      "label": "Control plane",
       "wraps": [
         "gitops",
         "fleet",
@@ -395,7 +395,7 @@
     },
     {
       "kind": "region",
-      "label": "Data and execution plane: L0 to L7",
+      "label": "Data and execution plane",
       "wraps": [
         "slot_decision",
         "slot_llm",
@@ -418,7 +418,7 @@
     },
     {
       "kind": "security-group",
-      "label": "L1 Serving: six OTel slots on Red Hat AI Inference (vLLM) with KServe",
+      "label": "Model endpoint inferencing: six OTel slots",
       "wraps": [
         "slot_decision",
         "slot_llm",
@@ -431,7 +431,7 @@
     },
     {
       "kind": "region",
-      "label": "Lifecycle plane: L9a to L9c",
+      "label": "Lifecycle plane",
       "wraps": [
         "adaptation",
         "evaluation",
@@ -441,7 +441,7 @@
     },
     {
       "kind": "region",
-      "label": "Placement: L8 tiers",
+      "label": "Placement tiers",
       "wraps": [
         "far_edge",
         "regional",
@@ -562,17 +562,17 @@
       "dot": "cyan",
       "title": "Three routing layers",
       "items": [
-        "Models-as-a-Service decides who may call which model",
+        "The AI Gateway decides who may call which model",
         "The Decision slot picks the slot and the LLM size",
-        "The llm-d scheduler picks the replica"
+        "The inference scheduler picks the replica"
       ]
     },
     {
       "dot": "rose",
       "title": "Action path",
       "items": [
-        "The agent reads and notifies through the tool gateway",
-        "Only Ansible Automation Platform holds write credentials",
+        "The agent reads and notifies through the MCP Gateway",
+        "Only the execute step holds write credentials",
         "REVIEW waits for a human; LOOK and STOP block the step",
         "Every step is verified, rolled back on failure, and audited"
       ]
@@ -581,8 +581,8 @@
       "dot": "emerald",
       "title": "Lifecycle and placement",
       "items": [
-        "EvalHub gates every promotion of a pinned revision",
-        "GitOps and Advanced Cluster Management deploy to every tier",
+        "Evaluation gates every promotion of a pinned revision",
+        "Declarative deployment and fleet management reach every tier",
         "Any component can be replaced"
       ]
     }
