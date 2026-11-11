@@ -724,14 +724,65 @@ def test_notify_pages_agree():
 NOTIFY_OLD_PHRASES = ("read and notify tools plus", "NOTIFY sends a notification")
 
 
+MERMAID_FENCE = re.compile(r"^```mermaid[^\n]*\n.*?^```", re.M | re.S)
+
+
+# NOTIFY named only as one label in a list of gate labels, such as
+# "LOOK, NOTIFY, and REVIEW", says nothing about how it is delivered.
+GATE_LABEL = r"(?:LOOK|REVIEW|ACT|STOP)"
+NOTIFY_IN_LABEL_LIST = re.compile(
+    rf"\b{GATE_LABEL},?\s+(?:and\s+|or\s+)?NOTIFY\b|\bNOTIFY,?\s+(?:and\s+|or\s+)?{GATE_LABEL}\b"
+)
+
+
+def notify_sections_without_gate_link(text: str) -> list[str]:
+    """Headings of H2 or H3 sections where a paragraph or table row describes
+    NOTIFY (beyond naming it in a label list) and the same section neither links
+    the decision gate page nor states the stage rule. Diagram labels are not
+    prose, so Mermaid fences are left out."""
+    text = MERMAID_FENCE.sub("", text)
+    parts = re.split(r"^(#{2,3} .*)$", text, flags=re.M)
+    out = []
+    heading = "(top)"
+    for part in parts:
+        if re.match(r"#{2,3} ", part):
+            heading = part
+            continue
+        units = [u for block in re.split(r"\n\s*\n", part) for u in block.splitlines()
+                 if u.lstrip().startswith("|")] + [
+            block for block in re.split(r"\n\s*\n", part) if not block.lstrip().startswith("|")]
+        describes = any("NOTIFY" in NOTIFY_IN_LABEL_LIST.sub("", u) for u in units)
+        flat = re.sub(r"\s+", " ", part).lower()
+        states_rule = NOTIFY_RULE[0] in flat and NOTIFY_RULE[2] in flat
+        if describes and "decision-gate.md" not in part and not states_rule:
+            out.append(heading)
+    return out
+
+
+@pytest.mark.parametrize(
+    ("text", "missing"),
+    [
+        ("## A\nNOTIFY goes out.\n## B\n[gate](../../architecture/decision-gate.md)\n", ["## A"]),
+        ("## A\nNOTIFY goes out, as the [gate](../../architecture/decision-gate.md) sets out.\n", []),
+        ("## A\nNOTIFY runs a notification job.\n\nFrom the assist stage up, notify tools.\n", []),
+        ("## A\n```mermaid\nG -- \"NOTIFY\" --> N\n```\n", []),
+        ("## A\n| Assist | LOOK and NOTIFY |\n| Recommend | LOOK, NOTIFY, and REVIEW |\n", []),
+        ("## A\nNo labels here.\n", []),
+    ],
+)
+def test_notify_section_rule_cases(text, missing):
+    assert notify_sections_without_gate_link(text) == missing
+
+
 @pytest.mark.parametrize("path", platform_pages(), ids=_id)
 def test_shared_notify_mentions_link_the_gate(path):
-    """Any page that mentions NOTIFY links the decision gate page, which holds
-    the stage rule, and uses none of the old phrasings."""
-    text = re.sub(r"\s+", " ", body(path))
-    if "NOTIFY" not in text:
-        return
-    assert "decision-gate.md" in text, _id(path)
+    """Each section that mentions NOTIFY links the decision gate page, which
+    holds the stage rule, and the page uses none of the old phrasings."""
+    raw = body(path)
+    if "NOTIFY" not in MERMAID_FENCE.sub("", raw):
+        pytest.skip("page does not mention NOTIFY")
+    assert notify_sections_without_gate_link(raw) == [], _id(path)
+    text = re.sub(r"\s+", " ", raw)
     for phrase in NOTIFY_OLD_PHRASES:
         assert phrase not in text, phrase
 

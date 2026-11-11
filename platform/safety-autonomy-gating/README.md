@@ -80,7 +80,7 @@ One triage episode passes these controls in order:
 4. The Safety slot checks whether the passages support an answer. If they don't, the agent abstains and cites what it searched.
 5. To change anything, the agent submits an action request. Its own gate label is advisory.
 6. Action orchestration runs the Decision gate again and applies the lower of the model label and the policy ceiling for the risk class.
-7. REVIEW goes to a human approver, ACT runs an approved playbook, NOTIFY runs a notification job, and LOOK and STOP block the step.
+7. REVIEW goes to a human approver, ACT runs an approved playbook, NOTIFY runs a notification job, and LOOK and STOP block the step, as the [decision gate](../../architecture/decision-gate.md) page sets out.
 8. Output guardrails screen the final answer before it reaches the operations user.
 
 ### Where each control sits
