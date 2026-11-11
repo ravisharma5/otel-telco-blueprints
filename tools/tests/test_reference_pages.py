@@ -21,7 +21,9 @@ from pathlib import Path
 import pytest
 from markdown_it import MarkdownIt
 
+from tools.bplint.checks.links import doc_slugs
 from tools.bplint.loader import load_yaml, split_front_matter
+from tools.bplint.markdown import parse_doc
 from tools.tests.conftest import REPO_ROOT
 
 TEMPLATE = REPO_ROOT / "templates/reference-page.md"
@@ -341,6 +343,11 @@ READINESS_DOMAINS = [
     "operating model",
 ]
 MD_LINK = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
+# A reference-style link definition: "[label]: target" at the start of a line.
+REF_DEF = re.compile(r"^ {0,3}\[([^\]]+)\]:[ \t]*(\S+)", re.M)
+# A relative target inside the platform/ folder, with or without a trailing slash.
+PLATFORM_TARGET = re.compile(r"(^|/)platform(/|$|#)")
+PB_IN_TEXT = re.compile(r"\bPB-[0-9]{2}\b")
 
 
 def _readiness_rows():
@@ -391,13 +398,60 @@ def test_readiness_serving_row_uses_hardware_class():
     assert "named hardware" not in ready
 
 
+def _md_slugs(path: Path) -> set[str]:
+    return doc_slugs(parse_doc(path, path.read_text(encoding="utf-8")))
+
+
+def platform_link_problems(text: str, base: Path) -> list[str]:
+    """Broken relative links into platform/ in text, resolved from folder base.
+
+    External URLs are skipped. Inline and reference-style links count, with or
+    without a trailing slash. The target page must exist, a #fragment must
+    match one of its headings, and link text naming a PB id must match the
+    target page's id.
+    """
+    links = MD_LINK.findall(text) + REF_DEF.findall(text)
+    out = []
+    for label, target in links:
+        target = target.strip().split(" ", 1)[0].strip("<>")
+        if re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I) or not PLATFORM_TARGET.search(target):
+            continue
+        path_part, _, fragment = target.partition("#")
+        page = (base / path_part).resolve()
+        if page.is_dir():
+            page = page / "README.md"
+        if not page.is_file():
+            out.append(f"{target}: no such page")
+            continue
+        if fragment and fragment not in _md_slugs(page):
+            out.append(f"{target}: no heading for #{fragment}")
+        named = PB_IN_TEXT.search(label)
+        if named and named.group(0) != (front_matter(page) or {}).get("id"):
+            out.append(f"{target}: link text {label!r} names another blueprint")
+    return out
+
+
+@pytest.mark.parametrize(
+    ("link", "ok"),
+    [
+        ("[PB-04](../platform/serving-routing-placement/README.md)", True),
+        ("[PB-04](../platform/serving-routing-placement/README.md#components)", True),
+        ("[PB-04](../platform/serving-routing-placement/README.md#no-such-anchor)", False),
+        ("[PB-05](../platform/serving-routing-placement/README.md)", False),
+        ("[x](../platform/no-such-page/README.md)", False),
+        ("[x](../platform/no-such-page)", False),
+        ("[PB-04][s]\n\n[s]: ../platform/serving-routing-placement/README.md#nope", False),
+        ("[docs](https://docs.example.com/openshift_container_platform/4/x.html)", True),
+    ],
+)
+def test_platform_link_rule_cases(link, ok):
+    problems = platform_link_problems(link, READINESS.parent)
+    assert (problems == []) is ok, problems
+
+
 def test_readiness_platform_links_resolve():
     """Links into platform/ are allowed only once the target page exists."""
-    for _text, target in MD_LINK.findall(body(READINESS)):
-        if "platform/" not in target:
-            continue
-        path = target.split("#", 1)[0]
-        assert (READINESS.parent / path).resolve().is_file(), target
+    assert platform_link_problems(body(READINESS), READINESS.parent) == []
 
 
 # ---------- architecture overview (architecture landing page) ----------
