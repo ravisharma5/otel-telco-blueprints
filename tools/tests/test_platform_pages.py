@@ -48,6 +48,21 @@ MILLISECONDS = re.compile(r"\b\d+\s?ms\b")
 ISO_QUOTED = re.compile(r'^clarity_reviewed: "\d{4}-\d{2}-\d{2}"$', re.M)
 RAW_FRONT_MATTER = re.compile(r"\A---\n(.*?)^---[ \t]*$", re.M | re.S)
 MIN_SOURCES_ROWS = 6
+PARAM_NAME_COLUMNS = ("Parameter", "Who sets it")
+PARAM_VALUE_COLUMNS = ("What it controls", "How to calibrate")
+VALUE_HEADER = re.compile(r"\b(default|value)s?\b", re.I)
+# Identifiers whose digits are not values: Level N, PB ids, TM Forum API numbers.
+SAFE_ID = re.compile(r"\bLevel [0-9]\b|\bPB-[0-9]{2}\b|\bTMF[0-9]{3}\b")
+# Named methods whose number is part of the name, not a default.
+NAMED_RULES = re.compile(r"\brule of three\b", re.I)
+# Spelled-out numbers. "one" is left out: pages use it as a determiner
+# ("one owner", "back one stage"), never as a threshold.
+WORD_NUMBER = re.compile(
+    r"\b(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty"
+    r"|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|dozen"
+    r"|half|percent|per cent)\b",
+    re.I,
+)
 
 
 # ---------- helpers ----------
@@ -134,14 +149,55 @@ def test_shared_worked_example(path):
     assert f"### {WORKED_EXAMPLE_H3}" in lines
 
 
+def param_table_problems(table: list[list[str]]) -> list[str]:
+    """Why a parameter table breaks the no-default-values rule (empty if it does not).
+
+    A table counts as a parameter table when its header holds every name in
+    PARAM_TABLE_HEADER, so an extra column cannot exempt it. A Default or Value
+    column fails outright. The calibration columns may hold no digits and no
+    spelled-out numbers. The name columns may hold digits only inside a safe
+    identifier (Level N, a PB id, a TM Forum API number).
+    """
+    header = table[0]
+    if not set(PARAM_TABLE_HEADER) <= set(header):
+        return []
+    problems = [f"value column {h!r}" for h in header if VALUE_HEADER.search(h)]
+    value_cols = [header.index(h) for h in PARAM_VALUE_COLUMNS]
+    name_cols = [header.index(h) for h in PARAM_NAME_COLUMNS]
+    for row in table[1:]:
+        for i in value_cols:
+            cell = NAMED_RULES.sub("", row[i])
+            if re.search(r"\d", cell) or WORD_NUMBER.search(cell):
+                problems.append(f"{row[0]}: {row[i]}")
+        for i in name_cols:
+            if re.search(r"\d", SAFE_ID.sub("", row[i])):
+                problems.append(f"{row[0]}: {row[i]}")
+    return problems
+
+
+@pytest.mark.parametrize(
+    ("table", "ok"),
+    [
+        ([PARAM_TABLE_HEADER, ["Floor", "The lowest share", "Risk owner", "Fit on a set"]], True),
+        ([PARAM_TABLE_HEADER, ["Level 3 ceiling", "The ceiling", "PB-02 owner", "Fit"]], True),
+        ([PARAM_TABLE_HEADER, ["Budget", "Uses the rule of three", "Risk owner", "Fit"]], True),
+        ([PARAM_TABLE_HEADER, ["Floor", "About 95 percent", "Risk owner", "Fit"]], False),
+        ([PARAM_TABLE_HEADER, ["Floor", "About ninety-five percent", "Risk owner", "Fit"]], False),
+        ([PARAM_TABLE_HEADER, ["Floor", "The share", "Risk owner", "Start at three requests"]], False),
+        ([PARAM_TABLE_HEADER, ["Floor 2", "The share", "Risk owner", "Fit"]], False),
+        ([[*PARAM_TABLE_HEADER, "Default"], ["Floor", "The share", "Risk owner", "Fit", "high"]], False),
+        ([["Parameter", "Value", *PARAM_TABLE_HEADER[1:]], ["Floor", "x", "y", "z", "w"]], False),
+        ([["Name", "Notes"], ["Floor", "95"]], True),
+    ],
+)
+def test_param_table_rule_cases(table, ok):
+    assert (param_table_problems(table) == []) is ok, param_table_problems(table)
+
+
 @PAGES
 def test_shared_parameter_tables_have_no_values(path):
     for table in page_tables(path):
-        if table[0] != PARAM_TABLE_HEADER:
-            continue
-        for row in table[1:]:
-            for cell in row:
-                assert not re.search(r"\d", cell), (row[0], cell)
+        assert param_table_problems(table) == []
 
 
 @PAGES
