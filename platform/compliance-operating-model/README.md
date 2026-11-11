@@ -80,7 +80,7 @@ Example: complete this record for your own deployment. The entries cite Regulati
 | Competent authority | Article 75(1), as amended, keeps systems referred to in Annex III point 2 outside the AI Office's exclusive competence. Record the national market surveillance authority |
 | Fundamental rights impact assessment | Article 27(1) excludes high-risk systems in the area listed in Annex III point 2. Record whether your legal team relies on that exclusion, and the date you checked it |
 | Obligations apply from | Article 113, as amended, applies the Annex III high-risk obligations from December 2, 2027. Recheck this record when the Commission's guidelines are final |
-| Date, owner, and legal sign-off | Date of the record; business owner; legal team reference |
+| Date, owner, and legal sign-off | Date of the record; the risk owner who drafted it; legal team reference |
 
 Your legal team owns the classification.
 
@@ -225,7 +225,7 @@ This page gives no default values. You set each parameter with SME review and ve
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The example classification record on this page describes `noc-triage-agent` with this incident. Before the shadow stage, the risk owner drafts the record, the legal team signs it off, and the business owner accepts it.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The example classification record on this page describes `noc-triage-agent` with this incident. Before the shadow stage, the risk owner drafts the record, and the legal team signs it off as the accountable owner after consulting the business owner and the data protection officer.
 
 At the recommend stage, the `approver` reviews `dec-0001` at REVIEW on the [decision gate](../../architecture/decision-gate.md) before eth1 on r2 restarts. The RACI applies to triage unchanged. The operations engineer reports engineer hours saved, mean time to identify, and abstention handling cost for `inc-2041` and similar incidents against the shadow-stage baseline. Prompts, passages, and traces for the incident stay at the regional site.
 
@@ -287,7 +287,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
-| Classify the use case under the EU AI Act | Risk owner | Business owner | Data protection officer and legal team | Security |
+| Classify the use case under the EU AI Act | Risk owner | Legal team | Business owner and data protection officer | Security |
 | Approve a stage promotion | Approver | Risk owner | SME | Change board |
 | Run the DPIA | Data protection officer | Business owner | Legal team | Risk owner |
 | Report a NIS2 incident | Security | Business owner | Operations engineer | Risk owner |

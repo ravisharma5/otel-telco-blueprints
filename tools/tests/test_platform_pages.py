@@ -1438,6 +1438,14 @@ def test_compliance_legal_ownership_line():
     assert re.sub(r"\s+", " ", body(COMPLIANCE)).count(LEGAL_LINE) == 1
 
 
+def test_compliance_legal_team_accountable_for_classification():
+    """The ownership line and the RACI agree: the legal team is accountable."""
+    table = table_with_header(COMPLIANCE, "Operating model", ["Activity", "Accountable"])
+    row = next(r for r in table[1:] if r[0].startswith("Classify the use case"))
+    assert row[table[0].index("Accountable")] == "Legal team", row
+    assert "Legal team" not in row[table[0].index("Consulted")], row
+
+
 @pytest.mark.parametrize(
     ("text", "hit"),
     [
