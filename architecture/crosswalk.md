@@ -78,7 +78,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 ## Used by
 
-- PB-04 to PB-08: serving, integration, gating, the action layer, and security map onto these rows
+- [PB-04](../platform/serving-routing-placement/README.md), [PB-05](../platform/integration/README.md), [PB-06](../platform/safety-autonomy-gating/README.md), [PB-07](../platform/action-layer/README.md), [PB-08](../platform/security-identity-sandbox/README.md): serving, integration, gating, the action layer, and security map onto these rows
 - [PB-02](../platform/evaluation-acceptance/README.md), [PB-03](../platform/adaptation/README.md), [PB-09](../platform/quality-operations/README.md): evaluation, adaptation, and observability fill the lifecycle extensions
 - [Architecture overview](index.md): the layer table this crosswalk maps to
 - [Decision gate](decision-gate.md): the gate extension in detail

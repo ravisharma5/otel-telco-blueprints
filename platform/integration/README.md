@@ -98,7 +98,7 @@ NOTIFY works two ways. From the assist stage up, an agent may hold direct notify
 | Filtered tool list | `tools/list` returns only the tools the token allows, so the rest stay hidden from the agent |
 | Audit entry | One entry for every valid `tools/call`, including early rejections: user, server, tool, status, request ID, and session ID |
 | Rate limits | Per-agent request limits at the gateway, set with a [rate limit policy](https://docs.kuadrant.io/1.5.x/kuadrant-operator/doc/overviews/rate-limiting/) |
-| Workload identity | Each agent runs with its own SPIFFE identity, so roles bind to one agent; PB-08 covers the full identity design |
+| Workload identity | Each agent runs with its own SPIFFE identity, so roles bind to one agent; [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md) covers the full identity design |
 
 ### Tool contracts and conformance
 
@@ -211,6 +211,6 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [Decision gate](../../architecture/decision-gate.md): where every `submit_action_request` goes
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): builds on the gateway guardrails here
 - [PB-07 Action layer](../action-layer/README.md): the action layer completes the write path that starts at the action request
-- PB-08: security and identity covers workload identity and secrets in depth
+- [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): covers workload identity and secrets in depth
 - PB-10: compliance covers customer consent and data residency for CAMARA calls and corpora
 - Agent-school: 301 adds an approval gate, 302 covers governed MCP gateways, 303 covers identity-based tool authorization, and 401 generates gateway policies from a capability catalog, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

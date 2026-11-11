@@ -43,3 +43,6 @@ ROCm
 [Rr]ulebooks?
 [Gg]roundedness
 Unsloth
+Kata
+Landlock
+seccomp

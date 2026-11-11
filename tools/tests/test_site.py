@@ -450,6 +450,7 @@ def test_nav_order():
         "platform/evaluation-acceptance/README.md",
         "platform/adaptation/README.md",
         "platform/quality-operations/README.md",
+        "platform/security-identity-sandbox/README.md",
     ]
 
 

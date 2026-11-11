@@ -40,6 +40,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "evaluation-acceptance": "PB-02",
     "adaptation": "PB-03",
     "quality-operations": "PB-09",
+    "security-identity-sandbox": "PB-08",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -1023,3 +1024,104 @@ def test_quality_mermaid_capabilities():
     for want in ("Trace spans per agent step", "Drift signals", "Next golden set"):
         assert want in fence, want
     assert PRODUCT_TERMS.findall(fence) == []
+
+
+# ---------- security, identity, and sandbox ----------
+
+SECURITY = REPO_ROOT / "platform/security-identity-sandbox/README.md"
+CROSSWALK_PAGE = REPO_ROOT / "architecture/crosswalk.md"
+MATURITY_WORDS = ("early-stage", "Technology Preview", "Developer Preview", "community project")
+
+
+def _table_text(table: list[list[str]]) -> str:
+    return "\n".join(" | ".join(row) for row in table)
+
+
+def test_security_sandbox_controls():
+    table = table_with_header(SECURITY, "Reference design", ["Control", "What it enforces"])
+    text = _table_text(table[1:]).lower()
+    for want in ("shell", "read-only", "egress", "workload identity", "secrets"):
+        assert want in text, want
+    assert "resource" in text or "limits" in text
+    egress = [r for r in table[1:] if "egress" in " ".join(r).lower()]
+    assert any("AI Gateway" in " ".join(r) and "MCP Gateway" in " ".join(r) for r in egress), egress
+
+
+def test_security_sandbox_options():
+    table = table_with_header(SECURITY, "Reference design", ["Option", "Source"])
+    text = _table_text(table[1:])
+    for want in ("sandboxed containers", "Agent Sandbox", "OpenShell"):
+        assert want in text, want
+    src = table[0].index("Source")
+    for row in table[1:]:
+        assert "](http" in row[src], row
+
+
+def test_security_no_maturity_labels():
+    text = body(SECURITY)
+    for word in MATURITY_WORDS:
+        assert word.lower() not in text.lower(), word
+
+
+def test_security_mirror_flow_steps():
+    steps = _ordered_steps(reference_design_text(SECURITY))
+    assert 0 < len(steps) <= 8, len(steps)
+    joined = " ".join(steps)
+    for want in ("oc-mirror", "HF_HUB_OFFLINE=1", "signed", "Python index", "object storage", "teacher"):
+        assert want in joined, want
+
+
+def test_security_offline_changes():
+    table = table_with_header(SECURITY, "Reference design", ["What changes offline"])
+    text = _table_text(table)
+    for want in ("approximate", "/v1/chat/completions", "/v1/systemone", "runtime adapter",
+                 "external provider"):
+        assert want.lower() in text.lower(), want
+
+
+def test_security_tool_output_injection():
+    table = None
+    for header in ("Defence", "Defense"):
+        try:
+            table = table_with_header(SECURITY, "Reference design", [header])
+            break
+        except AssertionError:
+            continue
+    assert table, "no defence table"
+    rows = [" | ".join(r) for r in table[1:]]
+    assert any(
+        re.search(r"tool (response|output)", r, re.I) and "fail closed" in r.lower() for r in rows
+    ), rows
+    assert "../integration/README.md" in _table_text(table)
+
+
+def test_security_secrets_never_in_context():
+    text = re.sub(r"\s+", " ", body(SECURITY))
+    sentences = re.split(r"(?<=[.!?])\s", text)
+    assert any(
+        "never" in s.lower() and "model context" in s.lower() and "secret" in s.lower()
+        for s in sentences
+    )
+
+
+def test_security_mermaid_capabilities():
+    fence = mermaid_fences(body(SECURITY))[0]
+    for want in ("Workload identity", "Screen for injection"):
+        assert want in fence, want
+    assert PRODUCT_TERMS.findall(fence) == []
+
+
+def test_security_identity_links_integration():
+    table = table_with_header(SECURITY, "Reference design", ["Concern", "Design"])
+    text = _table_text(table).lower()
+    assert "per agent" in text or "per-agent" in text
+    assert "short-lived" in text
+    assert "../integration/readme.md" in text
+
+
+def test_crosswalk_used_by_links_each_platform_page():
+    text = body(CROSSWALK_PAGE)
+    assert "PB-04 to PB-08" not in text
+    for slug in ("serving-routing-placement", "integration", "safety-autonomy-gating",
+                 "action-layer", "security-identity-sandbox"):
+        assert f"../platform/{slug}/README.md" in text, slug

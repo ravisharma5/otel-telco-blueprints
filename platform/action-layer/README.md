@@ -210,6 +210,6 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): the stages and policy ceilings this page applies
 - [Decision gate](../../architecture/decision-gate.md): the label policy, both paths, and the message examples
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): supplies the calibration and canary evidence behind each ceiling
-- PB-08: security and identity covers workload identity and secrets for job credentials
+- [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): covers workload identity and secrets for job credentials
 - [PB-09 Quality operations and observability](../quality-operations/README.md): quality operations tracks gate outcomes, approvals, rollbacks, and overrides
 - Agent-school: courses 202 and 301 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate to a closed loop
