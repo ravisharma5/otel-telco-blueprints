@@ -43,7 +43,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 ### Runtime pattern
 
-1. The agent, an OTel LLM, has read and notify tools plus one action-request tool. It can never execute changes.
+1. The agent, an OTel LLM, has read tools, notify tools from the assist stage on, and one action-request tool. It can never execute changes.
 2. The OTel Decision model labels each request as LOOK, NOTIFY, REVIEW, ACT, or STOP.
 3. AAP, the automation layer, follows the label: it executes, routes REVIEW to a human, or blocks. It then verifies and audits.
 
@@ -60,6 +60,8 @@ For example, an alarm reports link errors on a router. The agent investigates wi
 | REVIEW | A human approver, then AAP | The approved job after sign-off, then verification | Request, label probabilities, approver role, decision, and job result |
 | ACT | AAP | The approved job for an approved playbook, then verification and rollback on failure | Request, label probabilities, policy version, job result, and verification result |
 | STOP | AAP | Nothing; the step ends and the agent reports what it found | Request, label probabilities, and the reason |
+
+NOTIFY works two ways. From the assist stage up, an agent may hold direct notify tools, such as an operations-channel message or a ticket comment, through the MCP Gateway; the shadow stage gets no notify role. An action request that the gate labels NOTIFY becomes a notification job that AAP runs.
 
 The outcome never exceeds the model label or the policy ceiling for the capability and risk class, and STOP is always allowed. The ceiling follows the [autonomy ceiling](../framework/definitions.md#autonomy-ceiling): inform allows LOOK, notify allows NOTIFY, recommend-with-approval allows REVIEW, and act-within-policy allows ACT.
 

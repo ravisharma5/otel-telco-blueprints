@@ -550,6 +550,81 @@ def test_action_alarm_example():
         assert want in example, want
 
 
+# ---------- NOTIFY delivery (shared across pages) ----------
+
+NOTIFY_GATE_PAGE = REPO_ROOT / "architecture/decision-gate.md"
+# Each page that mentions NOTIFY states the two delivery paths, once.
+NOTIFY_RULE = ("from the assist stage up", "the shadow stage gets no notify role", "notification job")
+# A Mermaid edge: source node, label, target node with its quoted text.
+MERMAID_EDGE = re.compile(r'(\w+)(?:\[[^\]]*\]|\{[^}]*\})?\s*--\s*"([^"]*)"\s*-->\s*(\w+)')
+MERMAID_NODE = re.compile(r'(\w+)[\[{]+"([^"]*)"[\]}]+')
+
+
+def notify_pages() -> list[Path]:
+    return [INTEGRATION, GATING, ACTION, NOTIFY_GATE_PAGE]
+
+
+def mermaid_edges(fence: str) -> list[tuple[str, str, str]]:
+    """(edge label, target id, target text) for each labelled edge in fence."""
+    nodes = dict(MERMAID_NODE.findall(fence))
+    return [(label, dst, nodes.get(dst, "")) for _src, label, dst in MERMAID_EDGE.findall(fence)]
+
+
+def notify_edge_problems(fence: str) -> list[str]:
+    """NOTIFY must lead to a notification job, never to a no-change branch."""
+    out = []
+    for label, dst, text in mermaid_edges(fence):
+        if "NOTIFY" not in label:
+            continue
+        if "no change" in label.lower():
+            out.append(f"NOTIFY shares a no-change edge to {dst}")
+        elif "notification job" not in text.lower():
+            out.append(f"NOTIFY goes to {dst} ({text!r}), not a notification job")
+    return out
+
+
+@pytest.mark.parametrize(
+    ("fence", "ok"),
+    [
+        ('DG -- "NOTIFY" --> NJ["Run the notification job"]', True),
+        ('DG -- "LOOK, NOTIFY, or STOP: no change" --> AU["Audit record"]', False),
+        ('DG -- "NOTIFY" --> AU["Audit record"]', False),
+        ('DG{"Decision gate"} -- "NOTIFY" --> NJ["Run the notification job"]', True),
+    ],
+)
+def test_notify_edge_rule_cases(fence, ok):
+    assert (notify_edge_problems(fence) == []) is ok
+
+
+@pytest.mark.parametrize("path", notify_pages(), ids=_id)
+def test_notify_rule_stated_once(path):
+    text = re.sub(r"\s+", " ", body(path)).lower()
+    for phrase in NOTIFY_RULE:
+        assert phrase in text, phrase
+    assert text.count(NOTIFY_RULE[1]) == 1
+
+
+@pytest.mark.parametrize("path", [GATING, ACTION], ids=_id)
+def test_notify_diagram_runs_a_notification_job(path):
+    fence = mermaid_fences(body(path))[0]
+    assert "NOTIFY" in fence
+    assert notify_edge_problems(fence) == []
+
+
+def test_notify_pages_agree():
+    stages = table_with_header(GATING, "Reference design", STAGE_HEADER)
+    shadow = next(row for row in stages[1:] if row[0] == "Shadow")
+    assert "NOTIFY" not in shadow[STAGE_HEADER.index("Gate outcomes allowed")]
+    tools_table = table_with_header(INTEGRATION, "Reference design", ["Tool", "Standard", "Access"])
+    access = tools_table[0].index("Access")
+    notify_rows = [row for row in tools_table[1:] if row[access] == "notify"]
+    assert notify_rows and all("assist stage" in row[0] for row in notify_rows)
+    for path in notify_pages():
+        text = re.sub(r"\s+", " ", body(path))
+        assert "read and notify tools plus" not in text, _id(path)
+        assert "NOTIFY sends a notification" not in text, _id(path)
+
+
 # ---------- evaluation and acceptance ----------
 
 ACCEPTANCE = REPO_ROOT / "platform/evaluation-acceptance/README.md"

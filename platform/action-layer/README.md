@@ -60,7 +60,9 @@ flowchart TD
   HU -- "approve" --> RUN["Run the playbook"]
   DG -- "ACT within policy" --> RUN
   HU -- "reject" --> AU["Audit record"]
-  DG -- "LOOK, NOTIFY, or STOP: no change" --> AU
+  DG -- "NOTIFY" --> NJ["Run the notification job"]
+  NJ --> AU
+  DG -- "LOOK or STOP: no change" --> AU
   RUN --> VE{"Verify"}
   VE -- "healthy" --> AU
   VE -- "failed" --> RB["Roll back"]
@@ -75,9 +77,11 @@ The write path, from alarm to audit record:
 3. The request reaches an Automation Orchestrator workflow through its webhook trigger, which checks it against the decision gate schema.
 4. A REST API step calls the Decision slot on `/v1/chat/completions` with log probabilities and a fixed label question, and reads the label probabilities.
 5. A switch step takes the lower of the model label and the policy ceiling for the risk class. A STOP label forces STOP, and a label mass below the floor fails closed to STOP.
-6. REVIEW goes to an approval step for the `required_approver` role. ACT goes on only for an approved playbook within policy.
+6. REVIEW goes to an approval step for the `required_approver` role. ACT goes on only for an approved playbook within policy. NOTIFY runs a notification job that posts to the ticket or the operations channel, with no network change.
 7. A job template runs the playbook, and a verification job reads the same object. If verification fails, the workflow reports the failure, then runs a rollback job.
 8. The workflow writes the audit record and updates the TMF621 ticket, then returns the result to the agent.
+
+NOTIFY works two ways. From the assist stage up, an agent may hold direct notify tools, such as an operations-channel message or a ticket comment, through the MCP Gateway; the shadow stage gets no notify role. An action request that the gate labels NOTIFY becomes a notification job that this layer runs. Direct notify tools never reach this layer, so the gateway's tool-role mapping enforces their stage.
 
 ### Two ways to get the label
 

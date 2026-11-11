@@ -68,7 +68,7 @@ flowchart TD
   DG -- "REVIEW" --> HU["Human approver"]
   HU -- "approve" --> RUN["Run the approved job"]
   DG -- "ACT within policy" --> RUN
-  DG -- "NOTIFY" --> NO["Send a notification, no change"]
+  DG -- "NOTIFY" --> NO["Run the notification job, no network change"]
   DG -- "LOOK or STOP" --> BL["Block and return the reason"]
 ```
 
@@ -80,7 +80,7 @@ One triage episode passes these controls in order:
 4. The Safety slot checks whether the passages support an answer. If they don't, the agent abstains and cites what it searched.
 5. To change anything, the agent submits an action request. Its own gate label is advisory.
 6. Action orchestration runs the Decision gate again and applies the lower of the model label and the policy ceiling for the risk class.
-7. REVIEW goes to a human approver, ACT runs an approved playbook, NOTIFY sends a notification, and LOOK and STOP block the step.
+7. REVIEW goes to a human approver, ACT runs an approved playbook, NOTIFY runs a notification job, and LOOK and STOP block the step.
 8. Output guardrails screen the final answer before it reaches the operations user.
 
 ### Where each control sits
@@ -108,6 +108,8 @@ TM Forum applies levels to scenarios, not whole networks, so each use case and a
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. The gate call in action orchestration is authoritative and the agent's label is advisory, so a prompt-injected agent can't skip the gate. The [policy table](../../architecture/decision-gate.md#policy-table) on the decision gate page says who acts and what runs for each label.
 
+NOTIFY works two ways. From the assist stage up, an agent may hold direct notify tools, such as an operations-channel message or a ticket comment, through the MCP Gateway; the shadow stage gets no notify role. An action request that the gate labels NOTIFY becomes a notification job that the action layer runs. For direct notify tools, the gateway's tool-role mapping enforces the stage, not the gate.
+
 ### Promotion thresholds
 
 | Parameter | What it controls | Who sets it | How to calibrate |
@@ -122,7 +124,7 @@ This page gives no default values. You set each parameter with SME sign-off and 
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The stage register puts triage notes at the assist stage, with a ceiling of notify. The agent reads the alarms and counters through the gateway, Classification labels the likely cause, and the Safety slot checks that the evidence supports the finding. The outcome is a NOTIFY: a ticket note or an operations-channel message, sent through the action layer.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The stage register puts triage notes at the assist stage, with a ceiling of notify. The agent reads the alarms and counters through the gateway, Classification labels the likely cause, and the Safety slot checks that the evidence supports the finding. The agent submits its triage note as an action request. The gate labels it NOTIFY, and the action layer runs a notification job that posts the note to the ticket.
 
 The agent then proposes restarting eth1 on r2. Interface restarts are a `write_low` action class at the recommend stage, so the ceiling is REVIEW. Even when the Decision label says ACT, the outcome is REVIEW. The shift lead approves, and the action layer runs the restart, verifies it, and writes the audit record, as `req-0001` on the [decision gate](../../architecture/decision-gate.md) page shows.
 

@@ -46,7 +46,7 @@ Until you answer it, agents hold direct credentials to network systems, and nobo
 | Pick the standard that fronts each system | TM Forum Open APIs; CAMARA; 3GPP NWDAF and UDR; vendor APIs; device command line | TM Forum Open APIs for OSS and BSS, CAMARA for network APIs, 3GPP NWDAF and UDR for core analytics, and a read-only device command line for state no API exposes | Standard APIs come with published specifications and per-API conformance kits ([TM Forum conformance](https://www.tmforum.org/conformance-certification/open-api-conformance/)) |
 | Put every tool behind one gateway | Agents call each server directly; one gateway | One MCP Gateway for every tool | One place checks the token per tool, screens each call, and writes the audit entry ([MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available)) |
 | Deny every tool unless a role allows it | Allow unless denied; deny unless allowed | Deny unless a per-tool role allows the call | By default a valid user can call every tool behind the gateway ([Locking down MCP at the gateway](https://developers.redhat.com/articles/2026/10/23/locking-down-mcp-at-the-gateway)) |
-| Route every write through the action request | Direct write tools; the action request | The action request, through `submit_action_request`, for every write to a system of record, ticket writes included | The gate, the duplicate-ticket policy, and the audit trail live in one place ([decision gate](../../architecture/decision-gate.md)) |
+| Route every write through the action request | Direct write tools; the action request | The action request, through `submit_action_request`, for every write to a system of record, ticket creation and updates included. Direct notify tools are the one exception, from the assist stage up | The gate, the duplicate-ticket policy, and the audit trail live in one place ([decision gate](../../architecture/decision-gate.md)) |
 | Produce tool definitions | Hand-written; generated from a pinned OpenAPI version | Generate them from a pinned OpenAPI version, following CAMARA API Design Guide Appendix B | Agents pick a tool from its `operationId` and description alone ([CAMARA API Design Guide](https://github.com/camaraproject/Commonalities/blob/main/documentation/CAMARA-API-Design-Guide.md)) |
 
 ## Reference design
@@ -56,7 +56,7 @@ flowchart LR
     AG["Agent runtime with the LLM slot"] -- "tool call with the agent token" --> GW["MCP Gateway: authorize per tool and audit every call"]
     GW <-- "screen request and response" --> GR["Guardrails"]
     GW -- "read" --> RT["Read tools: alarms, performance, inventory, tickets, device state"]
-    GW -- "notify" --> NT["Notify tools: operations-channel message"]
+    GW -- "notify, assist stage and later" --> NT["Notify tools: channel message or ticket comment"]
     GW -- "one action-request tool" --> AR["Action request"]
     AR --> AO["Action orchestration"]
 ```
@@ -82,8 +82,10 @@ Each `tools/call` follows these steps:
 | Run `show` commands on a device | Device command line, through a read-only MCP server | read |
 | Read network analytics | 3GPP NWDAF | read |
 | Classify the root cause | OTel Classification slot, served as a tool | read |
-| Post an operations-channel message | Operations chat or paging system | notify |
+| Post an operations-channel message or a ticket comment, from the assist stage up | Operations chat, paging system, or ticket comment | notify |
 | `submit_action_request` | Action request in the [decision gate schema](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json) | action request |
+
+NOTIFY works two ways. From the assist stage up, an agent may hold direct notify tools, such as an operations-channel message or a ticket comment, through the MCP Gateway; the shadow stage gets no notify role. An action request that the gate labels NOTIFY becomes a notification job that the action layer runs. Bind each notify role to the stage register, so the gateway's tool-role mapping enforces the stage for direct notify tools.
 
 ### Per-tool authorization
 
