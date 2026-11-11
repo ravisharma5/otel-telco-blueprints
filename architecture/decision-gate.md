@@ -76,10 +76,10 @@ Both paths re-run the gate on the request. Neither trusts the agent's advisory l
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| Minimum ACT probability | The lowest ACT probability at which AAP may act alone | Operator, with SME sign-off | PB-02 calibration method: fit on an operator gate set labelled by SMEs, and check calibration error |
-| REVIEW band | The probability range that sends a request to a human instead of acting or blocking | Operator, with SME sign-off | PB-02 calibration method: set from the calibration curve and the human review load |
-| False-ACT budget | How many wrong ACT labels the operator accepts on state-changing requests | Operator risk owner | PB-02 calibration method: count false ACT labels on state-changing gate cases, with a set large enough to bound the rate |
-| Ceiling per risk class | The highest outcome allowed for read, notify, low-risk write, and high-risk write | Operator, with SME sign-off | PB-02 calibration method: raise a ceiling only after a canary window with no false ACT labels |
+| Minimum ACT probability | The lowest ACT probability at which AAP may act alone | Operator, with SME sign-off | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): fit on an operator gate set labelled by SMEs, and check calibration error |
+| REVIEW band | The probability range that sends a request to a human instead of acting or blocking | Operator, with SME sign-off | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): set from the calibration curve and the human review load |
+| False-ACT budget | How many wrong ACT labels the operator accepts on state-changing requests | Operator risk owner | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): count false ACT labels on state-changing gate cases, with a set large enough to bound the rate |
+| Ceiling per risk class | The highest outcome allowed for read, notify, low-risk write, and high-risk write | Operator, with SME sign-off | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): raise a ceiling only after a canary window with no false ACT labels |
 
 This page gives no default values. You set each parameter with SME sign-off and version the set as the policy that `policy_version` names.
 
@@ -150,7 +150,7 @@ Both messages follow the [decision gate schema](https://github.com/ravisharma5/o
 
 ## Used by
 
-- PB-02: the calibration method behind every threshold
+- [PB-02 Evaluation and acceptance](../platform/evaluation-acceptance/README.md): the calibration method behind every threshold
 - [PB-06](../platform/safety-autonomy-gating/README.md), [PB-07](../platform/action-layer/README.md): gating and the action layer build on this contract
 - [Architecture overview](index.md): the investigate-then-act flow this page details
 - [Readiness questions](../framework/index.md): the autonomy question this page answers

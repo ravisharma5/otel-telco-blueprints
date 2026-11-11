@@ -195,7 +195,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 - Gate: after every deploy, ask each generative slot to identify itself, and fail the rollout if the answer is wrong or empty.
 - Gate: on MI350-class GPUs, confirm the pod sets `VLLM_ROCM_USE_AITER=0` and that a fixed prompt returns well-formed text before traffic arrives.
-- Gate: every quantized build passes your operator acceptance suite (PB-02) before you place it at a regional site.
+- Gate: every quantized build passes your operator acceptance suite ([PB-02](../evaluation-acceptance/README.md)) before you place it at a regional site.
 - Gate: reranker scores from the serving engine match `sentence-transformers` scores on your held-out pairs before the reranker serves retrieval.
 - Gate: the deployed revision of every slot matches the revision record in the model registry.
 
@@ -227,5 +227,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-05 Integration](../integration/README.md): integration reaches the slots served here through the same front door
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): uses the Safety and Decision slots placed here
 - [PB-07 Action layer](../action-layer/README.md): the action layer runs behind the gate at the regional site and the core
-- PB-02: evaluation and acceptance gates every quantized build before placement
+- [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): gates every quantized build before placement
 - Agent-school: 104 serves a NOC assistant behind the front door, and 203 covers routing, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

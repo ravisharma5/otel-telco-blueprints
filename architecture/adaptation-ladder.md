@@ -94,6 +94,6 @@ flowchart TD
 
 ## Used by
 
-- PB-02, PB-03, PB-09: evaluation, adaptation, and lifecycle build on this ladder
+- [PB-02](../platform/evaluation-acceptance/README.md), PB-03, PB-09: evaluation, adaptation, and lifecycle build on this ladder
 - [Decision gate](decision-gate.md): the risk class from each manifest sets its ceiling
 - [Architecture overview](index.md): the evaluation, adaptation, and observability layers, where these flows run

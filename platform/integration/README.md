@@ -178,7 +178,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - Gate: the TM Forum Conformance Test Kit passes for each TMF API an MCP server fronts, at the pinned version.
 - Gate: for every tool, a call with a valid token and no role for that tool is rejected, and the rejection appears in the audit log.
 - Gate: the diff of every tool name and description is reviewed before an MCP server release.
-- Gate: every API with writes has a stateful mock in the evaluation set (PB-02).
+- Gate: every API with writes has a stateful mock in the evaluation set ([PB-02](../evaluation-acceptance/README.md)).
 - Gate: no agent token can reach a write endpoint directly; writes appear only as action requests.
 - Gate: every corpus in the index has a filled usage-rights entry in the corpus register.
 

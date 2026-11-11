@@ -38,7 +38,7 @@ A use case is ready for production when all ten criteria hold for that use case.
 | # | Question | What ready means | Answered by |
 |---|---|---|---|
 | 1 | Intake: which checkpoints may you run, and where do they come from? | Every checkpoint in use is pinned to a revision hash, has a recorded licence chain, and is served from your own registry as a signed image | PB-01 |
-| 2 | Evaluation: how do you know a model is good enough for this use case? | Each slot has acceptance thresholds measured on your data and tool contracts, signed off by a named owner, and re-run on every model, prompt, tool, or adapter change | PB-02 |
+| 2 | Evaluation: how do you know a model is good enough for this use case? | Each slot has acceptance thresholds measured on your data and tool contracts, signed off by a named owner, and re-run on every model, prompt, tool, or adapter change | [PB-02](../platform/evaluation-acceptance/README.md) |
 | 3 | Adaptation: how do you fit the model to your network? | You climb from retrieval to skills, LoRA, and OSFT only when an evaluation gap calls for it, and every adapter is bound to one base revision and re-evaluated after a base upgrade | PB-03 |
 | 4 | Serving and placement: where and how does each slot run? | Each slot has a sized deployment on a hardware class, a placement tier, a latency target, and a fallback for when it is down | [PB-04](../platform/serving-routing-placement/README.md) |
 | 5 | Integration: how do agents reach your network and business systems? | Agents reach systems only through standards-based tools (TM Forum, CAMARA, 3GPP) behind one gateway. Tools are read-only by default and have versioned contracts and conformance tests | [PB-05](../platform/integration/README.md) |

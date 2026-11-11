@@ -37,6 +37,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "integration": "PB-05",
     "safety-autonomy-gating": "PB-06",
     "action-layer": "PB-07",
+    "evaluation-acceptance": "PB-02",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -491,3 +492,98 @@ def test_action_alarm_example():
     example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]
     for want in ("eth1", "r2", "noc-shift-lead", "pb-interface-restart", "REVIEW", "roll"):
         assert want in example, want
+
+
+# ---------- evaluation and acceptance ----------
+
+ACCEPTANCE = REPO_ROOT / "platform/evaluation-acceptance/README.md"
+LADDER_STAGES = [
+    "Intake and smoke",
+    "Public sanity",
+    "Operator offline acceptance",
+    "Safety and red team",
+    "Shadow, then canary",
+]
+TRAJECTORY_CHECKS = (
+    "No unnecessary writes",
+    "ID retention",
+    "Failed actions surfaced",
+    "Verification after fix",
+    "Fact vs theory",
+)
+
+
+def _h3_text(text: str, name: str) -> str:
+    """Raw markdown between "### <name>" and the next H2 or H3."""
+    m = re.search(rf"^### {re.escape(name)}[ \t]*$", text, re.M)
+    assert m, f"no '### {name}'"
+    nxt = re.search(r"^#{2,3} ", text[m.end() :], re.M)
+    return text[m.end() : m.end() + nxt.start()] if nxt else text[m.end() :]
+
+
+def test_acceptance_ladder():
+    table = table_with_header(ACCEPTANCE, "Reference design", ["Stage"])
+    assert table[0][0] == "Stage"
+    assert [row[0] for row in table[1:]] == LADDER_STAGES
+
+
+def test_acceptance_trajectory_checks():
+    header = ["Check", "How it is computed", "Type"]
+    table = table_with_header(ACCEPTANCE, "Reference design", header)
+    assert table[0] == header
+    firsts = [row[0] for row in table[1:]]
+    for want in TRAJECTORY_CHECKS:
+        assert any(f.startswith(want) for f in firsts), want
+
+
+def test_acceptance_per_slot_gates():
+    table = table_with_header(ACCEPTANCE, "Reference design", PARAM_TABLE_HEADER)
+    assert table[0] == PARAM_TABLE_HEADER
+    rows = " ".join(" ".join(row) for row in table[1:])
+    assert re.search(r"\bLLM\b|\bllm\b", rows)
+    for want in ("Safety", "Classification", "Decision", "no-write"):
+        assert want in rows, want
+    assert "Embedding" in rows or "Reranker" in rows
+
+
+def test_acceptance_false_act_method():
+    text = _h3_text(reference_design_text(ACCEPTANCE), "False-ACT method")
+    assert "rule of three" in text
+    assert "3/n" in text
+
+
+def test_acceptance_zero_tolerance():
+    text = _h3_text(reference_design_text(ACCEPTANCE), "Zero-tolerance rules")
+    assert "duplicate ticket" in text
+    assert "secret" in text
+
+
+def test_acceptance_regression_triggers():
+    header = ["Change", "What re-runs"]
+    table = table_with_header(ACCEPTANCE, "Reference design", header)
+    assert table[0] == header
+    assert len(table) - 1 >= 8
+
+
+def test_acceptance_suites():
+    text = body(ACCEPTANCE)
+    for want in (
+        "bring-your-own-framework",
+        "GSMA Open-Telco",
+        "https://github.com/gsma-labs/evals",
+        "promotion pipeline",
+    ):
+        assert want in text, want
+
+
+def test_acceptance_no_gap_wording():
+    text = CODE_FENCE.sub("", body(ACCEPTANCE))
+    assert not re.search(r"\bgaps?\b", text, re.I)
+    assert not re.search(r"not yet", text, re.I)
+
+
+def test_acceptance_mermaid_capabilities():
+    fence = mermaid_fences(body(ACCEPTANCE))[0]
+    for want in LADDER_STAGES[:4] + ["Promotion pipeline", "Model registry"]:
+        assert want in fence, want
+    assert not re.search(r"EvalHub|Garak|MLflow|Red Hat", fence)

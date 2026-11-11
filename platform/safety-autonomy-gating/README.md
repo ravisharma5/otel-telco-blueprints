@@ -112,11 +112,11 @@ The outcome is the lower of the model label and the policy ceiling for the capab
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| Shadow agreement floor | How often shadow outcomes must match what people did before a use case moves to assist | Operator risk owner, with SME sign-off | Evaluation and acceptance method: compare shadow outcomes with logged human actions over a window the risk owner sets |
-| Correct-abstention floor | The lowest share of insufficient-context items on which the Safety slot must abstain | NOC lead, with SME sign-off | Evaluation and acceptance method: score abstention on an operator set that includes items with no supporting evidence |
-| Canary window | How long, and over how many requests, a raised ceiling runs on a small share of traffic | Operator risk owner | Evaluation and acceptance method: size the window to hold enough state-changing requests to bound the false-ACT rate |
+| Shadow agreement floor | How often shadow outcomes must match what people did before a use case moves to assist | Operator risk owner, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): compare shadow outcomes with logged human actions over a window the risk owner sets |
+| Correct-abstention floor | The lowest share of insufficient-context items on which the Safety slot must abstain | NOC lead, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): score abstention on an operator set that includes items with no supporting evidence |
+| Canary window | How long, and over how many requests, a raised ceiling runs on a small share of traffic | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): size the window to hold enough state-changing requests to bound the false-ACT rate |
 | Minimum ACT probability for the act stage | The lowest calibrated ACT probability at which the act stage may run a playbook alone | Operator, with SME sign-off | Evaluation and acceptance calibration: fit on an operator gate set labelled by SMEs, and check calibration error |
-| Override rate ceiling | The share of human overrides that sends a use case back one stage | NOC lead | Evaluation and acceptance method: count overrides per use case and action class in the trace |
+| Override rate ceiling | The share of human overrides that sends a use case back one stage | NOC lead | [Evaluation and acceptance method](../evaluation-acceptance/README.md): count overrides per use case and action class in the trace |
 
 This page gives no default values. You set each parameter with SME sign-off and version it with the policy ceilings.
 
@@ -168,7 +168,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - Gate: the shadow agreement floor is met before a use case moves from shadow to assist.
 - Gate: the correct-abstention floor is met on insufficient-context items before the Safety slot fronts answers.
 - Gate: no false ACT label appears during the canary window before any ceiling rises.
-- Gate: the red-team suite (PB-02) includes guardrail tests for jailbreaks, personal data, and prompt injection through alarm, ticket, and tool text, and every test is blocked.
+- Gate: the red-team suite ([PB-02](../evaluation-acceptance/README.md)) includes guardrail tests for jailbreaks, personal data, and prompt injection through alarm, ticket, and tool text, and every test is blocked.
 - Gate: a test request with a STOP label ends as STOP, and a `write_low` request labelled ACT under a REVIEW ceiling ends as REVIEW.
 - Gate: every stage change has a signed entry in the stage register.
 
@@ -199,7 +199,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [Decision gate](../../architecture/decision-gate.md): the label policy and gate thresholds this page builds on
 - [Architecture overview](../../architecture/index.md): the grounded answer and investigate-then-act flows these controls guard
 - [PB-07 Action layer](../action-layer/README.md): the action layer runs each gate outcome
-- PB-02: evaluation supplies the evidence behind each promotion
+- [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): supplies the evidence behind each promotion
 - PB-08: security and identity covers prompt injection and workload identity in depth
 - PB-09: quality operations tracks abstention rate, gate labels, and human overrides
 - Agent-school: courses 201, 301, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate and 304 covers agent security operations

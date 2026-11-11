@@ -441,6 +441,7 @@ def test_nav_order():
         "platform/integration/README.md",
         "platform/safety-autonomy-gating/README.md",
         "platform/action-layer/README.md",
+        "platform/evaluation-acceptance/README.md",
     ]
 
 

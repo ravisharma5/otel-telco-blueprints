@@ -79,7 +79,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 ## Used by
 
 - PB-04 to PB-08: serving, integration, gating, the action layer, and security map onto these rows
-- PB-02, PB-03, PB-09: evaluation, adaptation, and observability fill the lifecycle extensions
+- [PB-02](../platform/evaluation-acceptance/README.md), PB-03, PB-09: evaluation, adaptation, and observability fill the lifecycle extensions
 - [Architecture overview](index.md): the layer table this crosswalk maps to
 - [Decision gate](decision-gate.md): the gate extension in detail
 - [Adaptation ladder](adaptation-ladder.md): the adaptation extension in detail

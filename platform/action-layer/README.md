@@ -115,12 +115,12 @@ The REST API step blocks URLs that target private network addresses or cloud met
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| Ceiling for read requests | The highest outcome for requests that only read | Operator, with SME sign-off | Evaluation and acceptance method: review the gate set for read requests and the human review load |
-| Ceiling for notify requests | The highest outcome for notifications and ticket notes | Operator, with SME sign-off | Evaluation and acceptance method: review notify cases for duplicates and noise |
-| Ceiling for low-risk writes | The highest outcome for reversible changes such as an interface restart | Operator risk owner | Evaluation and acceptance method: raise it only after a canary window with no false ACT label |
-| Ceiling for high-risk writes | The highest outcome for changes that are hard to reverse or affect many customers | Operator risk owner | Evaluation and acceptance method: keep it at REVIEW until the risk owner signs off on canary evidence |
-| Required approver role per action class | Which role approves REVIEW for each action class | NOC lead | Evaluation and acceptance method: check approval times and overrides per class in the trace |
-| Label-mass floor | The lowest label mass at which the gate trusts the readout | Platform engineer, with SME sign-off | Evaluation and acceptance method: measure label mass on the operator gate set and set the floor below normal readouts |
+| Ceiling for read requests | The highest outcome for requests that only read | Operator, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): review the gate set for read requests and the human review load |
+| Ceiling for notify requests | The highest outcome for notifications and ticket notes | Operator, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): review notify cases for duplicates and noise |
+| Ceiling for low-risk writes | The highest outcome for reversible changes such as an interface restart | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): raise it only after a canary window with no false ACT label |
+| Ceiling for high-risk writes | The highest outcome for changes that are hard to reverse or affect many customers | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): keep it at REVIEW until the risk owner signs off on canary evidence |
+| Required approver role per action class | Which role approves REVIEW for each action class | NOC lead | [Evaluation and acceptance method](../evaluation-acceptance/README.md): check approval times and overrides per class in the trace |
+| Label-mass floor | The lowest label mass at which the gate trusts the readout | Platform engineer, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): measure label mass on the operator gate set and set the floor below normal readouts |
 
 This page gives no default values. You set each parameter with SME sign-off and version the set as the policy that `policy_version` names.
 
@@ -205,7 +205,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-05 Integration](../integration/README.md): the MCP Gateway and the `submit_action_request` tool that start this write path
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): the stages and policy ceilings this page applies
 - [Decision gate](../../architecture/decision-gate.md): the label policy, both paths, and the message examples
-- PB-02: evaluation supplies the calibration and canary evidence behind each ceiling
+- [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): supplies the calibration and canary evidence behind each ceiling
 - PB-08: security and identity covers workload identity and secrets for job credentials
 - PB-09: quality operations tracks gate outcomes, approvals, rollbacks, and overrides
 - Agent-school: courses 202 and 301 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate to a closed loop
