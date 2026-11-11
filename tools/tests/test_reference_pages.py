@@ -708,6 +708,8 @@ PRODUCT_TERMS = re.compile(
     r"|Data Science Pipelines|Garak|Inspect AI|Kueue|Istio|Envoy|\bQuay\b|Kubeflow"
     r"|Unsloth|KubeRay|MicroShift|ModelCar|LLM Compressor|Model Optimization Toolkit"
     r"|Workload Identity Manager|TrustyAI"
+    r"|\bTempo\b|OpenShell|\bKata\b|Sigstore|\bcosign\b|External Secrets"
+    r"|Trusted Artifact Signer|Hugging Face"
 )
 TEMPLATES = sorted((REPO_ROOT / "templates").glob("*.md"))
 

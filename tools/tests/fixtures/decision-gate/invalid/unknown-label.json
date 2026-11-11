@@ -17,7 +17,7 @@
   "outcome": "REVIEW",
   "policy_version": "noc-gate-policy-3",
   "model_revision": "decision-slot@rev-a1b2c3",
-  "required_approver": "noc-shift-lead",
+  "required_approver": "approver",
   "reasons": [
     "Policy ceiling is REVIEW"
   ]

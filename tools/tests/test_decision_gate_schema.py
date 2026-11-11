@@ -162,7 +162,7 @@ def test_outcome_above_ceiling_is_rejected(gate_validator):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
     for ceiling in LABELS:
         for outcome in LABELS:
-            approver = "noc-shift-lead" if outcome == "REVIEW" else None
+            approver = "approver" if outcome == "REVIEW" else None
             payload = {**base, "policy_ceiling": ceiling, "outcome": outcome, "required_approver": approver}
             assert gate_validator.is_valid(payload) == _allowed_under_ceiling(ceiling, outcome), (ceiling, outcome)
 
@@ -236,7 +236,7 @@ def test_outcome_above_model_label_is_rejected(gate_validator):
     base = _load(GATE_FIXTURES / "valid" / "gate-decision-act.json")
     for label in LABELS:
         for outcome in LABELS:
-            approver = "noc-shift-lead" if outcome == "REVIEW" else None
+            approver = "approver" if outcome == "REVIEW" else None
             payload = {**base, "model_label": label, "outcome": outcome, "required_approver": approver}
             assert gate_validator.is_valid(payload) == _allowed_for_label(label, outcome), (label, outcome)
 

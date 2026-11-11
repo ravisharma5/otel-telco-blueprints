@@ -14,7 +14,7 @@ top_decisions:
   - "Give the agent read-only job access"
   - "Pair every playbook with a verification job and a rollback job"
 agent_school: [202, 301]
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -27,7 +27,7 @@ clarity_reviewed: "2026-11-10"
 |---|---|
 | One-liner | Turns an agent's action request into a gated, approved, executed, verified, and audited change, with rollback on failure. Depends on an automation platform that holds the only write credentials. |
 | Question answered | Autonomy gating: what may the agent do without a human? |
-| Audience | Automation engineers, platform engineers, and NOC leads |
+| Audience | Operations engineers, platform teams, and business owners |
 | OTel slots | Decision and LLM |
 | Placement tier | Regional and core |
 | Top 3 decisions | Read the gate label inside the orchestrator; give the agent read-only job access; pair every playbook with a verification job and a rollback job |
@@ -44,7 +44,7 @@ Until you answer it, agents hold write credentials to the network, and nobody ca
 |---|---|---|---|
 | Read the gate label inside the orchestrator | Trust the agent's label; an Automation Orchestrator workflow; a job template that calls the gate with `uri` | An Automation Orchestrator workflow by default. A job template with `uri` when you run job templates only | The workflow holds the gate, the approval, and the job in one place, and inherits your RBAC, approval gates, and audit trails ([Automation Orchestrator announcement](https://www.redhat.com/en/blog/unify-it-workflows-scale-new-automation-orchestrator-ansible-automation-platform)) |
 | Give the agent read-only job access | No job access; read-only mode; read-write mode | The MCP Server for AAP in read-only mode. Grant only the job status and output tools | Read-write mode lets agents run jobs and make changes, which turns the gate into a suggestion ([MCP Server for AAP announcement](https://www.redhat.com/en/blog/it-automation-agentic-ai-introducing-mcp-server-red-hat-ansible-automation-platform)) |
-| Choose who approves REVIEW | A named person; a role | A role, carried as `required_approver` in the gate decision, such as `noc-shift-lead` | Shifts change, and the [decision gate schema](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json) records the approver role |
+| Choose who approves REVIEW | A named person; a role | A role, carried as `required_approver` in the gate decision, such as `approver` | Shifts change, and the [decision gate schema](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json) records the approver role |
 | Pair every playbook with a verification job and a rollback job | Trust the job exit code; verify and roll back per playbook | A verification job that reads the changed object, and a rollback job that restores it | A job can succeed while the network stays broken. Only a check on the object shows the fix worked |
 | Limit what Event-Driven Ansible may start | Fixes on an event; investigations and workflows only | Investigations and Orchestrator workflows only. Every fix passes the gate | An event can start a workflow, so send it there and let the gate decide. Workflows start from webhooks, schedules, or event sources ([Automation Orchestrator announcement](https://www.redhat.com/en/blog/unify-it-workflows-scale-new-automation-orchestrator-ansible-automation-platform)) |
 
@@ -119,20 +119,20 @@ The REST API step blocks URLs that target private network addresses or cloud met
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| Ceiling for read requests | The highest outcome for requests that only read | Operator, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): review the gate set for read requests and the human review load |
-| Ceiling for notify requests | The highest outcome for notifications and ticket notes | Operator, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): review notify cases for duplicates and noise |
-| Ceiling for low-risk writes | The highest outcome for reversible changes such as an interface restart | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): raise it only after a canary window with no false ACT label |
-| Ceiling for high-risk writes | The highest outcome for changes that are hard to reverse or affect many customers | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): keep it at REVIEW until the risk owner signs off on canary evidence |
-| Required approver role per action class | Which role approves REVIEW for each action class | NOC lead | [Evaluation and acceptance method](../evaluation-acceptance/README.md): check approval times and overrides per class in the trace |
-| Label-mass floor | The lowest label mass at which the gate trusts the readout | Platform engineer, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): measure label mass on the operator gate set and set the floor below normal readouts |
+| Ceiling for read requests | The highest outcome for requests that only read | Risk owner, with subject-matter expert (SME) review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): review the gate set for read requests and the human review load |
+| Ceiling for notify requests | The highest outcome for notifications and ticket notes | Risk owner, with SME review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): review notify cases for duplicates and noise |
+| Ceiling for low-risk writes | The highest outcome for reversible changes such as an interface restart | Risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): raise it only after a canary window with no false ACT label |
+| Ceiling for high-risk writes | The highest outcome for changes that are hard to reverse or affect many customers | Risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): keep it at REVIEW until the risk owner signs off on canary evidence |
+| Required approver role per action class | Which role approves REVIEW for each action class | Risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): check approval times and overrides per class in the trace |
+| Label-mass floor | The lowest label mass at which the gate trusts the readout | Platform team, with SME review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): measure label mass on the operator gate set and set the floor below normal readouts |
 
-This page gives no default values. You set each parameter with SME sign-off and version the set as the policy that `policy_version` names.
+This page gives no default values. You set each parameter with SME review and version the set as the policy that `policy_version` names.
 
 ### Worked example: alarm and root-cause triage
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The agent sends `req-0001`, a `write_low` request to restart eth1 on r2 with `router.restart_interface`. The stage register puts this class at the recommend stage, so the ceiling is REVIEW, and `dec-0001` records the outcome REVIEW under `noc-gate-policy-3`. Both messages are on the [decision gate](../../architecture/decision-gate.md#message-examples) page, and both follow the [decision gate schema](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json).
 
-The approval step waits for `noc-shift-lead`. After approval, the `pb-interface-restart` job template restarts eth1 on r2. The verification job checks that CRC errors stop rising, the BFD session to r3 stays stable, and the TMF642 alarm clears. If any check fails, the workflow posts the failure to the ticket, then the rollback job re-applies the previous interface configuration. The audit record holds the `gate_decision` message, the approver, the job result, and the verification result.
+The approval step waits for the `approver` role. After approval, the `pb-interface-restart` job template restarts eth1 on r2. The verification job checks that CRC errors stop rising, the BFD session to r3 stays stable, and the TMF642 alarm clears. If any check fails, the workflow posts the failure to the ticket, then the rollback job re-applies the previous interface configuration. The audit record holds the `gate_decision` message, the approver, the job result, and the verification result.
 
 - Config artifact: an Automation Orchestrator workflow definition with the webhook trigger, REST API step, switch, approval, and job steps
 - Config artifact: an Event-Driven Ansible rulebook that starts investigations from TMF642 alarm events
@@ -187,11 +187,11 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
-| Approve a REVIEW request | NOC shift lead | NOC lead | Operator SME | Automation engineer |
-| Write a playbook with its verification and rollback jobs | Automation engineer | Platform owner | Operator SME | NOC lead |
-| Change a policy ceiling or an approver role | Automation engineer | Operator risk owner | Operator SME | NOC lead |
-| Change an Event-Driven Ansible rulebook | Automation engineer | Platform owner | NOC lead | Security team |
-| Grant MCP Server for AAP toolsets to an agent | Platform engineer | Security team | Automation engineer | Operator risk owner |
+| Approve a REVIEW request | Approver | Business owner | SME | Operations engineer |
+| Write a playbook with its verification and rollback jobs | Operations engineer | Platform team | SME | Business owner |
+| Change a policy ceiling or an approver role | Operations engineer | Risk owner | Change board and SME | Business owner |
+| Change an Event-Driven Ansible rulebook | Operations engineer | Platform team | Business owner | Security |
+| Grant MCP Server for AAP toolsets to an agent | Platform team | Security | Operations engineer | Risk owner |
 
 ## Risks and limitations
 

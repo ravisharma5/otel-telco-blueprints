@@ -3,7 +3,7 @@ type: "reference"
 title: "Decision gate"
 question: "How does an agent's proposed change become an executed, blocked, or human-approved action?"
 doc_status: done
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 platform_blueprints: ["PB-02", "PB-06", "PB-07"]
 otel_slots: ["llm", "decision"]
 ---
@@ -78,12 +78,12 @@ Both paths re-run the gate on the request. Neither trusts the agent's advisory l
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| Minimum ACT probability | The lowest ACT probability at which AAP may act alone | Operator, with SME sign-off | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): fit on an operator gate set labelled by SMEs, and check calibration error |
-| REVIEW band | The probability range that sends a request to a human instead of acting or blocking | Operator, with SME sign-off | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): set from the calibration curve and the human review load |
-| False-ACT budget | How many wrong ACT labels the operator accepts on state-changing requests | Operator risk owner | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): count false ACT labels on state-changing gate cases, with a set large enough to bound the rate |
-| Ceiling per risk class | The highest outcome allowed for read, notify, low-risk write, and high-risk write | Operator, with SME sign-off | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): raise a ceiling only after a canary window with no false ACT labels |
+| Minimum ACT probability | The lowest ACT probability at which AAP may act alone | Risk owner, with subject-matter expert (SME) review | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): fit on an operator gate set labelled by SMEs, and check calibration error |
+| REVIEW band | The probability range that sends a request to a human instead of acting or blocking | Risk owner, with SME review | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): set from the calibration curve and the human review load |
+| False-ACT budget | How many wrong ACT labels the operator accepts on state-changing requests | Risk owner | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): count false ACT labels on state-changing gate cases, with a set large enough to bound the rate |
+| Ceiling per risk class | The highest outcome allowed for read, notify, low-risk write, and high-risk write | Risk owner, with SME review | [PB-02 calibration method](../platform/evaluation-acceptance/README.md#false-act-method): raise a ceiling only after a canary window with no false ACT labels |
 
-This page gives no default values. You set each parameter with SME sign-off and version the set as the policy that `policy_version` names.
+This page gives no default values. You set each parameter with SME review and version the set as the policy that `policy_version` names.
 
 ### Message examples
 
@@ -134,7 +134,7 @@ The gate decision from AAP:
   "outcome": "REVIEW",
   "policy_version": "noc-gate-policy-3",
   "model_revision": "decision-slot@rev-a1b2c3",
-  "required_approver": "noc-shift-lead",
+  "required_approver": "approver",
   "reasons": ["Policy ceiling is REVIEW"]
 }
 ```

@@ -600,8 +600,9 @@ def test_action_gate_rules():
 def test_action_alarm_example():
     text = reference_design_text(ACTION)
     example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]
-    for want in ("eth1", "r2", "noc-shift-lead", "pb-interface-restart", "REVIEW", "roll"):
+    for want in ("eth1", "r2", "`approver`", "pb-interface-restart", "REVIEW", "roll"):
         assert want in example, want
+    assert "noc-shift-lead" not in example
 
 
 # ---------- NOTIFY delivery (shared across pages) ----------
