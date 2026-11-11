@@ -420,12 +420,44 @@ def test_gating_mermaid_capabilities():
 
 
 def test_gating_tm_forum_source():
+    """The TM Forum autonomy levels come from a standards body's whitepaper,
+    which the project documentation basis covers."""
     table = tables(sections(body(GATING)).get("Sources and acceptance", []))[0]
     basis, source = table[0].index("Basis"), table[0].index("Source")
     assert any(
-        row[basis].lower() == "project documentation" and "tmforum.org" in row[source]
+        row[basis].lower() == "project documentation"
+        and "tmforum.org" in row[source]
+        and "whitepaper" in row[source].lower()
         for row in table[1:]
     )
+    assert "whitepapers" in project_documentation_definition()
+
+
+def project_documentation_definition() -> str:
+    """The "project documentation" row of the claim basis table in the definitions."""
+    for line in (REPO_ROOT / "framework/definitions.md").read_text(encoding="utf-8").splitlines():
+        if line.startswith("| project documentation |"):
+            return line
+    raise AssertionError("no project documentation row in framework/definitions.md")
+
+
+def test_project_documentation_covers_standards_bodies():
+    row = project_documentation_definition()
+    for want in ("3GPP", "IETF", "TM Forum", "CAMARA", "specifications", "whitepapers"):
+        assert want in row, want
+
+
+# A blog post or news item: a dated path, or a /blog/ folder.
+BLOG_URL = re.compile(r"/blog/|/20[0-9]{2}/[0-9]{2}/[0-9]{2}/")
+
+
+@PAGES
+def test_project_documentation_rows_are_not_blog_posts(path):
+    table = tables(sections(body(path)).get("Sources and acceptance", []))[0]
+    basis, source = table[0].index("Basis"), table[0].index("Source")
+    for row in table[1:]:
+        if row[basis].strip().lower() == "project documentation":
+            assert not BLOG_URL.search(row[source]), row[source]
 
 
 def test_gating_gate_rules():

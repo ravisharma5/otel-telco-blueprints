@@ -173,7 +173,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 10 | TMF639 defines resource inventory operations | project documentation | [TMF639 Resource Inventory API](https://github.com/tmforum-apis/TMF639_ResourceInventory) |
 | 11 | TMF628 defines performance indicator and measurement job operations | project documentation | [TMF628 Performance Management API](https://github.com/tmforum-apis/TMF628_Performance) |
 | 12 | TM Forum publishes a Conformance Test Kit for each Open API | project documentation | [TM Forum Open API conformance](https://www.tmforum.org/conformance-certification/open-api-conformance/) |
-| 13 | An MCP server can translate CAMARA APIs into tools, with the declared purpose on each call and consent kept in CAMARA's own flow | project documentation | [CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/) |
+| 13 | An MCP server can translate CAMARA APIs into tools, with the declared purpose on each call and consent kept in CAMARA's own flow | industry use case | [CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/) |
 | 14 | CAMARA API Design Guide Appendix B sets `operationId` and description rules for MCP tool selection | project documentation | [CAMARA API Design Guide](https://github.com/camaraproject/Commonalities/blob/main/documentation/CAMARA-API-Design-Guide.md) |
 | 15 | NWDAF exposes network analytics to consumers in the 5G core | project documentation | [3GPP TS 23.288](https://www.3gpp.org/dynareport/23288.htm) |
 

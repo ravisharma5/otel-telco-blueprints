@@ -26,7 +26,7 @@ Blueprints are recipes. They draw on telecom network expertise, industry use cas
 | research | Papers and benchmarks | "Research shows ..." and name the paper | The paper URL |
 | Red Hat guidance | Red Hat documentation, recommendations, and articles | "Red Hat recommends ..." | The doc or article URL |
 | industry use case | Operator and GSMA material | "Operators use ..." | The source URL or a repo file |
-| project documentation | Upstream open source project docs (vLLM, llm-d, KServe) and standards specifications from TM Forum and CAMARA | "The vLLM docs state that" and name the project | The project doc or specification URL |
+| project documentation | Upstream open source project docs (vLLM, llm-d, KServe), and standards bodies' published specifications, whitepapers, and conformance programs (TM Forum, CAMARA, 3GPP, IETF RFCs). Blog posts and news items aren't project documentation | Name the project or standard: "The vLLM docs state that" or "3GPP TS 23.288 defines" | The project doc, specification, or whitepaper URL |
 
 ## Sources table
 
