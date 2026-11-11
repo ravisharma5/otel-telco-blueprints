@@ -222,8 +222,8 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 5 | LoRA fine-tuning runs on OpenShift AI with Ray | Red Hat guidance | [LoRA fine-tuning on OpenShift AI with Ray](https://developers.redhat.com/articles/2026/08/24/lora-fine-tuning-red-hat-openshift-ai-ray) |
 | 6 | The engine loads static adapters with `--lora-modules` and limits adapter rank with `--max-lora-rank` | project documentation | [vLLM LoRA docs](https://docs.vllm.ai/en/latest/features/lora/) |
 | 7 | Block runtime adapter loading and pin adapters by digest | Red Hat guidance | [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) |
-| 8 | The inference service rejects OCI URIs for adapters | project documentation | [KServe issue 6094](https://github.com/kserve/kserve/issues/6094) |
-| 9 | Some commercial API terms bar using the service to develop competing models | project documentation | [Gemini API terms](https://ai.google.dev/gemini-api/terms) |
+| 8 | The inference service rejects OCI URIs for adapters | research | [KServe issue 6094](https://github.com/kserve/kserve/issues/6094) |
+| 9 | Some commercial API terms bar using the service to develop competing models | model card | [Gemini API terms](https://ai.google.dev/gemini-api/terms) |
 | 10 | Only the quantized build of the Decision model is published | model card | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 
 - Gate: no adapter serves without a model registry record that binds its base revision and evaluation report.

@@ -456,10 +456,45 @@ def project_documentation_definition() -> str:
     raise AssertionError("no project documentation row in framework/definitions.md")
 
 
+def _basis_definition(name: str) -> str:
+    for line in (REPO_ROOT / "framework/definitions.md").read_text(encoding="utf-8").splitlines():
+        if line.startswith(f"| {name} |"):
+            return line
+    raise AssertionError(f"no {name} row in framework/definitions.md")
+
+
 def test_project_documentation_covers_standards_bodies():
     row = project_documentation_definition()
-    for want in ("3GPP", "IETF", "TM Forum", "CAMARA", "specifications", "whitepapers"):
+    for want in ("3GPP", "IETF", "TM Forum", "CAMARA", "specifications", "whitepapers",
+                 "laws and regulations", "EUR-Lex"):
         assert want in row, want
+
+
+def test_basis_definitions_cover_licences_and_issue_reports():
+    assert "licence or usage terms" in _basis_definition("model card")
+    assert "issue reports" in _basis_definition("research")
+    spec = (REPO_ROOT / "schemas/sources-table.yaml").read_text(encoding="utf-8")
+    for want in ("laws and regulations", "licence or usage terms", "issue reports"):
+        assert want in spec, want
+
+
+ISSUE_URL = re.compile(r"github\.com/[^/]+/[^/]+/issues/")
+VENDOR_TERMS_URL = re.compile(r"ai\.google\.dev/(gemma/terms|gemma/docs/gemma_4_license|gemini-api/terms)"
+                              r"|huggingface\.co/[^/]+/[^/]+/blob/main/LICENSE")
+
+
+@PAGES
+def test_sources_basis_fits_the_source(path):
+    """Issue reports are research, a model publisher's licence or terms are
+    model card, and no row cites a page of this repository."""
+    table = tables(sections(body(path)).get("Sources and acceptance", []))[0]
+    basis, source = table[0].index("Basis"), table[0].index("Source")
+    for row in table[1:]:
+        if ISSUE_URL.search(row[source]):
+            assert row[basis] == "research", row
+        if VENDOR_TERMS_URL.search(row[source]):
+            assert row[basis] == "model card", row
+        assert not re.search(r"\]\((?!https?:)[^)]*\.md", row[source]), row
 
 
 # A blog post or news item: a dated path, or a /blog/ folder.
@@ -1375,10 +1410,11 @@ def test_intake_licence_sources():
     table = table_with_header(INTAKE, "Sources and acceptance", ["Claim", "Basis", "Source"])
     basis = table[0].index("Basis")
     src = table[0].index("Source")
-    for url in ("https://ai.google.dev/gemma/terms", "https://ai.google.dev/gemma/docs/gemma_4_license"):
+    for url in ("https://ai.google.dev/gemma/terms", "https://ai.google.dev/gemma/docs/gemma_4_license",
+                "https://huggingface.co/LiquidAI/LFM2-24B-A2B/blob/main/LICENSE"):
         hits = [r for r in table[1:] if f"({url})" in r[src]]
         assert hits, url
-        assert all(r[basis] == "project documentation" for r in hits), hits
+        assert all(r[basis] == "model card" for r in hits), hits
 
 
 APACHE_LICENCE = "https://www.apache.org/licenses/LICENSE-2.0"

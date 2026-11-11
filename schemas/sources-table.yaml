@@ -11,9 +11,13 @@ columns:
 
 # Matched case-insensitively after trimming whitespace. Any other value,
 # including a blank cell, is a VT007 error.
-# "project documentation" covers upstream open source project docs and standards
-# bodies' published specifications, whitepapers, and conformance programs
-# (TM Forum, CAMARA, 3GPP, IETF RFCs). Blog posts are not project documentation.
+# "model card" covers what the model card reports and the licence or usage terms
+# a model's publisher sets for it. "research" covers papers, benchmarks, and
+# upstream issue reports. "project documentation" covers upstream open source
+# project docs, standards bodies' published specifications, whitepapers, and
+# conformance programs (TM Forum, CAMARA, 3GPP, IETF RFCs), and
+# laws and regulations that official bodies publish (EUR-Lex). Blog posts are
+# not project documentation.
 basis_values:
   - "model card"
   - "research"

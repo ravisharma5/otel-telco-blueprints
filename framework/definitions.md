@@ -1,7 +1,7 @@
 ---
 title: "Definitions: sources, autonomy, and naming"
 doc_status: done
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 ---
 
 # Definitions: sources, autonomy, and naming
@@ -22,11 +22,11 @@ Blueprints are recipes. They draw on telecom network expertise, industry use cas
 
 | Basis | Use it for | Write it as | Source links to |
 |---|---|---|---|
-| model card | Numbers and behavior the model card reports | "The model card reports ..." | The model card URL |
-| research | Papers and benchmarks | "Research shows ..." and name the paper | The paper URL |
+| model card | Numbers and behavior the model card reports, and the licence or usage terms a model's publisher sets for it | "The model card reports ..." | The model card URL, or the publisher's licence or terms page |
+| research | Papers, benchmarks, and upstream issue reports | "Research shows ..." and name the paper or issue | The paper, benchmark, or issue URL |
 | Red Hat guidance | Red Hat documentation, recommendations, and articles | "Red Hat recommends ..." | The doc or article URL |
 | industry use case | Operator and GSMA material | "Operators use ..." | The source URL or a repo file |
-| project documentation | Upstream open source project docs (vLLM, llm-d, KServe), and standards bodies' published specifications, whitepapers, and conformance programs (TM Forum, CAMARA, 3GPP, IETF RFCs). Blog posts and news items aren't project documentation | Name the project or standard: "The vLLM docs state that" or "3GPP TS 23.288 defines" | The project doc, specification, or whitepaper URL |
+| project documentation | Upstream open source project docs (vLLM, llm-d, KServe), and standards bodies' published specifications, whitepapers, and conformance programs (TM Forum, CAMARA, 3GPP, IETF RFCs), and laws and regulations that official bodies publish (EUR-Lex). Blog posts and news items aren't project documentation | Name the project or standard: "The vLLM docs state that" or "3GPP TS 23.288 defines" | The project doc, specification, or whitepaper URL |
 
 ## Sources table
 

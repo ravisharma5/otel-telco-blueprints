@@ -201,9 +201,9 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 5 | The 8.3B Classification model is built on EssentialAI rnj-1 | model card | [OTel-LLM-8.3B-Classification model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Classification) |
 | 6 | The 24B LLM is built on LiquidAI LFM2-24B-A2B and asks users to comply with the base-model terms | model card | [OTel-LLM-24B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-24B-IT) |
 | 7 | The base repositories of Gemma 3 models ask users to accept the Gemma terms before download | model card | [Gemma 3 12B IT model card](https://huggingface.co/google/gemma-3-12b-it) |
-| 8 | The Gemma Terms of Use define Model Derivatives and Hosted Service, and set the distribution, Notice file, use restriction, and termination terms | project documentation | [Gemma Terms of Use](https://ai.google.dev/gemma/terms) |
-| 9 | Gemma 4 models use the Apache-2.0 licence | project documentation | [Gemma 4 licence](https://ai.google.dev/gemma/docs/gemma_4_license) |
-| 10 | The LFM Open License v1.0 sets a revenue threshold for commercial use | project documentation | [LFM2-24B-A2B licence](https://huggingface.co/LiquidAI/LFM2-24B-A2B/blob/main/LICENSE) |
+| 8 | The Gemma Terms of Use define Model Derivatives and Hosted Service, and set the distribution, Notice file, use restriction, and termination terms | model card | [Gemma Terms of Use](https://ai.google.dev/gemma/terms) |
+| 9 | Gemma 4 models use the Apache-2.0 licence | model card | [Gemma 4 licence](https://ai.google.dev/gemma/docs/gemma_4_license) |
+| 10 | The LFM Open License v1.0 sets a revenue threshold for commercial use | model card | [LFM2-24B-A2B licence](https://huggingface.co/LiquidAI/LFM2-24B-A2B/blob/main/LICENSE) |
 | 11 | The BAAI bge models use the MIT licence | model card | [BAAI bge-m3 model card](https://huggingface.co/BAAI/bge-m3) |
 | 12 | The MIT licence requires the copyright and permission notices in copies | project documentation | [MIT licence](https://opensource.org/license/mit) |
 | 13 | Trusted Artifact Signer signs and verifies model files, and its Policy Controller and Model Validation Operator check signatures at admission | Red Hat guidance | [Trusted Artifact Signer administration guide](https://docs.redhat.com/en/documentation/red_hat_trusted_artifact_signer/1/html/administration_guide/rhtas-ocp-admin) |

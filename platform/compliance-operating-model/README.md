@@ -277,7 +277,6 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 10 | CAMARA is working out how network APIs reach AI agents through MCP | industry use case | [CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/) |
 | 11 | The GSMA roadmap measures maturity at four named levels across five dimensions | industry use case | [GSMA Responsible AI Maturity Roadmap](https://www.gsma.com/solutions-and-impact/connectivity-for-good/external-affairs/wp-content/uploads/2024/09/GSMA-ai4i_The-GSMA-Responsible-AI-Maturity-Roadmap_v8.pdf) |
 | 12 | The GSMA roadmap builds on seven principles, from fairness to environmental impact | industry use case | [GSMA press release](https://www.gsma.com/newsroom/press-release/gsma-launches-maturity-roadmap-as-telecoms-industry-leads-the-way-in-the-deployment-of-responsible-ai/) |
-| 13 | The regional tier keeps network data in the region | project documentation | [Placement](../../architecture/placement.md) |
 
 - Gate: no use case enters the shadow stage without a classification record and legal sign-off.
 - Gate: no stage promotion happens without the accountable owner named in the RACI.
