@@ -3,7 +3,7 @@ id: "PB-03"
 type: "platform"
 title: "Adaptation"
 readiness_question: "Adaptation: how do you fit the model to your network?"
-doc_status: draft
+doc_status: done
 layers: ["adaptation", "data-knowledge"]
 table1_rows: [11]
 extension_rows: ["E1", "E6"]
@@ -15,6 +15,7 @@ top_decisions:
   - "Choose LoRA or OSFT when training is earned"
   - "Serve adapters statically, pinned by digest"
 agent_school: [401, 402, 403]
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -36,7 +37,7 @@ agent_school: [401, 402, 403]
 ## The operator question
 
 How do you fit an OTel model to your network without retraining everything each time the base model changes?
-Without an answer, teams train adapters before they need them, skip the re-gate after a base change, and ship adapters that fail without warning.
+Until you answer it, teams train adapters they don't need and skip the re-gate after a base change, so adapters fail without warning.
 
 ## Decisions you must make
 
@@ -93,7 +94,11 @@ Record a usage-rights entry for each corpus in the corpus register before you in
 
 ### Skills and capability manifests
 
-A skill is a procedure bound to a role, written as one SKILL.md per role. Govern skills as content: review, version, provenance, and a judge, as the 401 course in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) describes. A capability is what an agent reaches through MCP. Each capability gets one manifest with six fields: backend pattern, I/O schema, risk class, allowed identities, rate class, and data class. The risk class sets the ceiling that the [decision gate](../../architecture/decision-gate.md) applies, and the same manifest drives the tool gateway's access and rate policies. The course defines the backend patterns; this example uses a descriptive value.
+A skill is a procedure bound to a role: write one SKILL.md per role. Govern skills as content, with review, version, provenance, and a judge, as the 401 course in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) describes.
+
+A capability is what an agent reaches through MCP. Give each capability one manifest with six fields: backend pattern, I/O schema, risk class, allowed identities, rate class, and data class. The risk class sets the ceiling that the [decision gate](../../architecture/decision-gate.md) applies, and the same manifest drives the tool gateway's access and rate policies.
+
+The course defines the backend patterns, so the triage manifest below uses a descriptive value.
 
 ```yaml
 capability: classify_root_cause
@@ -126,7 +131,7 @@ Training data that always ends in a change teaches the model to act. Generate LO
 | New embedding model | Re-index every store built with the old model, then re-run retrieval and abstention checks |
 | New skill or manifest version | Rerun the task suite; no retraining |
 
-An adapter trained on an earlier base may load on a new one, because the shapes match, but its behaviour is undefined. Every adapter is retrained and re-gated on every base revision, and the model registry binds each adapter to one base revision.
+An adapter trained on an earlier base may load on a new one, because the shapes match, but its behaviour is undefined. Retrain and re-gate every adapter on every base revision, and let the model registry bind each adapter to one base revision.
 
 ### Adapter serving and security
 
@@ -151,11 +156,15 @@ Never set `VLLM_ALLOW_RUNTIME_LORA_UPDATING`; block it by policy. [PB-04 Serving
 | Minimum measured gap to train | The smallest task-suite shortfall, after retrieval and skills, that earns an adapter | Risk owner, with SME review | Compare the gap with the run-to-run noise of the suite and the cost of retraining on each base revision |
 | Minimum share of non-ACT training cases | The lowest share of LOOK, NOTIFY, REVIEW, and STOP cases in adapter training data | Model owner, with SME review | Sample real incidents and count those where people only looked, notified, escalated, or stopped |
 
-This page gives no default values. You set each parameter with SME review and version it with the training run. The non-inferiority margin that a retrained adapter must meet belongs to [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md).
+This page gives no default values. You set each parameter with SME review and version the set with the training run. The non-inferiority margin that a retrained adapter must meet belongs to [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md).
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. Triage starts at the retrieval rung with runbooks and past root-cause reports. The triage skill and the manifests for its tools come next. It earns a LoRA only if the PB-02 suite shows a measured gap with those in place, for example the wrong tool sequence or the wrong output format on eth1 interface faults. The adapter trains on SDG Hub data built from the triage tools and replayed tapes, including LOOK, NOTIFY, REVIEW, and STOP cases, so it doesn't learn that every incident ends in a restart. It is bound to the base revision in the model registry and served statically. A fix proposal such as `req-0001` still goes through the gate, and `dec-0001` stays at REVIEW for the `approver`, as the [decision gate](../../architecture/decision-gate.md) requires. On the next OTel base revision, the adapter is retrained and re-gated before it serves.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. Triage starts at the retrieval rung, with runbooks and past root-cause reports, then adds the triage skill and the manifests for its tools. It earns a LoRA only if the PB-02 suite still shows a measured gap, such as the wrong tool sequence or the wrong output format on eth1 interface faults.
+
+The adapter trains on SDG Hub data built from the triage tools and replayed tapes. That data includes LOOK, NOTIFY, REVIEW, and STOP cases, so the adapter doesn't learn that every incident ends in a restart. The model registry binds it to the base revision, and the engine loads it at start.
+
+A fix proposal such as `req-0001` still goes through the gate, and `dec-0001` stays at REVIEW for the `approver`, as the [decision gate](../../architecture/decision-gate.md) requires. When the next OTel base revision ships, you retrain and re-gate the adapter before it serves.
 
 - Config artifact: skill catalog entry for the triage role that records its version and reviewer
 - Config artifact: capability manifest for each triage tool
