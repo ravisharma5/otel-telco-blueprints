@@ -3,7 +3,7 @@ id: "PB-01"
 type: "platform"
 title: "Intake and model selection"
 readiness_question: "Intake: which checkpoints may you run, and where do they come from?"
-doc_status: draft
+doc_status: done
 layers: ["model-endpoint-inferencing", "control"]
 table1_rows: [6]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
@@ -14,6 +14,7 @@ top_decisions:
   - "Pin a commit revision for every checkpoint"
   - "Serve signed model images from your own registry"
 agent_school: [403]
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -97,9 +98,9 @@ This page states what the licences say; your legal team decides what they mean f
 
 Checked against the model cards on 2026-11-11; the family changes. The table groups the smaller checkpoints by licence family, so check each card on Hugging Face for the full list. The safety, embedding, and smaller LLM cards ask users to comply with both the OTel release licence and the upstream base-model licence or terms.
 
-The LFM rows are the main reason to follow the base model. Their repository tag says apache-2.0, but each base uses the LFM Open License v1.0, whose own terms set a revenue threshold for commercial use. The tag doesn't settle the licence chain.
+The LFM rows show why you follow the base model. Their repositories are tagged apache-2.0, but each base uses the LFM Open License v1.0, and that licence sets a revenue threshold for commercial use.
 
-The Classification checkpoint's config.json declares the `Gemma3TextForSequenceClassification` architecture class, while its card names rnj-1 as the base model. An architecture class and a base model are different facts, and the licence follows the base model.
+The Classification checkpoint's config.json declares the `Gemma3TextForSequenceClassification` architecture class, while its card names rnj-1 as the base model. The licence follows the base model, not the architecture class.
 
 ### What the licences say
 
@@ -154,9 +155,9 @@ legal_review: <reference>
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` uses these checkpoints from the family table: OTel-2.0-LLM-31B-IT as the agent model, OTel-2.0-Decision-26B-A4B-4bit for the gate labels, OTel-LLM-8.3B-Classification for the root-cause label, OTel-LLM-8.3B-Safety for abstention, and an OTel Embedding and Reranker pair on Qwen3 bases for local retrieval. All of these carry Apache-2.0 through to their bases.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` uses these checkpoints from the family table: OTel-2.0-LLM-31B-IT as the agent model, OTel-2.0-Decision-26B-A4B-4bit for the gate labels, OTel-LLM-8.3B-Classification for the root-cause label, OTel-LLM-8.3B-Safety for abstention, and an OTel Embedding and Reranker pair on Qwen3 bases for local retrieval. Every one is Apache-2.0 down to its base.
 
-A team that picks OTel-LLM-12B-Safety for abstention instead records a chain that includes the Gemma Terms of Use, and legal review covers those terms too. Each checkpoint is pinned by commit revision in the model registry and served as a signed ModelCar image from the internal registry. When the `approver` reviews `dec-0001` at REVIEW on the [decision gate](../../architecture/decision-gate.md), the record shows which revisions produced the labels for eth1.
+A team that picks OTel-LLM-12B-Safety instead records a chain that includes the Gemma Terms of Use, and legal review covers those terms as well. Each checkpoint is pinned by commit revision in the model registry and served as a signed ModelCar image from the internal registry. When the `approver` reviews `dec-0001` at REVIEW on the [decision gate](../../architecture/decision-gate.md), the record shows which revisions produced the labels for eth1.
 
 - Config artifact: licence chain record for each checkpoint, with the legal review reference
 - Config artifact: model registry entry with the pinned revision and image digest
