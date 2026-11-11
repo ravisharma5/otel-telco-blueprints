@@ -3,7 +3,7 @@ id: "PB-09"
 type: "platform"
 title: "Quality operations and observability"
 readiness_question: "Quality operations: how do you notice when quality drops?"
-doc_status: draft
+doc_status: done
 layers: ["observability", "evaluation"]
 extension_rows: ["E7"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
@@ -14,6 +14,7 @@ top_decisions:
   - "Give every drift signal an owner and a threshold"
   - "Send AI incidents through the NOC and SOC process"
 agent_school: [301, 302, 304]
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -81,7 +82,7 @@ invoke_agent noc-triage-agent
   tools/call submit_action_request      # MCP span, compatible with execute_tool
 ```
 
-Each span records the agent, tool, conversation, and call IDs by default. Capturing prompts, tool arguments, and tool results is an opt-in that the data protection officer approves per use case. The conventions still change upstream; pin the version you emit and record it on the collector config.
+By default, each span records only the agent, tool, conversation, and call IDs. Prompts, tool arguments, and tool results are captured only as an opt-in that the data protection officer approves per use case. The conventions still change upstream; pin the version you emit and record it on the collector config.
 
 ### Drift signals
 
@@ -119,20 +120,20 @@ The [decision gate](../../architecture/decision-gate.md) sets the five labels LO
 | Prompt injection detected at the gateway | Block the session and drop the use case back one stage in the [stage register](../safety-autonomy-gating/README.md) | Security | SOC case |
 | A model or adapter integrity alert, such as a digest mismatch | Roll back the slot revision as [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md) describes | Platform team | SOC case and NOC incident |
 
-For an EU provider, an AI-caused incident that meets the significance test is reported like any other under NIS2: an early warning within 24 hours, a notification within 72 hours, and a final report within one month ([NIS2 Directive](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng)). Your existing process does the reporting.
+If you are an EU provider, report an AI-caused incident that meets the NIS2 significance test like any other: an early warning within 24 hours, a notification within 72 hours, and a final report within one month ([NIS2 Directive](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng)). Your existing NOC and SOC process files these reports, not a separate AI process.
 
 ### Feedback loop
 
 1. Approvers record a reason with every override and rejection.
 2. SMEs label those traces and scrub personal data, as the regression rules in [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md) require.
-3. The labelled cases join the next golden-set release in PB-02, and the candidate re-runs the ladder.
+3. The labelled cases join the next golden-set release in PB-02, and every later candidate change is scored against them.
 4. A gap that skills and retrieval can't close starts a climb in [PB-03 Adaptation](../adaptation/README.md).
 
 ### Worked example: alarm and root-cause triage
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The trace shows `invoke_agent noc-triage-agent`, then `execute_tool list_alarms` against TMF642 for r2, then `execute_tool classify_root_cause`, which labels an eth1 interface fault. The agent then calls `tools/call submit_action_request` with `req-0001` for `router.restart_interface`.
 
-The gate decision span records `dec-0001` at REVIEW under `noc-gate-policy-3`. The `approver` accepts, so the trace adds the approver decision, the `pb-interface-restart` job, and the verification read of the eth1 counters on r2. The acceptance counts toward the override-rate signal as a non-override, and the interface-fault label counts toward the root-cause mix. Tool arguments and results stay out of the spans, because nobody opted in to capture them.
+The gate decision span records `dec-0001` at REVIEW under `noc-gate-policy-3`. The `approver` accepts, so the trace adds the approver decision, the `pb-interface-restart` job, and the verification read of the eth1 counters on r2. The acceptance counts as a non-override in the override-rate signal, and the interface-fault label adds to the root-cause mix. Tool arguments and results stay out of the spans, because nobody opted in to capture them.
 
 - Config artifact: span attribute allow-list, with the opt-ins the data protection officer approved
 - Config artifact: drift parameter set, versioned with the gate policy
@@ -192,7 +193,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 |---|---|---|---|---|
 | Set drift thresholds | Model owner | Risk owner | SME | Business owner |
 | Approve content capture | Platform team | Data protection officer | Security | Risk owner |
-| Run the trace pipeline and retention | Platform team | Platform team | Data protection officer | Model owner |
+| Run the trace pipeline and retention | Platform team | Data protection officer | Security | Model owner |
 | Respond to an AI incident | Operations engineer | Risk owner | Security | Change board |
 | Label overrides for the golden set | SME | Model owner | Approver | Risk owner |
 
@@ -202,7 +203,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 |---|---|---|
 | Personal data lands in traces | High with content capture on | Keep capture off by default, enforce the attribute allow-list at the collector, and set a retention period |
 | The GenAI conventions change and break dashboards | Medium | Pin the convention version you emit and re-test dashboards when you move it |
-| Too many alerts and nobody reacts | Medium | One owner per signal, thresholds set from the baseline, and review per review period |
+| Too many alerts and nobody reacts | Medium | Give each signal one owner, set its threshold from the baseline, and review alerts once per review period |
 | A signal has no owner | Medium without the gate | Block promotion until every signal in the drift parameter set has an owner |
 | The baseline goes stale after a model change | Medium | Reset the baseline from the shadow stage after every promotion |
 
