@@ -213,7 +213,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - Gate: no checkpoint enters intake without a recorded licence chain and legal sign-off.
 - Gate: every checkpoint in use has a pinned revision in the model registry.
 - Gate: no model image is admitted without a valid signature and a revision that matches the registry record.
-- Gate: every deployment passes the self-identification smoke check before traffic arrives.
+- Gate: every generative deployment passes the self-identification smoke check before traffic arrives, and every pooling slot passes a fixed-input output check against the reference outputs the model registry records at acceptance.
 
 ## Operating model
 
@@ -233,7 +233,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | An older signed revision gets served | Medium | Check the revision against the registry record at admission, as well as the signature |
 | A gated base's terms were never accepted | Medium | Gating is a check step, and the licence chain record shows who accepted the terms |
 | The family changes after intake | High | Re-run the check steps for every new revision; the dated note shows when this table was last checked |
-| The wrong weights load behind a healthy endpoint | Medium | Run the self-identification smoke check before traffic arrives |
+| The wrong weights load behind a healthy endpoint | Medium | Before traffic arrives, run the self-identification smoke check on generative slots and the fixed-input output check on pooling slots |
 
 ## Used by and next steps
 

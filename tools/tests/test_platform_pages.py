@@ -1382,6 +1382,17 @@ def test_intake_apache_terms_cite_the_licence_text():
     assert hits and all(r[sources[0].index("Basis")] == "project documentation" for r in hits)
 
 
+def test_intake_smoke_check_fits_each_runner():
+    """Pooling slots have no chat endpoint to ask, so they get an output check."""
+    gates = [l for l in section_text(INTAKE, "Sources and acceptance").splitlines()
+             if l.startswith("- Gate:")]
+    assert not any("every deployment passes the self-identification" in g for g in gates), gates
+    smoke = [g for g in gates if "self-identification" in g]
+    assert smoke and all("generative" in g and "pooling" in g for g in smoke), smoke
+    risks = _table_text(table_with_header(INTAKE, "Risks and limitations", ["Risk", "Mitigation"]))
+    assert "pooling" in risks
+
+
 def test_intake_selection_guide():
     table = table_with_header(INTAKE, "Reference design", ["Slot", "Pick when"])
     rows = table[1:]
