@@ -221,7 +221,7 @@ value per period =
 | Review cost per rejection | The cost of an approver reviewing and rejecting a proposed change that never runs | Business owner | Time how long an approver spends on each rejected proposal during the recommend stage |
 | Handling cost per abstention | The cost of a person picking up an abstained case | Business owner | Time the hand-off and the manual triage during the shadow stage |
 | Run cost of the slots | The serving, storage, and operations cost of the use case per period | Platform team | Allocate the share of hardware and operations the use case consumes |
-| Audit log retention period | How long gate decisions, audit records, and traces are kept | Data protection officer | Set it from the log retention period the applicable law sets and from your audit needs |
+| Audit log retention period | How long gate decisions, audit records, and traces are kept, and the floor for the trace retention periods on the [quality operations](../quality-operations/README.md) page | Data protection officer | Set it from the log retention period the applicable law sets and from your audit needs |
 
 This page gives no default values. You set each parameter with SME review and version the set with the use case's value case.
 

@@ -1067,6 +1067,20 @@ def test_quality_default_span_attributes_cover_signals():
         assert want in default[0], want
 
 
+def test_quality_trace_retention_has_a_floor():
+    """Live and archive retention are separate, and neither undercuts the audit
+    log retention period on the compliance page."""
+    params = table_with_header(QUALITY, "Reference design", PARAM_TABLE_HEADER)
+    names = [r[0] for r in params[1:]]
+    assert "Trace live retention period" in names and "Trace archive retention period" in names
+    text = re.sub(r"\s+", " ", body(QUALITY))
+    assert "audit log retention period" in text
+    assert "../compliance-operating-model/README.md#staged-rollout-and-roi" in text
+    audit = table_with_header(COMPLIANCE, "Reference design", PARAM_TABLE_HEADER)
+    row = next(r for r in audit[1:] if r[0] == "Audit log retention period")
+    assert "../quality-operations/README.md" in " ".join(row), row
+
+
 def test_quality_feedback_loop():
     text = reference_design_text(QUALITY)
     for want in ("../evaluation-acceptance/README.md", "../adaptation/README.md", "SME"):

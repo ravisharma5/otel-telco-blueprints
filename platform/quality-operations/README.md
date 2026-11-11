@@ -43,7 +43,7 @@ Until you answer it, drift in gate labels, abstentions, or human overrides goes 
 | Decision | Options | Recommendation | Because |
 |---|---|---|---|
 | Decide what each span captures | Full prompts and tool results; metadata only; metadata by default with content capture as an opt-in | Metadata by default; capture prompts, tool arguments, and results only where the data protection officer opts in | The GenAI conventions make content capture opt-in, because prompts and tool results can hold subscriber and network data ([GenAI spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-spans.md)) |
-| Decide where traces live and for how long | Vendor cloud service; trace store on site; trace store plus agent trace archival | A trace store on site for spans, and the agent trace store with archival to object storage, under a named retention period | Traces stay in region, and archived payloads stay searchable by metadata ([release notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes)) |
+| Decide where traces live and for how long | Vendor cloud service; trace store on site; trace store plus agent trace archival | A trace store on site for spans, and the agent trace store with archival to object storage; both keep data for named live and archive retention periods | Traces stay in region, and archived payloads stay searchable by metadata ([release notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes)) |
 | Give every drift signal an owner and a threshold | Dashboards with no owner; one shared alert; one owner and one threshold per signal | One owner and one named threshold per signal, with no default | A signal nobody owns is a chart nobody reads |
 | Send AI incidents through the NOC and SOC process | A separate AI incident process; the existing NOC and SOC process | The existing NOC and SOC process, with AI-specific triggers and first actions | Operators already run severity, paging, and regulatory reporting there, and an AI-caused outage is an incident like any other |
 | Decide how feedback reaches golden sets | Ad hoc; every override straight into the set; SME labelling first | SME labelling and personal-data scrubbing before any trace enters a golden set | Unlabelled traces teach the evaluation the system's own mistakes |
@@ -70,7 +70,7 @@ flowchart TD
 |---|---|
 | Tracing collector | Receives spans over the OpenTelemetry protocol from agents, the MCP gateway, and the action layer, drops attributes outside the allow-list, and forwards the rest |
 | Trace store | Holds spans on site and links each agent step to its tool calls by trace ID |
-| Agent trace store | Records prompts, reasoning steps, tool calls, and token costs per episode, accepts spans at `/v1/traces`, and archives payloads to object storage after the retention period |
+| Agent trace store | Records prompts, reasoning steps, tool calls, and token costs per episode, accepts spans at `/v1/traces`, and archives payloads to object storage after the live retention period |
 | Replica-scheduler inference traces | Add the inference request to the same trace, so slow steps show up beside the agent step that waited |
 
 One triage step produces this span tree under the GenAI semantic conventions:
@@ -94,9 +94,10 @@ By default, each span records IDs and the metadata attributes the signal table l
 | Human override rate drift band | How far the share of approver overrides may rise before review, below the override ceiling that drops a stage | Business owner | Count overrides per use case and action class, and compare against the shadow-stage baseline on the same incident mix |
 | Tool error rate threshold | The share of failed tool calls per review period that opens a review | Platform team | Compare against the error rate of the same tools before the agent used them |
 | Root-cause label distribution shift threshold | How far the Classification label mix may move from the accepted baseline before review | Model owner, with SME review | Compare the label mix against the shadow-stage baseline on the same incident mix, and check new alarm types with SMEs |
-| Trace payload retention period | How long archived prompts and tool payloads are kept before deletion | Data protection officer | Set from the retention period the applicable law and your audit needs require |
+| Trace live retention period | How long spans and payloads stay searchable in the trace stores before payloads move to the archive | Data protection officer | Set from how far back incident reviews and drift checks need full traces |
+| Trace archive retention period | How long archived prompts and tool payloads are kept before deletion | Data protection officer | Set from the retention period the applicable law and your audit needs require |
 
-This page gives no default values. You set each parameter with SME review and version the set with the gate policy that `policy_version` names. The override ceiling that drops a use case back one stage belongs to [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md).
+This page gives no default values. You set each parameter with SME review and version the set with the gate policy that `policy_version` names. The override ceiling that drops a use case back one stage belongs to [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md). The live and archive retention periods together never end before the audit log retention period in [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md#staged-rollout-and-roi), which sets the floor for traces.
 
 ### Signal sources
 
