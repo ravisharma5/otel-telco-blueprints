@@ -1316,6 +1316,26 @@ def test_compliance_example_record():
         assert want in record, want
 
 
+def test_compliance_record_true_at_every_stage():
+    """The example record says the act stage runs approved playbooks with no
+    approver, and promotion to the act stage reopens the record."""
+    record = _h3_matching(reference_design_text(COMPLIANCE), "Example", "classification record")
+    table = next(t for t in _text_tables(record) if t[0][:2] == ["Field", "Example entry"])
+    purpose = next(row[1] for row in table[1:] if row[0] == "Intended purpose")
+    assert "act stage" in purpose and "without an approver" in purpose, purpose
+    reasoning = next(row[1] for row in table[1:] if row[0] == "Risk-category reasoning")
+    assert "before every change" not in reasoning, reasoning
+    assert "each stage" in reasoning, reasoning
+    reopen = "Promotion to the act stage reopens the classification record"
+    gates = section_text(COMPLIANCE, "Sources and acceptance")
+    assert any(reopen.lower() in line.lower() for line in gates.splitlines()
+               if line.startswith("- Gate:"))
+    rollout = _h3_matching(reference_design_text(COMPLIANCE), "Staged rollout")
+    assert reopen in re.sub(r"\s+", " ", rollout)
+    risks = _table_text(table_with_header(COMPLIANCE, "Risks and limitations", ["Risk", "Mitigation"]))
+    assert "act stage" in risks and "reopens the classification record" in risks
+
+
 def test_compliance_blank_record():
     fences = _text_fences(body(COMPLIANCE))
     assert any(all(f in fence.lower() for f in RECORD_FIELDS) for fence in fences)

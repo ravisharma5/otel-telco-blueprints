@@ -70,9 +70,9 @@ Example: complete this record for your own deployment. The entries cite Regulati
 | Field | Example entry |
 |---|---|
 | System description | `noc-triage-agent` reads alarms, interface counters, and inventory through read-only tools, proposes a root cause and a remediation, and sends any network change as an action request. It uses the LLM, Decision, Classification, and Safety slots. Example incident: `inc-2041`, CRC errors and BFD flaps on eth1 of router r2 |
-| Intended purpose | Propose a root cause and a remediation for network alarms to operations engineers. Every network change passes the [decision gate](../../architecture/decision-gate.md), and from the recommend stage an approver decides each change |
+| Intended purpose | Propose a root cause and a remediation for network alarms to operations engineers. Every network change passes the [decision gate](../../architecture/decision-gate.md). At the assist and recommend stages an approver decides each change; at the act stage, approved low-risk playbooks run without an approver |
 | Deployer and provider roles | The operator deploys the system. The provider is whoever develops the system and puts it into service under its own name. Record who holds each role, including any adaptation the operator does in house, for your legal team to confirm |
-| Risk-category reasoning | Annex III point 2 lists "AI systems intended to be used as safety components in the management and operation of critical digital infrastructure" as high-risk. Article 3(14), as amended, adds that "a component fulfils a safety function where its intended purpose is to prevent or mitigate risks to health and safety of persons or property" for the purposes of the definition. Article 6(1a) says systems "solely used for non-safety related aspects of user assistance, performance optimisation, service efficiency, automation or convenience or quality control" do not qualify as safety components. Article 6(1b) brings back any system "the failure or malfunctioning of which would endanger health and safety" as a safety component. The Commission's AI Act Service Desk lists trouble ticket management and network load prediction as examples out of scope. The team's assessment, with its facts: triage proposes and does not change the network by itself; the gate and an approver sit before every change; the network's own protection runs independently of the agent |
+| Risk-category reasoning | Annex III point 2 lists "AI systems intended to be used as safety components in the management and operation of critical digital infrastructure" as high-risk. Article 3(14), as amended, adds that "a component fulfils a safety function where its intended purpose is to prevent or mitigate risks to health and safety of persons or property" for the purposes of the definition. Article 6(1a) says systems "solely used for non-safety related aspects of user assistance, performance optimisation, service efficiency, automation or convenience or quality control" do not qualify as safety components. Article 6(1b) brings back any system "the failure or malfunctioning of which would endanger health and safety" as a safety component. The Commission's AI Act Service Desk lists trouble ticket management and network load prediction as examples out of scope. The team's assessment, with its facts, for each stage planned for the use case: up to the recommend stage, triage proposes and an approver decides each change; at the act stage, the gate runs approved low-risk playbooks without an approver and sends every other class to REVIEW; at every stage, the network's own protection runs independently of the agent |
 | Article 6(3) assessment | Needed only if your legal team places the system in Annex III. Record which condition the team relies on, such as a narrow procedural or preparatory task, and keep the documented assessment that Article 6(4) asks the provider for |
 | Human oversight | The decision gate labels every action request. The stage register in [PB-06](../safety-autonomy-gating/README.md#staged-autonomy) caps the outcomes at each stage, and the approval step in [PB-07](../action-layer/README.md) waits for the approver |
 | Logging | Gate decisions, the action audit record, and end-to-end traces from [PB-09](../quality-operations/README.md), kept for the audit log retention period set under Staged rollout and ROI |
@@ -203,6 +203,8 @@ These are the stages in the [stage register](../safety-autonomy-gating/README.md
 | Recommend | Adds REVIEW; the approver decides each proposed change | Engineer hours saved; mean time to identify; abstention handling cost; false-ACT cost of proposals the approver rejects |
 | Act | ACT for approved playbooks in low-risk classes; REVIEW for every other class | Engineer hours saved; false-ACT cost; abstention handling cost; mean time to identify |
 
+At the act stage some changes run without an approver, so the facts in the classification record change. Promotion to the act stage reopens the classification record and needs a new legal sign-off before the first playbook runs alone.
+
 ```text
 value per period =
     (engineer hours saved x loaded hourly cost)
@@ -281,6 +283,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - Gate: no stage promotion happens without the accountable owner named in the RACI.
 - Gate: report ROI only against a shadow-stage baseline for the same use case.
 - Gate: every use case has a residency statement before any data reaches it.
+- Gate: promotion to the act stage reopens the classification record and needs a new legal sign-off.
 
 ## Operating model
 
@@ -303,6 +306,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | Data leaves the country through an external model provider | Medium | The residency statement bars external providers for regulated data, and the front door routes only to in-country models |
 | Value is claimed without a baseline | High | Report ROI only against the shadow-stage baseline, using the named measures |
 | A use case changes purpose without a new record | Medium | A change of intended purpose reopens the classification record and the rule-to-control map |
+| The record's facts stop holding when a use case reaches the act stage | Medium | Promotion to the act stage reopens the classification record and needs a new legal sign-off |
 
 ## Used by and next steps
 
