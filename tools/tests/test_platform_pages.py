@@ -669,6 +669,17 @@ def test_notify_pages_agree():
         assert "NOTIFY sends a notification" not in text, _id(path)
 
 
+# ---------- shared worked example vocabulary ----------
+
+# inc-2041 is the incident and correlation ID; the ticket ID comes from the create call.
+INCIDENT_AS_TICKET = re.compile(r"inc-2041`?\s+ticket", re.I)
+
+
+@pytest.mark.parametrize("path", [*platform_pages(), NOTIFY_GATE_PAGE], ids=_id)
+def test_example_incident_id_is_not_a_ticket_id(path):
+    assert not INCIDENT_AS_TICKET.search(body(path))
+
+
 # ---------- evaluation and acceptance ----------
 
 ACCEPTANCE = REPO_ROOT / "platform/evaluation-acceptance/README.md"
