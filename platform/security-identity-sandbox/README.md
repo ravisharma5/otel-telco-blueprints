@@ -71,7 +71,7 @@ The agent holds an identity but no credentials, and it can reach only the two ga
 
 | Control | What it enforces | Option used |
 |---|---|---|
-| No shell by default | The agent image ships no shell, and process rules block starting one | Sandbox template; OpenShell process restrictions |
+| No shell | The agent image ships no shell, and process rules block starting one | Sandbox template; OpenShell process restrictions |
 | Read-only filesystem | A read-only root filesystem, with a scratch volume only where a task needs one | Pod security context; OpenShell filesystem rules through `Landlock` |
 | Egress only to the AI Gateway and MCP Gateway | Network policy allows those two hosts and drops everything else | Network policy, plus the OpenShell egress proxy |
 | Per-agent workload identity | Each agent gets its own SPIFFE identity and short-lived token | Zero Trust Workload Identity Manager |
@@ -117,7 +117,7 @@ This page gives no default values. You set each parameter with security review a
 
 ### Zero-tolerance rules
 
-No operator setting relaxes three things: no shell in an agent pod by default, secrets never in model context, and no runtime adapter loading. They are rules, not parameters.
+No operator setting relaxes three things: no shell in an agent pod, secrets never in model context, and no runtime adapter loading. They are rules, not parameters.
 
 ### Air-gapped mirror flow
 

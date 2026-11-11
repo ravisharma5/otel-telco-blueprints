@@ -1133,6 +1133,13 @@ def test_security_sandbox_options():
         assert "](http" in row[src], row
 
 
+def test_security_no_shell_rule_has_no_default():
+    """A zero-tolerance rule cannot have a default, so "no shell" stands alone."""
+    for unit in _units(SECURITY):
+        if re.search(r"(?i)\bno shell\b", unit):
+            assert "by default" not in unit, unit
+
+
 def test_security_no_maturity_labels():
     text = body(SECURITY)
     for word in MATURITY_WORDS:
