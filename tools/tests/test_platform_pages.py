@@ -1370,6 +1370,18 @@ def test_intake_licence_sources():
         assert all(r[basis] == "project documentation" for r in hits), hits
 
 
+APACHE_LICENCE = "https://www.apache.org/licenses/LICENSE-2.0"
+
+
+def test_intake_apache_terms_cite_the_licence_text():
+    table = table_with_header(INTAKE, "Reference design", ["Licence", "What it says"])
+    row = next(r for r in table[1:] if r[0] == "Apache-2.0")
+    assert f"({APACHE_LICENCE})" in row[table[0].index("Source")], row
+    sources = table_with_header(INTAKE, "Sources and acceptance", ["Claim", "Basis", "Source"])
+    hits = [r for r in sources[1:] if f"({APACHE_LICENCE})" in r[sources[0].index("Source")]]
+    assert hits and all(r[sources[0].index("Basis")] == "project documentation" for r in hits)
+
+
 def test_intake_selection_guide():
     table = table_with_header(INTAKE, "Reference design", ["Slot", "Pick when"])
     rows = table[1:]
