@@ -1558,6 +1558,24 @@ def test_compliance_rollout_and_roi():
     assert not any(re.search(r"\d", f) for f in fences)
 
 
+def test_compliance_roi_formula_terms():
+    """Value per period counts incidents, and only executed false ACTs carry the
+    false-ACT cost; rejected proposals carry a review cost."""
+    rd = reference_design_text(COMPLIANCE)
+    fence = next(f for f in _text_fences(rd) if "value per period" in f)
+    flat = re.sub(r"\s+", " ", fence)
+    for want in ("incidents in period x reduction in mean time to identify x cost per incident minute",
+                 "false ACTs executed x cost per false ACT",
+                 "proposals rejected x review cost per rejection"):
+        assert want in flat, want
+    stages = table_with_header(COMPLIANCE, "Reference design", ["Stage", "What is allowed"])
+    recommend = next(r for r in stages[1:] if r[0] == "Recommend")
+    assert "false-ACT cost" not in recommend[2], recommend
+    assert "review cost" in recommend[2], recommend
+    params = table_with_header(COMPLIANCE, "Reference design", PARAM_TABLE_HEADER)
+    assert any(r[0] == "Review cost per rejection" for r in params[1:])
+
+
 def test_compliance_residency():
     table = table_with_header(COMPLIANCE, "Reference design", ["Data", "Where it lives"])
     text = _table_text(table[1:]).lower()

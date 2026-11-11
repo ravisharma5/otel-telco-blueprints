@@ -198,7 +198,7 @@ These are the stages in the [stage register](../safety-autonomy-gating/README.md
 |---|---|---|
 | Shadow | LOOK only; the system runs beside people, who do everything | Record the baseline: mean time to identify, engineer hours per incident, and the cases the system would abstain on |
 | Assist | LOOK and NOTIFY, with NOTIFY delivered as the [decision gate](../../architecture/decision-gate.md) page sets out | Mean time to identify; share of incidents auto-triaged; abstention handling cost |
-| Recommend | Adds REVIEW; the approver decides each proposed change | Engineer hours saved; mean time to identify; abstention handling cost; false-ACT cost of proposals the approver rejects |
+| Recommend | Adds REVIEW; the approver decides each proposed change | Engineer hours saved; mean time to identify; abstention handling cost; review cost of proposals the approver rejects |
 | Act | ACT for approved playbooks in low-risk classes; REVIEW for every other class | Engineer hours saved; false-ACT cost; abstention handling cost; mean time to identify |
 
 At the act stage some changes run without an approver, so the facts in the classification record change. Promotion to the act stage reopens the classification record and needs a new legal sign-off before the first playbook runs alone.
@@ -206,8 +206,9 @@ At the act stage some changes run without an approver, so the facts in the class
 ```text
 value per period =
     (engineer hours saved x loaded hourly cost)
-  + (reduction in mean time to identify x cost per incident minute)
-  - (false-ACT count x cost per false ACT)
+  + (incidents in period x reduction in mean time to identify x cost per incident minute)
+  - (false ACTs executed x cost per false ACT)
+  - (proposals rejected x review cost per rejection)
   - (abstentions handed to people x handling cost per abstention)
   - run cost of the slots
 ```
@@ -216,7 +217,8 @@ value per period =
 |---|---|---|---|
 | Loaded hourly cost | The value of an engineer hour in the value formula | Business owner | Take the loaded hourly rate your finance team uses |
 | Cost per incident minute | The value of a shorter time to identify | Business owner | Derive it from service credits, penalties, and revenue at risk on the affected services |
-| Cost per false ACT | The cost charged for each change that should not have gone ahead | Risk owner | Price the rollback work, customer impact, and incident handling of past wrong changes |
+| Cost per false ACT | The cost charged for each executed change that should not have gone ahead | Risk owner | Price the rollback work, customer impact, and incident handling of past wrong changes |
+| Review cost per rejection | The cost of an approver reviewing and rejecting a proposed change that never runs | Business owner | Time how long an approver spends on each rejected proposal during the recommend stage |
 | Handling cost per abstention | The cost of a person picking up an abstained case | Business owner | Time the hand-off and the manual triage during the shadow stage |
 | Run cost of the slots | The serving, storage, and operations cost of the use case per period | Platform team | Allocate the share of hardware and operations the use case consumes |
 | Audit log retention period | How long gate decisions, audit records, and traces are kept | Data protection officer | Set it from the log retention period the applicable law sets and from your audit needs |
