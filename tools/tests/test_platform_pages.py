@@ -1300,7 +1300,14 @@ LEGAL_LINE = "Your legal team owns the classification."
 LEGAL_CONCLUSION = re.compile(
     r"(?i)\b(is|are) not high-risk\b|\bcomplian(t|ce) with\b|\bcomplies with\b"
     r"|\bis exempt\b|\bmeets the AI Act\b|\byou are a provider\b"
+    r"|\bdo(es)?(n't| not) apply\b|\b(is|are) out of scope\b"
+    r"|\b(triage|the system|this system|the use case|this use case) falls outside\b"
+    r"|\b(is|are) not a safety component\b|\bonly to engineers\b"
+    r"|\brecord the exclusion\b|\bthe exclusion applies\b"
 )
+# An applicability call in a map's control column: the control says when a
+# provision applies, or names the example use case.
+APPLICABILITY = re.compile(r"(?i)\bapplies (where|to|only)\b|\btriage\b")
 ROI_MEASURES = (
     "mean time to identify",
     "auto-triaged",
@@ -1373,8 +1380,52 @@ def test_compliance_legal_ownership_line():
     assert re.sub(r"\s+", " ", body(COMPLIANCE)).count(LEGAL_LINE) == 1
 
 
+@pytest.mark.parametrize(
+    ("text", "hit"),
+    [
+        ("Article 50 does not apply because triage talks to engineers", True),
+        ("This provision doesn't apply to network elements", True),
+        ("Triage is out of scope for Annex III", True),
+        ("NOC triage talks only to engineers", True),
+        ("Record the exclusion and the date you checked it", True),
+        ("Triage falls outside high risk", True),
+        ("The system is not a safety component", True),
+        ("Record whether your legal team relies on the exclusion", False),
+        ("An Annex III system that poses no significant risk falls outside high risk", False),
+        ("Articles 9 to 15 apply only to high-risk systems", False),
+    ],
+)
+def test_legal_conclusion_pattern_cases(text, hit):
+    assert bool(LEGAL_CONCLUSION.search(text)) is hit
+
+
 def test_compliance_no_legal_conclusions():
     assert LEGAL_CONCLUSION.findall(CODE_FENCE.sub("", body(COMPLIANCE))) == []
+
+
+def test_compliance_control_columns_make_no_applicability_call():
+    for table in _control_tables():
+        col = next(i for i, h in enumerate(table[0]) if "Blueprint control" in h)
+        for row in table[1:]:
+            assert not APPLICABILITY.search(row[col]), (row[0], row[col])
+
+
+def test_compliance_no_scope_note_rows():
+    """The maps leave scope calls on transparency and automated decisions to the
+    legal team, so neither provision gets a row of its own."""
+    for table in _control_tables():
+        firsts = [row[0] for row in table[1:]]
+        assert not any(re.match(r"Article 50\b", f) for f in firsts), firsts
+        assert not any(re.match(r"GDPR Article 22\b", f) for f in firsts), firsts
+
+
+def test_compliance_data_governance_states_facts():
+    record = _h3_matching(reference_design_text(COMPLIANCE), "Example", "classification record")
+    table = next(t for t in _text_tables(record) if t[0][:2] == ["Field", "Example entry"])
+    for field in ("Data governance", "Fundamental rights impact assessment"):
+        cell = next(row[1] for row in table[1:] if row[0] == field)
+        assert not LEGAL_CONCLUSION.search(cell), (field, cell)
+        assert not re.search(r"(?i)\bholds no\b|\bno subscriber\b", cell), (field, cell)
 
 
 def test_compliance_regimes_mapped():
