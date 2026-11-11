@@ -530,9 +530,9 @@ def test_action_fallback_snippet():
     fences = YAML_FENCE.findall(body(ACTION))
     snippet = [f for f in fences if "ansible.builtin.uri" in f and "ansible.builtin.assert" in f]
     assert snippet, "no yaml fence with the uri and assert tasks"
+    # The length limit covers the snippet itself and every other yaml fence.
+    assert len(snippet[0].splitlines()) <= MAX_YAML_LINES
     for fence in fences:
-        if fence is snippet[0]:
-            continue
         assert len(fence.splitlines()) <= MAX_YAML_LINES, fence[:80]
 
 
