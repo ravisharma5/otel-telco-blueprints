@@ -1056,6 +1056,17 @@ def test_quality_content_capture_opt_in():
     )
 
 
+def test_quality_default_span_attributes_cover_signals():
+    """The default allow-list holds the metadata the signal table reads, so no
+    drift signal depends on an opt-in."""
+    text = re.sub(r"\s+", " ", body(QUALITY))
+    assert "records only the agent" not in text
+    default = re.findall(r"By default, each span[^.]*\.", text)
+    assert len(default) == 1, default
+    for want in ("IDs", "labels", "probabilities", "`policy_version`", "abstain outcome", "error type"):
+        assert want in default[0], want
+
+
 def test_quality_feedback_loop():
     text = reference_design_text(QUALITY)
     for want in ("../evaluation-acceptance/README.md", "../adaptation/README.md", "SME"):

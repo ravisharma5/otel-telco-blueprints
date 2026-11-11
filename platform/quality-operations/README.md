@@ -82,7 +82,7 @@ invoke_agent noc-triage-agent
   tools/call submit_action_request      # MCP span, compatible with execute_tool
 ```
 
-By default, each span records only the agent, tool, conversation, and call IDs. Prompts, tool arguments, and tool results are captured only as an opt-in that the data protection officer approves per use case. The conventions still change upstream; pin the version you emit and record it on the collector config.
+By default, each span records IDs and the metadata attributes the signal table lists: the agent, tool, conversation, and call IDs, plus labels, probabilities, `policy_version`, the abstain outcome, and the error type. Prompts, tool arguments, and tool results are captured only as an opt-in that the data protection officer approves per use case. The conventions still change upstream; pin the version you emit and record it on the collector config.
 
 ### Drift signals
 
