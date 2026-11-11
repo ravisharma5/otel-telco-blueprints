@@ -449,6 +449,7 @@ def test_nav_order():
         "platform/action-layer/README.md",
         "platform/evaluation-acceptance/README.md",
         "platform/adaptation/README.md",
+        "platform/quality-operations/README.md",
     ]
 
 

@@ -203,5 +203,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-07 Action layer](../action-layer/README.md): the action layer runs each gate outcome
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): supplies the evidence behind each promotion
 - PB-08: security and identity covers prompt injection and workload identity in depth
-- PB-09: quality operations tracks abstention rate, gate labels, and human overrides
+- [PB-09 Quality operations and observability](../quality-operations/README.md): quality operations tracks abstention rate, gate labels, and human overrides
 - Agent-school: courses 201, 301, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate and 304 covers agent security operations

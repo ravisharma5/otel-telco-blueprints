@@ -70,4 +70,5 @@ nav:
       - Action layer: platform/action-layer/README.md
       - Evaluation and acceptance: platform/evaluation-acceptance/README.md
       - Adaptation: platform/adaptation/README.md
+      - Quality operations and observability: platform/quality-operations/README.md
   - Templates: templates.md

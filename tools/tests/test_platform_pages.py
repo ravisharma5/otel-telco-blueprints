@@ -39,6 +39,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "action-layer": "PB-07",
     "evaluation-acceptance": "PB-02",
     "adaptation": "PB-03",
+    "quality-operations": "PB-09",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -930,5 +931,95 @@ def test_adaptation_training_data_covers_labels():
 def test_adaptation_mermaid_capabilities():
     fence = mermaid_fences(body(ADAPTATION))[0]
     for want in ("Measured evaluation gap", "Registry binds base revision"):
+        assert want in fence, want
+    assert PRODUCT_TERMS.findall(fence) == []
+
+
+# ---------- quality operations ----------
+
+QUALITY = REPO_ROOT / "platform/quality-operations/README.md"
+GENAI_CONVENTIONS = "https://github.com/open-telemetry/semantic-conventions-genai"
+QUALITY_SIGNALS = ("abstention", "groundedness", "gate label", "override", "tool error", "root-cause")
+GENERIC_ROLE = re.compile(
+    r"\b(business owner|approver|platform team|model owner|risk owner|security"
+    r"|data protection officer|change board|operations engineer|SME|subject-matter expert"
+    r"|legal team)\b",
+    re.I,
+)
+INLINE_CODE = re.compile(r"`[^`\n]+`")
+
+
+def _without_code(text: str) -> str:
+    return INLINE_CODE.sub("", CODE_FENCE.sub("", text))
+
+
+def test_quality_span_names():
+    text = body(QUALITY)
+    code = "\n".join(CODE_FENCE.findall(text))
+    for want in ("invoke_agent", "execute_tool", "tools/call"):
+        assert want in code, want
+    assert "OpenTelemetry" in text
+    assert GENAI_CONVENTIONS in text
+
+
+def test_quality_drift_parameters():
+    table = table_with_header(QUALITY, "Reference design", PARAM_TABLE_HEADER)
+    assert table[0] == PARAM_TABLE_HEADER
+    firsts = " ".join(row[0] for row in table[1:]).lower()
+    for want in QUALITY_SIGNALS:
+        assert want in firsts, want
+    who = PARAM_TABLE_HEADER.index("Who sets it")
+    for row in table[1:]:
+        assert GENERIC_ROLE.search(row[who]), row[who]
+
+
+def test_quality_signal_span_table():
+    table = table_with_header(QUALITY, "Reference design", ["Signal", "Span"])
+    span = table[0].index("Span")
+    assert len(table) - 1 >= 6
+    for row in table[1:]:
+        cell = row[span]
+        assert "`" in cell or "gate decision" in cell or "action outcome" in cell, cell
+
+
+def test_quality_incident_table():
+    table = table_with_header(QUALITY, "Reference design", ["Trigger", "First action"])
+    text = " ".join(" ".join(row) for row in table)
+    for want in ("NOC", "SOC", "false ACT", "../safety-autonomy-gating/README.md"):
+        assert want in text, want
+
+
+def test_quality_no_otlp_in_prose():
+    text = _without_code(body(QUALITY))
+    for banned in ("OTLP", "OTel trace", "OTel collector", "OTel span"):
+        assert banned not in text, banned
+
+
+def test_quality_content_capture_opt_in():
+    text = re.sub(r"\s+", " ", body(QUALITY))
+    sentences = re.split(r"(?<=[.!?])\s", text)
+    assert any(
+        re.search(r"opt[- ]in", s, re.I) and re.search(r"prompt|tool argument", s, re.I)
+        for s in sentences
+    )
+
+
+def test_quality_feedback_loop():
+    text = reference_design_text(QUALITY)
+    for want in ("../evaluation-acceptance/README.md", "../adaptation/README.md", "SME"):
+        assert want in text, want
+
+
+def test_quality_nis2_deadlines_outside_parameters():
+    text = body(QUALITY)
+    assert "24 hours" in text and "72 hours" in text
+    for table in page_tables(QUALITY):
+        if set(PARAM_TABLE_HEADER) <= set(table[0]):
+            assert "hour" not in " ".join(" ".join(row) for row in table).lower()
+
+
+def test_quality_mermaid_capabilities():
+    fence = mermaid_fences(body(QUALITY))[0]
+    for want in ("Trace spans per agent step", "Drift signals", "Next golden set"):
         assert want in fence, want
     assert PRODUCT_TERMS.findall(fence) == []
