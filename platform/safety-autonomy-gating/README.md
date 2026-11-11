@@ -115,7 +115,7 @@ NOTIFY works two ways. From the assist stage up, an agent may hold direct notify
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
 | Shadow agreement floor | How often shadow outcomes must match what people did before a use case moves to assist | Operator risk owner, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): compare shadow outcomes with logged human actions over a window the risk owner sets |
-| Correct-abstention floor | The lowest share of insufficient-context items on which the Safety slot must abstain | NOC lead, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): score abstention on an operator set that includes items with no supporting evidence |
+| Safety abstain-recall floor | The lowest share of insufficient-context items on which the Safety slot must abstain | Operator risk owner, with operator SME review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): score abstention on an operator set that includes items with no supporting evidence |
 | Canary window | How long, and over how many requests, a raised ceiling runs on a small share of traffic | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): size the window to hold enough state-changing requests to bound the false-ACT rate |
 | Minimum ACT probability for the act stage | The lowest calibrated ACT probability at which the act stage may run a playbook alone | Operator, with SME sign-off | Evaluation and acceptance calibration: fit on an operator gate set labelled by SMEs, and check calibration error |
 | Override rate ceiling | The share of human overrides that sends a use case back one stage | NOC lead | [Evaluation and acceptance method](../evaluation-acceptance/README.md): count overrides per use case and action class in the trace |
@@ -168,7 +168,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 8 | An Automation Orchestrator workflow can call a REST service as a step and branch on the result | Red Hat guidance | [Automation Orchestrator REST API step](https://docs.redhat.com/en/documentation/automation_orchestrator/2026.8/develop-add_a_rest_api_step_to_a_workflow) |
 
 - Gate: the shadow agreement floor is met before a use case moves from shadow to assist.
-- Gate: the correct-abstention floor is met on insufficient-context items before the Safety slot fronts answers.
+- Gate: the Safety abstain-recall floor is met on insufficient-context items before the Safety slot fronts answers.
 - Gate: no false ACT label appears during the canary window before any ceiling rises.
 - Gate: the red-team suite ([PB-02](../evaluation-acceptance/README.md)) includes guardrail tests for jailbreaks, personal data, and prompt injection through alarm, ticket, and tool text, and every test is blocked.
 - Gate: a test request with a STOP label ends as STOP, and a `write_low` request labelled ACT under a REVIEW ceiling ends as REVIEW.
@@ -188,8 +188,8 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| Over-abstention hides answers people need | Medium | Track the abstention rate per use case, review abstained items with SMEs, and re-tune against the correct-abstention floor |
-| Under-abstention lets the agent answer from weak evidence | Medium | Gate on the correct-abstention floor, cite passages in every answer, and keep people deciding at the assist and recommend stages |
+| Over-abstention hides answers people need | Medium | Track the abstention rate per use case, review abstained items with SMEs, and re-tune against the Safety abstain-recall floor |
+| Under-abstention lets the agent answer from weak evidence | Medium | Gate on the Safety abstain-recall floor, cite passages in every answer, and keep people deciding at the assist and recommend stages |
 | Uncalibrated probabilities let a wrong ACT through | High until you calibrate | Calibrate on an operator gate set, keep REVIEW ceilings until then, and run the canary with no false ACT |
 | A use case gains autonomy without evidence | Medium | Promote only through the stage register, with the promotion parameters met and the risk owner's sign-off |
 | Alarm, ticket, or tool text carries a prompt injection | Medium | Input and tool-response guardrails fail closed, the agent holds no write credentials, and the orchestrator runs the gate again |

@@ -680,6 +680,27 @@ def test_example_incident_id_is_not_a_ticket_id(path):
     assert not INCIDENT_AS_TICKET.search(body(path))
 
 
+def _abstention_floor_rows(path: Path) -> list[list[str]]:
+    rows = []
+    for table in page_tables(path):
+        if set(PARAM_TABLE_HEADER) <= set(table[0]):
+            controls = table[0].index("What it controls")
+            rows += [r for r in table[1:] if "floor" in r[0].lower()
+                     and "Safety slot" in r[controls] and re.search(r"abstain", r[controls])]
+    return rows
+
+
+def test_abstention_floor_has_one_name_and_owner():
+    """The gating and evaluation pages name the Safety abstention floor the same
+    way and give it the same owner."""
+    found = {_id(p): _abstention_floor_rows(p) for p in (GATING, ACCEPTANCE)}
+    assert all(len(rows) == 1 for rows in found.values()), found
+    (g,), (e,) = found.values()
+    who = PARAM_TABLE_HEADER.index("Who sets it")
+    assert g[0] == e[0], (g[0], e[0])
+    assert g[who] == e[who], (g[who], e[who])
+
+
 # ---------- evaluation and acceptance ----------
 
 ACCEPTANCE = REPO_ROOT / "platform/evaluation-acceptance/README.md"
