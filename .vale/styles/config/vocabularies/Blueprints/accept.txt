@@ -42,3 +42,4 @@ logprobs
 ROCm
 [Rr]ulebooks?
 [Gg]roundedness
+Unsloth

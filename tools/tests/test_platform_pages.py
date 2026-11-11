@@ -38,6 +38,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "safety-autonomy-gating": "PB-06",
     "action-layer": "PB-07",
     "evaluation-acceptance": "PB-02",
+    "adaptation": "PB-03",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -840,5 +841,94 @@ def test_acceptance_no_gap_wording():
 def test_acceptance_mermaid_capabilities():
     fence = mermaid_fences(body(ACCEPTANCE))[0]
     for want in LADDER_STAGES[:4] + ["Promotion pipeline", "Model registry"]:
+        assert want in fence, want
+    assert PRODUCT_TERMS.findall(fence) == []
+
+
+# ---------- adaptation ----------
+
+ADAPTATION = REPO_ROOT / "platform/adaptation/README.md"
+LADDER_PAGE = REPO_ROOT / "architecture/adaptation-ladder.md"
+MANIFEST_FIELDS = (
+    "backend_pattern",
+    "io_schema",
+    "risk_class",
+    "allowed_identities",
+    "rate_class",
+    "data_class",
+)
+KSERVE_OCI_ISSUE = "https://github.com/kserve/kserve/issues/6094"
+
+
+def test_adaptation_rungs_match_ladder():
+    table = table_with_header(ADAPTATION, "Reference design", ["Rung", "Gate to climb"])
+    ladder = table_with_header(LADDER_PAGE, "The design", ["Rung", "Climb when"])
+    assert [row[0] for row in table[1:]] == [row[0] for row in ladder[1:]]
+    assert "adaptation-ladder.md" in reference_design_text(ADAPTATION)
+
+
+def test_adaptation_manifest_fields():
+    fences = YAML_FENCE.findall(body(ADAPTATION))
+    assert len(fences) == 1
+    fence = fences[0]
+    assert len(fence.strip().splitlines()) <= MAX_YAML_LINES
+    for key in MANIFEST_FIELDS:
+        assert re.search(rf"^{key}:", fence, re.M), key
+    assert "noc-triage-agent" in fence
+
+
+def test_adaptation_retrain_and_regate():
+    text = re.sub(r"\s+", " ", body(ADAPTATION))
+    sentences = re.split(r"(?<=[.!?])\s", text)
+    assert any(
+        "retrain" in s.lower()
+        and "re-gate" in s.lower()
+        and ("base revision" in s or "base-model revision" in s)
+        for s in sentences
+    )
+
+
+def test_adaptation_static_adapters():
+    code = "\n".join(CODE_FENCE.findall(body(ADAPTATION)))
+    assert "--lora-modules" in code
+    assert "--max-lora-rank" in code
+    text = ADAPTATION.read_text(encoding="utf-8")
+    assert "VLLM_ALLOW_RUNTIME_LORA_UPDATING=True" not in text
+    for line in text.splitlines():
+        if "VLLM_ALLOW_RUNTIME_LORA_UPDATING" in line:
+            assert re.search(r"(?i)never|block", line), line
+
+
+def test_adaptation_no_oci_adapter_uris():
+    text = body(ADAPTATION)
+    assert "object storage" in text
+    assert KSERVE_OCI_ISSUE in text
+
+
+def test_adaptation_components():
+    rows = tables(sections(body(ADAPTATION)).get("Components", []))[0][1:]
+    text = " ".join(" ".join(row) for row in rows)
+    for want in ("Training Hub", "SDG Hub"):
+        assert want in text, want
+    assert "model registry" in text.lower()
+
+
+def test_adaptation_method_table():
+    table = table_with_header(ADAPTATION, "Reference design", ["Method", "Use when"])
+    firsts = [row[0] for row in table[1:]]
+    for want in ("LoRA", "QLoRA", "OSFT", "GRPO"):
+        assert any(re.search(rf"\b{want}\b", f) for f in firsts), want
+
+
+def test_adaptation_training_data_covers_labels():
+    text = reference_design_text(ADAPTATION)
+    for want in ("LOOK", "NOTIFY", "REVIEW", "STOP"):
+        assert want in text, want
+    assert "decision-gate.md" in text
+
+
+def test_adaptation_mermaid_capabilities():
+    fence = mermaid_fences(body(ADAPTATION))[0]
+    for want in ("Measured evaluation gap", "Registry binds base revision"):
         assert want in fence, want
     assert PRODUCT_TERMS.findall(fence) == []

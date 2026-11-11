@@ -69,4 +69,5 @@ nav:
       - Safety and autonomy gating: platform/safety-autonomy-gating/README.md
       - Action layer: platform/action-layer/README.md
       - Evaluation and acceptance: platform/evaluation-acceptance/README.md
+      - Adaptation: platform/adaptation/README.md
   - Templates: templates.md

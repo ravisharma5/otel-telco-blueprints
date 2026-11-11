@@ -240,6 +240,6 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [Decision gate](../../architecture/decision-gate.md): the thresholds this page calibrates
 - [Adaptation ladder](../../architecture/adaptation-ladder.md): every rung re-enters this ladder
 - PB-01: intake and model selection feeds candidates into intake and smoke
-- PB-03: adaptation retrains adapters that trigger operator offline acceptance
+- [PB-03 Adaptation](../adaptation/README.md): adaptation retrains adapters that trigger operator offline acceptance
 - PB-09: quality operations tracks production drift against the accepted baseline
 - Agent-school: courses 201, 302, 304, and 403 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 302 adds a judge suite and 403 covers OTel evaluation
