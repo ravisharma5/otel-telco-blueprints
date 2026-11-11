@@ -93,8 +93,8 @@ Each option can be replaced. Layer them. OpenShell policy inside a sandboxed-con
 | Concern | Design | Source |
 |---|---|---|
 | Per-agent identity | Each agent runs with its own SPIFFE identity, so roles bind to one agent | [Zero Trust Workload Identity Manager announcement](https://www.redhat.com/en/blog/zero-trust-workload-identity-manager-11-generally-available-red-hat-openshift) |
-| Short-lived tokens | Tokens expire after the workload token lifetime and renew from the identity, so a stolen token stops working quickly | [RFC 8693 OAuth 2.0 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693) |
-| Tool authorization | Keycloak acts as the MCP authorization server, and the gateway exchanges tokens per backend and checks each tool against the token's roles, as [PB-05 Integration](../integration/README.md) describes | [Keycloak MCP authorization server](https://www.keycloak.org/securing-apps/mcp-authz-server) |
+| Short-lived tokens | Identity documents and their keys are short-lived and rotate automatically; the agent fetches new ones from the Workload API before they expire, so a stolen token stops working quickly | [SPIFFE concepts](https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/) |
+| Tool authorization | Keycloak acts as the MCP authorization server, and the gateway exchanges tokens per backend and checks each tool against the token's roles, as [PB-05 Integration](../integration/README.md) describes | [Keycloak MCP authorization server](https://www.keycloak.org/securing-apps/mcp-authz-server); [RFC 8693 OAuth 2.0 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693) |
 | Platform secrets | External Secrets Operator syncs secrets from your vault; authenticate its secret store with short-term credentials and allow its egress explicitly | [External Secrets Operator](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/external-secrets-operator-for-red-hat-openshift) |
 | Tool credentials | Injected at the network boundary, so the agent never holds them | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
 
@@ -201,6 +201,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 17 | `/v1/systemone` runs only on engine main and nightly builds; `/v1/chat/completions` with log probabilities returns the label probabilities | model card | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | 18 | Training Hub installs from the Red Hat Python index | Red Hat guidance | [Unsloth and Training Hub](https://developers.redhat.com/articles/2026/04/01/unsloth-and-training-hub-lightning-fast-lora-and-qlora-fine-tuning) |
 | 19 | Indirect prompt injection and data poisoning are AI-specific security risks | project documentation | [ETSI EN 304 223](https://www.etsi.org/deliver/etsi_en/304200_304299/304223/02.01.01_60/en_304223v020101p.pdf) |
+| 20 | SPIFFE keys and certificates are short-lived and rotate automatically, and workloads fetch new ones from the Workload API before they expire | project documentation | [SPIFFE concepts](https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/) |
 
 - Gate: every agent has its own workload identity, and no two agents share a token.
 - Gate: no agent pod has a shell or a write credential.

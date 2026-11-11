@@ -1148,6 +1148,23 @@ def test_security_example_counts_only_state_changing_requests():
     assert "The only state-changing request in this incident is `req-0001`" in text
 
 
+SPIFFE_CONCEPTS = "https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/"
+TOKEN_EXCHANGE_RFC = "https://www.rfc-editor.org/rfc/rfc8693"
+
+
+def test_security_token_rows_cite_what_they_claim():
+    """Expiry and renewal come from SPIFFE; token exchange stays on the tool
+    authorization row."""
+    table = table_with_header(SECURITY, "Reference design", ["Concern", "Design", "Source"])
+    src = table[0].index("Source")
+    rows = {r[0]: r for r in table[1:]}
+    assert SPIFFE_CONCEPTS in rows["Short-lived tokens"][src]
+    assert TOKEN_EXCHANGE_RFC not in rows["Short-lived tokens"][src]
+    assert TOKEN_EXCHANGE_RFC in rows["Tool authorization"][src]
+    sources = _table_text(table_with_header(SECURITY, "Sources and acceptance", ["Claim", "Basis"]))
+    assert SPIFFE_CONCEPTS in sources
+
+
 def test_security_no_maturity_labels():
     text = body(SECURITY)
     for word in MATURITY_WORDS:
