@@ -1140,6 +1140,14 @@ def test_security_no_shell_rule_has_no_default():
             assert "by default" not in unit, unit
 
 
+def test_security_example_counts_only_state_changing_requests():
+    """The triage note also travels as an action request, so the example counts
+    state-changing requests, not all requests."""
+    text = re.sub(r"\s+", " ", body(SECURITY))
+    assert "The only request in this incident" not in text
+    assert "The only state-changing request in this incident is `req-0001`" in text
+
+
 def test_security_no_maturity_labels():
     text = body(SECURITY)
     for word in MATURITY_WORDS:
