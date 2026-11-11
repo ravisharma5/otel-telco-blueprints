@@ -3,7 +3,7 @@ id: "PB-02"
 type: "platform"
 title: "Evaluation and acceptance"
 readiness_question: "Evaluation: how do you know a model is good enough for this use case?"
-doc_status: draft
+doc_status: done
 layers: ["evaluation"]
 extension_rows: ["E5"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
@@ -14,6 +14,7 @@ top_decisions:
   - "Score the process as well as the outcome"
   - "Gate the Decision slot on the false-ACT rate"
 agent_school: [201, 302, 304, 403]
+clarity_reviewed: "2026-11-10"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -44,7 +45,7 @@ Until you answer it, teams judge models on public scores or final answers, and n
 | Set acceptance thresholds per slot and name who signs them | One shared score; per-slot thresholds set by the platform team; per-slot thresholds signed by the risk owner | Per-slot thresholds that the operator risk owner signs, with operator SME review | Each slot fails in its own way, and the person who carries the risk of a wrong action should own the bar |
 | Score the process as well as the outcome | Final answer only; final answer plus trajectory checks | Final answer plus trajectory checks on stateful mocks | Agents can write a good summary while skipping the diagnostic steps, so outcome-only scoring overstates readiness ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)) |
 | Gate the Decision slot on the false-ACT rate | Accuracy; false-ACT rate on state-changing proposals | The false-ACT rate, measured on a gate set weighted toward non-ACT cases | A wrong ACT changes the network. A wrong LOOK costs a human a minute. Accuracy hides the difference |
-| Decide which changes re-run which stages | Re-run everything on every change; re-run by change class | Re-run by change class, using the regression triggers table | Every change still gets checked, without a full ladder for a prompt edit |
+| Decide which changes re-run which stages | Re-run everything on every change; re-run by change class | Re-run by change class, using the regression triggers table | Every change is still checked, and a prompt edit doesn't run the full ladder |
 | Decide where thresholds are enforced | In the evaluation runner; in the promotion pipeline | The promotion pipeline reads the evaluation results and enforces the thresholds | One place applies the paired tests and hard gates and records the pass on the registry version |
 
 ## Reference design
@@ -66,7 +67,7 @@ One candidate moving up the ladder:
 
 1. A change lands, such as a new checkpoint, adapter, prompt, tool schema, or gate policy. The regression triggers table picks the stages that run.
 2. Intake and smoke: the pipeline starts the pinned revision with its declared serving flags and chat template, then runs the self-identification and malformed-output checks.
-3. Public sanity: the evaluation runner runs the GSMA Open-Telco suite and the tool-calling regression set, and compares them with the incumbent.
+3. Public sanity: the evaluation runner runs the GSMA Open-Telco suite and the tool-calling regression set, and compares the scores with the incumbent's.
 4. Operator offline acceptance: golden sets and trajectory suites in your taxonomy replay on stateful mocks. The per-slot gates and the zero-tolerance rules decide. This is the acceptance decision.
 5. Safety and red team: Garak through EvalHub and the guardrail tests run, including prompt injection through tool output.
 6. The promotion pipeline reads the results, applies the paired tests and hard gates, and records the pass on the Model Registry version.
@@ -118,13 +119,13 @@ Three events fail a run outright, whatever the scores: any write outside the sce
 | Fact vs theory | Each causal claim is tagged as seen, correlated, suspected, or confirmed, and cites a tool result | Calibrated judge plus citation check |
 | No duplicate ticket, stop when evidence runs out, recent change checked | The scenario fixture declares each expected behaviour | Deterministic or judge |
 
-These checks come from operator SME review of how NOC engineers triage. They score the steps an agent takes, because a good final summary can hide a skipped diagnostic step ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)). Each scenario replays on stateful mocks and checks the end state of the mocked systems, as [tau2-bench](https://github.com/sierra-research/tau2-bench) does.
+These checks come from operator SME review of how NOC engineers triage. They score each step, because a good final summary can hide a skipped diagnostic step ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)). Each scenario replays on stateful mocks and checks the end state of the mocked systems, as [tau2-bench](https://github.com/sierra-research/tau2-bench) does.
 
 ### False-ACT method
 
 A false ACT is an ACT label on a state-changing proposal where the operator SME ground truth is LOOK, NOTIFY, REVIEW, or STOP. The false-ACT rate is the number of false ACT labels divided by the number of state-changing proposals whose ground truth is not ACT. Use this rate as the primary gate metric for the Decision slot, not accuracy.
 
-Size the gate set with the rule of three: if a run shows zero false ACT labels in n non-ACT cases, the true rate is below about 3/n at 95% confidence ([rule-of-three paper](https://pubmed.ncbi.nlm.nih.gov/6827763/)). To show a rate below your budget b, you need at least 3/b non-ACT cases with zero false ACT labels. Weight the gate set toward non-ACT cases, because they are the ones that can produce a false ACT. The [decision gate thresholds](../../architecture/decision-gate.md#thresholds) use this method.
+Size the gate set with the rule of three: if a run shows zero false ACT labels in n non-ACT cases, the true rate is below about 3/n at 95% confidence ([rule-of-three paper](https://pubmed.ncbi.nlm.nih.gov/6827763/)). To show a rate below your budget b, you need at least 3/b non-ACT cases with zero false ACT labels. Weight the gate set toward non-ACT cases, because only those cases can produce a false ACT. The [decision gate thresholds](../../architecture/decision-gate.md#thresholds) use this method.
 
 ### Regression triggers
 
@@ -156,7 +157,7 @@ Paired runs on identical items use the declared non-inferiority margin.
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. Before the triage agent goes live, three checks accept it. Classification is scored by per-class root-cause recall on your alarm taxonomy, with a temporal holdout, so the interface-fault class meets its floor on incidents newer than the training data. Trajectory checks run on replayed triage episodes: the agent must reuse the `inc-2041` ticket ID it was given rather than open a duplicate, and it must read the eth1 counters on r2 again after the restart before it closes the episode. The Decision slot must meet the false-ACT budget on fix proposals such as `req-0001` before any act-stage canary, so `dec-0001` stays at REVIEW until then.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. Three checks must pass before the triage agent goes live. First, Classification is scored by per-class root-cause recall on your alarm taxonomy with a temporal holdout, and the interface-fault class must meet its floor on incidents newer than the training data. Second, trajectory checks run on replayed triage episodes: the agent must reuse the `inc-2041` ticket ID it was given rather than open a duplicate, and it must read the eth1 counters on r2 again after the restart before it closes the episode. Third, the Decision slot must meet the false-ACT budget on fix proposals such as `req-0001` before any act-stage canary, so `dec-0001` stays at REVIEW until then.
 
 - Config artifact: threshold set for each slot, versioned as the policy that `policy_version` names
 - Config artifact: bring-your-own-framework adapter images, pinned by digest
