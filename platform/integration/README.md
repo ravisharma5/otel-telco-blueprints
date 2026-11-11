@@ -28,7 +28,7 @@ clarity_reviewed: "2026-11-11"
 |---|---|
 | One-liner | Connects agents to network and business systems through standards-based tools. Each call is authorized per tool and audited. Depends on an MCP gateway and an authorization server. |
 | Question answered | Integration: how do agents reach your network and business systems? |
-| Audience | Platform teams and security architects |
+| Audience | Platform teams and security |
 | OTel slots | LLM, Classification, Embedding, and Reranker |
 | Placement tier | Regional and core |
 | Top 3 decisions | Pick the standard that fronts each system; deny every tool unless a role allows it; route every write through the action request |

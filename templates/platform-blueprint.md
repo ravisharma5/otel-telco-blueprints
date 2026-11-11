@@ -30,7 +30,7 @@ clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 |---|---|
 | One-liner | Gives each team an OpenAI-compatible endpoint with per-team token limits. Depends on a gateway with token rate limiting. |
 | Question answered | <The readiness question in one line> |
-| Audience | <Platform engineers, architects, or both> |
+| Audience | <Platform teams, architects, or both> |
 | OTel slots | <Slots this capability serves> |
 | Placement tier | <far-edge, regional, or core> |
 | Top 3 decisions | <Decision 1>; <Decision 2>; <Decision 3> |

@@ -20,7 +20,7 @@ clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 |---|---|
 | Question answered | <The question in one line> |
 | Answer | <The answer in one line> |
-| Audience | <Architects, platform engineers, or both> |
+| Audience | <Architects, platform teams, or both> |
 | OTel slots | <Slots this page covers> |
 | Platform blueprints | <PB ids as plain text, for example PB-04> |
 

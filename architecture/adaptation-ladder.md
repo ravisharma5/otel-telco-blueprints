@@ -3,7 +3,7 @@ type: "reference"
 title: "Adaptation ladder"
 question: "How far should an operator customise an OTel model, and when should they go further?"
 doc_status: done
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 platform_blueprints: ["PB-02", "PB-03", "PB-09"]
 otel_slots: ["llm", "decision", "classification", "embedding", "reranker"]
 ---
@@ -16,7 +16,7 @@ otel_slots: ["llm", "decision", "classification", "embedding", "reranker"]
 |---|---|
 | Question answered | How far should an operator customise an OTel model, and when should they go further? |
 | Answer | Start with retrieval, then skills and capability manifests, then LoRA, then OSFT, and climb only when evaluation shows the current rung falls short |
-| Audience | Architects, platform engineers, and model owners |
+| Audience | Architects, platform teams, and model owners |
 | OTel slots | LLM, Decision, Classification, Embedding, Reranker |
 | Platform blueprints | PB-02, PB-03, PB-09 |
 

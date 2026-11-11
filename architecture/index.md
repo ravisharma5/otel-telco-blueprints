@@ -3,7 +3,7 @@ type: "reference"
 title: "Architecture overview"
 question: "How do the six OTel model slots map onto Red Hat products, and how do requests flow?"
 doc_status: done
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 platform_blueprints: ["PB-04", "PB-05", "PB-06", "PB-07"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
@@ -16,7 +16,7 @@ otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classificati
 |---|---|
 | Question answered | How do the six OTel model slots map onto Red Hat products, and how do requests flow? |
 | Answer | Every slot runs on Red Hat AI Inference (vLLM) behind gateways, and guardrails plus a Decision-model gate sit between the agent and any change to the network |
-| Audience | Architects and platform engineers |
+| Audience | Architects and platform teams |
 | OTel slots | All six: LLM, Embedding, Reranker, Safety, Decision, Classification |
 | Platform blueprints | PB-04, PB-05, PB-06, PB-07 |
 

@@ -27,7 +27,7 @@ clarity_reviewed: "2026-11-11"
 |---|---|
 | One-liner | Screens every input, tool response, and answer, grounds answers in evidence, and gates every change by autonomy stage. Depends on guardrails, the Safety and Decision slots, and an orchestrator that applies the policy ceiling. |
 | Question answered | Autonomy gating: what may the agent do without a human? |
-| Audience | Platform teams, security architects, and risk owners |
+| Audience | Platform teams, security, and risk owners |
 | OTel slots | Safety, Decision, and LLM |
 | Placement tier | Far edge, regional, and core |
 | Top 3 decisions | Place every control where its risk enters; set a stage per use case and action class; promote a stage only on evidence |

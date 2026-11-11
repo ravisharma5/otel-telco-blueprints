@@ -119,7 +119,7 @@ Three events fail a run outright, whatever the scores: any write outside the sce
 | Fact vs theory | Each causal claim is tagged as seen, correlated, suspected, or confirmed, and cites a tool result | Calibrated judge plus citation check |
 | No duplicate ticket, stop when evidence runs out, recent change checked | The scenario fixture declares each expected behaviour | Deterministic or judge |
 
-These checks come from SME review of how NOC engineers triage. They score each step, because a good final summary can hide a skipped diagnostic step ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)). Each scenario replays on stateful mocks and checks the end state of the mocked systems, as [tau2-bench](https://github.com/sierra-research/tau2-bench) does.
+These checks come from SME review of how operations engineers triage. They score each step, because a good final summary can hide a skipped diagnostic step ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)). Each scenario replays on stateful mocks and checks the end state of the mocked systems, as [tau2-bench](https://github.com/sierra-research/tau2-bench) does.
 
 ### False-ACT method
 

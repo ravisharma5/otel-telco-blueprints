@@ -16,7 +16,7 @@ otel_slots: ["llm", "decision"]
 |---|---|
 | Question answered | How does an agent's proposed change become an executed, blocked, or human-approved action? |
 | Answer | The agent submits an action request, the OTel Decision model labels it, and the automation platform follows the label, then verifies and audits |
-| Audience | Architects, platform engineers, and automation teams |
+| Audience | Architects, platform teams, and operations engineers |
 | OTel slots | LLM (the agent) and Decision (the gate) |
 | Platform blueprints | PB-02, PB-06, PB-07 |
 

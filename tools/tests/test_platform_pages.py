@@ -703,10 +703,31 @@ def test_shared_notify_mentions_link_the_gate(path):
 
 # ---------- shared role vocabulary ----------
 
-# Telecom job titles the pages replaced with generic roles.
+# Telecom job titles and older audience names the pages replaced with generic
+# roles, and the "named approver" wording a role-based approval step rejects.
 TELECOM_ROLE = re.compile(
-    r"noc-shift-lead|\bNOC lead|\bshift lead|operator risk owner|operator SME", re.I
+    r"noc-shift-lead|\bNOC lead|\bshift lead|operator risk owner|operator SME"
+    r"|\bplatform engineers?\b|\bplatform owners?\b|\bautomation teams?\b"
+    r"|\brisk and compliance leads?\b|\bnamed approver\b|\bsecurity architects?\b"
+    r"|\bNOC engineers?\b",
+    re.I,
 )
+
+
+@pytest.mark.parametrize(
+    ("text", "hit"),
+    [
+        ("Architects and platform engineers", True),
+        ("Operator architects, platform owners, and risk and compliance leads", True),
+        ("Architects, platform engineers, and automation teams", True),
+        ("a named approver handles REVIEW", True),
+        ("Platform teams and security architects", True),
+        ("Architects, platform teams, business owners, and risk owners", False),
+        ("an approver handles REVIEW", False),
+    ],
+)
+def test_generic_role_pattern_cases(text, hit):
+    assert bool(TELECOM_ROLE.search(text)) is hit
 
 
 def _role_scan_pages() -> list[Path]:

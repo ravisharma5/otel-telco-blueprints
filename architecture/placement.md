@@ -3,7 +3,7 @@ type: "reference"
 title: "Placement tiers"
 question: "Which OTel slots run at the far edge, regional sites, and the core, and what latency can each tier support?"
 doc_status: done
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 platform_blueprints: ["PB-04", "PB-08", "PB-10"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
@@ -16,7 +16,7 @@ otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classificati
 |---|---|
 | Question answered | Which OTel slots run at the far edge, regional sites, and the core, and what latency can each tier support? |
 | Answer | The far edge runs one small model per box, regional sites run a closed loop with several slots, and the core runs the large LLM, adaptation, and evaluation |
-| Audience | Architects and platform engineers |
+| Audience | Architects and platform teams |
 | OTel slots | All six: LLM, Embedding, Reranker, Safety, Decision, Classification |
 | Platform blueprints | PB-04, PB-08, PB-10 |
 
