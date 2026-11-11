@@ -86,7 +86,9 @@ def on_files(files, config):
 def on_page_markdown(markdown, page, config, files):
     """Reference and platform pages only: a draft or review banner after the H1."""
     meta = page.meta or {}
-    if meta.get("type") not in BANNER_TYPES:
+    doc_type = meta.get("type")
+    # A list or mapping type is unhashable, so test the type before membership.
+    if not isinstance(doc_type, str) or doc_type not in BANNER_TYPES:
         return markdown
     status = meta.get("doc_status")
     text = BANNERS.get(status) if isinstance(status, str) else None

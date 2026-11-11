@@ -360,6 +360,12 @@ def test_banner_unit_platform_done_unknown_or_non_string(status):
     assert _banner(src, {"type": "platform", "doc_status": status}) == src
 
 
+@pytest.mark.parametrize("doc_type", [["platform"], {"a": 1}, 3])
+def test_banner_unit_non_string_type_untouched(doc_type):
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"type": doc_type, "doc_status": "draft"}) == src
+
+
 def test_banner_unit_use_case_untouched():
     src = "# Title\n\nBody\n"
     assert _banner(src, {"type": "use-case", "doc_status": "draft"}) == src
