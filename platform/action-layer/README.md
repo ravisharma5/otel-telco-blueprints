@@ -3,7 +3,7 @@ id: "PB-07"
 type: "platform"
 title: "Action layer"
 readiness_question: "Autonomy gating: what may the agent do without a human?"
-doc_status: draft
+doc_status: done
 layers: ["action"]
 extension_rows: ["E4"]
 otel_slots: ["decision", "llm"]
@@ -14,6 +14,7 @@ top_decisions:
   - "Give the agent read-only job access"
   - "Pair every playbook with a verification job and a rollback job"
 agent_school: [202, 301]
+clarity_reviewed: "2026-11-10"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -45,7 +46,7 @@ Until you answer it, agents hold write credentials to the network, and nobody ca
 | Give the agent read-only job access | No job access; read-only mode; read-write mode | The MCP Server for AAP in read-only mode. Grant only the job status and output tools | Read-write mode lets agents run jobs and make changes, which turns the gate into a suggestion ([MCP Server for AAP announcement](https://www.redhat.com/en/blog/it-automation-agentic-ai-introducing-mcp-server-red-hat-ansible-automation-platform)) |
 | Choose who approves REVIEW | A named person; a role | A role, carried as `required_approver` in the gate decision, such as `noc-shift-lead` | Shifts change, and the [decision gate schema](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json) records the approver role |
 | Pair every playbook with a verification job and a rollback job | Trust the job exit code; verify and roll back per playbook | A verification job that reads the changed object, and a rollback job that restores it | A job can succeed while the network stays broken. Only a check on the object shows the fix worked |
-| Limit what Event-Driven Ansible may start | Fixes on an event; investigations and workflows only | Investigations and Orchestrator workflows only. Every fix passes the gate | Workflows start from webhooks, schedules, or event sources, so events can reach the gate instead of skipping it ([Automation Orchestrator announcement](https://www.redhat.com/en/blog/unify-it-workflows-scale-new-automation-orchestrator-ansible-automation-platform)) |
+| Limit what Event-Driven Ansible may start | Fixes on an event; investigations and workflows only | Investigations and Orchestrator workflows only. Every fix passes the gate | An event can start a workflow, so send it there and let the gate decide. Workflows start from webhooks, schedules, or event sources ([Automation Orchestrator announcement](https://www.redhat.com/en/blog/unify-it-workflows-scale-new-automation-orchestrator-ansible-automation-platform)) |
 
 ## Reference design
 
@@ -75,7 +76,7 @@ The write path, from alarm to audit record:
 4. A REST API step calls the Decision slot on `/v1/chat/completions` with log probabilities and a fixed label question, and reads the label probabilities.
 5. A switch step takes the lower of the model label and the policy ceiling for the risk class. A STOP label forces STOP, and a label mass below the floor fails closed to STOP.
 6. REVIEW goes to an approval step for the `required_approver` role. ACT goes on only for an approved playbook within policy.
-7. A job template runs the playbook, and a verification job reads the same object. If verification fails, a rollback job runs, and the failure is reported first.
+7. A job template runs the playbook, and a verification job reads the same object. If verification fails, the workflow reports the failure, then runs a rollback job.
 8. The workflow writes the audit record and updates the TMF621 ticket, then returns the result to the agent.
 
 ### Two ways to get the label
@@ -108,7 +109,7 @@ A small filter or role sets `gate_outcome` from the reply: it turns the log prob
 
 ### Prerequisites
 
-The REST API step blocks URLs that target private network addresses or cloud metadata endpoints by default. The Decision slot runs inside the cluster, so allow the gate endpoint for REST API steps, as the [REST API step docs](https://docs.redhat.com/en/documentation/automation_orchestrator/2026.8/develop-add_a_rest_api_step_to_a_workflow) describe. The Decision model card's recipe starts a server with no authentication, so put a token in front of the gate endpoint before any workflow calls it. Automation Orchestrator ships as an add-on to Red Hat Ansible Automation Platform.
+The REST API step blocks URLs that target private network addresses or cloud metadata endpoints by default. The Decision slot runs inside the cluster, so allow the gate endpoint for REST API steps, as the [REST API step docs](https://docs.redhat.com/en/documentation/automation_orchestrator/2026.8/develop-add_a_rest_api_step_to_a_workflow) describe. The Decision model card's recipe starts a server with no authentication, so require a token at the gate endpoint before any workflow calls it. Automation Orchestrator ships as an add-on to Red Hat Ansible Automation Platform.
 
 ### Policy ceilings
 
@@ -127,7 +128,7 @@ This page gives no default values. You set each parameter with SME sign-off and 
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The agent sends `req-0001`, a `write_low` request to restart eth1 on r2 with `router.restart_interface`. The stage register puts this class at the recommend stage, so the ceiling is REVIEW, and `dec-0001` records the outcome REVIEW under `noc-gate-policy-3`. Both messages are on the [decision gate](../../architecture/decision-gate.md#message-examples) page, and both follow the [decision gate schema](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/schemas/decision-gate.schema.json).
 
-The approval step waits for `noc-shift-lead`. After approval, the `pb-interface-restart` job template restarts eth1 on r2. The verification job checks that CRC errors stop rising, the BFD session to r3 stays stable, and the TMF642 alarm clears. If any check fails, the rollback job re-applies the previous interface configuration, and the ticket gets the failure first. The audit record holds the `gate_decision` message, the approver, the job result, and the verification result.
+The approval step waits for `noc-shift-lead`. After approval, the `pb-interface-restart` job template restarts eth1 on r2. The verification job checks that CRC errors stop rising, the BFD session to r3 stays stable, and the TMF642 alarm clears. If any check fails, the workflow posts the failure to the ticket, then the rollback job re-applies the previous interface configuration. The audit record holds the `gate_decision` message, the approver, the job result, and the verification result.
 
 - Config artifact: an Automation Orchestrator workflow definition with the webhook trigger, REST API step, switch, approval, and job steps
 - Config artifact: an Event-Driven Ansible rulebook that starts investigations from TMF642 alarm events
@@ -175,7 +176,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - Gate: a job launch with the agent's token fails.
 - Gate: a test request with a STOP label ends as STOP, and a test request with label mass below the floor ends as STOP.
 - Gate: a REVIEW outcome runs nothing until the required approver role approves.
-- Gate: the REST API step reaches the in-cluster gate endpoint, with a token, before the workflow is published.
+- Gate: the REST API step reaches the in-cluster gate endpoint with a token before you publish the workflow.
 - Gate: every audit record holds the gate decision, the approver, the job result, and the verification result.
 
 ## Operating model
@@ -192,7 +193,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| An agent with job-launch rights turns the gate into a suggestion | Medium | Run the MCP Server for AAP in read-only mode, grant job status and output tools only, and test that the agent's token cannot launch a job |
+| An agent with job-launch rights turns the gate into a suggestion | Medium | Run the MCP Server for AAP in read-only mode, grant job status and output tools only, and test that the agent's token can't launch a job |
 | Job output that holds secrets reaches the model provider through a tool result | Medium | Keep secret-bearing job output out of the agent's toolsets, and mask secrets in playbook output |
 | A rollback job that never runs leaves a failed change in place | Medium | Run every rollback job against a stateful mock before the canary, and alert when verification fails without a rollback record |
 | The REST API step blocks the gate endpoint, so every request stalls | High on first install | Allow the in-cluster gate endpoint for REST API steps, and check the call before publishing the workflow |
