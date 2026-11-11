@@ -3,7 +3,7 @@ id: "PB-10"
 type: "platform"
 title: "Compliance, sovereignty, and operating model"
 readiness_question: "Compliance and sovereignty: can you show the use case meets the rules and keeps data where it must stay?"
-doc_status: draft
+doc_status: done
 layers: ["control", "safety-governance"]
 otel_slots: ["llm", "decision", "safety", "classification"]
 placement_tier: ["regional", "core"]
@@ -13,6 +13,7 @@ top_decisions:
   - "Map each rule to the control that already produces its evidence"
   - "Measure value against the shadow-stage baseline"
 agent_school: [301, 401]
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -34,7 +35,7 @@ agent_school: [301, 401]
 ## The operator question
 
 Can you show that a use case meets the rules and keeps data where it must stay, and who owns it as it grows?
-Without an answer, the use case has no classification record, nobody knows who approves the next stage, and the value claimed for it has no baseline.
+Until you answer it, the use case runs without a classification record, nobody knows who approves the next stage, and any value claimed for it has no baseline.
 
 ## Decisions you must make
 
@@ -64,14 +65,14 @@ flowchart TD
 
 ### Example classification record: alarm and root-cause triage
 
-Example: complete this record for your own deployment. It cites Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744, and records the team's assessment and its reasons for legal review.
+Example: complete this record for your own deployment. The entries cite Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744. They record the team's assessment and its reasons, for legal review.
 
 | Field | Example entry |
 |---|---|
 | System description | `noc-triage-agent` reads alarms, interface counters, and inventory through read-only tools, proposes a root cause and a remediation, and sends any network change as an action request. It uses the LLM, Decision, Classification, and Safety slots. Example incident: `inc-2041`, CRC errors and BFD flaps on eth1 of router r2 |
 | Intended purpose | Propose a root cause and a remediation for network alarms to operations engineers. Every network change passes the [decision gate](../../architecture/decision-gate.md), and from the recommend stage an approver decides each change |
 | Deployer and provider roles | The operator deploys the system. The provider is whoever develops the system and puts it into service under its own name. Record who holds each role, including any adaptation the operator does in house, for your legal team to confirm |
-| Risk-category reasoning | Annex III point 2 lists "AI systems intended to be used as safety components in the management and operation of critical digital infrastructure" as high-risk. Article 3(14), as amended, says a component fulfils a safety function "where its intended purpose is to prevent or mitigate risks to health and safety of persons or property" and nowhere else. Article 6(1a) says systems "solely used for non-safety related aspects of user assistance, performance optimisation, service efficiency, automation or convenience or quality control" do not qualify as safety components. Article 6(1b) brings back any system "the failure or malfunctioning of which would endanger health and safety" as a safety component. The Commission's AI Act Service Desk lists trouble ticket management and network load prediction as examples out of scope. The team's assessment, with its facts: triage proposes and does not change the network by itself; the gate and an approver sit before every change; the network's own protection runs independently of the agent |
+| Risk-category reasoning | Annex III point 2 lists "AI systems intended to be used as safety components in the management and operation of critical digital infrastructure" as high-risk. Article 3(14), as amended, adds that "a component fulfils a safety function where its intended purpose is to prevent or mitigate risks to health and safety of persons or property" for the purposes of the definition. Article 6(1a) says systems "solely used for non-safety related aspects of user assistance, performance optimisation, service efficiency, automation or convenience or quality control" do not qualify as safety components. Article 6(1b) brings back any system "the failure or malfunctioning of which would endanger health and safety" as a safety component. The Commission's AI Act Service Desk lists trouble ticket management and network load prediction as examples out of scope. The team's assessment, with its facts: triage proposes and does not change the network by itself; the gate and an approver sit before every change; the network's own protection runs independently of the agent |
 | Article 6(3) assessment | Needed only if your legal team places the system in Annex III. Record which condition the team relies on, such as a narrow procedural or preparatory task, and keep the documented assessment that Article 6(4) asks the provider for |
 | Human oversight | The decision gate labels every action request. The stage register in [PB-06](../safety-autonomy-gating/README.md#staged-autonomy) caps the outcomes at each stage, and the approval step in [PB-07](../action-layer/README.md) waits for the approver |
 | Logging | Gate decisions, the action audit record, and end-to-end traces from [PB-09](../quality-operations/README.md), kept for the audit log retention period set under Staged rollout and ROI |
@@ -101,7 +102,7 @@ Date, owner, and legal sign-off:
 
 ### EU AI Act map
 
-Articles 9 to 15 and Article 26 apply to high-risk systems. Map them anyway: the same controls produce the evidence whichever category your legal team records.
+Articles 9 to 15 and Article 26 apply only to high-risk systems. Map them anyway, because the same controls produce the evidence whichever category your legal team records.
 
 | Provision | What it says | Blueprint control | Source |
 |---|---|---|---|
@@ -193,7 +194,7 @@ Inference runs in country, on the regional tier described on the [placement](../
 
 ### Staged rollout and ROI
 
-The stages are the ones in the [stage register](../safety-autonomy-gating/README.md#staged-autonomy). Each measure compares against the shadow-stage baseline for the same use case.
+These are the stages in the [stage register](../safety-autonomy-gating/README.md#staged-autonomy). Each measure compares with the shadow-stage baseline for the same use case.
 
 | Stage | What is allowed | ROI measures against the shadow-stage baseline |
 |---|---|---|
@@ -226,7 +227,7 @@ This page gives no default values. You set each parameter with SME review and ve
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The example classification record on this page describes `noc-triage-agent` with this incident. Before the shadow stage, the risk owner drafts the record, the legal team signs it off, and the business owner accepts it.
 
-At the recommend stage, the `approver` reviews `dec-0001` at REVIEW on the [decision gate](../../architecture/decision-gate.md) before eth1 on r2 restarts. The RACI rows for stage promotion and ROI apply to triage as written. The operations engineer reports engineer hours saved, mean time to identify, and abstention handling cost for `inc-2041` and similar incidents against the shadow-stage baseline. Prompts, passages, and traces for the incident stay at the regional site.
+At the recommend stage, the `approver` reviews `dec-0001` at REVIEW on the [decision gate](../../architecture/decision-gate.md) before eth1 on r2 restarts. The RACI applies to triage unchanged. The operations engineer reports engineer hours saved, mean time to identify, and abstention handling cost for `inc-2041` and similar incidents against the shadow-stage baseline. Prompts, passages, and traces for the incident stay at the regional site.
 
 - Config artifact: classification record for each use case, with the legal sign-off reference
 - Config artifact: rule-to-control map for each use case, linked to the evidence each control produces
