@@ -104,6 +104,8 @@ One triage episode passes these controls in order:
 
 TM Forum applies levels to scenarios, not whole networks, so each use case and action class gets its own stage. Each level here is a target, never a claim, as the [definitions](../../framework/definitions.md#autonomy-ceiling) page sets out. Level 4 and higher, where the system decides across domains and shares intent, is a later target beyond these blueprints.
 
+A confirmed false ACT drops the use case and its action class back one stage, and so does an override rate that crosses the override rate ceiling. A blocked prompt injection opens a SOC case and does not drop a stage, because an attacker who can write alarm or ticket text could otherwise force a use case down the stages. The approver records each drop in the stage register.
+
 ### Gate rules
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. The gate call in action orchestration is authoritative and the agent's label is advisory, so a prompt-injected agent can't skip the gate. The [policy table](../../architecture/decision-gate.md#policy-table) on the decision gate page says who acts and what runs for each label.

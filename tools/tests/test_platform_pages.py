@@ -1157,6 +1157,43 @@ def test_crosswalk_used_by_links_each_platform_page():
         assert f"../platform/{slug}/README.md" in text, slug
 
 
+# ---------- drop-back rules (shared across pages) ----------
+
+DEMOTE = re.compile(r"(?i)\bdrops?\b[^.|]*\bback\b|\bdrop back\b|\bdemot")
+NO_DEMOTE = re.compile(r"(?i)\bdoes not drop\b|\bdoesn't drop\b|\bkeeps its stage\b|\bwithout a drop\b")
+
+
+def _units(path: Path) -> list[str]:
+    """Prose sentences plus table rows, so a rule in either form is one unit."""
+    rows = [" | ".join(r) for t in page_tables(path) for r in t[1:]]
+    return _sentences(body(path)) + rows
+
+
+def test_gating_drop_back_rules():
+    """A confirmed false ACT drops a stage; a blocked injection opens a SOC case
+    and does not, so planted text cannot force autonomy down."""
+    staged = re.sub(r"\s+", " ", _h3_text(reference_design_text(GATING), "Staged autonomy"))
+    sentences = re.split(r"(?<=[.!?])\s", staged)
+    assert any("confirmed false ACT" in s and "back one stage" in s for s in sentences), staged
+    assert any("injection" in s and "SOC case" in s and NO_DEMOTE.search(s) and "attacker" in s
+               for s in sentences), staged
+
+
+@pytest.mark.parametrize("path", [GATING, SECURITY, QUALITY], ids=_id)
+def test_injection_never_drops_a_stage(path):
+    for unit in _units(path):
+        if re.search(r"(?i)injection", unit) and DEMOTE.search(unit):
+            assert NO_DEMOTE.search(unit), unit
+
+
+@pytest.mark.parametrize("path", [SECURITY, QUALITY], ids=_id)
+def test_false_act_drop_needs_confirmation(path):
+    for unit in _units(path):
+        if re.search(r"false ACT", unit) and DEMOTE.search(unit):
+            assert "confirmed" in unit, unit
+
+
+
 # ---------- intake and model selection ----------
 
 INTAKE = REPO_ROOT / "platform/intake-model-selection/README.md"

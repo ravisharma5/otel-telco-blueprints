@@ -115,9 +115,9 @@ The [decision gate](../../architecture/decision-gate.md) sets the five labels LO
 
 | Trigger | First action | Owner | Hand-off |
 |---|---|---|---|
-| A false ACT report | Drop the use case back one stage in the [stage register](../safety-autonomy-gating/README.md) and freeze promotions | Risk owner | NOC incident; the change board reviews the action that ran |
+| A confirmed false ACT report | Drop the use case back one stage in the [stage register](../safety-autonomy-gating/README.md#staged-autonomy) and freeze promotions | Approver, with the risk owner accountable | NOC incident; the change board reviews the action that ran |
 | A drift threshold crossed | Freeze promotions for the use case and review the signal with its owner; drop back one stage if the override ceiling is crossed | Signal owner | NOC incident at the severity your process sets |
-| Prompt injection detected at the gateway | Block the session and drop the use case back one stage in the [stage register](../safety-autonomy-gating/README.md) | Security | SOC case |
+| Prompt injection detected at the gateway | Block the session and open a SOC case. The use case keeps its stage, so planted text can't force autonomy down, as the [stage register](../safety-autonomy-gating/README.md#staged-autonomy) sets out | Security | SOC case |
 | A model or adapter integrity alert, such as a digest mismatch | Roll back the slot revision as [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md) describes | Platform team | SOC case and NOC incident |
 
 If you are an EU provider, report an AI-caused incident that meets the NIS2 significance test like any other: an early warning within 24 hours, a notification within 72 hours, and a final report within one month ([NIS2 Directive](https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng)). Your existing NOC and SOC process files these reports, not a separate AI process.
@@ -211,7 +211,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): labelled overrides become the next golden set
 - [PB-03 Adaptation](../adaptation/README.md): drift that skills and retrieval can't fix starts a new climb
-- [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): incidents drop a use case back one stage
+- [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): a confirmed false ACT or an override rate that crosses the ceiling drops a use case back one stage
 - [PB-07 Action layer](../action-layer/README.md): action jobs and rollbacks appear in the same trace
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): slot rollback on an integrity alert
 - [Decision gate](../../architecture/decision-gate.md): the labels behind the gate label mix

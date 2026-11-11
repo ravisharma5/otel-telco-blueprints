@@ -231,7 +231,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 ## Used by and next steps
 
 - [PB-05 Integration](../integration/README.md): per-tool authorization, and the gateway that screens tool responses
-- [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): a detected injection drops the use case back one stage
+- [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): a blocked injection opens a SOC case and the use case keeps its stage, so planted text can't force autonomy down
 - [PB-07 Action layer](../action-layer/README.md): job credentials stay in the action layer, never in the agent
 - [PB-03 Adaptation](../adaptation/README.md): adapters in internal object storage, and the teacher on site
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): signed, pinned slot images and the far-edge options
