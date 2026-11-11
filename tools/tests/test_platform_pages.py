@@ -980,6 +980,17 @@ def test_compliance_data_checks_link_the_adaptation_checks():
         assert re.search(r"training data checks", line, re.I), line
 
 
+def test_adaptation_teacher_licence_chain():
+    """A teacher's licence can reach adapters trained on its output, so the
+    teacher decision sends its chain through intake and legal review."""
+    table = table_with_header(ADAPTATION, "Decisions you must make", ["Decision", "Recommendation"])
+    row = " | ".join(next(r for r in table[1:] if "teacher" in r[0].lower()))
+    for want in ("Gemma Terms of Use", "../intake-model-selection/README.md", "legal review"):
+        assert want in row, want
+    steps = " ".join(_ordered_steps(reference_design_text(INTAKE))).lower()
+    assert "teacher model" in steps
+
+
 def test_adaptation_mermaid_capabilities():
     fence = mermaid_fences(body(ADAPTATION))[0]
     for want in ("Measured evaluation gap", "Registry binds base revision"):

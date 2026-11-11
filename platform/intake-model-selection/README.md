@@ -72,7 +72,7 @@ Run these checks for each checkpoint before it enters intake:
 3. Check redistribution, including whether serving the model to others through an API counts under the licence.
 4. Check use restrictions, such as a prohibited-use policy or a commercial-use limit tied to revenue.
 5. Check attribution and notice files that must travel with any copy you distribute.
-6. Check derivative and adapter terms: whether your fine-tunes, adapters, quantized builds, or synthetic training data count as derivatives.
+6. Check derivative and adapter terms: whether your fine-tunes, adapters, quantized builds, or synthetic training data count as derivatives, including adapters trained on the output of a teacher model.
 7. Check gating, and accept the base model's terms on its repository where it asks.
 8. Record the licence chain with the pinned revision in the model registry, and send it to legal review.
 
