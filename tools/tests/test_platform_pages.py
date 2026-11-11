@@ -299,6 +299,16 @@ def test_serving_edge_options():
     assert any("one AI model" in cell for row in table[1:] for cell in row)
 
 
+def test_serving_fp8_source_includes_blackwell():
+    """The FP8 source row must allow the FP8 fix the Blackwell prerequisite gives."""
+    table = tables(sections(body(SERVING)).get("Sources and acceptance", []))[0]
+    claim = table[0].index("Claim")
+    rows = [r for r in table[1:] if "FP8 W8A8 needs" in r[claim]]
+    assert rows, "no FP8 W8A8 source row"
+    for row in rows:
+        assert "Blackwell" in row[claim] and "8.9" in row[claim], row[claim]
+
+
 # ---------- integration ----------
 
 INTEGRATION = REPO_ROOT / "platform/integration/README.md"
