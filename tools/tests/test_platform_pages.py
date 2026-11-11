@@ -1361,9 +1361,40 @@ def test_intake_rnj_not_gemma_base():
     for r in rows:
         assert "rnj-1" in r, r
         assert "Gemma 3" not in r, r
-    for s in _sentences(body(INTAKE)):
-        if "8.3B" in s and "Gemma 3" in s:
-            assert "architecture class" in s and "config.json" in s, s
+    assert any(_rnj_sentence_problem(s) == "" and RNJ_SUBJECT.search(s) and GEMMA3.search(s)
+               for s in _sentences(body(INTAKE)))
+
+
+RNJ_SUBJECT = re.compile(r"8\.3B|Classification (checkpoint|model)|rnj-1")
+GEMMA3 = re.compile(r"Gemma ?3")
+
+
+def _rnj_sentence_problem(sentence: str) -> str:
+    """A sentence that ties the rnj-1-based checkpoints to Gemma 3 must say it is
+    only the architecture class from config.json."""
+    if RNJ_SUBJECT.search(sentence) and GEMMA3.search(sentence):
+        if not ("architecture class" in sentence and "config.json" in sentence):
+            return sentence
+    return ""
+
+
+@pytest.mark.parametrize(
+    ("sentence", "bad"),
+    [
+        ("The Classification model is built on Gemma 3.", True),
+        ("OTel-LLM-8.3B-Safety uses a Gemma3 base.", True),
+        ("The Classification checkpoint's config.json declares the Gemma3 architecture class.", False),
+        ("The 12B Safety model is built on Gemma 3 12B IT.", False),
+    ],
+)
+def test_rnj_sentence_rule_cases(sentence, bad):
+    assert bool(_rnj_sentence_problem(sentence)) is bad
+
+
+@PAGES
+def test_shared_rnj_checkpoints_not_called_gemma(path):
+    problems = [p for p in map(_rnj_sentence_problem, _sentences(body(path))) if p]
+    assert problems == [], problems
 
 
 def test_intake_lfm_licence_trap():
