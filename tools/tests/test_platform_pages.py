@@ -42,6 +42,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "quality-operations": "PB-09",
     "security-identity-sandbox": "PB-08",
     "intake-model-selection": "PB-01",
+    "compliance-operating-model": "PB-10",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -1238,5 +1239,166 @@ def test_intake_selection_guide():
 def test_intake_mermaid_capabilities():
     fence = mermaid_fences(body(INTAKE))[0]
     for want in ("Licence chain recorded", "Verify signature and revision"):
+        assert want in fence, want
+    assert PRODUCT_TERMS.findall(fence) == []
+
+
+# ---------- compliance and operating model ----------
+
+COMPLIANCE = REPO_ROOT / "platform/compliance-operating-model/README.md"
+ALLOWED_ROLES = {
+    "business owner",
+    "approver",
+    "platform team",
+    "model owner",
+    "risk owner",
+    "security",
+    "data protection officer",
+    "change board",
+    "operations engineer",
+    "sme",
+    "subject-matter expert",
+    "legal team",
+}
+RECORD_FIELDS = (
+    "system description",
+    "intended purpose",
+    "risk-category reasoning",
+    "human oversight",
+    "logging",
+    "data governance",
+)
+LEGAL_LINE = "Your legal team owns the classification."
+LEGAL_CONCLUSION = re.compile(
+    r"(?i)\b(is|are) not high-risk\b|\bcomplian(t|ce) with\b|\bcomplies with\b"
+    r"|\bis exempt\b|\bmeets the AI Act\b|\byou are a provider\b"
+)
+ROI_MEASURES = (
+    "mean time to identify",
+    "auto-triaged",
+    "engineer hours saved",
+    "false-ACT cost",
+    "abstention handling cost",
+)
+GSMA_LEVELS = ("Foundational", "Evolving", "Performing", "Advanced")
+
+
+def _text_tables(text: str) -> list[list[list[str]]]:
+    """Tables in a slice of raw markdown."""
+    return tables(sections("## Slice\n" + text)["Slice"])
+
+
+def _h3_matching(text: str, *words: str) -> str:
+    """Raw markdown under the first H3 whose heading holds every word."""
+    for m in re.finditer(r"^### (.+)$", text, re.M):
+        if all(w in m.group(1) for w in words):
+            nxt = re.search(r"^#{2,3} ", text[m.end() :], re.M)
+            return text[m.end() : m.end() + nxt.start()] if nxt else text[m.end() :]
+    raise AssertionError(f"no H3 holding {words}")
+
+
+def _text_fences(text: str) -> list[str]:
+    return [m.group(1) for m in re.finditer(r"^```text\n(.*?)^```", text, re.M | re.S)]
+
+
+def _control_tables() -> list[list[list[str]]]:
+    rd = tables(sections(body(COMPLIANCE)).get("Reference design", []))
+    return [t for t in rd if any("Blueprint control" in h for h in t[0])]
+
+
+def test_compliance_example_record():
+    record = _h3_matching(reference_design_text(COMPLIANCE), "Example", "classification record")
+    table = next(t for t in _text_tables(record) if t[0][:2] == ["Field", "Example entry"])
+    fields = " ".join(row[0].lower() for row in table[1:])
+    for want in RECORD_FIELDS:
+        assert want in fields, want
+    for want in ("Annex III", "Article 6(1a)", "2026/1744", "2024/1689", "December 2, 2027"):
+        assert want in record, want
+
+
+def test_compliance_blank_record():
+    fences = _text_fences(body(COMPLIANCE))
+    assert any(all(f in fence.lower() for f in RECORD_FIELDS) for fence in fences)
+
+
+def test_compliance_legal_ownership_line():
+    assert re.sub(r"\s+", " ", body(COMPLIANCE)).count(LEGAL_LINE) == 1
+
+
+def test_compliance_no_legal_conclusions():
+    assert LEGAL_CONCLUSION.findall(CODE_FENCE.sub("", body(COMPLIANCE))) == []
+
+
+def test_compliance_regimes_mapped():
+    found = _control_tables()
+    text = "\n".join(_table_text(t) for t in found)
+    for want in ("NIS2", "GDPR", "CAMARA", "GSMA"):
+        assert want in text or want in reference_design_text(COMPLIANCE), want
+    assert len(found) >= 5, len(found)
+    for t in found:
+        if "Source" in t[0]:
+            src = t[0].index("Source")
+            for row in t[1:]:
+                assert "](http" in row[src], row
+    ai_act = _text_tables(_h3_matching(reference_design_text(COMPLIANCE), "EU AI Act map"))[0]
+    col = ai_act[0].index("Blueprint control")
+    controls = " ".join(row[col] for row in ai_act[1:])
+    for link in ("decision-gate.md", "../safety-autonomy-gating/README.md",
+                 "../action-layer/README.md", "../evaluation-acceptance/README.md"):
+        assert link in controls, link
+
+
+def test_compliance_regime_headings():
+    rd = reference_design_text(COMPLIANCE)
+    for words in (("NIS2",), ("GDPR",), ("CAMARA",), ("GSMA",)):
+        h3 = _h3_matching(rd, *words)
+        assert any(any("Blueprint control" in h for h in t[0]) for t in _text_tables(h3)), words
+
+
+def test_compliance_raci_generic_roles():
+    table = table_with_header(
+        COMPLIANCE, "Operating model", ["Activity", "Responsible", "Accountable", "Consulted", "Informed"]
+    )
+    for row in table[1:]:
+        for name in ("Responsible", "Accountable", "Consulted", "Informed"):
+            cell = row[table[0].index(name)]
+            for role in re.split(r",\s*|\s+and\s+", cell):
+                role = role.strip().lower()
+                if role:
+                    assert role in ALLOWED_ROLES, (row[0], role)
+
+
+def test_compliance_rollout_and_roi():
+    rd = reference_design_text(COMPLIANCE)
+    table = table_with_header(COMPLIANCE, "Reference design", ["Stage", "What is allowed"])
+    assert [row[0] for row in table[1:]] == ["Shadow", "Assist", "Recommend", "Act"]
+    assert "../safety-autonomy-gating/README.md" in rd
+    for want in ROI_MEASURES:
+        assert want in rd, want
+    assert "shadow-stage baseline" in rd
+    fences = [f for f in _text_fences(rd) if "value per period" in f]
+    assert fences
+    assert not any(re.search(r"\d", f) for f in fences)
+
+
+def test_compliance_residency():
+    table = table_with_header(COMPLIANCE, "Reference design", ["Data", "Where it lives"])
+    text = _table_text(table[1:]).lower()
+    for want in ("prompts", "retrieved passages", "traces", "training data", "adapters"):
+        assert want in text, want
+
+
+def test_compliance_gsma_levels_named():
+    text = body(COMPLIANCE)
+    for level in GSMA_LEVELS:
+        assert level in text, level
+    for s in _sentences(text):
+        if "GSMA" in s:
+            assert not re.search(r"\bLevel [0-9]", s), s
+
+
+def test_compliance_mermaid_capabilities():
+    fence = mermaid_fences(body(COMPLIANCE))[0]
+    for want in ("Classification record", "Legal review", "shadow baseline"):
         assert want in fence, want
     assert PRODUCT_TERMS.findall(fence) == []

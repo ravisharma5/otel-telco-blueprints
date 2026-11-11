@@ -48,3 +48,7 @@ Landlock
 seccomp
 bge
 mpnet
+ePrivacy
+pseudonymi[sz]ation
+EU AI Act
+Responsible AI

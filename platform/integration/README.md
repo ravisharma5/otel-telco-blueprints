@@ -126,7 +126,7 @@ Keep a corpus register, and record the licence of every corpus before you index 
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` holds roles for TMF642 list and get, TMF628 read, TMF639 read, TMF621 search, the device `show interface` command, the Classification tool, and `submit_action_request`. It holds no direct notify role. The gateway denies and audits every other call.
 
-The agent reads the alarms, the CRC counters on eth1, and the inventory links to r3, asks the Classification tool for the likely cause, then searches for an open ticket. Its triage note, creating the ticket for `inc-2041`, and restarting eth1 on r2 all go through the action request. The restart is `req-0001` on the [decision gate](../../architecture/decision-gate.md) page. If triage needs a customer line's network state, the CAMARA call carries its declared purpose, and consent stays in CAMARA's own flow. PB-10 covers customer consent design.
+The agent reads the alarms, the CRC counters on eth1, and the inventory links to r3, asks the Classification tool for the likely cause, then searches for an open ticket. Its triage note, creating the ticket for `inc-2041`, and restarting eth1 on r2 all go through the action request. The restart is `req-0001` on the [decision gate](../../architecture/decision-gate.md) page. If triage needs a customer line's network state, the CAMARA call carries its declared purpose, and consent stays in CAMARA's own flow. [PB-10](../compliance-operating-model/README.md) covers customer consent design.
 
 - Config artifact: one `MCPServerRegistration` per MCP server
 - Config artifact: one `AuthPolicy` per MCP server, with the per-tool rule
@@ -212,5 +212,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): builds on the gateway guardrails here
 - [PB-07 Action layer](../action-layer/README.md): the action layer completes the write path that starts at the action request
 - [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): covers workload identity and secrets in depth
-- PB-10: compliance covers customer consent and data residency for CAMARA calls and corpora
+- [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): compliance covers customer consent and data residency for CAMARA calls and corpora
 - Agent-school: 301 adds an approval gate, 302 covers governed MCP gateways, 303 covers identity-based tool authorization, and 401 generates gateway policies from a capability catalog, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

@@ -391,6 +391,14 @@ def test_readiness_answered_by():
     assert "PB-10" in answered[8] and "PB-10" in answered[9]
 
 
+def test_readiness_every_row_links_a_platform_page():
+    """Each of the ten questions links the platform blueprint that answers it."""
+    header, rows = _readiness_rows()
+    for row in rows:
+        targets = [target for _label, target in MD_LINK.findall(_cell(header, row, "Answered by"))]
+        assert any("platform/" in target for target in targets), row[0]
+
+
 def test_readiness_serving_row_uses_hardware_class():
     header, rows = _readiness_rows()
     ready = _cell(header, rows[3], "What ready means")

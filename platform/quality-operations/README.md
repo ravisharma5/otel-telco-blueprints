@@ -215,5 +215,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-07 Action layer](../action-layer/README.md): action jobs and rollbacks appear in the same trace
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): slot rollback on an integrity alert
 - [Decision gate](../../architecture/decision-gate.md): the labels behind the gate label mix
-- PB-10: compliance maps traces and incident records to regulatory duties
+- [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): compliance maps traces and incident records to regulatory duties
 - Agent-school: courses 301, 302, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate, 302 adds a judge suite, and 304 covers agent security operations

@@ -58,7 +58,7 @@ Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanc
 ## Used by
 
 - [PB-04](../platform/serving-routing-placement/README.md): serving and placement build on these tiers
-- [PB-08](../platform/security-identity-sandbox/README.md), PB-10: air-gapped operation and in-country inference use the regional and far-edge tiers
+- [PB-08](../platform/security-identity-sandbox/README.md), [PB-10](../platform/compliance-operating-model/README.md): air-gapped operation and in-country inference use the regional and far-edge tiers
 - [Architecture overview](index.md): the placement layer this page details
 - [Decision gate](decision-gate.md): the gate model that runs closest to the network
 - [Adaptation ladder](adaptation-ladder.md): the adaptation work that stays in the core

@@ -242,5 +242,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): mirrors signed model images to offline sites
 - [PB-09 Quality operations and observability](../quality-operations/README.md): a digest mismatch alert rolls the slot back to the revision recorded here
 - [Decision gate](../../architecture/decision-gate.md): the Decision slot's labels come from a pinned checkpoint
-- PB-10: compliance uses the licence chain records as evidence
+- [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): compliance uses the licence chain records as evidence
 - Agent-school: course 403 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) covers the OTel domain models
