@@ -395,8 +395,12 @@ def test_readiness_every_row_links_a_platform_page():
     """Each of the ten questions links the platform blueprint that answers it."""
     header, rows = _readiness_rows()
     for row in rows:
-        targets = [target for _label, target in MD_LINK.findall(_cell(header, row, "Answered by"))]
-        assert any("platform/" in target for target in targets), row[0]
+        links = MD_LINK.findall(_cell(header, row, "Answered by"))
+        assert any("platform/" in target for _label, target in links), row[0]
+        for label, target in links:
+            page = (READINESS.parent / target.split("#")[0]).resolve()
+            assert page.is_file(), (row[0], target)
+            assert (front_matter(page) or {}).get("id") == label, (row[0], label, target)
 
 
 def test_readiness_serving_row_uses_hardware_class():
