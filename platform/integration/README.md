@@ -208,7 +208,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [Architecture overview](../../architecture/index.md): the network capabilities, MCP Gateway, and data and knowledge layers this page details
 - [Decision gate](../../architecture/decision-gate.md): where every `submit_action_request` goes
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): builds on the gateway guardrails here
-- PB-07: the action layer completes the write path that starts at the action request
+- [PB-07 Action layer](../action-layer/README.md): the action layer completes the write path that starts at the action request
 - PB-08: security and identity covers workload identity and secrets in depth
 - PB-10: compliance covers customer consent and data residency for CAMARA calls and corpora
 - Agent-school: 301 adds an approval gate, 302 covers governed MCP gateways, 303 covers identity-based tool authorization, and 401 generates gateway policies from a capability catalog, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

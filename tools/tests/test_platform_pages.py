@@ -8,6 +8,7 @@ no cases and the expected-pages guard compares two empty maps.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -35,6 +36,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "serving-routing-placement": "PB-04",
     "integration": "PB-05",
     "safety-autonomy-gating": "PB-06",
+    "action-layer": "PB-07",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -380,4 +382,112 @@ def test_gating_alarm_example_review():
     text = reference_design_text(GATING)
     example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]
     for want in ("NOTIFY", "REVIEW", "eth1", "r2"):
+        assert want in example, want
+
+
+# ---------- action layer ----------
+
+ACTION = REPO_ROOT / "platform/action-layer/README.md"
+YAML_FENCE = re.compile(r"^```ya?ml[ \t]*\n(.*?)^```", re.M | re.S)
+MAX_YAML_LINES = 20
+
+
+def _ordered_steps(text: str) -> list[str]:
+    """Inline text of each item in the first ordered list of text."""
+    from tools.tests.test_reference_pages import _md
+
+    steps, in_list, depth = [], False, 0
+    for tok in _md().parse(text):
+        if tok.type == "ordered_list_open":
+            if in_list:
+                depth += 1
+            in_list = True
+        elif tok.type == "ordered_list_close":
+            if depth:
+                depth -= 1
+                continue
+            break
+        elif in_list and tok.type == "list_item_open" and depth == 0:
+            steps.append("")
+        elif in_list and tok.type == "inline" and steps:
+            steps[-1] += tok.content + " "
+    return steps
+
+
+def test_action_two_paths():
+    table = table_with_header(ACTION, "Reference design", ["Path"])
+    rows = [" | ".join(row) for row in table[1:]]
+    assert any("Automation Orchestrator" in r and "default" in r.lower() for r in rows), rows
+    assert any(
+        "job template" in r.lower() and "`uri`" in r and "alternative" in r.lower() for r in rows
+    ), rows
+
+
+def test_action_write_path_steps():
+    steps = _ordered_steps(reference_design_text(ACTION))
+    assert 0 < len(steps) <= 8, len(steps)
+    lowered = [s.lower() for s in steps]
+
+    def first(*words):
+        for i, s in enumerate(lowered):
+            if any(w in s for w in words):
+                return i
+        raise AssertionError(f"no step mentions {words}")
+
+    order = [
+        first("approv"),
+        first("verif"),
+        first("roll back", "rollback"),
+        first("audit"),
+    ]
+    assert order == sorted(order), order
+
+
+def test_action_components():
+    rows = tables(sections(body(ACTION)).get("Components", []))[0][1:]
+    products = [row[1] for row in rows]
+    assert any("Automation Orchestrator" in cell for cell in products)
+    assert any("Event-Driven Ansible" in cell for cell in products)
+    mcp = [row for row in rows if "MCP Server" in row[1]]
+    assert mcp and all("read-only" in " ".join(row) for row in mcp), mcp
+
+
+def test_action_json_validates():
+    from jsonschema import Draft202012Validator
+
+    validator = Draft202012Validator(json.loads(GATE_SCHEMA_PATH.read_text(encoding="utf-8")))
+    for example in json_fences(body(ACTION)):
+        errors = list(validator.iter_errors(example))
+        assert errors == [], [e.message for e in errors]
+
+
+def test_action_schema_url():
+    assert GATE_SCHEMA_URL in body(ACTION)
+
+
+def test_action_private_address_prerequisite():
+    assert "private network addresses" in body(ACTION)
+
+
+def test_action_fallback_snippet():
+    fences = YAML_FENCE.findall(body(ACTION))
+    snippet = [f for f in fences if "ansible.builtin.uri" in f and "ansible.builtin.assert" in f]
+    assert snippet, "no yaml fence with the uri and assert tasks"
+    for fence in fences:
+        if fence is snippet[0]:
+            continue
+        assert len(fence.splitlines()) <= MAX_YAML_LINES, fence[:80]
+
+
+def test_action_gate_rules():
+    text = body(ACTION)
+    assert "policy ceiling" in text
+    assert "forces STOP" in text or "forces a STOP" in text
+    assert "label mass" in text
+
+
+def test_action_alarm_example():
+    text = reference_design_text(ACTION)
+    example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]
+    for want in ("eth1", "r2", "noc-shift-lead", "pb-interface-restart", "REVIEW", "roll"):
         assert want in example, want

@@ -198,7 +198,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-05 Integration](../integration/README.md): the MCP Gateway and the tool-response guardrails this page places
 - [Decision gate](../../architecture/decision-gate.md): the label policy and gate thresholds this page builds on
 - [Architecture overview](../../architecture/index.md): the grounded answer and investigate-then-act flows these controls guard
-- PB-07: the action layer runs each gate outcome
+- [PB-07 Action layer](../action-layer/README.md): the action layer runs each gate outcome
 - PB-02: evaluation supplies the evidence behind each promotion
 - PB-08: security and identity covers prompt injection and workload identity in depth
 - PB-09: quality operations tracks abstention rate, gate labels, and human overrides

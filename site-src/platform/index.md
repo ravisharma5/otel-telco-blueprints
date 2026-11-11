@@ -17,7 +17,7 @@ Platform blueprints cover the shared capabilities every use case depends on. The
 | [PB-04](serving-routing-placement/README.md) | Serving, routing, and placement | Run and govern |
 | [PB-05](integration/README.md) | Integration | Run and govern |
 | [PB-06](safety-autonomy-gating/README.md) | Safety and autonomy gating | Run and govern |
-| PB-07 | Action layer | Run and govern |
+| [PB-07](action-layer/README.md) | Action layer | Run and govern |
 | PB-08 | Security, identity, and sandbox | Adapt, operate, and comply |
 | PB-09 | Quality operations and observability | Adapt, operate, and comply |
 | PB-10 | Compliance, sovereignty, and operating model | Adapt, operate, and comply |

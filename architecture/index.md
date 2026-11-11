@@ -124,7 +124,7 @@ The agent reads and notifies through the MCP Gateway and asks for a change throu
 
 ## Used by
 
-- [PB-04](../platform/serving-routing-placement/README.md), [PB-05](../platform/integration/README.md), [PB-06](../platform/safety-autonomy-gating/README.md), PB-07: serving, integration, gating, and the action layer build on this map
+- [PB-04](../platform/serving-routing-placement/README.md), [PB-05](../platform/integration/README.md), [PB-06](../platform/safety-autonomy-gating/README.md), [PB-07](../platform/action-layer/README.md): serving, integration, gating, and the action layer build on this map
 - [Readiness questions](../framework/index.md): what each part of this design must show before production
 - [Decision gate](decision-gate.md): the label policy behind the investigate-then-act flow
 - [Adaptation ladder](adaptation-ladder.md): how each slot is fitted to an operator's network
