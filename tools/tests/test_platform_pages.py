@@ -931,6 +931,34 @@ def test_adaptation_training_data_covers_labels():
     assert "decision-gate.md" in text
 
 
+TRAINING_DATA_CHECKS = ("provenance", "usage rights", "personal data", "traffic and location",
+                        "lawful basis", "label balance")
+TRAINING_DATA_ANCHOR = "../adaptation/README.md#training-data-checks"
+
+
+def test_adaptation_training_data_checks():
+    h3 = _h3_matching(reference_design_text(ADAPTATION), "Training data checks")
+    table = next(t for t in _text_tables(h3) if t[0][:2] == ["Check", "What it enforces"])
+    checks = " ".join(row[0] for row in table[1:]).lower()
+    for want in TRAINING_DATA_CHECKS:
+        assert want in checks, want
+    for want in ("LOOK", "NOTIFY", "REVIEW", "STOP"):
+        assert want in _table_text(table), want
+    gates = section_text(ADAPTATION, "Sources and acceptance")
+    assert "- Gate: no dataset enters training without passing the training data checks." in gates
+
+
+def test_compliance_data_checks_link_the_adaptation_checks():
+    """Every compliance mention of data checks points at the checks on the
+    adaptation page, and every line that links them names training data."""
+    text = body(COMPLIANCE)
+    lines = [line for line in text.splitlines() if re.search(r"data checks", line, re.I)]
+    assert lines
+    for line in lines:
+        assert TRAINING_DATA_ANCHOR in line, line
+        assert re.search(r"training data checks", line, re.I), line
+
+
 def test_adaptation_mermaid_capabilities():
     fence = mermaid_fences(body(ADAPTATION))[0]
     for want in ("Measured evaluation gap", "Registry binds base revision"):

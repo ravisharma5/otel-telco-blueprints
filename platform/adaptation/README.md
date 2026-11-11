@@ -122,6 +122,19 @@ data_class: network-operational      # no subscriber personal data
 
 Training data that always ends in a change teaches the model to act. Generate LOOK, NOTIFY, REVIEW, and STOP cases as well as ACT cases, using the labels from the [decision gate](../../architecture/decision-gate.md).
 
+### Training data checks
+
+Every dataset passes these checks before SDG Hub or Training Hub uses it.
+
+| Check | What it enforces |
+|---|---|
+| Provenance | Each dataset records its sources, the SDG flow and teacher model that produced it, and its version in experiment tracking |
+| Usage rights | Each document set, ticket export, and tape set has a usage-rights entry in the corpus register in [PB-05 Integration](../integration/README.md#knowledge-sources-and-usage-rights) |
+| Personal data screening | Subscriber identifiers are scrubbed from tapes, tickets, and documents before synthetic data generation |
+| Traffic and location data | Traffic data and location data get erased or made anonymous, unless the lawful basis or consent recorded for the dataset covers them |
+| Lawful basis | Each dataset records the lawful basis for any personal data it still holds, and the data protection officer reviews it |
+| Label balance | The dataset meets the minimum share of non-ACT training cases, with LOOK, NOTIFY, REVIEW, and STOP cases beside the ACT cases |
+
 ### Base upgrades
 
 | Change | What re-runs |
@@ -218,12 +231,14 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - Gate: no serving config enables runtime adapter loading.
 - Gate: no corpus enters the index without a usage-rights entry.
 - Gate: adapter training data meets the minimum share of non-ACT training cases.
+- Gate: no dataset enters training without passing the training data checks.
 
 ## Operating model
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
 | Train an adapter | Model owner | Platform team | SME | Risk owner |
+| Run the training data checks | Model owner | Data protection officer | SME | Risk owner |
 | Approve adapter promotion | Approver | Risk owner | Model owner | Business owner |
 | Author and review a skill | SME | Model owner | Platform team | Business owner |
 | Change a manifest risk class | Platform team | Risk owner | Security | Change board |
