@@ -247,5 +247,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-05 Integration](../integration/README.md): holds the corpus register and the MCP tools the manifests describe
 - [Decision gate](../../architecture/decision-gate.md): the risk class from each manifest sets its ceiling
 - [PB-09 Quality operations and observability](../quality-operations/README.md): quality operations spots the drift that starts a new climb
-- PB-01: intake and model selection picks the base each adapter binds to
+- [PB-01 Intake and model selection](../intake-model-selection/README.md): picks the base each adapter binds to
 - Agent-school: courses 401, 402, and 403 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 401 covers skills and manifests, 402 the knowledge service, and 403 the OTel domain models

@@ -41,6 +41,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "adaptation": "PB-03",
     "quality-operations": "PB-09",
     "security-identity-sandbox": "PB-08",
+    "intake-model-selection": "PB-01",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")
@@ -1125,3 +1126,117 @@ def test_crosswalk_used_by_links_each_platform_page():
     for slug in ("serving-routing-placement", "integration", "safety-autonomy-gating",
                  "action-layer", "security-identity-sandbox"):
         assert f"../platform/{slug}/README.md" in text, slug
+
+
+# ---------- intake and model selection ----------
+
+INTAKE = REPO_ROOT / "platform/intake-model-selection/README.md"
+FAMILY_HEADER = ["Slot", "OTel checkpoint", "Base model", "Licence", "Source"]
+COMMIT_HASH = re.compile(r"\b[0-9a-f]{12,}\b")
+
+
+def _sentences(text: str) -> list[str]:
+    """Prose sentences only: table rows and code fences are left out."""
+    prose = "\n".join(
+        line for line in CODE_FENCE.sub("", text).splitlines() if not line.lstrip().startswith("|")
+    )
+    return re.split(r"(?<=[.!?])\s", re.sub(r"\s+", " ", prose))
+
+
+def test_intake_family_table():
+    table = table_with_header(INTAKE, "Reference design", FAMILY_HEADER)
+    rows = table[1:]
+    lic = table[0].index("Licence")
+    src = table[0].index("Source")
+
+    def row(name: str) -> list[str]:
+        hits = [r for r in rows if name in " ".join(r)]
+        assert hits, name
+        return hits[0]
+
+    for name in ("OTel-2.0-LLM-31B-IT", "OTel-2.0-Decision-26B-A4B-4bit", "OTel-LLM-12B-Safety",
+                 "OTel-LLM-8.3B-Safety", "OTel-LLM-8.3B-Classification", "Reranker", "Embedding"):
+        row(name)
+    assert "Apache-2.0" in row("OTel-2.0-LLM-31B-IT")[lic]
+    assert "Apache-2.0" in row("OTel-2.0-Decision-26B-A4B-4bit")[lic]
+    assert "Gemma Terms of Use" in row("OTel-LLM-12B-Safety")[lic]
+    for r in rows:
+        assert "huggingface.co" in r[src], r
+
+
+def test_intake_rnj_not_gemma_base():
+    table = table_with_header(INTAKE, "Reference design", FAMILY_HEADER)
+    rows = [" | ".join(r) for r in table[1:] if "8.3B" in " ".join(r)]
+    assert rows
+    for r in rows:
+        assert "rnj-1" in r, r
+        assert "Gemma 3" not in r, r
+    for s in _sentences(body(INTAKE)):
+        if "8.3B" in s and "Gemma 3" in s:
+            assert "architecture class" in s and "config.json" in s, s
+
+
+def test_intake_lfm_licence_trap():
+    text = body(INTAKE)
+    assert any("LFM Open License" in " ".join(r) for t in page_tables(INTAKE) for r in t[1:])
+    for size in ("1.2B", "8B-A1B", "24B"):
+        assert size in text, size
+    table = table_with_header(INTAKE, "Reference design", ["Licence", "What it says"])
+    assert "10,000,000" in _table_text(table)
+
+
+def test_intake_dated_family_note():
+    assert re.search(r"Checked against the model cards on \d{4}-\d{2}-\d{2}", body(INTAKE))
+
+
+def test_intake_check_steps():
+    steps = _ordered_steps(reference_design_text(INTAKE))
+    assert 0 < len(steps) <= 8, len(steps)
+    joined = " ".join(steps).lower()
+    for want in ("base model", "redistribution", "use restrictions", "attribution", "derivative",
+                 "adapter", "legal review"):
+        assert want in joined, want
+
+
+def test_intake_legal_line():
+    assert "your legal team decides what they mean for you" in re.sub(r"\s+", " ", body(INTAKE))
+
+
+def test_intake_no_commit_hashes():
+    assert COMMIT_HASH.findall(body(INTAKE)) == []
+
+
+def test_intake_pinned_and_signed():
+    text = body(INTAKE)
+    for want in ("pinned", "revision", "signed", "ModelCar"):
+        assert want in text, want
+    assert any(
+        "signature" in s.lower() and "revision" in s.lower() and "also" in s.lower()
+        for s in _sentences(text)
+    )
+
+
+def test_intake_licence_sources():
+    table = table_with_header(INTAKE, "Sources and acceptance", ["Claim", "Basis", "Source"])
+    basis = table[0].index("Basis")
+    src = table[0].index("Source")
+    for url in ("https://ai.google.dev/gemma/terms", "https://ai.google.dev/gemma/docs/gemma_4_license"):
+        hits = [r for r in table[1:] if f"({url})" in r[src]]
+        assert hits, url
+        assert all(r[basis] == "project documentation" for r in hits), hits
+
+
+def test_intake_selection_guide():
+    table = table_with_header(INTAKE, "Reference design", ["Slot", "Pick when"])
+    rows = table[1:]
+    assert len(rows) == 6
+    text = " ".join(r[0] for r in rows).lower()
+    for slot in ("llm", "embedding", "reranker", "safety", "decision", "classification"):
+        assert slot in text, slot
+
+
+def test_intake_mermaid_capabilities():
+    fence = mermaid_fences(body(INTAKE))[0]
+    for want in ("Licence chain recorded", "Verify signature and revision"):
+        assert want in fence, want
+    assert PRODUCT_TERMS.findall(fence) == []

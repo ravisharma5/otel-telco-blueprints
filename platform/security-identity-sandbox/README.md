@@ -239,6 +239,6 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): the judge runs on site when the site is offline
 - [Placement tiers](../../architecture/placement.md): air-gapped and in-country sites
 - [Decision gate](../../architecture/decision-gate.md): where every write is labelled before an approver sees it
-- PB-01: intake checks image signatures and licences
+- [PB-01 Intake and model selection](../intake-model-selection/README.md): intake checks image signatures and licences
 - PB-10: compliance maps identity, access control, and the air gap to regulatory duties
 - Agent-school: courses 102, 303, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

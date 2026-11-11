@@ -72,4 +72,5 @@ nav:
       - Adaptation: platform/adaptation/README.md
       - Quality operations and observability: platform/quality-operations/README.md
       - Security, identity, and sandbox: platform/security-identity-sandbox/README.md
+      - Intake and model selection: platform/intake-model-selection/README.md
   - Templates: templates.md
