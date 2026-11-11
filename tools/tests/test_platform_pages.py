@@ -1533,6 +1533,18 @@ def test_compliance_raci_generic_roles():
                     assert role in ALLOWED_ROLES, (row[0], role)
 
 
+def test_policy_ceiling_raci_rows_agree():
+    """Every page that assigns the policy-ceiling change gives it the same roles."""
+    header = ["Activity", "Responsible", "Accountable", "Consulted", "Informed"]
+    found = {}
+    for path in (GATING, ACTION, COMPLIANCE):
+        table = table_with_header(path, "Operating model", header)
+        rows = [r for r in table[1:] if r[0].startswith("Change a policy ceiling")]
+        assert len(rows) == 1, _id(path)
+        found[_id(path)] = rows[0][1:]
+    assert len({tuple(v) for v in found.values()}) == 1, found
+
+
 def test_compliance_rollout_and_roi():
     rd = reference_design_text(COMPLIANCE)
     table = table_with_header(COMPLIANCE, "Reference design", ["Stage", "What is allowed"])

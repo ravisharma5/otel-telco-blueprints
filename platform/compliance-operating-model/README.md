@@ -292,7 +292,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | Run the DPIA | Data protection officer | Business owner | Legal team | Risk owner |
 | Report a NIS2 incident | Security | Business owner | Operations engineer | Risk owner |
 | Measure ROI per stage | Operations engineer | Business owner | Model owner | Change board |
-| Change a policy ceiling | Operations engineer | Risk owner | Change board | Approver |
+| Change a policy ceiling | Operations engineer | Risk owner | Change board and SME | Business owner |
 | Keep the AI literacy training record | Platform team | Business owner | Security | Risk owner |
 
 ## Risks and limitations
