@@ -680,6 +680,43 @@ def test_notify_pages_agree():
         assert "NOTIFY sends a notification" not in text, _id(path)
 
 
+# Phrasings that describe NOTIFY without its stage rule.
+NOTIFY_OLD_PHRASES = ("read and notify tools plus", "NOTIFY sends a notification")
+
+
+@pytest.mark.parametrize("path", platform_pages(), ids=_id)
+def test_shared_notify_mentions_link_the_gate(path):
+    """Any page that mentions NOTIFY links the decision gate page, which holds
+    the stage rule, and uses none of the old phrasings."""
+    text = re.sub(r"\s+", " ", body(path))
+    if "NOTIFY" not in text:
+        return
+    assert "decision-gate.md" in text, _id(path)
+    for phrase in NOTIFY_OLD_PHRASES:
+        assert phrase not in text, phrase
+
+
+# ---------- shared role vocabulary ----------
+
+# Telecom job titles the pages replaced with generic roles.
+TELECOM_ROLE = re.compile(
+    r"noc-shift-lead|\bNOC lead|\bshift lead|operator risk owner|operator SME", re.I
+)
+
+
+def _role_scan_pages() -> list[Path]:
+    return [
+        *platform_pages(),
+        *sorted((REPO_ROOT / "architecture").glob("*.md")),
+        *sorted((REPO_ROOT / "framework").glob("*.md")),
+    ]
+
+
+@pytest.mark.parametrize("path", _role_scan_pages(), ids=_id)
+def test_shared_generic_role_names(path):
+    assert TELECOM_ROLE.findall(body(path)) == []
+
+
 # ---------- shared worked example vocabulary ----------
 
 # inc-2041 is the incident and correlation ID; the ticket ID comes from the create call.

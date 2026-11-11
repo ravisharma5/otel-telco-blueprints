@@ -14,7 +14,7 @@ top_decisions:
   - "Score the process as well as the outcome"
   - "Gate the Decision slot on the false-ACT rate"
 agent_school: [201, 302, 304, 403]
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -27,7 +27,7 @@ clarity_reviewed: "2026-11-10"
 |---|---|
 | One-liner | Accepts a model, adapter, prompt, or tool change only after it passes a five-stage ladder on your own data, with process checks and a false-ACT budget for the gate. Depends on an evaluation runner, a promotion pipeline, and a model registry. |
 | Question answered | Evaluation: how do you know a model is good enough for this use case? |
-| Audience | ML engineers, platform engineers, operator risk owners, and NOC leads |
+| Audience | Model owners, platform teams, risk owners, and business owners |
 | OTel slots | All six slots, LLM, Embedding, Reranker, Safety, Decision, and Classification |
 | Placement tier | Core |
 | Top 3 decisions | Set acceptance thresholds per slot and name who signs them; score the process as well as the outcome; gate the Decision slot on the false-ACT rate |
@@ -42,7 +42,7 @@ Until you answer it, teams judge models on public scores or final answers, and n
 
 | Decision | Options | Recommendation | Because |
 |---|---|---|---|
-| Set acceptance thresholds per slot and name who signs them | One shared score; per-slot thresholds set by the platform team; per-slot thresholds signed by the risk owner | Per-slot thresholds that the operator risk owner signs, with operator SME review | Each slot fails in its own way, and the person who carries the risk of a wrong action should own the bar |
+| Set acceptance thresholds per slot and name who signs them | One shared score; per-slot thresholds set by the platform team; per-slot thresholds signed by the risk owner | Per-slot thresholds that the risk owner signs, with subject-matter expert (SME) review | Each slot fails in its own way, and the person who carries the risk of a wrong action should own the bar |
 | Score the process as well as the outcome | Final answer only; final answer plus trajectory checks | Final answer plus trajectory checks on stateful mocks | Agents can write a good summary while skipping the diagnostic steps, so outcome-only scoring overstates readiness ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)) |
 | Gate the Decision slot on the false-ACT rate | Accuracy; false-ACT rate on state-changing proposals | The false-ACT rate, measured on a gate set weighted toward non-ACT cases | A wrong ACT changes the network. A wrong LOOK costs a human a minute. Accuracy hides the difference |
 | Decide which changes re-run which stages | Re-run everything on every change; re-run by change class | Re-run by change class, using the regression triggers table | Every change is still checked, and a prompt edit doesn't run the full ladder |
@@ -88,21 +88,21 @@ One candidate moving up the ladder:
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| LLM groundedness floor | The lowest share of answers whose claims the cited passages support | Operator risk owner, with operator SME review | Score a golden set of operator questions with SME-checked answers and a calibrated judge |
-| LLM citation-correctness floor | The lowest share of citations that point to the passage that holds the claim | Operator risk owner, with operator SME review | Check citations against the retrieved passages on the same golden set |
-| Non-inferiority margin | The largest drop against the incumbent that still counts as no worse | Operator risk owner | Run candidate and incumbent on identical items and set the margin from the run-to-run noise |
-| Safety abstain-recall floor | The lowest share of insufficient-context items where the Safety slot abstains | Operator risk owner, with operator SME review | Build items with the evidence removed and measure correct abstention |
-| Safety false-abstention ceiling | The highest share of sufficient-context items where the Safety slot abstains | NOC lead | Measure abstention on items with full evidence, and weigh it against the human workload |
-| Embedding and Reranker recall-at-k floor | The lowest share of questions with a correct passage in the top results | Platform engineer, with operator SME review | Label relevant passages for operator questions; the reranker must beat retriever-only on the same set |
-| Classification per-class recall floor | The lowest recall for each root-cause class in your alarm taxonomy | Operator risk owner, with operator SME review | Use SME labels on a temporal holdout, so test incidents come after training incidents |
-| Classification other-or-abstain recall floor | The lowest recall for incidents outside the taxonomy | Operator risk owner | Hold out incident types the model never saw and check they land in other or abstain |
-| Decision false-ACT budget | The highest false-ACT rate accepted on state-changing proposals | Operator risk owner | Use the false-ACT method, with a gate set large enough for the rule of three |
-| Decision minimum ACT probability | The lowest ACT probability at which the orchestrator may act alone | Operator, with operator SME review | Fit on the SME-labelled gate set and check the calibration error |
-| Decision REVIEW band | The probability range that sends a request to a human | Operator, with operator SME review | Set from the calibration curve and the human review load |
-| Decision calibration error ceiling | The largest difference between stated and observed label probabilities | Platform engineer, with operator SME review | Bin the gate set by stated probability and compare with observed outcomes |
-| Minimum share of no-write scenarios | The lowest share of trajectory scenarios whose correct answer changes nothing | Operator SME | Sample real incidents and count those where people only looked, notified, or escalated |
+| LLM groundedness floor | The lowest share of answers whose claims the cited passages support | Risk owner, with SME review | Score a golden set of operator questions with SME-checked answers and a calibrated judge |
+| LLM citation-correctness floor | The lowest share of citations that point to the passage that holds the claim | Risk owner, with SME review | Check citations against the retrieved passages on the same golden set |
+| Non-inferiority margin | The largest drop against the incumbent that still counts as no worse | Risk owner | Run candidate and incumbent on identical items and set the margin from the run-to-run noise |
+| Safety abstain-recall floor | The lowest share of insufficient-context items where the Safety slot abstains | Risk owner, with SME review | Build items with the evidence removed and measure correct abstention |
+| Safety false-abstention ceiling | The highest share of sufficient-context items where the Safety slot abstains | Business owner | Measure abstention on items with full evidence, and weigh it against the human workload |
+| Embedding and Reranker recall-at-k floor | The lowest share of questions with a correct passage in the top results | Platform team, with SME review | Label relevant passages for operator questions; the reranker must beat retriever-only on the same set |
+| Classification per-class recall floor | The lowest recall for each root-cause class in your alarm taxonomy | Risk owner, with SME review | Use SME labels on a temporal holdout, so test incidents come after training incidents |
+| Classification other-or-abstain recall floor | The lowest recall for incidents outside the taxonomy | Risk owner | Hold out incident types the model never saw and check they land in other or abstain |
+| Decision false-ACT budget | The highest false-ACT rate accepted on state-changing proposals | Risk owner | Use the false-ACT method, with a gate set large enough for the rule of three |
+| Decision minimum ACT probability | The lowest ACT probability at which the orchestrator may act alone | Risk owner, with SME review | Fit on the SME-labelled gate set and check the calibration error |
+| Decision REVIEW band | The probability range that sends a request to a human | Risk owner, with SME review | Set from the calibration curve and the human review load |
+| Decision calibration error ceiling | The largest difference between stated and observed label probabilities | Platform team, with SME review | Bin the gate set by stated probability and compare with observed outcomes |
+| Minimum share of no-write scenarios | The lowest share of trajectory scenarios whose correct answer changes nothing | SME | Sample real incidents and count those where people only looked, notified, or escalated |
 
-This page gives no default values. You set each parameter with operator SME review and version the set as the policy that `policy_version` names.
+This page gives no default values. You set each parameter with SME review and version the set as the policy that `policy_version` names.
 
 ### Zero-tolerance rules
 
@@ -119,11 +119,11 @@ Three events fail a run outright, whatever the scores: any write outside the sce
 | Fact vs theory | Each causal claim is tagged as seen, correlated, suspected, or confirmed, and cites a tool result | Calibrated judge plus citation check |
 | No duplicate ticket, stop when evidence runs out, recent change checked | The scenario fixture declares each expected behaviour | Deterministic or judge |
 
-These checks come from operator SME review of how NOC engineers triage. They score each step, because a good final summary can hide a skipped diagnostic step ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)). Each scenario replays on stateful mocks and checks the end state of the mocked systems, as [tau2-bench](https://github.com/sierra-research/tau2-bench) does.
+These checks come from SME review of how NOC engineers triage. They score each step, because a good final summary can hide a skipped diagnostic step ([TelcoAgent-Bench](https://arxiv.org/html/2604.06209v1)). Each scenario replays on stateful mocks and checks the end state of the mocked systems, as [tau2-bench](https://github.com/sierra-research/tau2-bench) does.
 
 ### False-ACT method
 
-A false ACT is an ACT label on a state-changing proposal where the operator SME ground truth is LOOK, NOTIFY, REVIEW, or STOP. The false-ACT rate is the number of false ACT labels divided by the number of state-changing proposals whose ground truth is not ACT. Use this rate as the primary gate metric for the Decision slot, not accuracy.
+A false ACT is an ACT label on a state-changing proposal where the SME ground truth is LOOK, NOTIFY, REVIEW, or STOP. The false-ACT rate is the number of false ACT labels divided by the number of state-changing proposals whose ground truth is not ACT. Use this rate as the primary gate metric for the Decision slot, not accuracy.
 
 Size the gate set with the rule of three: if a run shows zero false ACT labels in n non-ACT cases, the true rate is below about 3/n at 95% confidence ([rule-of-three paper](https://pubmed.ncbi.nlm.nih.gov/6827763/)). To show a rate below your budget b, you need at least 3/b non-ACT cases with zero false ACT labels. Weight the gate set toward non-ACT cases, because only those cases can produce a false ACT. The [decision gate thresholds](../../architecture/decision-gate.md#thresholds) use this method.
 
@@ -215,11 +215,11 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
-| Set and sign the per-slot thresholds | ML engineer | Operator risk owner | Operator SME | NOC lead |
-| Build and label golden sets, trajectory scenarios, and the gate set | Operator SME | NOC lead | ML engineer | Operator risk owner |
-| Run the ladder on a candidate change | ML engineer | Platform owner | Operator SME | NOC lead |
-| Approve a canary | NOC lead | Operator risk owner | ML engineer | Security team |
-| Change the judge model or a suite pin | ML engineer | Platform owner | Operator SME | Operator risk owner |
+| Set and sign the per-slot thresholds | Model owner | Risk owner | SME | Business owner |
+| Build and label golden sets, trajectory scenarios, and the gate set | SME | Business owner | Model owner | Risk owner |
+| Run the ladder on a candidate change | Model owner | Platform team | SME | Business owner |
+| Approve a canary | Approver | Risk owner | Model owner | Security |
+| Change the judge model or a suite pin | Model owner | Platform team | SME | Risk owner |
 
 ## Risks and limitations
 

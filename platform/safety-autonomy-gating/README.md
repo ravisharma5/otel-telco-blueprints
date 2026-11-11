@@ -14,7 +14,7 @@ top_decisions:
   - "Set a stage per use case and action class"
   - "Promote a stage only on evidence"
 agent_school: [201, 301, 304]
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -27,7 +27,7 @@ clarity_reviewed: "2026-11-10"
 |---|---|
 | One-liner | Screens every input, tool response, and answer, grounds answers in evidence, and gates every change by autonomy stage. Depends on guardrails, the Safety and Decision slots, and an orchestrator that applies the policy ceiling. |
 | Question answered | Autonomy gating: what may the agent do without a human? |
-| Audience | Platform engineers, security architects, and operator risk owners |
+| Audience | Platform teams, security architects, and risk owners |
 | OTel slots | Safety, Decision, and LLM |
 | Placement tier | Far edge, regional, and core |
 | Top 3 decisions | Place every control where its risk enters; set a stage per use case and action class; promote a stage only on evidence |
@@ -44,7 +44,7 @@ Until you answer it, teams disagree on what the agent may do alone, and nobody c
 |---|---|---|---|
 | Place every control where its risk enters | Guardrails at the gateway only; a control on each path | Input guardrails, tool-response guardrails, the Safety slot, the Decision gate, and output guardrails, each on its own path | Each path carries its own risk. The gateway screens tool traffic that input guardrails never see ([MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available)) |
 | Set a stage per use case and action class | One stage for the whole system; one stage per use case and action class | One stage per use case and action class, kept in a stage register | TM Forum applies autonomy levels to selected scenarios, not whole networks ([TM Forum Autonomous Networks whitepaper](https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf)) |
-| Promote a stage only on evidence | The platform team decides; the operator risk owner decides on evidence | The operator risk owner approves each promotion, with the promotion parameters met and SME sign-off | The Decision model card advises keeping human review for consequential decisions ([Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit)) |
+| Promote a stage only on evidence | The platform team decides; the risk owner decides on evidence | The risk owner approves each promotion, with the promotion parameters met and subject-matter expert (SME) review | The Decision model card advises keeping human review for consequential decisions ([Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit)) |
 | Tune the Safety slot before use | Use it as shipped; measure abstention on your own set | Measure correct abstention and answer quality on an operator set before the slot fronts answers | The model card says it may over-abstain or under-abstain, so tune and measure before production use ([Safety model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-12B-Safety)) |
 | Treat Decision probabilities as uncalibrated until you calibrate them | Trust them as shipped; calibrate on an operator gate set | Keep REVIEW ceilings until the probabilities are calibrated on an operator gate set | The model card says not to assume the label probabilities are calibrated ([Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit)) |
 
@@ -114,19 +114,19 @@ NOTIFY works two ways. From the assist stage up, an agent may hold direct notify
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
-| Shadow agreement floor | How often shadow outcomes must match what people did before a use case moves to assist | Operator risk owner, with SME sign-off | [Evaluation and acceptance method](../evaluation-acceptance/README.md): compare shadow outcomes with logged human actions over a window the risk owner sets |
-| Safety abstain-recall floor | The lowest share of insufficient-context items on which the Safety slot must abstain | Operator risk owner, with operator SME review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): score abstention on an operator set that includes items with no supporting evidence |
-| Canary window | How long, and over how many requests, a raised ceiling runs on a small share of traffic | Operator risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): size the window to hold enough state-changing requests to bound the false-ACT rate |
-| Minimum ACT probability for the act stage | The lowest calibrated ACT probability at which the act stage may run a playbook alone | Operator, with SME sign-off | Evaluation and acceptance calibration: fit on an operator gate set labelled by SMEs, and check calibration error |
-| Override rate ceiling | The share of human overrides that sends a use case back one stage | NOC lead | [Evaluation and acceptance method](../evaluation-acceptance/README.md): count overrides per use case and action class in the trace |
+| Shadow agreement floor | How often shadow outcomes must match what people did before a use case moves to assist | Risk owner, with SME review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): compare shadow outcomes with logged human actions over a window the risk owner sets |
+| Safety abstain-recall floor | The lowest share of insufficient-context items on which the Safety slot must abstain | Risk owner, with SME review | [Evaluation and acceptance method](../evaluation-acceptance/README.md): score abstention on an operator set that includes items with no supporting evidence |
+| Canary window | How long, and over how many requests, a raised ceiling runs on a small share of traffic | Risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): size the window to hold enough state-changing requests to bound the false-ACT rate |
+| Minimum ACT probability for the act stage | The lowest calibrated ACT probability at which the act stage may run a playbook alone | Risk owner, with SME review | Evaluation and acceptance calibration: fit on an operator gate set labelled by SMEs, and check calibration error |
+| Override rate ceiling | The share of human overrides that sends a use case back one stage | Business owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): count overrides per use case and action class in the trace |
 
-This page gives no default values. You set each parameter with SME sign-off and version it with the policy ceilings.
+This page gives no default values. You set each parameter with SME review and version it with the policy ceilings.
 
 ### Worked example: alarm and root-cause triage
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. The stage register puts triage notes at the assist stage, with a ceiling of notify. The agent reads the alarms and counters through the gateway, Classification labels the likely cause, and the Safety slot checks that the evidence supports the finding. The agent submits its triage note as an action request. The gate labels it NOTIFY, and the action layer runs a notification job that posts the note to the ticket.
 
-The agent then proposes restarting eth1 on r2. Interface restarts are a `write_low` action class at the recommend stage, so the ceiling is REVIEW. Even when the Decision label says ACT, the outcome is REVIEW. The shift lead approves, and the action layer runs the restart, verifies it, and writes the audit record, as `req-0001` on the [decision gate](../../architecture/decision-gate.md) page shows.
+The agent then proposes restarting eth1 on r2. Interface restarts are a `write_low` action class at the recommend stage, so the ceiling is REVIEW. Even when the Decision label says ACT, the outcome is REVIEW. The approver signs off, and the action layer runs the restart, verifies it, and writes the audit record, as `req-0001` on the [decision gate](../../architecture/decision-gate.md) page shows.
 
 - Config artifact: guardrail rail configuration in Colang for the input, tool-response, and output rails
 - Config artifact: stage register with the stage for each use case and action class, and the evidence and sign-off behind each promotion
@@ -178,11 +178,11 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
-| Promote a use case to the next stage | NOC lead | Operator risk owner | Operator SME | Platform engineer |
-| Drop a use case back a stage | NOC lead | Operator risk owner | Platform engineer | Security team |
-| Change a policy ceiling | Automation engineer | Operator risk owner | Operator SME | NOC lead |
-| Change guardrail rails | Security team | Platform owner | NOC lead | Operator risk owner |
-| Tune Safety slot abstention | Platform engineer | Platform owner | Operator SME | NOC lead |
+| Promote a use case to the next stage | Approver | Risk owner | SME | Platform team |
+| Drop a use case back a stage | Approver | Risk owner | Platform team | Security |
+| Change a policy ceiling | Operations engineer | Risk owner | Change board and SME | Business owner |
+| Change guardrail rails | Security | Platform team | Business owner | Risk owner |
+| Tune Safety slot abstention | Platform team | Model owner | SME | Business owner |
 
 ## Risks and limitations
 

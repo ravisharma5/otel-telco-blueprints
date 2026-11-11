@@ -15,7 +15,7 @@ top_decisions:
   - "Keep the front door, content routing, and replica scheduling separate"
   - "Pick a serving option for each tier"
 agent_school: [104, 203]
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -28,7 +28,7 @@ clarity_reviewed: "2026-11-10"
 |---|---|
 | One-liner | Sizes, serves, routes, and places every OTel slot from the far edge to the core. Depends on a front door, the Decision slot for content routing, and a replica scheduler. |
 | Question answered | Serving and placement: where and how does each slot run? |
-| Audience | Platform engineers and architects |
+| Audience | Platform teams and architects |
 | OTel slots | All six slots, LLM, Embedding, Reranker, Safety, Decision, and Classification |
 | Placement tier | Far edge, regional, and core |
 | Top 3 decisions | Pick a hardware class and precision for each slot; keep the front door, content routing, and replica scheduling separate; pick a serving option for each tier |
@@ -139,7 +139,7 @@ Load adapters only at start, pinned by digest. Never enable runtime adapter load
 
 Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`, and `noc-triage-agent` starts triage at the regional site. That site runs single-node OpenShift with one large GPU and serves Classification for the root-cause label, Decision for the gate and content routing, Safety, a small LLM, and Embedding and Reranker for local retrieval.
 
-When the shift lead asks for a written explanation, the Decision slot routes the request to the 31B at the core, behind the replica scheduler. The front door gives the NOC triage team its own subscription and token limit, and the triage priority band ranks ahead of batch evaluation on the same pool. The [decision gate](../../architecture/decision-gate.md) page covers the gate itself.
+When the approver asks for a written explanation, the Decision slot routes the request to the 31B at the core, behind the replica scheduler. The front door gives the NOC triage team its own subscription and token limit, and the triage priority band ranks ahead of batch evaluation on the same pool. The [decision gate](../../architecture/decision-gate.md) page covers the gate itself.
 
 - Config artifact: serving runtime config for each slot with its key flags and pinned revision
 - Config artifact: front-door subscription and token limit for each team, such as the NOC triage team
@@ -203,11 +203,11 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
-| Size and place each slot | Platform engineer | Model owner | NOC lead | Operator risk owner |
-| Set front-door subscriptions and token limits | Platform engineer | NOC lead | Model owner | Operator risk owner |
-| Set Decision routing thresholds | Model owner | NOC lead | Platform engineer | Operator risk owner |
-| Roll out a new model revision | Platform engineer | Model owner | NOC lead | Operator risk owner |
-| Roll back a slot | Platform engineer | NOC lead | Model owner | Operator risk owner |
+| Size and place each slot | Platform team | Model owner | Business owner | Risk owner |
+| Set front-door subscriptions and token limits | Platform team | Business owner | Model owner | Risk owner |
+| Set Decision routing thresholds | Model owner | Business owner | Platform team | Risk owner |
+| Roll out a new model revision | Platform team | Model owner | Business owner | Risk owner |
+| Roll back a slot | Platform team | Business owner | Model owner | Risk owner |
 
 ## Risks and limitations
 

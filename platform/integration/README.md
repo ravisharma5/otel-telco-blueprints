@@ -15,7 +15,7 @@ top_decisions:
   - "Deny every tool unless a role allows it"
   - "Route every write through the action request"
 agent_school: [301, 302, 303, 401]
-clarity_reviewed: "2026-11-10"
+clarity_reviewed: "2026-11-11"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -28,7 +28,7 @@ clarity_reviewed: "2026-11-10"
 |---|---|
 | One-liner | Connects agents to network and business systems through standards-based tools. Each call is authorized per tool and audited. Depends on an MCP gateway and an authorization server. |
 | Question answered | Integration: how do agents reach your network and business systems? |
-| Audience | Platform engineers, integration engineers, and security architects |
+| Audience | Platform teams and security architects |
 | OTel slots | LLM, Classification, Embedding, and Reranker |
 | Placement tier | Regional and core |
 | Top 3 decisions | Pick the standard that fronts each system; deny every tool unless a role allows it; route every write through the action request |
@@ -119,7 +119,7 @@ Keep a corpus register, and record the licence of every corpus before you index 
 |---|---|---|---|---|
 | Vendor manuals and release notes | Vendor manager | The contract clause that allows indexing, per vendor | Each vendor release | Embedding, Reranker |
 | Standards specifications | Standards team | The publisher's terms page and the date you checked it | Each standards release | Embedding, Reranker |
-| Past trouble tickets | NOC lead | Data owner approval and any customer data rules | Daily | Embedding, Reranker, Classification |
+| Past trouble tickets | Business owner | Business owner approval, with data protection officer review of customer data | Daily | Embedding, Reranker, Classification |
 | Runbooks and method-of-procedure documents | Operations engineering | Internal, with the owning team named | On change | Embedding, Reranker, LLM |
 
 ### Worked example: alarm and root-cause triage
@@ -188,11 +188,11 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
-| Grant a tool role to an agent | Platform engineer | Operator risk owner | NOC lead | Security team |
-| Release an MCP server version | Integration engineer | Platform owner | Security team | NOC lead |
-| Review tool description changes | Integration engineer | Security team | NOC lead | Operator risk owner |
-| Add a corpus to the register | Data owner | Operator risk owner | Legal team | NOC lead |
-| Review the tool-call audit log | Security team | Operator risk owner | NOC lead | Platform engineer |
+| Grant a tool role to an agent | Platform team | Risk owner | Business owner | Security |
+| Release an MCP server version | Platform team | Business owner | Security | Operations engineer |
+| Review tool description changes | Platform team | Security | Business owner | Risk owner |
+| Add a corpus to the register | Business owner | Risk owner | Legal team and data protection officer | Platform team |
+| Review the tool-call audit log | Security | Risk owner | Business owner | Platform team |
 
 ## Risks and limitations
 
