@@ -479,7 +479,7 @@ def test_basis_definitions_cover_licences_and_issue_reports():
 
 
 ISSUE_URL = re.compile(r"github\.com/[^/]+/[^/]+/issues/")
-VENDOR_TERMS_URL = re.compile(r"ai\.google\.dev/(gemma/terms|gemma/docs/gemma_4_license|gemini-api/terms)"
+VENDOR_TERMS_URL = re.compile(r"ai\.google\.dev/(gemma/terms|gemma/docs/gemma_4_license)"
                               r"|huggingface\.co/[^/]+/[^/]+/blob/main/LICENSE")
 
 
