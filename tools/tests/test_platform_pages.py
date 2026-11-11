@@ -352,6 +352,18 @@ def test_integration_stateful_mocks():
     assert "stateful mock" in body(INTEGRATION)
 
 
+def test_integration_example_roles_cover_its_calls():
+    """Deny by default: the agent holds a role for every call the example makes."""
+    text = reference_design_text(INTEGRATION)
+    example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]
+    roles = next(s for s in re.split(r"(?<=\.)\s+", example) if "holds roles for" in s)
+    for want in ("TMF642", "TMF628", "TMF639", "TMF621", "show interface", "Classification",
+                 "submit_action_request"):
+        assert want in roles, want
+    for want in ("inc-2041", "r2", "eth1"):
+        assert want in example, want
+
+
 def test_integration_writes_through_action_request():
     assert "submit_action_request" in body(INTEGRATION)
 
