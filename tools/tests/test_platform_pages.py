@@ -642,4 +642,4 @@ def test_acceptance_mermaid_capabilities():
     fence = mermaid_fences(body(ACCEPTANCE))[0]
     for want in LADDER_STAGES[:4] + ["Promotion pipeline", "Model registry"]:
         assert want in fence, want
-    assert not re.search(r"EvalHub|Garak|MLflow|Red Hat", fence)
+    assert PRODUCT_TERMS.findall(fence) == []

@@ -705,7 +705,9 @@ PRODUCT_TERMS = re.compile(
     r"|Argo CD|Keycloak|SPIFFE|SPIRE|NeMo|EvalHub|Kuadrant|Ansible|\bAAP\b"
     r"|MLflow|Perses|\bACM\b|Prometheus|OpenTelemetry|Podman|SDG Hub|Training Hub"
     r"|Automation Orchestrator|Connectivity Link|LangGraph|Device Edge"
-    r"|Data Science Pipelines"
+    r"|Data Science Pipelines|Garak|Inspect AI|Kueue|Istio|Envoy|\bQuay\b|Kubeflow"
+    r"|Unsloth|KubeRay|MicroShift|ModelCar|LLM Compressor|Model Optimization Toolkit"
+    r"|Workload Identity Manager|TrustyAI"
 )
 TEMPLATES = sorted((REPO_ROOT / "templates").glob("*.md"))
 
@@ -761,6 +763,10 @@ def test_product_terms_regex():
     assert PRODUCT_TERMS.search("runs on AAP")
     assert not PRODUCT_TERMS.search("AI Gateway routes to model endpoint inferencing")
     assert not PRODUCT_TERMS.search("GitOps promotes a canary")
+    for name in ("Garak scan", "Inspect AI", "Red Hat build of Kueue", "Istio", "Envoy",
+                 "Quay", "Kubeflow", "Unsloth", "MicroShift", "ModelCar images"):
+        assert PRODUCT_TERMS.search(name), name
+    assert not PRODUCT_TERMS.search("Promotion pipeline writes to the model registry")
 
 
 # ---------- placement tiers ----------
