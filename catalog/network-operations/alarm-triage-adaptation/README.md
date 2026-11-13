@@ -204,13 +204,14 @@ Apply these settings in order. No fix ever gets an outcome above REVIEW.
 
 1. Pin each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
 2. Register the corpora, then author the triage skill and a capability manifest for each tool.
-3. Run the skills-only baseline through PB-02 operator offline acceptance in paired runs, and record it on the registry version.
-4. Apply the when-to-train rule. Stop here if it doesn't hold.
-5. Generate data with SDG Hub, and check it against the PB-03 training data checks.
-6. Train the LoRA with Training Hub (`lora_sft`), and retrain the Classification head on your taxonomy.
-7. Re-enter the PB-02 gates, and bind the adapter to its base revision in the registry.
-8. Serve the adapter statically, pinned by digest, from object storage.
-9. On every new base revision, retrain and re-gate each adapter before it serves.
+3. Retrain the Classification head on your alarm taxonomy with Training Hub, and gate it on the Classification per-class recall floor and the Classification other-or-abstain recall floor before triage uses it. This step doesn't depend on the LoRA decision.
+4. Run the skills-only baseline through PB-02 operator offline acceptance in paired runs, and record it on the registry version.
+5. Apply the when-to-train rule. Stop here if it doesn't hold.
+6. Generate data with SDG Hub, and check it against the PB-03 training data checks.
+7. Train the LoRA with Training Hub (`lora_sft`).
+8. Re-enter the PB-02 gates, and bind the adapter to its base revision in the registry.
+9. Serve the adapter statically, pinned by digest, from object storage.
+10. On every new base revision, retrain and re-gate each adapter before it serves.
 
 | Check | PB-02 gate or parameter | Owner |
 |---|---|---|
