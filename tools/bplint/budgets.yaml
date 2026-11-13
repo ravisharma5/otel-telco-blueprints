@@ -92,7 +92,7 @@ types:
       - title: What you need
         bullets: 12         # models, platform blueprints, integrations, tools/data, adaptation, prerequisites
       - title: Governance
-        tables: 1
+        tables: 3           # gate outcome per action, named parameters, RACI
       - title: Sources
         tables: 1
       - title: Deploy and verify

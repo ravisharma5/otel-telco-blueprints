@@ -49,7 +49,7 @@ Page budget: 1350 prose words for a flagship (about 3 pages), 450 prose words fo
 | 1 | Problem and value | 5 lines |
 | 2 | How it works | 1 diagram, 8 steps |
 | 3 | What you need | 12 bullets (checklist, including components), then the standard replaceable line |
-| 4 | Governance | 1 table |
+| 4 | Governance | 3 tables (gate outcome per action, named parameters, RACI) |
 | 5 | Sources | 1 table (canonical Sources table) |
 | 6 | Deploy and verify | 5 lines, 5 bullets (related-work links) |
 | 7 | Limitations | 6 bullets |

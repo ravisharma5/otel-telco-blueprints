@@ -73,7 +73,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 ## Governance
 
-<!-- budget: 1 table ; purpose: gate outcome per action, approvals, AI Act class -->
+<!-- budget: 3 tables ; purpose: gate outcome per action, named parameters, RACI -->
 
 | Action | Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP) | Approval | AI Act class |
 |---|---|---|---|

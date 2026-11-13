@@ -168,10 +168,11 @@ def test_six_problem_lines_is_bg001(tmp_path):
     assert len(findings) == 1 and "lines" in findings[0].message
 
 
-def test_two_tables_over_budget_is_bg001(tmp_path):
+def test_four_tables_over_budget_is_bg001(tmp_path):
     secs = use_case_sections()
     tbl = "| Control | Owner |\n|---|---|\n| Approval | NOC |"
-    secs["Governance"] = tbl + "\n\nBetween.\n\n" + tbl
+    # Governance allows three tables, so a fourth is one over budget.
+    secs["Governance"] = "\n\nBetween.\n\n".join([tbl] * 4)
     findings = [f for f in lint(tmp_path, render(use_case_fm(), secs)) if f.code == "BG001"]
     assert len(findings) == 1 and "tables" in findings[0].message
 

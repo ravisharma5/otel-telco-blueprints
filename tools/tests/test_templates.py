@@ -44,6 +44,17 @@ STANDARD_LINE = (
     "The Red Hat products named here show one way to build this design."
 )
 COMPONENT_HEADER = ["Component role", "Red Hat product used"]
+# Budget unit -> the word used in template budget comments. Kept local because
+# this module must not import the linter; it mirrors the style-guide test map.
+UNIT_WORD = {
+    "rows": "row",
+    "tables": "table",
+    "steps": "step",
+    "bullets": "bullet",
+    "lines": "line",
+    "diagrams": "diagram",
+}
+BUDGET_COMMENT = re.compile(r"<!-- budget: ([^;]*);")
 
 
 # ---------- helpers ----------
@@ -241,6 +252,25 @@ def test_fixture_components_convention(name):
     assert STANDARD_LINE in paragraphs(toks)
     if name == "platform":
         assert tables(toks)[0][0] == COMPONENT_HEADER
+
+
+@pytest.mark.parametrize(
+    "section",
+    BUDGETS["types"]["use-case"]["sections"],
+    ids=lambda s: s["title"],
+)
+def test_use_case_template_budget_comments_match_budgets(section):
+    text = TEMPLATE_FILES["use-case"].read_text()
+    heading = f"\n## {section['title']}\n"
+    assert heading in text, f"{section['title']} missing from the use-case template"
+    match = BUDGET_COMMENT.search(text, text.index(heading))
+    assert match, f"no budget comment after ## {section['title']}"
+    comment = match.group(1)
+    for unit, limit in section.items():
+        if unit == "title":
+            continue
+        pat = rf"\b{limit} {UNIT_WORD[unit]}s?\b"
+        assert re.search(pat, comment), f"{section['title']}: '{limit} {unit}' not in '{comment}'"
 
 
 # ---------- valid fixtures ----------
