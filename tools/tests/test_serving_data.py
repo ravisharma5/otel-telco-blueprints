@@ -406,3 +406,234 @@ def test_sizing_rows_render():
     assert any(
         r["slot"].startswith("Safety 8.3B") for r in load("slot-variants.yaml")["sizing_table"]
     )
+
+
+# ---------- advanced serving options ----------
+
+OPTIONS_SCHEMA = "serving-options.schema.json"
+BASE_OPTION_IDS = [
+    "prefix-scheduling",
+    "priority-bands",
+    "weighted-canary",
+    "speculative-decoding",
+    "pd-split",
+    "autoscaling",
+    "fp8-regional",
+    "adapter-routing",
+    "fp8-kv-cache",
+    "structured-outputs",
+]
+KV_OFFLOAD_ID = "kv-offload"
+OPTION_HEADER = [
+    "Option",
+    "What it does",
+    "What to set",
+    "How to check on your traffic",
+    "Limits",
+    "Source",
+]
+FIT_HEADER = ["Option", "Use case", "Where it helps"]
+FLAGSHIP_PAGES = {
+    "UC-KNOW-01": "catalog/standards-knowledge/grounded-knowledge-assistant/README.md",
+    "UC-AGOPS-01": "catalog/agentic-operations/closed-loop-incident-handling/README.md",
+    "UC-OPS-01": "catalog/network-operations/alarm-triage-adaptation/README.md",
+    "UC-CARE-01": "catalog/business-assurance/camara-care-diagnostics/README.md",
+}
+SOURCE_HOSTS = {
+    "docs.vllm.ai",
+    "github.com",
+    "huggingface.co",
+    "docs.redhat.com",
+    "developers.redhat.com",
+    "access.redhat.com",
+}
+GITHUB_SOURCE_PREFIXES = ("https://github.com/vllm-project/", "https://github.com/llm-d/")
+REASON_IDS = {"core-only", "not-amd-paths", "batch-only", "not-needed-at-core", "regional-only"}
+DECISION_KEPT_OFF = ("speculative-decoding", "fp8-kv-cache", "structured-outputs")
+EXCLUDED_FEATURES = ("wide expert parallelism", "sleep mode", "chunked prefill")
+RELATED_PREFIX = "https://github.com/openshift-psap/inference-playbooks/"
+SAME_GATES = re.compile(r"same gates|PB-02")
+
+
+def options() -> list[dict]:
+    return load("options.yaml")["options"]
+
+
+def use_case_titles() -> dict[str, str]:
+    out = {}
+    for uc, rel in FLAGSHIP_PAGES.items():
+        text = (REPO_ROOT / rel).read_text(encoding="utf-8")
+        fm = yaml.safe_load(text.split("---", 2)[1])
+        assert fm["id"] == uc, rel
+        out[uc] = fm["title"]
+    return out
+
+
+def test_options_schema_valid():
+    Draft202012Validator.check_schema(json.loads((SCHEMAS / OPTIONS_SCHEMA).read_text()))
+    errors = [e.message for e in validator(OPTIONS_SCHEMA).iter_errors(load("options.yaml"))]
+    assert errors == []
+
+
+def test_options_schema_rejects_unknown_keys():
+    data = load("options.yaml")
+    v = validator(OPTIONS_SCHEMA)
+    for path, _ in _objects(data):
+        bad = copy.deepcopy(data)
+        target = bad
+        for step in path:
+            target = target[step]
+        target["unexpected_key"] = "x"
+        assert not v.is_valid(bad), f"extra key accepted at {path}"
+
+
+def test_option_ids_and_order():
+    ids = [o["id"] for o in options()]
+    assert len(ids) == len(set(ids)), "duplicate option id"
+    if KV_OFFLOAD_ID in ids:
+        assert ids.count(KV_OFFLOAD_ID) == 1
+        assert ids[ids.index(KV_OFFLOAD_ID) - 1] == "weighted-canary"
+    assert [i for i in ids if i != KV_OFFLOAD_ID] == BASE_OPTION_IDS
+
+
+def option_table() -> list[list[str]]:
+    return table_with_header(SERVING, "Reference design", OPTION_HEADER)
+
+
+def test_option_rows_complete():
+    table = option_table()
+    assert table[0] == OPTION_HEADER
+    assert [r[0] for r in table[1:]] == [o["name"] for o in options()]
+    urls = sources_table_urls()
+    for row in table[1:]:
+        for cell in row[1:]:
+            assert cell.strip(), row
+        links = MARKDOWN_LINK.findall(row[5])
+        assert links, f"{row[0]}: no source link"
+        for url in links:
+            assert url in urls, f"{row[0]}: {url} not in the Sources table"
+    for o in options():
+        for url in o["sources"]:
+            assert url in urls, f"{o['id']}: {url} not in the Sources table"
+
+
+def test_option_source_hosts():
+    for o in options():
+        for url in o["sources"]:
+            host = url.split("/")[2]
+            assert host in SOURCE_HOSTS, (o["id"], url)
+            if host == "github.com":
+                assert url.startswith(GITHUB_SOURCE_PREFIXES), (o["id"], url)
+
+
+def test_option_check_uses_same_gates():
+    for o in options():
+        assert SAME_GATES.search(o["check"]), o["id"]
+
+
+def test_decision_kept_off():
+    by_id = {o["id"]: o for o in options()}
+    for oid in DECISION_KEPT_OFF:
+        o = by_id[oid]
+        assert "decision" in o["excluded_slots"], oid
+        assert any("Decision slot" in lim for lim in o["limits"]), oid
+        for fit in o["where_it_helps"]:
+            assert "decision" not in fit["reason"].lower(), (oid, fit)
+
+
+def test_excluded_features_absent():
+    page = SERVING.read_text(encoding="utf-8").lower()
+    data = (DATA_DIR / "options.yaml").read_text(encoding="utf-8").lower()
+    for phrase in EXCLUDED_FEATURES:
+        assert phrase not in page, phrase
+        assert phrase not in data, phrase
+
+
+def fit_row(o: dict, fit: dict, titles: dict[str, str]) -> list[str]:
+    uc = fit["use_case"]
+    link = f"[{uc} {titles[uc]}](../../{FLAGSHIP_PAGES[uc]})"
+    return [o["name"], link, fit["reason"]]
+
+
+def test_where_it_helps_rows():
+    titles = use_case_titles()
+    for o in options():
+        for fit in o["where_it_helps"]:
+            assert fit["use_case"] in FLAGSHIP_PAGES, (o["id"], fit)
+            assert fit["reason"].strip(), (o["id"], fit)
+    table = table_with_header(SERVING, "Reference design", FIT_HEADER)
+    assert table[0] == FIT_HEADER
+    want = [fit_row(o, f, titles) for o in options() for f in o["where_it_helps"]]
+    assert table[1:] == want
+    for row in table[1:]:
+        assert "/recipes/" not in row[1], row
+
+
+def test_applies_when_reason_ids():
+    for o in options():
+        for rule in o["applies_when"]:
+            assert rule["reason"] in REASON_IDS, (o["id"], rule)
+            if rule["rule"] == "tier":
+                assert set(rule["allowed"]) == set(o["tiers"]), o["id"]
+
+
+def test_applies_when_rules():
+    by_id = {o["id"]: o for o in options()}
+
+    def rules(oid):
+        return {(r["rule"], r["reason"]): set(r["allowed"]) for r in by_id[oid]["applies_when"]}
+
+    for oid in ("prefix-scheduling", "priority-bands", "weighted-canary", "pd-split"):
+        assert rules(oid).get(("tier", "core-only")) == {"core"}, oid
+    assert rules("pd-split").get(("vendor", "not-amd-paths")) == {"nvidia"}
+    assert rules("priority-bands").get(("batch", "batch-only")) == {"yes"}
+    assert rules("fp8-regional").get(("tier", "not-needed-at-core")) == {"regional"}
+
+
+def test_related_recipes():
+    for o in options():
+        for rel in o["related"]:
+            assert rel["url"].startswith(RELATED_PREFIX), (o["id"], rel)
+            assert rel["source"] == "inference-playbooks"
+    mtp = [
+        o["id"] for o in options() for rel in o["related"] if "mtp" in rel["url"].lower()
+    ]
+    assert mtp == ["speculative-decoding"], mtp
+
+
+def test_speculative_decoding_choices():
+    o = {o["id"]: o for o in options()}["speculative-decoding"]
+    joined = " ".join(o["set"])
+    pos = [joined.find(s) for s in ("n-gram", "gemma-4-31B-it-assistant", "speculator.eagle3")]
+    assert all(p >= 0 for p in pos) and pos == sorted(pos), o["set"]
+    assert "acceptance" in (o["check"] + " ".join(o["limits"])).lower()
+
+
+def test_prefix_scheduling_precise_scoring_limit():
+    o = {o["id"]: o for o in options()}["prefix-scheduling"]
+    limits = " ".join(o["limits"]).lower()
+    assert "approximate" in limits and "tokenizer" in limits
+
+
+def test_advanced_tables_after_key_settings():
+    pos = h3_order(
+        [
+            "Key settings per setup",
+            "Advanced serving options",
+            "Where each option helps",
+            "Worked example: alarm and root-cause triage",
+        ]
+    )
+    assert pos == sorted(pos)
+    text = SERVING.read_text(encoding="utf-8")
+    for name in ("advanced-options", "option-fit"):
+        for edge in ("start", "end"):
+            assert text.count(f"<!-- generated:{name} {edge} -->") == 1, (name, edge)
+
+
+def test_no_status_words_in_options():
+    for s in strings(load("options.yaml")):
+        assert not STATUS_LABEL.search(s), s
+        assert not STATUS_WORDS.search(s), s
+        assert not PLANNING_ID_RE.search(s), s
+        assert not PRODUCT_RELEASE.search(s), s

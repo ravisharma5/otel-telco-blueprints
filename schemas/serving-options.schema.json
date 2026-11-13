@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://otel-telco-blueprints.invalid/schemas/serving-options.schema.json",
+  "title": "Advanced serving options",
+  "description": "Source of truth for the serving page's Advanced serving options and Where each option helps tables, and for the explorer's applicability rules. Each option is an option to test, with sources.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["options"],
+  "properties": {
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/option" }
+    }
+  },
+  "$defs": {
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "engine",
+        "tiers",
+        "what",
+        "set",
+        "check",
+        "limits",
+        "sources",
+        "applies_when",
+        "where_it_helps",
+        "related",
+        "excluded_slots"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "engine": { "enum": ["vLLM", "llm-d", "LLM Compressor", "request option"] },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/tier" }
+        },
+        "what": { "type": "string", "minLength": 1 },
+        "set": {
+          "description": "What to set; several entries are choices, in the order to try them.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "check": { "type": "string", "minLength": 1 },
+        "limits": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^https://" }
+        },
+        "applies_when": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/rule" }
+        },
+        "where_it_helps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fit" }
+        },
+        "related": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/related" }
+        },
+        "excluded_slots": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "serving-slot-variants.schema.json#/$defs/role" }
+        }
+      }
+    },
+    "tier": { "enum": ["regional", "core"] },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "allowed", "reason"],
+      "properties": {
+        "rule": { "enum": ["tier", "vendor", "batch", "arch"] },
+        "allowed": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
+        },
+        "reason": {
+          "enum": ["core-only", "not-amd-paths", "batch-only", "not-needed-at-core", "regional-only"]
+        }
+      }
+    },
+    "fit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["use_case", "reason"],
+      "properties": {
+        "use_case": { "type": "string", "pattern": "^UC-[A-Z]+-[0-9]{2}$" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "related": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "url", "source"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "pattern": "^https://" },
+        "source": { "const": "inference-playbooks" }
+      }
+    }
+  }
+}
