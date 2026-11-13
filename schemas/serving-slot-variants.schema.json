@@ -44,7 +44,12 @@
         "checkpoint": { "type": ["string", "null"] },
         "model_card": { "$ref": "#/$defs/url_or_null" },
         "red_hat_build": { "$ref": "#/$defs/url_or_null" },
-        "note": { "type": ["string", "null"] }
+        "note": { "type": ["string", "null"] },
+        "fit_reference": {
+          "type": "boolean",
+          "default": false,
+          "description": "True on the one llm-small variant the explorer's fit estimate sizes the small LLM from."
+        }
       }
     },
     "sizing_row": {
