@@ -60,3 +60,23 @@ def bplint():
 @pytest.fixture
 def vale_bin():
     return vale_or_skip()
+
+
+EXPLORER_DIST = REPO_ROOT / "explorer/dist"
+SITE_DIR = REPO_ROOT / "site"
+
+
+@pytest.fixture
+def explorer_dist():
+    """Built explorer output; fails (never skips) when the build is missing."""
+    if not EXPLORER_DIST.is_dir():
+        pytest.fail("explorer/dist is missing: run make explorer first")
+    return EXPLORER_DIST
+
+
+@pytest.fixture
+def site_dir():
+    """Built docs site; fails (never skips) when the build is missing."""
+    if not SITE_DIR.is_dir():
+        pytest.fail("site/ is missing: run make site first")
+    return SITE_DIR

@@ -25,4 +25,7 @@ package = false
 [tool.pytest.ini_options]
 testpaths = ["tools/tests"]
 pythonpath = ["."]
-addopts = "-ra"
+addopts = "-ra -m \"not site_output\""
+markers = [
+    "site_output: reads built output (run make site or make explorer first)",
+]

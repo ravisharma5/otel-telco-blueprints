@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import { frontmatter as copy } from '../content/copy.md';
+
+const base = import.meta.env.BASE_URL;
+const hero = copy.home.hero;
+---
+<Base title={copy.site.home_title} current="">
+  <section class="hero" aria-labelledby="hero-title">
+    <p class="eyebrow">{hero.eyebrow}</p>
+    <h1 id="hero-title">{hero.headline}</h1>
+    <p class="lede">{hero.notes.lede}</p>
+    <p class="otel-line">
+      {hero.notes.otel} <a href={base + hero.otel_path}>{hero.buttons.otel_link}</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    max-width: var(--content-max-home);
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-xl);
+  }
+  .hero > * { max-width: var(--prose-max); }
+  .eyebrow {
+    margin: 0 0 var(--space-sm);
+    color: var(--color-text-muted);
+    font-size: var(--text-label); font-weight: var(--weight-bold);
+    line-height: var(--leading-label);
+  }
+  h1 {
+    margin: 0 0 var(--space-md);
+    font-size: var(--text-display); line-height: var(--leading-display);
+    letter-spacing: var(--tracking-tight);
+  }
+  .lede { margin: 0 0 var(--space-md); color: var(--color-text-muted); }
+  .otel-line {
+    margin: 0; color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  @media (max-width: 639px) {
+    .hero { padding: var(--space-3xl) var(--space-md); }
+    h1 { font-size: var(--text-heading); line-height: var(--leading-heading); }
+  }
+</style>

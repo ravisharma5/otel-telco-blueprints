@@ -1,0 +1,156 @@
+---
+import '../../../site-src/brand/tokens.css';
+import { frontmatter as copy } from '../content/copy.md';
+
+interface Props {
+  title: string;
+  current?: string;
+}
+
+const { title, current = '' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">{copy.site.skip_link}</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href={base}>
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">{copy.site.name}</span>
+        </a>
+        <button
+          class="menu-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >{copy.buttons.menu}</button>
+        <nav id="site-nav" class="site-nav" aria-label={copy.nav.label}>
+          <ul>
+            {copy.nav.items.map((item) => (
+              <li>
+                <a
+                  href={base + item.path}
+                  aria-current={item.path === current ? 'page' : undefined}
+                >{item.label}</a>
+              </li>
+            ))}
+          </ul>
+          <a class="github-link" href={copy.site.repo_url}>
+            {copy.buttons.github} <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">{copy.notes.external}</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+    <main id="content" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>{copy.footer.notes.licence}</p>
+      <p>{copy.footer.notes.otel}</p>
+    </footer>
+    <script>
+      const button = document.querySelector('.menu-button');
+      const nav = document.getElementById('site-nav');
+      if (button && nav) {
+        button.addEventListener('click', () => {
+          const open = button.getAttribute('aria-expanded') === 'true';
+          button.setAttribute('aria-expanded', String(!open));
+          nav.classList.toggle('is-open', !open);
+        });
+      }
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-text);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  a { color: var(--color-text); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--color-primary-text); text-decoration-thickness: 2px; }
+  h1, h2, h3, h4 { font-family: var(--font-display); font-weight: var(--weight-bold); }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: var(--space-md); top: -100px; z-index: 10;
+    padding: var(--space-sm) var(--space-control-x);
+    background: var(--color-surface); border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-md);
+  }
+  .skip-link:focus { top: var(--space-sm); }
+  main:focus { outline: none; }
+</style>
+
+<style>
+  .site-header {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .header-inner {
+    display: flex; align-items: center; gap: var(--space-lg);
+    min-height: var(--header-height);
+    max-width: var(--content-max-page); margin: 0 auto; padding: 0 var(--space-xl);
+  }
+  .brand {
+    display: inline-flex; align-items: center; gap: var(--space-sm);
+    font-family: var(--font-display); font-weight: var(--weight-bold);
+    text-decoration: none;
+  }
+  .brand-mark {
+    width: 16px; height: 16px; border-radius: var(--radius-sm);
+    background: var(--color-primary);
+  }
+  .site-nav { display: flex; align-items: center; gap: var(--space-lg); flex: 1; }
+  .site-nav ul { display: flex; gap: var(--space-lg); margin: 0; padding: 0; list-style: none; flex: 1; }
+  .site-nav ul a {
+    display: inline-block; padding: var(--space-sm) 0;
+    color: var(--color-text-muted); text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+  .site-nav ul a:hover { color: var(--color-text); }
+  .site-nav ul a[aria-current='page'] {
+    color: var(--color-text); font-weight: var(--weight-bold);
+    border-bottom-color: var(--color-primary);
+  }
+  .github-link { font-size: var(--text-label); }
+  .menu-button {
+    display: none; margin-left: auto; min-height: var(--target-button);
+    padding: 0 var(--space-control-x);
+    background: transparent; color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-full);
+    font: inherit; font-size: var(--text-label); cursor: pointer;
+  }
+  .menu-button:hover { border-color: var(--color-text); }
+  .site-footer {
+    margin-top: var(--space-3xl);
+    padding: var(--space-xl);
+    background: var(--color-surface-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .site-footer p { max-width: var(--content-max-page); margin: 0 auto var(--space-xs); }
+  @media (max-width: 639px) {
+    .header-inner { flex-wrap: wrap; padding: 0 var(--space-md); }
+    .menu-button { display: inline-flex; align-items: center; }
+    .site-nav { display: none; flex-basis: 100%; flex-direction: column; align-items: flex-start; padding-bottom: var(--space-md); }
+    .site-nav.is-open { display: flex; }
+    .site-nav ul { flex-direction: column; gap: 0; }
+  }
+</style>

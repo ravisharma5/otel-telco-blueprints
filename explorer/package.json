@@ -1,0 +1,14 @@
+{
+  "name": "otel-telco-blueprints-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "astro build",
+    "dev": "astro dev"
+  },
+  "dependencies": {
+    "astro": "7.4.11"
+  }
+}
