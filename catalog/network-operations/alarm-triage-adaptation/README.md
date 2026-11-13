@@ -106,7 +106,7 @@ A site power event raises NG-link and cell-down alarms on `gnb-114`, opening inc
 
 In paired runs, the skills-only baseline labels power-related causes as transport faults and misses the note format. The facts are in retrieval and the procedure is right, so the gap is vocabulary and format, and it clears the Minimum measured gap to train. SDG Hub data from the tool catalog and replayed tapes holds LOOK, NOTIFY, REVIEW, and STOP cases. `alarm-triage-adapter` re-enters operator offline acceptance and meets the Non-inferiority margin.
 
-The agent then proposes restarting the NG interface in `req-5520-1`. Even if the label reads ACT, the ceiling is REVIEW, so `dec-5520-1` records REVIEW. The `approver` role signs off before the action layer runs the restart.
+The agent then proposes restarting the NG interface in `req-5520-1`. Fixes are at the recommend stage, so even if the label reads ACT, `dec-5520-1` records REVIEW. The `approver` role signs off before the action layer runs the restart.
 
 ## What you need
 
@@ -157,7 +157,7 @@ Each action request passes the [decision gate](../../../architecture/decision-ga
 | Action | Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP) | Approval | AI Act class |
 |---|---|---|---|
 | Write a triage note to the incident, `notify` | NOTIFY, from the assist stage up | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
-| Propose a fix such as an interface restart, `write_low` | REVIEW | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Propose a fix such as an interface restart, `write_low` | REVIEW, from the recommend stage up | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 | Any action the label marks STOP | STOP | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 
 | Parameter | What it controls | Who sets it | How to calibrate |
@@ -200,7 +200,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 ## Deploy and verify
 
-Apply these settings in order. Fixes stay at REVIEW throughout.
+Apply these settings in order. No fix ever gets an outcome above REVIEW.
 
 1. Pin each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
 2. Register the corpora, then author the triage skill and a capability manifest for each tool.

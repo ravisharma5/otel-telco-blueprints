@@ -73,7 +73,7 @@ flowchart TD
 5. The Embedding and Reranker slots search the care knowledge base, and the LLM slot drafts an answer that cites the passages.
 6. The Safety slot checks that the evidence supports the answer. If it doesn't, the Safety slot abstains and the care agent follows the usual care process. Output guardrails screen the suggestion for personal data.
 7. The care agent reads the suggestion, decides, and talks to the customer.
-8. To add a case note or open a TMF621 network trouble ticket, the copilot sends an action request with `submit_action_request`, and the Decision slot answers a fixed label question for the [decision gate](../../../architecture/decision-gate.md). A case note becomes a notification job (NOTIFY), a ticket waits for the approver (REVIEW), and STOP changes nothing.
+8. To add a case note or open a TMF621 network trouble ticket, the copilot sends an action request with `submit_action_request`, and the Decision slot answers a fixed label question for the [decision gate](../../../architecture/decision-gate.md). From the assist stage up, a case note becomes a notification job (NOTIFY). From the recommend stage up, a ticket waits for the approver (REVIEW). STOP changes nothing.
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. A confirmed false ACT drops the use case and its action class back one stage, as [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy) sets out. A blocked prompt injection in case or knowledge base text opens a SOC case and does not drop a stage.
 
@@ -103,7 +103,7 @@ A customer abroad reports no mobile data, and the care agent opens `case-8841` f
 
 With the token from the consent check, roaming status returns `roaming: true` and `countryCode: 262`, reachability returns `connectivity: ["SMS"]` only, and network type returns `4G`. The copilot cites the care knowledge base and suggests checking that data roaming is on in the device settings and in the plan. The care agent walks the customer through it, and data returns.
 
-The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify` request, and the gate's NOTIFY outcome becomes a notification job that writes the note, per the [policy table](../../../architecture/decision-gate.md#policy-table). No ticket is needed.
+The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify` request. Case notes are at the assist stage, so the gate's NOTIFY outcome becomes a notification job that writes the note, per the [policy table](../../../architecture/decision-gate.md#policy-table). No ticket is needed.
 
 ## What you need
 
@@ -116,7 +116,7 @@ The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify
 - [ ] Data: a care knowledge base with usage rights recorded in the [PB-05 corpus register](../../../platform/integration/README.md#knowledge-sources-and-usage-rights)
 - [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
 - [ ] Commitments: no credits, refunds, or service-level statements in a suggestion without a deterministic policy lookup
-- [ ] Stage register: every action class starts at REVIEW
+- [ ] Stage register: every action class starts at the shadow stage
 
 | Component role | Red Hat product used |
 |---|---|
@@ -150,8 +150,8 @@ Each action request passes the [decision gate](../../../architecture/decision-ga
 | Action | Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP) | Approval | AI Act class |
 |---|---|---|---|
 | Suggest an answer to the care agent | LOOK, with no action request | None; the care agent decides | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
-| Add a diagnostic note to the customer case, `notify` | NOTIFY, run as a notification job | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
-| Open a network trouble ticket (TMF621), `write_low` | REVIEW | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Add a diagnostic note to the customer case, `notify` | NOTIFY, run as a notification job, from the assist stage up | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Open a network trouble ticket (TMF621), `write_low` | REVIEW, from the recommend stage up | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 | Any request the label marks STOP | STOP | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 
 | Parameter | What it controls | Who sets it | How to calibrate |
@@ -198,7 +198,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 ## Deploy and verify
 
-Apply these settings in order. Every action class stays at REVIEW until the gates pass.
+Apply these settings in order. No action class rises above its stage until the gates pass.
 
 1. Register each purpose as a `dpv:` scope, and wire the consent check into the Authorization Server.
 2. Configure the MCP Gateway with deny-unless-allowed rules and token exchange for the three device-status tools.

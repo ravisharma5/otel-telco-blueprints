@@ -801,7 +801,7 @@ def test_closed_loop_risk_classes():
     rows = table[1:]
     assert any("ticket" in r[0].lower() and "NOTIFY" in r[out] for r in rows), rows
     assert any("soft reset" in r[0].lower() and "REVIEW" in r[out] and "ACT" in r[out] for r in rows), rows
-    assert any("drain" in r[0].lower() and r[out] == "REVIEW" for r in rows), rows
+    assert any("drain" in r[0].lower() and r[out].startswith("REVIEW") and "ACT" not in r[out] for r in rows), rows
 
 
 def test_closed_loop_zero_tolerance():

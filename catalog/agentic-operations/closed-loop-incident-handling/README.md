@@ -34,7 +34,7 @@ clarity_reviewed: "2026-11-12"
 ## Problem and value
 
 Engineers triage router alarms and open tickets by hand, and under load they open duplicates and skip checks.
-This recipe investigates with read-only tools and sends every write, the ticket included, through the Decision gate and the automation workflow, so every change leaves an approval, a verification, and an audit record.
+This recipe investigates with read-only tools and sends every write through the Decision gate and the automation workflow, so every change leaves an approval, a verification, and an audit record.
 The KPIs are mean time to identify, the share of incidents handled without rework, and duplicate tickets avoided; any ROI is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures.
 
 ## How it works
@@ -101,9 +101,9 @@ Risk classes follow the [decision gate schema](https://github.com/ravisharma5/ot
 
 A BGP session from PE router `pe7` flaps after a CPU spike, and the TMF642 alarm opens incident `inc-3107`. `noc-loop-agent` reads the alarm, the BGP neighbour state and CPU history on `pe7`, the KPIs, and the topology, and finds no open TMF621 ticket.
 
-Its request `req-3107-1` creates the ticket. Ticket creation is `notify` class, so `dec-3107-1` records NOTIFY and the notification job opens the ticket, per the gate [policy table](../../../architecture/decision-gate.md#policy-table).
+Its request `req-3107-1` creates the ticket. Ticket creation is `notify` class at the assist stage, so `dec-3107-1` records NOTIFY and the notification job opens the ticket, per the gate [policy table](../../../architecture/decision-gate.md#policy-table).
 
-Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request. The stage register holds this class at the recommend stage, so `dec-3107-2` records REVIEW even though the label reads ACT. After the `approver` role signs off, the playbook runs, the verification job reads the session state, and the workflow clears the alarm and updates the ticket. The soft reset can run as ACT only once the act stage is earned for its class. A traffic drain on `pe7` is `write_high` and always goes to REVIEW.
+Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request. The stage register holds this class at the recommend stage, so `dec-3107-2` records REVIEW even though the label reads ACT. After the `approver` role signs off, the playbook runs, the verification job reads the session state, and the workflow clears the alarm and updates the ticket. The soft reset runs as ACT only once its class earns the act stage. A traffic drain on `pe7` is `write_high` and never runs without approval.
 
 ## What you need
 
@@ -117,7 +117,7 @@ Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request.
 - [ ] Playbooks: each with a verification job and a rollback job, tested on a stateful mock
 - [ ] Agent identity: a workload identity bound to the agent's tool roles, as PB-08 sets out
 - [ ] Data: replayed incidents on stateful mocks, and a gate set weighted toward non-ACT cases
-- [ ] Stage register: every action class starts at REVIEW
+- [ ] Stage register: every action class starts at the shadow stage
 - [ ] Traces: tool calls, gate decisions, approvals, and job results, as PB-09 sets out
 
 | Component role | Red Hat product used |
@@ -151,10 +151,10 @@ Each action request passes the [decision gate](../../../architecture/decision-ga
 
 | Action | Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP) | Approval | AI Act class |
 |---|---|---|---|
-| Create or update the TMF621 ticket, `notify` | NOTIFY | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
-| Comment on or acknowledge the TMF642 alarm, `notify` | NOTIFY | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
-| BGP soft reset, `write_low` | REVIEW until the act stage is earned, then ACT within policy | The `approver` role while the outcome is REVIEW | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
-| Drain traffic, `write_high` | REVIEW | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Create or update the TMF621 ticket, `notify` | NOTIFY, from the assist stage up | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Comment on or acknowledge the TMF642 alarm, `notify` | NOTIFY, from the assist stage up | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| BGP soft reset, `write_low` | REVIEW from the recommend stage up, then ACT within policy once the act stage is earned | The `approver` role while the outcome is REVIEW | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Drain traffic, `write_high` | REVIEW, from the recommend stage up | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 | Any action the label marks STOP | STOP | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 
 | Parameter | What it controls | Who sets it | How to calibrate |
@@ -208,14 +208,14 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 ## Deploy and verify
 
-Apply these settings in order. Every action class stays at REVIEW until the gates pass.
+Apply these settings in order. No class rises above its stage until the gates pass.
 
 1. Pin the 2.0 checkpoint for each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
 2. Deploy the slots with the flags from What you need, and expose the gate endpoint inside the cluster behind a token.
-3. Have each owner load the policy ceilings, the approver role per action class, and the Label-mass floor, with every class at REVIEW in the stage register ([PB-06](../../../platform/safety-autonomy-gating/README.md)).
+3. Have each owner load the policy ceilings, the approver role per action class, and the Label-mass floor, with every class at the shadow stage in the stage register ([PB-06](../../../platform/safety-autonomy-gating/README.md)).
 4. Baseline: run the PB-02 ladder on the pinned 2.0 checkpoints: intake and smoke, public sanity, operator offline acceptance on replayed incidents with stateful mocks and trajectory checks, and safety and red team. Record the pass or fail on each registry version.
 5. Swap: when OTel 2.5 ships, take it through intake. The regression trigger for a new checkpoint version or base family re-runs the full ladder in paired runs on identical items against the Non-inferiority margin, and you retrain any adapter on the new base.
-6. Promote or roll back: run the passing version in shadow beside people, then as a weighted canary at a REVIEW ceiling for the Canary window. Any zero-tolerance event or missed gate rolls back to the pinned 2.0 revision, and a ceiling rises only through the stage register.
+6. Promote or roll back: run the passing version in shadow beside people, then as a weighted canary, capped at REVIEW, for the Canary window. Any zero-tolerance event or missed gate rolls back to the pinned 2.0 revision, and a ceiling rises only through the stage register.
 
 | Check | PB-02 gate or parameter | Owner |
 |---|---|---|
@@ -237,6 +237,6 @@ Apply these settings in order. Every action class stays at REVIEW until the gate
 - It never acts on a high-risk class without approval; every `write_high` change goes to REVIEW.
 - It handles one router fault at a time; people correlate faults across domains.
 - The 2.0 baseline result is yours to record. This page claims none, and the 31B card says closed-loop work hasn't been evaluated.
-- It assumes no OTel 2.5 results: 2.5 replaces 2.0 only after it passes the same gates.
+- It assumes no OTel 2.5 results: 2.5 replaces 2.0 only after passing the same gates.
 - The Classification slot's shipped classes come from drive-test data, so retrain its head on your alarm taxonomy first.
 - The AI Act class is your legal team's call, recorded in the [classification record](../../../platform/compliance-operating-model/README.md).
