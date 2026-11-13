@@ -2,7 +2,7 @@
 id: "UC-AGOPS-01"
 type: "use-case"
 title: "Governed closed-loop incident handling"
-doc_status: draft
+doc_status: done
 domain: "agentic-operations"
 flagship: true
 otel_slots: ["llm", "decision", "safety", "classification"]
@@ -12,6 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Handles router incidents from alarm to ticket with read-only tools, and sends every write through the Decision gate. Acts within policy only for low-risk classes, once that stage is earned. Depends on the Decision gate and the automation workflow."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [101, 301, 302, 403]
+clarity_reviewed: "2026-11-12"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -33,7 +34,7 @@ agent_school: [101, 301, 302, 403]
 ## Problem and value
 
 Engineers triage router alarms and open tickets by hand, and under load they open duplicates and skip checks.
-This recipe investigates with read-only tools and sends every write, the ticket included, through the Decision gate and the automation workflow, so someone can approve, verify, and audit each change.
+This recipe investigates with read-only tools and sends every write, the ticket included, through the Decision gate and the automation workflow, so every change leaves an approval, a verification, and an audit record.
 The KPIs are mean time to identify, the share of incidents handled without rework, and duplicate tickets avoided; any ROI is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures.
 
 ## How it works
@@ -100,9 +101,9 @@ Risk classes follow the [decision gate schema](https://github.com/ravisharma5/ot
 
 A BGP session from PE router `pe7` flaps after a CPU spike, and the TMF642 alarm opens incident `inc-3107`. `noc-loop-agent` reads the alarm, the BGP neighbour state and CPU history on `pe7`, the KPIs, and the topology, and finds no open TMF621 ticket.
 
-Its request `req-3107-1` creates the ticket. Ticket creation is `notify` class, so `dec-3107-1` records NOTIFY and the notification job opens the ticket, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table sets out.
+Its request `req-3107-1` creates the ticket. Ticket creation is `notify` class, so `dec-3107-1` records NOTIFY and the notification job opens the ticket, per the gate [policy table](../../../architecture/decision-gate.md#policy-table).
 
-Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request. This class sits at the recommend stage, so `dec-3107-2` records REVIEW even though the label reads ACT. After the `approver` role signs off, the playbook runs, the verification job reads the session state, and the workflow clears the alarm and updates the ticket. The soft reset can run as ACT only once the act stage is earned for its class. A traffic drain on `pe7` is `write_high` and always goes to REVIEW.
+Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request. The stage register holds this class at the recommend stage, so `dec-3107-2` records REVIEW even though the label reads ACT. After the `approver` role signs off, the playbook runs, the verification job reads the session state, and the workflow clears the alarm and updates the ticket. The soft reset can run as ACT only once the act stage is earned for its class. A traffic drain on `pe7` is `write_high` and always goes to REVIEW.
 
 ## What you need
 
@@ -111,7 +112,7 @@ Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request.
 - [ ] Components: one product for each role in the components table
 - [ ] Integrations: the TMF642, TMF621, TMF628, and TMF639 APIs and read-only device tools, each behind the MCP Gateway
 - [ ] Write path: `submit_action_request` is the agent's only write tool, and only the job templates hold write credentials
-- [ ] Gate endpoint: allow the in-cluster gate endpoint for REST API steps, and require a token at the gate endpoint, because the Decision model card's recipe starts a server with no authentication
+- [ ] Gate endpoint: let REST API steps reach the in-cluster gate endpoint, and require a token there, because the Decision model card's recipe starts a server with no authentication
 - [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
 - [ ] Playbooks: each with a verification job and a rollback job, tested on a stateful mock
 - [ ] Agent identity: a workload identity bound to the agent's tool roles, as PB-08 sets out
@@ -130,7 +131,7 @@ Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request.
 | Input and tool-response guardrails | NeMo Guardrails in Red Hat OpenShift AI |
 | Version record for each checkpoint and its pass | Model Registry in Red Hat OpenShift AI |
 
-Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-placement/README.md#key-flags-per-slot). Start the Safety slot from the LLM block with its own pinned revision.
+Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-placement/README.md#key-flags-per-slot). Start the Safety slot with its own pinned revision and no tool-calling flags.
 
 ```text
 # LLM 31B (pin the revision; text-only; tool calling)
@@ -212,8 +213,8 @@ Apply these settings in order. Every action class stays at REVIEW until the gate
 1. Pin the 2.0 checkpoint for each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
 2. Deploy the slots with the flags from What you need, and expose the gate endpoint inside the cluster behind a token.
 3. Have each owner load the policy ceilings, the approver role per action class, and the Label-mass floor, with every class at REVIEW in the stage register ([PB-06](../../../platform/safety-autonomy-gating/README.md)).
-4. Baseline: run the PB-02 ladder on the pinned 2.0 checkpoints, from intake and smoke and public sanity through operator offline acceptance on replayed incidents with stateful mocks and trajectory checks, then safety and red team. Record the pass or fail on each registry version.
-5. Swap: when OTel 2.5 ships, take it through intake. The regression trigger for a new checkpoint version or base family re-runs the full ladder in paired runs on identical items against the Non-inferiority margin, and any adapter is retrained on the new base.
+4. Baseline: run the PB-02 ladder on the pinned 2.0 checkpoints: intake and smoke, public sanity, operator offline acceptance on replayed incidents with stateful mocks and trajectory checks, and safety and red team. Record the pass or fail on each registry version.
+5. Swap: when OTel 2.5 ships, take it through intake. The regression trigger for a new checkpoint version or base family re-runs the full ladder in paired runs on identical items against the Non-inferiority margin, and you retrain any adapter on the new base.
 6. Promote or roll back: run the passing version in shadow beside people, then as a weighted canary at a REVIEW ceiling for the Canary window. Any zero-tolerance event or missed gate rolls back to the pinned 2.0 revision, and a ceiling rises only through the stage register.
 
 | Check | PB-02 gate or parameter | Owner |
@@ -227,15 +228,15 @@ Apply these settings in order. Every action class stays at REVIEW until the gate
 | Human overrides stay below the ceiling during the canary | Override rate ceiling | Business owner |
 | OTel 2.5 is no worse than the 2.0 baseline on identical items | Non-inferiority margin | Risk owner |
 
-- Agent-school: 101 builds the NOC assistant loop, 301 adds an approval gate to a closed loop, 302 governs the MCP gateway with a judge suite, and 403 measures OTel 2.0 on the course tapes, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
+- Agent-school: 101 builds the NOC assistant loop, 301 adds an approval gate to a closed loop, 302 puts policies in front of the MCP gateway and adds a judge suite, and 403 measures OTel 2.0 on the course tapes, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
 - Architecture: the [decision gate](../../../architecture/decision-gate.md) page for the policy table and the message examples
 - TM Forum: the [TMF642](https://github.com/tmforum-apis/TMF642_AlarmManagement) and [TMF621](https://github.com/tmforum-apis/TMF621_TroubleTicket) API repositories for the contracts each MCP server fronts
 
 ## Limitations
 
 - It never acts on a high-risk class without approval; every `write_high` change goes to REVIEW.
-- It handles one router fault at a time and leaves correlation across network domains to people.
+- It handles one router fault at a time; people correlate faults across domains.
 - The 2.0 baseline result is yours to record. This page claims none, and the 31B card says closed-loop work hasn't been evaluated.
-- It assumes no OTel 2.5 results; 2.5 replaces 2.0 only after passing the same gates.
+- It assumes no OTel 2.5 results: 2.5 replaces 2.0 only after it passes the same gates.
 - The Classification slot's shipped classes come from drive-test data, so retrain its head on your alarm taxonomy first.
 - The AI Act class is your legal team's call, recorded in the [classification record](../../../platform/compliance-operating-model/README.md).
