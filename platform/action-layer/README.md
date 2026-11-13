@@ -212,4 +212,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): supplies the calibration and canary evidence behind each ceiling
 - [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): covers workload identity and secrets for job credentials
 - [PB-09 Quality operations and observability](../quality-operations/README.md): quality operations tracks gate outcomes, approvals, rollbacks, and overrides
+- Use cases: this page supports [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md), [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](../../catalog/network-operations/alarm-triage-adaptation/README.md), and [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md)
 - Agent-school: courses 202 and 301 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate to a closed loop

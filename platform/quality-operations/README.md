@@ -217,4 +217,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): slot rollback on an integrity alert
 - [Decision gate](../../architecture/decision-gate.md): the labels behind the gate label mix
 - [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): compliance maps traces and incident records to regulatory duties
+- Use cases: this page supports [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md), [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md), and [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md)
 - Agent-school: courses 301, 302, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 301 adds an approval gate, 302 adds a judge suite, and 304 covers agent security operations

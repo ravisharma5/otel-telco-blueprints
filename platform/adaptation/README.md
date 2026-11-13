@@ -262,4 +262,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [Decision gate](../../architecture/decision-gate.md): the risk class from each manifest sets its ceiling
 - [PB-09 Quality operations and observability](../quality-operations/README.md): quality operations spots the drift that starts a new climb
 - [PB-01 Intake and model selection](../intake-model-selection/README.md): picks the base each adapter binds to
+- Use cases: this page supports [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](../../catalog/network-operations/alarm-triage-adaptation/README.md)
 - Agent-school: courses 401, 402, and 403 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); 401 covers skills and manifests, 402 the knowledge service, and 403 the OTel domain models

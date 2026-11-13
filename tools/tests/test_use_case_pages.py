@@ -1072,3 +1072,62 @@ def test_camara_example_distinct():
     text = body(CARE)
     for old in EARLIER_FLAGSHIP_IDS:
         assert old not in text, old
+
+
+# ---------- platform back-links ----------
+
+USED_BY = "Used by and next steps"
+USED_BY_MAX = 12
+USE_CASES_BULLET = re.compile(r"^- Use cases:(.*)$", re.M)
+CATALOG_LINK = re.compile(r"\[([^\]]+)\]\(\.\./\.\./catalog/([a-z0-9-]+/[a-z0-9-]+)/README\.md\)")
+
+
+def flagship_dependants() -> dict[str, set[str]]:
+    """Platform id -> "<domain>/<slug>" of every flagship that lists it, read at run time."""
+    out: dict[str, set[str]] = {}
+    for path in use_case_pages():
+        fm = front_matter(path) or {}
+        if fm.get("flagship") is not True:
+            continue
+        for pb in fm.get("platform_blueprints") or []:
+            out.setdefault(pb, set()).add(page_key(path))
+    return out
+
+
+def _id_of(path: Path) -> str:
+    return (front_matter(path) or {}).get("id", "")
+
+
+def used_by_bullets(path: Path) -> list[str]:
+    return re.findall(r"^- .*$", section_text(path, USED_BY), re.M)
+
+
+@pytest.mark.parametrize("path", platform_pages(), ids=_id)
+def test_platform_back_links_to_use_cases(path):
+    want = flagship_dependants().get(_id_of(path), set())
+    bullets = used_by_bullets(path)
+    assert len(bullets) <= USED_BY_MAX, len(bullets)
+    found = USE_CASES_BULLET.findall(section_text(path, USED_BY))
+    if not want:
+        assert found == [], "no flagship lists this page, so it needs no Use cases bullet"
+        return
+    if not found:
+        assert len(bullets) == USED_BY_MAX, (
+            "flagships list this page and its Used by section has room: add a Use cases bullet"
+        )
+        return
+    assert len(found) == 1, found
+    linked = [key for _label, key in CATALOG_LINK.findall(found[0])]
+    assert len(linked) == len(set(linked)), linked
+    assert set(linked) == want
+
+
+@pytest.mark.parametrize("path", platform_pages(), ids=_id)
+def test_platform_back_link_labels(path):
+    ids = {page_key(p): (front_matter(p) or {}).get("id") for p in use_case_pages()}
+    for line in USE_CASES_BULLET.findall(section_text(path, USED_BY)):
+        links = CATALOG_LINK.findall(line)
+        assert links, line
+        for label, key in links:
+            assert key in ids, key
+            assert label.startswith(f"{ids[key]} "), (label, ids[key])

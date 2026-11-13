@@ -228,4 +228,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): uses the Safety and Decision slots placed here
 - [PB-07 Action layer](../action-layer/README.md): the action layer runs behind the gate at the regional site and the core
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): gates every quantized build before placement
+- Use cases: this page supports [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md), [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md), [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](../../catalog/network-operations/alarm-triage-adaptation/README.md), and [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md)
 - Agent-school: 104 serves a NOC assistant behind the front door, and 203 covers routing, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
