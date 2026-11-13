@@ -87,6 +87,11 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     "standards-knowledge/grounded-knowledge-assistant": {"Decision routing threshold": "Model owner"},
 }
 
+# RACI activities a use case may name that no platform page defines
+# ({"<domain>/<slug>": {activity, ...}}). Every other activity must copy a
+# platform RACI row exactly, so a misspelt copy fails instead of skipping.
+USE_CASE_LOCAL_RACI: dict[str, set[str]] = {}
+
 UC_ID = re.compile(r"^UC-[A-Z]+-[0-9]{2}$")
 ROADMAP_URL = "https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md"
 # OTel slot -> the header line prefix of its block in the serving page flag fence.
@@ -575,6 +580,14 @@ def test_sync_platform_raci_rows_present():
     assert "Change a policy ceiling" in platform_raci_rows()
 
 
+def test_sync_local_raci_is_well_formed():
+    platform = platform_raci_rows()
+    for key, activities in USE_CASE_LOCAL_RACI.items():
+        assert key in EXPECTED_USE_CASE_PAGES, key
+        for activity in activities:
+            assert activity not in platform, f"{activity} is a platform RACI activity; copy its row"
+
+
 def test_sync_local_params_are_well_formed():
     params = platform_params()
     for key, entries in USE_CASE_LOCAL_PARAMS.items():
@@ -649,10 +662,12 @@ def test_sync_parameters_reuse_platform_names(path):
 @PAGES
 def test_sync_raci_rows_match_platform(path):
     platform = platform_raci_rows()
+    local = USE_CASE_LOCAL_RACI.get(page_key(path), set())
     for table in raci_tables(path):
         for row in table[1:]:
-            if row[0] not in platform:
+            if row[0] in local:
                 continue
+            assert row[0] in platform, f"{row[0]} is neither a platform nor an allowlisted RACI activity"
             mine = [normalise_owner(c) for c in row]
             assert mine in platform[row[0]], (mine, platform[row[0]])
 
