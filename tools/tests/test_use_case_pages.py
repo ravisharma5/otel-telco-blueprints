@@ -74,6 +74,7 @@ from tools.tests.test_reference_pages import (
 EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "standards-knowledge/grounded-knowledge-assistant": "UC-KNOW-01",
     "agentic-operations/closed-loop-incident-handling": "UC-AGOPS-01",
+    "network-operations/alarm-triage-adaptation": "UC-OPS-01",
 }
 
 # Parameters a use case may name that no platform page defines
@@ -821,3 +822,113 @@ def test_closed_loop_example_ids():
     example = _h3_text(how, heading[4:])
     for ident in ("inc-3107", "req-3107-1", "dec-3107-1"):
         assert ident in example, ident
+
+
+# ---------- alarm triage adaptation ladder ----------
+
+TRIAGE = REPO_ROOT / "catalog/network-operations/alarm-triage-adaptation/README.md"
+LADDER_PAGE = REPO_ROOT / "architecture/adaptation-ladder.md"
+ADAPTATION_LINK = "../../../platform/adaptation/README.md"
+GATE_PAGE_LINK = "../../../architecture/decision-gate.md"
+KSERVE_ISSUE = "https://github.com/kserve/kserve/issues/6094"
+F2_IDS = ("inc-3107", "req-3107", "dec-3107", "noc-loop-agent")
+
+
+def _triage_h3(prefix: str) -> str:
+    """Text of the first How it works H3 whose title starts with prefix."""
+    how = section_text(TRIAGE, "How it works")
+    heading = next((ln for ln in how.splitlines() if ln.startswith(f"### {prefix}")), None)
+    assert heading, f"no H3 starting {prefix!r} in How it works"
+    return _h3_text(how, heading[4:])
+
+
+def _ladder_rungs() -> list[str]:
+    """First-column values of the rung table on the adaptation ladder page."""
+    for table in tables(sections(body(LADDER_PAGE)).get("The design", [])):
+        if table[0][0] == "Rung":
+            return [row[0] for row in table[1:]]
+    raise AssertionError("no rung table on the adaptation ladder page")
+
+
+def test_adaptation_ladder_rungs():
+    rungs = _ladder_rungs()[:3]
+    assert rungs == ["Retrieval", "Skills and capability manifests", "LoRA"], rungs
+    table = next(
+        t for t in tables(sections(body(TRIAGE)).get("How it works", [])) if any("Rung" in h for h in t[0])
+    )
+    firsts = [row[0] for row in table[1:]]
+    assert len(firsts) >= 3, firsts
+    for want, got in zip(rungs, firsts):
+        assert got.startswith(want), (want, got)
+    assert "skills-only baseline" in body(TRIAGE)
+
+
+def test_adaptation_ladder_when_to_train_rule():
+    text = flat(_triage_h3("When to train"))
+    for term in (
+        "Minimum measured gap to train",
+        "paired runs",
+        "Minimum share of non-ACT training cases",
+        "Non-inferiority margin",
+        "retrieval",
+        "skills",
+        ADAPTATION_LINK,
+        EVALUATION_LINK,
+    ):
+        assert term in text, term
+
+
+def test_adaptation_ladder_classification_head():
+    sentences = _sentences(body(TRIAGE))
+    assert any("Classification" in s and "taxonomy" in s for s in sentences)
+    assert any("drive-test" in s for s in sentences)
+    text = body(TRIAGE)
+    assert "Classification per-class recall floor" in text
+    assert "Classification other-or-abstain recall floor" in text
+
+
+def test_adaptation_ladder_static_adapters():
+    code = page_code(TRIAGE)
+    for flag in ("--enable-lora", "--lora-modules", "--max-lora-rank"):
+        assert flag in code, flag
+    text = flat(body(TRIAGE))
+    for term in ("object storage", "pinned by digest", KSERVE_ISSUE):
+        assert term in text, term
+
+
+def test_adaptation_ladder_retrain_on_base_change():
+    assert any(
+        "retrain" in s and "re-gate" in s and "base revision" in s for s in _sentences(body(TRIAGE))
+    )
+
+
+def test_adaptation_ladder_training_labels():
+    """The step or H3 that describes training data names the four non-ACT labels
+    and links the decision gate page for them."""
+    how = section_text(TRIAGE, "How it works")
+    units = [u for u in re.split(r"\n(?=\d+\. |### )", how) if "training data" in u]
+    labels = ("LOOK", "NOTIFY", "REVIEW", "STOP")
+    assert any(GATE_PAGE_LINK in u and all(lbl in u for lbl in labels) for u in units), units
+
+
+def test_adaptation_ladder_gate_stage():
+    table = table_with_header(TRIAGE, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    assert any("triage note" in r[0].lower() and "NOTIFY" in r[out] for r in rows), rows
+    assert any("fix" in r[0].lower() and "REVIEW" in r[out] for r in rows), rows
+    for r in rows:
+        assert not re.search(r"\bACT\b", r[out]), r
+
+
+def test_adaptation_ladder_decision_quantized():
+    assert any(
+        "Decision" in s and "quantized" in s and "model owner" in s for s in _sentences(body(TRIAGE))
+    )
+
+
+def test_adaptation_ladder_example_distinct():
+    assert "inc-5520" in _triage_h3("Worked example:")
+    text = body(TRIAGE)
+    for old in F2_IDS:
+        assert old not in text, old
