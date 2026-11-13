@@ -1131,3 +1131,12 @@ def test_platform_back_link_labels(path):
         for label, key in links:
             assert key in ids, key
             assert label.startswith(f"{ids[key]} "), (label, ids[key])
+
+
+def test_sync_lora_rank_placeholder_matches():
+    """The adaptation fence and the serving flag block use one rank placeholder."""
+    rank = re.compile(r"--max-lora-rank (<[^>]+>)")
+    serving = {m for ln in sum(pb04_flag_blocks().values(), []) for m in rank.findall(ln)}
+    text = _h3_text(section_text(ADAPTATION, "Reference design"), "Adapter serving and security")
+    adapter = set(rank.findall(CODE_FENCE.search(text).group(1)))
+    assert serving and serving == adapter, (serving, adapter)

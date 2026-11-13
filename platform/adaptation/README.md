@@ -156,11 +156,11 @@ An adapter trained on an earlier base may load on a new one, because the shapes 
 | Set `--max-lora-rank` to the highest trained rank | An adapter with a higher rank fails to load | [vLLM LoRA docs](https://docs.vllm.ai/en/latest/features/lora/) |
 
 ```text
---enable-lora --max-lora-rank <highest trained rank> \
+--enable-lora --max-lora-rank <r> \
 --lora-modules triage-adapter=<internal object storage path pinned by digest>
 ```
 
-Never set `VLLM_ALLOW_RUNTIME_LORA_UPDATING`; block it by policy. [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md) lists the full serving flags.
+Set `<r>` to the highest trained rank. Never set `VLLM_ALLOW_RUNTIME_LORA_UPDATING`; block it by policy. [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md) lists the full serving flags.
 
 ### Adaptation parameters
 
