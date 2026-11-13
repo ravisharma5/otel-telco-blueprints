@@ -4,9 +4,9 @@ Each shared check runs on every catalog/<domain>/<slug>/README.md. The sync
 tests read facts from the platform pages at run time (serving flags, the gate
 rule, the stage table, parameter names and owners, RACI rows) and compare each
 use-case page against them, so a recipe cannot drift from the platform page it
-copies. The "present" tests prove each source still parses today. With no
-use-case pages yet, the per-page checks collect as skipped and the
-expected-pages guard compares two empty maps.
+copies. The "present" tests prove each source still parses today. The
+expected-pages guard fails if a listed page is lost or renamed. Catalog pages
+may set flagship to true or false; the front matter schema checks the field.
 """
 
 from __future__ import annotations
@@ -307,7 +307,6 @@ def test_shared_fictitious_number_rule_cases(text, ok):
 def test_shared_front_matter(path):
     fm = front_matter(path) or {}
     assert fm.get("type") == "use-case"
-    assert fm.get("flagship") is True
     assert UC_ID.match(str(fm.get("id", ""))), fm.get("id")
     assert not PLANNING_ID_RE.search(str(fm.get("id", ""))), fm.get("id")
 
