@@ -66,6 +66,7 @@ nav:
       - Grounded knowledge assistant: catalog/standards-knowledge/grounded-knowledge-assistant/README.md
       - Governed closed-loop incident handling: catalog/agentic-operations/closed-loop-incident-handling/README.md
       - Adaptation ladder on alarm triage: catalog/network-operations/alarm-triage-adaptation/README.md
+      - CAMARA customer-care diagnostics: catalog/business-assurance/camara-care-diagnostics/README.md
   - Platform:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md

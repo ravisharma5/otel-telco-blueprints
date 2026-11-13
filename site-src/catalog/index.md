@@ -14,6 +14,7 @@ The catalog maps operator use cases to OTel model slots and platform blueprints.
 | [UC-KNOW-01](standards-knowledge/grounded-knowledge-assistant/README.md) | Grounded knowledge assistant | Standards knowledge |
 | [UC-AGOPS-01](agentic-operations/closed-loop-incident-handling/README.md) | Governed closed-loop incident handling | Agentic operations |
 | [UC-OPS-01](network-operations/alarm-triage-adaptation/README.md) | Adaptation ladder on alarm and root-cause triage | Network operations |
+| [UC-CARE-01](business-assurance/camara-care-diagnostics/README.md) | CAMARA customer-care diagnostics | Business assurance |
 
 Planned domains:
 

@@ -470,6 +470,7 @@ def test_nav_order():
         "catalog/standards-knowledge/grounded-knowledge-assistant/README.md",
         "catalog/agentic-operations/closed-loop-incident-handling/README.md",
         "catalog/network-operations/alarm-triage-adaptation/README.md",
+        "catalog/business-assurance/camara-care-diagnostics/README.md",
     ]
 
 

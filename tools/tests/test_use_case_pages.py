@@ -28,6 +28,7 @@ from tools.tests.test_platform_pages import (
     DEMOTE,
     EXPECTED_PLATFORM_PAGES,
     GATING,
+    ICM_MCP_ISSUE,
     INTEGRATION,
     ISO_QUOTED,
     ISSUE_URL,
@@ -75,6 +76,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "standards-knowledge/grounded-knowledge-assistant": "UC-KNOW-01",
     "agentic-operations/closed-loop-incident-handling": "UC-AGOPS-01",
     "network-operations/alarm-triage-adaptation": "UC-OPS-01",
+    "business-assurance/camara-care-diagnostics": "UC-CARE-01",
 }
 
 # Parameters a use case may name that no platform page defines
@@ -931,4 +933,142 @@ def test_adaptation_ladder_example_distinct():
     assert "inc-5520" in _triage_h3("Worked example:")
     text = body(TRIAGE)
     for old in F2_IDS:
+        assert old not in text, old
+
+
+# ---------- CAMARA care diagnostics ----------
+
+CARE = REPO_ROOT / "catalog/business-assurance/camara-care-diagnostics/README.md"
+CAMARA_APIS = (
+    "Device Roaming Status",
+    "Device Reachability Status",
+    "Connected Network Type",
+    "Number Verification",
+)
+CAMARA_YAMLS = (
+    "https://github.com/camaraproject/DeviceRoamingStatus/blob/r1.2/code/API_definitions/device-roaming-status.yaml",
+    "https://github.com/camaraproject/DeviceReachabilityStatus/blob/r1.2/code/API_definitions/device-reachability-status.yaml",
+    "https://github.com/camaraproject/ConnectedNetworkType/blob/r1.2/code/API_definitions/connected-network-type.yaml",
+    "https://github.com/camaraproject/NumberVerification/blob/r4.2/code/API_definitions/number-verification.yaml",
+)
+QUALITY_LINK = "../../../platform/quality-operations/README.md"
+COMPLIANCE_LINK = "../../../platform/compliance-operating-model/README.md"
+EARLIER_FLAGSHIP_IDS = ("inc-3107", "req-3107", "dec-3107", "noc-loop-agent", "inc-5520")
+
+
+def _care_sources() -> list[list[str]]:
+    return tables(sections(body(CARE)).get("Sources", []))[0]
+
+
+def _care_tools_table() -> list[list[str]]:
+    for table in tables(sections(body(CARE)).get("How it works", [])):
+        if table[0][0] == "Tool":
+            return table
+    raise AssertionError("no tools table in How it works")
+
+
+def test_camara_four_apis():
+    text = body(CARE)
+    for api in CAMARA_APIS:
+        assert api in text, api
+    rows = " ".join(" | ".join(r) for r in _care_sources()[1:])
+    for url in CAMARA_YAMLS:
+        assert url in rows, url
+
+
+def test_camara_number_verification_in_app_session():
+    """Number Verification runs in the customer's app session; the copilot sees
+    only its result and never holds `/verify` as a tool."""
+    sentences = _sentences(body(CARE))
+    assert any("Number Verification" in s and "device" in s and "session" in s for s in sentences)
+    assert any(
+        "copilot" in u.lower() and "Number Verification" in u and "result" in u for u in _units(CARE)
+    )
+    for row in _care_tools_table()[1:]:
+        joined = " | ".join(row)
+        assert "/verify" not in joined and "phoneNumberVerify" not in joined, row
+    for unit in _units(CARE):
+        if "/verify" in unit or "phoneNumberVerify" in unit:
+            assert "app" in unit, unit
+
+
+def test_camara_consent_before_tool_call():
+    sentences = _sentences(body(CARE))
+    assert any("consent" in s and "before" in s and "tool call" in s for s in sentences)
+    assert any("token" in s and "per-subscriber" in s for s in sentences)
+    assert any(
+        "token" in s and "model context" in s and re.search(r"\b(never|not)\b", s) for s in sentences
+    )
+
+
+def test_camara_consent_note_sourced():
+    text = body(CARE)
+    assert ICM_MCP_ISSUE in text
+    table = _care_sources()
+    claim, basis, source = (table[0].index(h) for h in ("Claim", "Basis", "Source"))
+    rows = [r for r in table[1:] if ICM_MCP_ISSUE in r[source]]
+    assert rows and all(r[basis] == "research" for r in rows), rows
+    assert any("consent" in r[claim].lower() for r in rows), rows
+    assert not re.search(r"(?i)unsolved", text)
+    for row in table[1:]:
+        if "consent" in row[claim].lower():
+            assert "camaraproject.org" not in row[source], row
+    for s in _sentences(text):
+        if "consent" in s.lower():
+            assert "camaraproject.org" not in s, s
+
+
+def test_camara_copilot_pattern():
+    text = flat(body(CARE))
+    assert text.count("care agent") >= 3
+    assert any(
+        "care agent" in s and ("talks to the customer" in s or "decides" in s)
+        for s in _sentences(body(CARE))
+    )
+    table = table_with_header(CARE, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    assert any("suggest" in r[0].lower() and r[out].startswith("LOOK") for r in rows), rows
+    assert any("case" in r[0].lower() and "note" in r[0].lower() and "NOTIFY" in r[out] for r in rows), rows
+    assert any("TMF621" in r[0] and "REVIEW" in r[out] for r in rows), rows
+    for r in rows:
+        assert not re.search(r"\bACT\b", r[out]), r
+
+
+def test_camara_privacy_controls():
+    text = body(CARE)
+    assert any(
+        "data protection officer" in s and "opt-in" in s and re.search(r"(?i)trace|span", s)
+        for s in _sentences(text)
+    )
+    assert flat(text).count("Your legal team owns the conclusions.") == 1
+    assert QUALITY_LINK in text
+    assert COMPLIANCE_LINK in text
+
+
+def test_camara_no_customer_facing_stage():
+    lim = section_text(CARE, "Limitations")
+    bullets = [ln for ln in lim.splitlines() if ln.startswith("- ")]
+    assert any("customer" in b and re.search(r"\bnever\b|\bdoes not\b", b) for b in bullets), bullets
+    assert "AI-interaction disclosure" not in body(CARE)
+
+
+def test_camara_agent_school_gap_stated():
+    assert any(
+        re.search(r"(?i)\bno\b[^.]*\bcourse\b[^.]*\bCAMARA\b", s) for s in _sentences(body(CARE))
+    )
+
+
+def test_camara_example_number_fictitious():
+    text = body(CARE)
+    assert "+44 7700 900123" in text
+    assert phone_number_problems(text) == []
+
+
+def test_camara_example_distinct():
+    example = flat(section_text(CARE, "How it works"))
+    for new in ("case-8841", "req-8841-1", "care-copilot"):
+        assert new in example, new
+    text = body(CARE)
+    for old in EARLIER_FLAGSHIP_IDS:
         assert old not in text, old
