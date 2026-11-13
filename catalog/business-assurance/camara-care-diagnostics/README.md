@@ -16,10 +16,10 @@ clarity_reviewed: "2026-11-13"
 card:
   goal: "Help care agents diagnose customer issues"
   summary: "Suggests answers to care agents on no-service calls, using device status read through CAMARA APIs with the customer's consent."
-  outcome: "Care agents see whether a device is roaming, reachable, and on which network, so more calls resolve first time."
+  outcome: "Care agents see a device's roaming, reachability, and network type, so they resolve more calls on first contact."
   audience: "Care agents, care operations, the data protection officer, and the risk owner"
   measures: ["Average handling time", "First-contact resolution"]
-  risk: "It reads subscriber data, so consent is checked before any tool call."
+  risk: "It reads subscriber data, so your consent service checks consent before any tool call."
 placement:
   far-edge: {runs: [], note: "Not used: the copilot serves care agents, not network sites."}
   regional: {runs: ["embedding", "reranker", "safety", "decision"], note: "Knowledge search, evidence checks, and the gate label run here."}

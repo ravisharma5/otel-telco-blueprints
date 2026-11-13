@@ -15,7 +15,7 @@ agent_school: [101, 301, 302, 403]
 clarity_reviewed: "2026-11-13"
 card:
   goal: "Resolve incidents with less manual work"
-  summary: "An agent investigates router alarms with read-only tools and opens tickets. Every fix passes a gate, and an approver signs off unless policy allows."
+  summary: "An agent investigates router alarms with read-only tools and opens tickets. Every fix passes a gate, and low-risk fixes skip approval only after earning it."
   outcome: "Incidents reach a cause and a ticket sooner, with fewer duplicates, and every change leaves an audit record."
   audience: "Operations engineers, approvers, and risk owners who run incident handling"
   measures: ["Mean time to identify", "Incidents handled without rework", "Duplicate tickets avoided"]

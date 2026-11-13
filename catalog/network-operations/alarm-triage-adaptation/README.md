@@ -22,8 +22,8 @@ card:
   risk: "Every fix needs approval, and each new base model means retraining and re-checking."
 placement:
   far-edge: {runs: [], note: "Not used: triage runs at the regional site."}
-  regional: {runs: ["llm-large", "classification", "safety", "decision", "embedding", "reranker"], note: "The triage agent, retrieval, and the gate run here."}
-  core: {runs: ["llm-large", "classification"], note: "Data generation, training, and evaluation of the adapter and the Classification head."}
+  regional: {runs: ["llm-large", "classification", "safety", "decision", "embedding", "reranker"], note: "The triage agent, cause labels, retrieval, and the gate run here."}
+  core: {runs: ["llm-large", "classification"], note: "Data generation, training, and evaluation for the adapter and Classification head run here."}
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->

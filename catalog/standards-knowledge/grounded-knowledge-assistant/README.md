@@ -11,17 +11,17 @@ placement_tier: ["regional", "core"]
 one_liner: "Answers standards and runbook questions with citations, or abstains and lists what it searched. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10"]
 agent_school: [103, 201, 203, 402]
-clarity_reviewed: "2026-11-12"
+clarity_reviewed: "2026-11-13"
 card:
   goal: "Answer engineers' questions faster"
   summary: "Answers standards and runbook questions from your own documents with citations, or says it can't answer and shows what it searched."
   outcome: "Engineers get cited answers without searching 3GPP, IETF, TM Forum, and vendor documents by hand."
   audience: "Operations engineers and support staff who ask standards and runbook questions"
   measures: ["Time to a cited answer", "Share of answers reviewers accept"]
-  risk: "A weak answer could mislead, so it cites its sources or abstains."
+  risk: "A weak answer could mislead an engineer, so it cites sources or declines to answer."
 placement:
   far-edge: {runs: [], note: "Not used: answers don't need to come from the cell site."}
-  regional: {runs: ["embedding", "reranker", "safety", "decision", "llm-small"], note: "Retrieval, Safety, Decision, and the small LLM handle routine lookups."}
+  regional: {runs: ["embedding", "reranker", "safety", "decision", "llm-small"], note: "Retrieval, the Safety and Decision checks, and the small LLM run here."}
   core: {runs: ["llm-large"], note: "The large LLM answers the questions the Decision slot routes up."}
 ---
 
