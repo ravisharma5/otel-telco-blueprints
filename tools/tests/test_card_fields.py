@@ -9,12 +9,25 @@ map against otel_slots and placement_tier.
 from __future__ import annotations
 
 import copy
+import re
 
 import pytest
+import yaml
 
 from tools.bplint.schema import load_validators
 from tools.tests.conftest import FIXTURES, REPO_ROOT, run_bplint
 from tools.tests.test_frontmatter_checks import lint, render, use_case_fm, use_case_sections
+from tools.tests.test_platform_pages import section_text
+from tools.tests.test_reference_pages import body, front_matter, sections, tables
+from tools.tests.test_use_case_pages import EXPECTED_USE_CASE_PAGES
+
+# Table headers the explorer exporter parses on every flagship, defined once so
+# the exporter tests can import them instead of retyping.
+EXPORTER_TABLE_HEADERS = {
+    "components": ("Component role", "Red Hat product used"),
+    "actions": ("Action", "Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP)", "Approval", "AI Act class"),
+    "parameters": ("Parameter", "What it controls", "Who sets it", "How to calibrate"),
+}
 
 VALIDATOR = load_validators(REPO_ROOT / "schemas")["use-case"]
 
@@ -252,3 +265,147 @@ def test_card_and_placement_optional(tmp_path):
     assert (rc, findings) == (0, [])
     assert lint(tmp_path, render(use_case_fm(), use_case_sections())) == []
     assert schema_errors(use_case_fm()) == []
+
+
+# ---- flagship pages -----------------------------------------------------------
+
+TIERS = ("far-edge", "regional", "core")
+# Placement column or Placement bullet wording -> tier.
+TIER_WORDS = {"far edge": "far-edge", "far-edge": "far-edge", "regional": "regional", "core": "core"}
+# Display names on the page -> slot role.
+ROLE_NAMES = {
+    "small llm": "llm-small",
+    "large llm": "llm-large",
+    "embedding": "embedding",
+    "reranker": "reranker",
+    "safety": "safety",
+    "decision": "decision",
+    "classification": "classification",
+}
+VARIANTS = REPO_ROOT / "data/serving/slot-variants.yaml"
+SLOTS_HEADER = ["Slot", "Checkpoint", "Role", "Placement"]
+
+
+def flagship_pages():
+    return [REPO_ROOT / "catalog" / key / "README.md" for key in EXPECTED_USE_CASE_PAGES]
+
+
+FLAGSHIPS = pytest.mark.parametrize(
+    "path", flagship_pages(), ids=lambda p: "/".join(p.parent.parts[-2:])
+)
+
+
+def placement_from_front_matter(path):
+    placement = (front_matter(path) or {}).get("placement") or {}
+    return {tier: set((placement.get(tier) or {}).get("runs") or []) for tier in TIERS}
+
+
+def slots_table(path):
+    """The Slots and checkpoints table, or None when the page has none."""
+    for table in tables(sections(body(path)).get("How it works", [])):
+        if table[0] == SLOTS_HEADER:
+            return table
+    return None
+
+
+def slot_cell_role(slot_cell, checkpoint_cell):
+    """`llm`, small -> llm-small; plain `llm` reads the size from the checkpoint."""
+    slot = re.sub(r"[`]", "", slot_cell).split(",")[0].strip()
+    if slot != "llm":
+        return slot
+    if "small" in slot_cell:
+        return "llm-small"
+    if "large" in slot_cell or "31B" in checkpoint_cell:
+        return "llm-large"
+    return "llm-small"
+
+
+def placement_from_slots_table(table):
+    out = {tier: set() for tier in TIERS}
+    for row in table[1:]:
+        tier = TIER_WORDS[row[3].strip().lower()]
+        out[tier].add(slot_cell_role(row[0], row[1]))
+    return out
+
+
+PLACEMENT_BULLET = re.compile(r"^- (?:\[[ x]\] )?Placement: (.+)$", re.M)
+
+
+def placement_bullet(path):
+    found = PLACEMENT_BULLET.findall(section_text(path, "What you need"))
+    return found[0] if len(found) == 1 else None
+
+
+def placement_from_bullet(text):
+    """Each sentence names one tier and the display names of the roles it runs."""
+    out = {tier: set() for tier in TIERS}
+    for sentence in re.split(r"(?<=\.)\s+", text.strip()):
+        low = sentence.lower()
+        tiers = {t for w, t in TIER_WORDS.items() if re.search(rf"\b{re.escape(w)}\b", low)}
+        assert len(tiers) == 1, f"Placement sentence must name one tier: {sentence!r}"
+        tier = tiers.pop()
+        for name, role in ROLE_NAMES.items():
+            if re.search(rf"\b{re.escape(name)}\b", low):
+                out[tier].add(role)
+    return out
+
+
+def section_tables(path, name):
+    return tables(sections(body(path)).get(name, []))
+
+
+@FLAGSHIPS
+def test_flagships_carry_card_and_placement(path):
+    fm = front_matter(path) or {}
+    assert isinstance(fm.get("card"), dict), f"{path}: no card in front matter"
+    placement = fm.get("placement")
+    assert isinstance(placement, dict), f"{path}: no placement in front matter"
+    assert set(placement) == set(TIERS), f"{path}: placement must list all three tiers"
+
+
+@FLAGSHIPS
+def test_placement_matches_page(path):
+    fm_map = placement_from_front_matter(path)
+    table = slots_table(path)
+    if table is not None:
+        assert fm_map == placement_from_slots_table(table)
+    else:
+        bullet = placement_bullet(path)
+        assert bullet, f"{path}: no Slots and checkpoints table, so What you need needs one Placement bullet"
+        assert fm_map == placement_from_bullet(bullet)
+
+
+@FLAGSHIPS
+def test_placed_roles_have_variants(path):
+    roles = {v["role"] for v in yaml.safe_load(VARIANTS.read_text(encoding="utf-8"))["variants"]}
+    placed = set().union(*placement_from_front_matter(path).values())
+    assert placed, f"{path}: placement runs no role"
+    assert placed <= roles, f"{path}: no variant for {sorted(placed - roles)}"
+
+
+def test_card_goals_and_summaries_unique():
+    cards = {p: (front_matter(p) or {}).get("card") or {} for p in flagship_pages()}
+    goals = [c.get("goal") for c in cards.values()]
+    summaries = [c.get("summary") for c in cards.values()]
+    assert all(goals) and len(set(goals)) == len(goals)
+    assert all(summaries) and len(set(summaries)) == len(summaries)
+    for path, card in cards.items():
+        assert card["summary"].strip() != (front_matter(path) or {}).get("one_liner", "").strip()
+
+
+@FLAGSHIPS
+def test_flagship_tables_exporter_shape(path):
+    need = section_tables(path, "What you need")
+    gov = section_tables(path, "Governance")
+
+    def one(tabs, key):
+        hits = [t for t in tabs if tuple(t[0]) == EXPORTER_TABLE_HEADERS[key]]
+        assert len(hits) == 1, f"{path}: expected one table with header {EXPORTER_TABLE_HEADERS[key]}"
+        assert len(hits[0]) > 1, f"{path}: table {key} has no data rows"
+        return hits[0]
+
+    one(need, "components")
+    one(gov, "actions")
+    params = one(gov, "parameters")
+    who = EXPORTER_TABLE_HEADERS["parameters"].index("Who sets it")
+    assert all(row[who].strip() for row in params[1:]), f"{path}: empty Who sets it cell"
