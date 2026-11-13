@@ -33,6 +33,9 @@ SIZING_COLUMNS = (
     ("Weights", "weights"),
     ("Hardware class", "hardware_class"),
 )
+SETUP_COLUMNS = ("Setup", "Tier", "GPUs per node", "Memory per GPU", "Notes")
+SETUP_FLAG_COLUMNS = ("Setup", "Setting", "Value", "Why")
+AMPERE_NOTE = "Ampere cards use W4A16 instead of FP8"
 
 
 def _load(data_dir: Path, name: str):
@@ -85,11 +88,65 @@ def flags_fence(data_dir: Path = DATA_DIR) -> str:
     return "\n".join(lines)
 
 
+def _table(header: tuple[str, ...], rows: list[list[str]]) -> str:
+    lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
+    lines.extend("| " + " | ".join(_cell(c) for c in row) + " |" for row in rows)
+    return "\n".join(lines)
+
+
+def _gb(x) -> str:
+    return f"{x:g} GB"
+
+
+def setups_table(data_dir: Path = DATA_DIR) -> str:
+    """The "Setup profiles" table, one row per setup in setups.yaml order."""
+    rows = []
+    for s in _load(data_dir, "setups.yaml")["setups"]:
+        acc = s["accelerators"]
+        notes = acc["model_class"] + (f"; {AMPERE_NOTE}" if s["ampere_note"] else "")
+        rows.append(
+            [
+                s["label"],
+                s["tier"].capitalize(),
+                str(acc["count_per_node"]),
+                _gb(acc["memory_per_gpu_gb"]),
+                notes,
+            ]
+        )
+    return _table(SETUP_COLUMNS, rows)
+
+
+def _code(text: str) -> str:
+    if "`" in text:
+        raise SystemExit(f"render_serving: cannot wrap text holding a backtick: {text!r}")
+    return f"`{text}`"
+
+
+def setup_flags_table(data_dir: Path = DATA_DIR) -> str:
+    """The "Key settings per setup" table, rows in flags.yaml per_setup order.
+
+    A setting that is a flag, and a value that is a flag value or a placeholder,
+    render as code so angle brackets show as text.
+    """
+    labels = {s["id"]: s["label"] for s in _load(data_dir, "setups.yaml")["setups"]}
+    rows = []
+    for r in _load(data_dir, "flags.yaml")["per_setup"]:
+        if r["setup"] not in labels:
+            raise SystemExit(f"render_serving: per_setup row names unknown setup {r['setup']!r}")
+        flag = r["setting"].startswith("--")
+        setting = _code(r["setting"]) if flag else r["setting"]
+        value = _code(r["value"]) if flag or "<" in r["value"] else r["value"]
+        rows.append([labels[r["setup"]], setting, value, r["why"]])
+    return _table(SETUP_FLAG_COLUMNS, rows)
+
+
 def blocks(data_dir: Path = DATA_DIR) -> dict[str, str]:
     """Marker name -> rendered text. A blank line separates each block from its markers."""
     return {
         "sizing": f"\n{sizing_table(data_dir)}\n\n",
         "flags-per-slot": f"\n{flags_fence(data_dir)}\n\n",
+        "setups": f"\n{setups_table(data_dir)}\n\n",
+        "setup-flags": f"\n{setup_flags_table(data_dir)}\n\n",
     }
 
 

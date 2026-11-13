@@ -1,8 +1,11 @@
 # Source of truth for slot weights. The serving page "Sizing by hardware class"
 # table is rendered from sizing_table by tools/site/render_serving.py
 # (`make render`). Figures are weights only; the KV cache comes on top.
-# Sources: the serving page Sources rows 1, 3, and 4, plus about 2 bytes per
-# parameter in bf16 for Safety and Classification.
+# Sources: the serving page Sources rows for each model card and row 4, plus
+# about 2 bytes per parameter in bf16 and about 1 byte in FP8 for Safety,
+# Classification, and the small LLM. No OTel FP8 build is published: every FP8
+# variant is operator-made. fit_reference marks the one llm-small variant the
+# explorer's fit estimate sizes the small LLM from.
 
 variants:
   - id: llm-31b-bf16
@@ -27,6 +30,29 @@ variants:
     model_card: "https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT"
     red_hat_build: "https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic"
     note: "The operator builds FP8 W8A8 from the OTel checkpoint. The weights figure comes from the FP8 build of the base model, linked as red_hat_build."
+  - id: llm-small-4b-bf16
+    role: llm-small
+    size_label: "4B"
+    precision: bf16
+    weights_gb: 8
+    gpu: true
+    source: published
+    checkpoint: "OTel-LLM-4B-IT"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-4B-IT"
+    red_hat_build: null
+    note: "The card states 4B parameters; sized at about 2 bytes per parameter."
+    fit_reference: true
+  - id: llm-small-4b-fp8
+    role: llm-small
+    size_label: "4B"
+    precision: fp8
+    weights_gb: 4
+    gpu: true
+    source: operator-made
+    checkpoint: "OTel-LLM-4B-IT"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-4B-IT"
+    red_hat_build: null
+    note: "The operator builds FP8 from the OTel checkpoint; sized at about 1 byte per parameter."
   - id: decision-26b-a4b-w4a16
     role: decision
     size_label: "26B-A4B"
@@ -49,6 +75,28 @@ variants:
     model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-12B-Safety"
     red_hat_build: null
     note: "Sized at about 2 bytes per parameter."
+  - id: safety-8.3b-bf16
+    role: safety
+    size_label: "8.3B"
+    precision: bf16
+    weights_gb: 17
+    gpu: true
+    source: published
+    checkpoint: "OTel-LLM-8.3B-Safety"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Safety"
+    red_hat_build: null
+    note: "The card states 8.3B parameters; sized at about 2 bytes per parameter."
+  - id: safety-8.3b-fp8
+    role: safety
+    size_label: "8.3B"
+    precision: fp8
+    weights_gb: 8.5
+    gpu: true
+    source: operator-made
+    checkpoint: "OTel-LLM-8.3B-Safety"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Safety"
+    red_hat_build: null
+    note: "The operator builds FP8 from the OTel checkpoint; sized at about 1 byte per parameter."
   - id: classification-8.3b-bf16
     role: classification
     size_label: "8.3B"
@@ -138,6 +186,11 @@ sizing_table:
     weights: "about 33 GB"
     hardware_class: "Single large GPU (about 80 GB or more); Small edge GPU at the 48 GB end, with less room for KV cache"
     variants: [llm-31b-fp8]
+  - slot: "Small LLM 4B"
+    precision: "bf16 or FP8"
+    weights: "about 8 GB in bf16, about 4 GB in FP8"
+    hardware_class: "Small edge GPU, or a slice of a Single large GPU"
+    variants: [llm-small-4b-bf16, llm-small-4b-fp8]
   - slot: "Decision 26B-A4B"
     precision: "W4A16"
     weights: "about 17 GB"
@@ -148,6 +201,11 @@ sizing_table:
     weights: "about 24 GB"
     hardware_class: "Small edge GPU at the 48 GB end, or Single large GPU"
     variants: [safety-12b-bf16]
+  - slot: "Safety 8.3B"
+    precision: "bf16 or FP8"
+    weights: "about 17 GB in bf16, about 8.5 GB in FP8"
+    hardware_class: "Small edge GPU (about 24 to 48 GB)"
+    variants: [safety-8.3b-bf16, safety-8.3b-fp8]
   - slot: "Classification 8.3B"
     precision: "bf16 or FP8"
     weights: "about 17 GB in bf16, about 8.5 GB in FP8"

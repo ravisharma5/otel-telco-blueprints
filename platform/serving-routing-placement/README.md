@@ -87,15 +87,17 @@ The figures cover weights only. The KV cache comes on top, so leave headroom for
 |---|---|---|---|
 | LLM 31B | bf16 | about 62.6 GB | Single large GPU with about 141 GB or more, or a Multi-GPU core node with two GPUs of about 80 GB in tensor parallel |
 | LLM 31B, operator-made build | FP8 W8A8 | about 33 GB | Single large GPU (about 80 GB or more); Small edge GPU at the 48 GB end, with less room for KV cache |
+| Small LLM 4B | bf16 or FP8 | about 8 GB in bf16, about 4 GB in FP8 | Small edge GPU, or a slice of a Single large GPU |
 | Decision 26B-A4B | W4A16 | about 17 GB | Small edge GPU (about 24 to 48 GB), tight at 24 GB; Single large GPU for high concurrency |
 | Safety 12B | bf16 | about 24 GB | Small edge GPU at the 48 GB end, or Single large GPU |
+| Safety 8.3B | bf16 or FP8 | about 17 GB in bf16, about 8.5 GB in FP8 | Small edge GPU (about 24 to 48 GB) |
 | Classification 8.3B | bf16 or FP8 | about 17 GB in bf16, about 8.5 GB in FP8 | Small edge GPU (about 24 to 48 GB) |
 | Embedding and Reranker, 0.6B to 8B | bf16 | about 1.2 to 16 GB | Small edge GPU, or a slice of a Single large GPU |
 | Small Embedding models up to 335M | bf16 or fp32 | under 1.5 GB | CPU |
 
 <!-- generated:sizing end -->
 
-Safety and Classification figures assume about 2 bytes per parameter in bf16. The 31B FP8 figure comes from the FP8 build of its base model.
+Safety, Classification, and small LLM figures assume about 2 bytes per parameter in bf16 and about 1 byte in FP8. No OTel FP8 builds are published, so operators make them; the 31B FP8 figure comes from the FP8 build of its base model. On Ampere, use W4A16 builds instead, as the hardware prerequisites say. Fit estimates count the small LLM as the 4B model, OTel-LLM-4B-IT.
 
 ### Edge options and limits
 
@@ -142,6 +144,50 @@ These failures are silent: the endpoint answers, but the output or the build is 
 <!-- generated:flags-per-slot end -->
 
 Load adapters only at start, pinned by digest. Never enable runtime adapter loading: block `VLLM_ALLOW_RUNTIME_LORA_UPDATING` by policy, as the [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) recommends.
+
+### Setup profiles
+
+Each setup is a hardware profile that a site can size its slots against; memory per GPU is the smallest card the setup allows.
+
+<!-- vale Google.OxfordComma = NO -->
+<!-- generated:setups start -->
+
+| Setup | Tier | GPUs per node | Memory per GPU | Notes |
+|---|---|---|---|---|
+| Regional site, one 48 GB GPU (Ada or newer) | Regional | 1 | 48 GB | 48 GB PCIe data-center GPU, Ada or newer; Ampere cards use W4A16 instead of FP8 |
+| Regional site, one 96 GB GPU | Regional | 1 | 96 GB | 96 GB PCIe data-center GPU, Blackwell |
+| Regional site, two 48 GB GPUs | Regional | 2 | 48 GB | 48 GB PCIe data-center GPU, Ada or newer; Ampere cards use W4A16 instead of FP8 |
+| Core pool, NVIDIA H200 or B200 | Core | 8 | 141 GB | H200 (141 GB) or B200; sized at the H200 |
+| Core pool, AMD MI300X | Core | 8 | 192 GB | MI300X (192 GB) |
+
+<!-- generated:setups end -->
+
+### Key settings per setup
+
+These settings come on top of the key flags per slot; values in angle brackets are yours to set, with no default.
+
+<!-- generated:setup-flags start -->
+
+| Setup | Setting | Value | Why |
+|---|---|---|---|
+| Regional site, one 48 GB GPU (Ada or newer) | Model build | FP8 W8A8, made by the operator (W4A16 on Ampere) | No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU. |
+| Regional site, one 48 GB GPU (Ada or newer) | `--max-model-len` | `<your longest prompt plus answer>` | Caps the KV cache each request can take, so the slots sharing one 48 GB GPU keep their room. |
+| Regional site, one 48 GB GPU (Ada or newer) | `--gpu-memory-utilization` | `<share for this slot>` | Gives each slot's vLLM instance a fixed share of GPU memory; the shares of all slots on one GPU sum to less than 1. |
+| Regional site, one 96 GB GPU | Model build | FP8 W8A8 for the 31B, made by the operator | The 31B in FP8 needs about 33 GB, which leaves room on 96 GB for the other regional slots. |
+| Regional site, one 96 GB GPU | `--gpu-memory-utilization` | `<share for this slot>` | Gives each slot's vLLM instance a fixed share of GPU memory; the shares of all slots on the GPU sum to less than 1. |
+| Regional site, two 48 GB GPUs | Model build | FP8 W8A8, made by the operator (W4A16 on Ampere) | No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU. |
+| Regional site, two 48 GB GPUs | `--tensor-parallel-size` | `1` | Places each slot service on one of the two GPUs, never split across both, because the cards share only PCIe. |
+| Regional site, two 48 GB GPUs | `--gpu-memory-utilization` | `<share for this slot>` | Gives each slot's vLLM instance a fixed share of its GPU; the shares of the slots on each GPU sum to less than 1. |
+| Core pool, NVIDIA H200 or B200 | Replica scheduling | Prefix-cache aware | Agent requests share long system prompts and tool lists, so the scheduler sends each request to a pod that already holds its prefix. |
+| Core pool, NVIDIA H200 or B200 | Priority band (`InferenceObjective`) | `<priority for this band>` | Only when batch work shares the pool: rank interactive triage ahead of batch evaluation and data generation, so batch jobs never starve it. |
+| Core pool, NVIDIA H200 or B200 | Weighted canary | `<share of traffic for the new revision>` | Sends a small share of traffic to a new revision before it takes the whole pool, so a bad revision reaches few requests. |
+| Core pool, AMD MI300X | Replica scheduling | Prefix-cache aware | Agent requests share long system prompts and tool lists, so the scheduler sends each request to a pod that already holds its prefix. |
+| Core pool, AMD MI300X | Priority band (`InferenceObjective`) | `<priority for this band>` | Only when batch work shares the pool: rank interactive triage ahead of batch evaluation and data generation, so batch jobs never starve it. |
+| Core pool, AMD MI300X | Weighted canary | `<share of traffic for the new revision>` | Sends a small share of traffic to a new revision before it takes the whole pool, so a bad revision reaches few requests. |
+| Core pool, AMD MI300X | `--moe-backend` | `triton` | Decision slot only: the Red Hat AI Inference build of vLLM needs it to serve the Gemma 4 MoE on ROCm. |
+
+<!-- generated:setup-flags end -->
+<!-- vale Google.OxfordComma = YES -->
 
 ### Worked example: alarm and root-cause triage
 
@@ -194,12 +240,15 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 6 | Gemma 4 uses the `gemma4` tool parser, and image and audio inputs can be turned off | project documentation | [vLLM Gemma 4 recipe](https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html) |
 | 7 | Pooling models serve embeddings, classification, and scores through `--runner pooling` and `--convert` | project documentation | [vLLM pooling models](https://docs.vllm.ai/en/latest/models/pooling_models/) |
 | 8 | INT8 W8A8 has no kernels on compute capability 10.0 and newer, and FP8 W8A8 needs compute capability 8.9 or newer (Ada, Hopper, Blackwell) or a supported AMD GPU | project documentation | [vLLM quantization](https://docs.vllm.ai/en/stable/features/quantization/) |
-| 9 | The front door routes on the request body and enforces per-subscription token limits; llm-d adds priority bands and weighted canary rollout | Red Hat guidance | [OpenShift AI release notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes) |
+| 9 | The front door routes on the request body and enforces per-subscription token limits; llm-d adds prefix-aware scheduling, priority bands, and weighted canary rollout | Red Hat guidance | [OpenShift AI release notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes) |
 | 10 | The current Red Hat AI Inference release ships vLLM 0.24, offers fast releases between its stable releases, and needs the MoE and attention flags in the hardware prerequisites | Red Hat guidance | [Red Hat AI Inference release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes) |
 | 11 | llm-d needs OpenShift 4.20 or later and an `amd64` node for the tokenizer | Red Hat guidance | [llm-d components](https://access.redhat.com/articles/7136620) |
 | 12 | MicroShift runs one AI model per deployment, on `x86_64` only, from ModelCar images | Red Hat guidance | [MicroShift AI models](https://docs.redhat.com/en/documentation/red_hat_build_of_microshift/4.22/html/using_ai_models/microshift-rh-openshift-ai) |
 | 13 | OpenShift AI on single-node OpenShift needs at least 32 CPU cores and 128 GiB of RAM | Red Hat guidance | [OpenShift AI install](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) |
 | 14 | Block runtime adapter loading and pin adapters by digest | Red Hat guidance | [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) |
+| 15 | The OTel small LLM used for fit estimates has 4B parameters | model card | [OTel-LLM-4B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-4B-IT) |
+| 16 | The smaller OTel Safety model has 8.3B parameters | model card | [OTel-LLM-8.3B-Safety model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Safety) |
+| 17 | `--max-model-len` caps the context length, `--gpu-memory-utilization` sets each vLLM instance's share of GPU memory, and `--tensor-parallel-size` sets how many GPUs one instance spans | project documentation | [vLLM engine arguments](https://docs.vllm.ai/en/latest/configuration/engine_args/) |
 
 - Gate: after every deploy, ask each generative slot to identify itself, and fail the rollout if the answer is wrong or empty.
 - Gate: on MI350-class GPUs, confirm the pod sets `VLLM_ROCM_USE_AITER=0` and that a fixed prompt returns well-formed text before traffic arrives.

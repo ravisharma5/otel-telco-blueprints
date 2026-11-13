@@ -96,3 +96,101 @@ per_slot:
         continue: false
         trailing_comment: null
         pad_to: null
+
+# Settings on top of the per-slot flags, for each setup profile in setups.yaml,
+# in setup order. Values are flags or settings from the cited source, or
+# placeholders in angle brackets with no default. when_batch: yes means the
+# row applies only when batch work shares the pool. Every source is a Source
+# link in the serving page Sources table.
+
+per_setup:
+  - setup: regional-48
+    setting: "Model build"
+    value: "FP8 W8A8, made by the operator (W4A16 on Ampere)"
+    why: "No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/stable/features/quantization/"
+  - setup: regional-48
+    setting: "--max-model-len"
+    value: "<your longest prompt plus answer>"
+    why: "Caps the KV cache each request can take, so the slots sharing one 48 GB GPU keep their room."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/latest/configuration/engine_args/"
+  - setup: regional-48
+    setting: "--gpu-memory-utilization"
+    value: "<share for this slot>"
+    why: "Gives each slot's vLLM instance a fixed share of GPU memory; the shares of all slots on one GPU sum to less than 1."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/latest/configuration/engine_args/"
+  - setup: regional-96
+    setting: "Model build"
+    value: "FP8 W8A8 for the 31B, made by the operator"
+    why: "The 31B in FP8 needs about 33 GB, which leaves room on 96 GB for the other regional slots."
+    when_batch: null
+    source: "https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic"
+  - setup: regional-96
+    setting: "--gpu-memory-utilization"
+    value: "<share for this slot>"
+    why: "Gives each slot's vLLM instance a fixed share of GPU memory; the shares of all slots on the GPU sum to less than 1."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/latest/configuration/engine_args/"
+  - setup: regional-2x48
+    setting: "Model build"
+    value: "FP8 W8A8, made by the operator (W4A16 on Ampere)"
+    why: "No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/stable/features/quantization/"
+  - setup: regional-2x48
+    setting: "--tensor-parallel-size"
+    value: "1"
+    why: "Places each slot service on one of the two GPUs, never split across both, because the cards share only PCIe."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/latest/configuration/engine_args/"
+  - setup: regional-2x48
+    setting: "--gpu-memory-utilization"
+    value: "<share for this slot>"
+    why: "Gives each slot's vLLM instance a fixed share of its GPU; the shares of the slots on each GPU sum to less than 1."
+    when_batch: null
+    source: "https://docs.vllm.ai/en/latest/configuration/engine_args/"
+  - setup: core-nvidia
+    setting: "Replica scheduling"
+    value: "Prefix-cache aware"
+    why: "Agent requests share long system prompts and tool lists, so the scheduler sends each request to a pod that already holds its prefix."
+    when_batch: null
+    source: "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes"
+  - setup: core-nvidia
+    setting: "Priority band (`InferenceObjective`)"
+    value: "<priority for this band>"
+    why: "Only when batch work shares the pool: rank interactive triage ahead of batch evaluation and data generation, so batch jobs never starve it."
+    when_batch: "yes"
+    source: "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes"
+  - setup: core-nvidia
+    setting: "Weighted canary"
+    value: "<share of traffic for the new revision>"
+    why: "Sends a small share of traffic to a new revision before it takes the whole pool, so a bad revision reaches few requests."
+    when_batch: null
+    source: "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes"
+  - setup: core-amd
+    setting: "Replica scheduling"
+    value: "Prefix-cache aware"
+    why: "Agent requests share long system prompts and tool lists, so the scheduler sends each request to a pod that already holds its prefix."
+    when_batch: null
+    source: "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes"
+  - setup: core-amd
+    setting: "Priority band (`InferenceObjective`)"
+    value: "<priority for this band>"
+    why: "Only when batch work shares the pool: rank interactive triage ahead of batch evaluation and data generation, so batch jobs never starve it."
+    when_batch: "yes"
+    source: "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes"
+  - setup: core-amd
+    setting: "Weighted canary"
+    value: "<share of traffic for the new revision>"
+    why: "Sends a small share of traffic to a new revision before it takes the whole pool, so a bad revision reaches few requests."
+    when_batch: null
+    source: "https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes"
+  - setup: core-amd
+    setting: "--moe-backend"
+    value: "triton"
+    why: "Decision slot only: the Red Hat AI Inference build of vLLM needs it to serve the Gemma 4 MoE on ROCm."
+    when_batch: null
+    source: "https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes"
