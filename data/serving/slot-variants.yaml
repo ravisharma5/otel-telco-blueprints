@@ -1,0 +1,165 @@
+# Source of truth for slot weights. The serving page "Sizing by hardware class"
+# table is rendered from sizing_table by tools/site/render_serving.py
+# (`make render`). Figures are weights only; the KV cache comes on top.
+# Sources: the serving page Sources rows 1, 3, and 4, plus about 2 bytes per
+# parameter in bf16 for Safety and Classification.
+
+variants:
+  - id: llm-31b-bf16
+    role: llm-large
+    size_label: "31B"
+    precision: bf16
+    weights_gb: 62.6
+    gpu: true
+    source: published
+    checkpoint: "OTel-2.0-LLM-31B-IT"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT"
+    red_hat_build: null
+    note: null
+  - id: llm-31b-fp8
+    role: llm-large
+    size_label: "31B"
+    precision: fp8
+    weights_gb: 33
+    gpu: true
+    source: operator-made
+    checkpoint: "OTel-2.0-LLM-31B-IT"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT"
+    red_hat_build: "https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic"
+    note: "The operator builds FP8 W8A8 from the OTel checkpoint. The weights figure comes from the FP8 build of the base model, linked as red_hat_build."
+  - id: decision-26b-a4b-w4a16
+    role: decision
+    size_label: "26B-A4B"
+    precision: w4a16
+    weights_gb: 17
+    gpu: true
+    source: published
+    checkpoint: "OTel-2.0-Decision-26B-A4B-4bit"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit"
+    red_hat_build: null
+    note: "Ships only as W4A16."
+  - id: safety-12b-bf16
+    role: safety
+    size_label: "12B"
+    precision: bf16
+    weights_gb: 24
+    gpu: true
+    source: published
+    checkpoint: "OTel-LLM-12B-Safety"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-12B-Safety"
+    red_hat_build: null
+    note: "Sized at about 2 bytes per parameter."
+  - id: classification-8.3b-bf16
+    role: classification
+    size_label: "8.3B"
+    precision: bf16
+    weights_gb: 17
+    gpu: true
+    source: published
+    checkpoint: "OTel-LLM-8.3B-Classification"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Classification"
+    red_hat_build: null
+    note: "Sized at about 2 bytes per parameter."
+  - id: classification-8.3b-fp8
+    role: classification
+    size_label: "8.3B"
+    precision: fp8
+    weights_gb: 8.5
+    gpu: true
+    source: operator-made
+    checkpoint: "OTel-LLM-8.3B-Classification"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Classification"
+    red_hat_build: null
+    note: "The operator builds FP8 from the OTel checkpoint; sized at about 1 byte per parameter."
+  - id: embedding-0.6b-bf16
+    role: embedding
+    size_label: "0.6B"
+    precision: bf16
+    weights_gb: 1.2
+    gpu: true
+    source: published
+    checkpoint: "OTel-Embedding-600M"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-Embedding-600M"
+    red_hat_build: null
+    note: "Changing the embedding model forces a full re-index."
+  - id: embedding-8b-bf16
+    role: embedding
+    size_label: "8B"
+    precision: bf16
+    weights_gb: 16
+    gpu: true
+    source: published
+    checkpoint: "OTel-Embedding-8B"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-Embedding-8B"
+    red_hat_build: null
+    note: "Changing the embedding model forces a full re-index."
+  - id: reranker-0.6b-bf16
+    role: reranker
+    size_label: "0.6B"
+    precision: bf16
+    weights_gb: 1.2
+    gpu: true
+    source: published
+    checkpoint: "OTel-Reranker-0.6B"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-Reranker-0.6B"
+    red_hat_build: null
+    note: "A Qwen3 LLM fine-tune with a one-label head, not Qwen3-Reranker."
+  - id: reranker-4b-bf16
+    role: reranker
+    size_label: "4B"
+    precision: bf16
+    weights_gb: 8
+    gpu: true
+    source: published
+    checkpoint: "OTel-Reranker-4B"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-Reranker-4B"
+    red_hat_build: null
+    note: "A Qwen3 LLM fine-tune with a one-label head, not Qwen3-Reranker."
+  - id: embedding-small-cpu
+    role: embedding
+    size_label: "up to 335M"
+    precision: bf16
+    weights_gb: 1.5
+    gpu: false
+    source: published
+    checkpoint: "OTel-Embedding-335M"
+    model_card: "https://huggingface.co/farbodtavakkoli/OTel-Embedding-335M"
+    red_hat_build: null
+    note: "Upper bound for the 22M to 335M OTel-Embedding models, which run on CPU in bf16 or fp32."
+
+sizing_table:
+  - slot: "LLM 31B"
+    precision: "bf16"
+    weights: "about 62.6 GB"
+    hardware_class: "Single large GPU with about 141 GB or more, or a Multi-GPU core node with two GPUs of about 80 GB in tensor parallel"
+    variants: [llm-31b-bf16]
+  - slot: "LLM 31B, operator-made build"
+    precision: "FP8 W8A8"
+    weights: "about 33 GB"
+    hardware_class: "Single large GPU (about 80 GB or more); Small edge GPU at the 48 GB end, with less room for KV cache"
+    variants: [llm-31b-fp8]
+  - slot: "Decision 26B-A4B"
+    precision: "W4A16"
+    weights: "about 17 GB"
+    hardware_class: "Small edge GPU (about 24 to 48 GB), tight at 24 GB; Single large GPU for high concurrency"
+    variants: [decision-26b-a4b-w4a16]
+  - slot: "Safety 12B"
+    precision: "bf16"
+    weights: "about 24 GB"
+    hardware_class: "Small edge GPU at the 48 GB end, or Single large GPU"
+    variants: [safety-12b-bf16]
+  - slot: "Classification 8.3B"
+    precision: "bf16 or FP8"
+    weights: "about 17 GB in bf16, about 8.5 GB in FP8"
+    hardware_class: "Small edge GPU (about 24 to 48 GB)"
+    variants: [classification-8.3b-bf16, classification-8.3b-fp8]
+  - slot: "Embedding and Reranker, 0.6B to 8B"
+    precision: "bf16"
+    weights: "about 1.2 to 16 GB"
+    hardware_class: "Small edge GPU, or a slice of a Single large GPU"
+    variants: [embedding-0.6b-bf16, embedding-8b-bf16, reranker-0.6b-bf16, reranker-4b-bf16]
+  - slot: "Small Embedding models up to 335M"
+    precision: "bf16 or fp32"
+    weights: "under 1.5 GB"
+    hardware_class: "CPU"
+    variants: [embedding-small-cpu]

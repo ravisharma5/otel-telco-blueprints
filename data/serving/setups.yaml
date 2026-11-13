@@ -1,0 +1,86 @@
+# Setup profiles for the use-case explorer, in the shape of an
+# inference-playbooks hardware profile. Each setup names the Red Hat AI
+# Inference vLLM image it runs (no tag; pin the tag in your deployment).
+# memory_per_gpu_gb is the smallest card the setup allows, so the fit bar
+# never overstates room. Two 48 GB GPUs are packed per GPU, never one pool.
+
+default:
+  setup: regional-96
+  batch: "yes"
+
+fit_bands:
+  fits_max_pct: 60
+  tight_max_pct: 80
+  why: "The fit bar counts weights only. Keeping weights at 60% of GPU memory or less leaves room for the KV cache at useful context lengths and concurrency; over 80% leaves too little."
+
+setups:
+  - id: regional-48
+    label: "Regional site, one 48 GB GPU (Ada or newer)"
+    tier: regional
+    accelerators:
+      vendor: nvidia
+      model_class: "48 GB PCIe data-center GPU, Ada or newer"
+      count_per_node: 1
+      memory_per_gpu_gb: 48
+      arch: ada
+      intra_node_interconnect: none
+    host:
+      cpu_architecture: x86_64
+    engine_image: "registry.redhat.io/rhaii/vllm-cuda-rhel9"
+    ampere_note: true
+  - id: regional-96
+    label: "Regional site, one 96 GB GPU"
+    tier: regional
+    accelerators:
+      vendor: nvidia
+      model_class: "96 GB PCIe data-center GPU, Blackwell"
+      count_per_node: 1
+      memory_per_gpu_gb: 96
+      arch: blackwell
+      intra_node_interconnect: none
+    host:
+      cpu_architecture: x86_64
+    engine_image: "registry.redhat.io/rhaii/vllm-cuda-rhel9"
+    ampere_note: false
+  - id: regional-2x48
+    label: "Regional site, two 48 GB GPUs"
+    tier: regional
+    accelerators:
+      vendor: nvidia
+      model_class: "48 GB PCIe data-center GPU, Ada or newer"
+      count_per_node: 2
+      memory_per_gpu_gb: 48
+      arch: ada
+      intra_node_interconnect: pcie
+    host:
+      cpu_architecture: x86_64
+    engine_image: "registry.redhat.io/rhaii/vllm-cuda-rhel9"
+    ampere_note: true
+  - id: core-nvidia
+    label: "Core pool, NVIDIA H200 or B200"
+    tier: core
+    accelerators:
+      vendor: nvidia
+      model_class: "H200 (141 GB) or B200; sized at the H200"
+      count_per_node: 8
+      memory_per_gpu_gb: 141
+      arch: hopper
+      intra_node_interconnect: nvlink
+    host:
+      cpu_architecture: x86_64
+    engine_image: "registry.redhat.io/rhaii/vllm-cuda-rhel9"
+    ampere_note: false
+  - id: core-amd
+    label: "Core pool, AMD MI300X"
+    tier: core
+    accelerators:
+      vendor: amd
+      model_class: "MI300X (192 GB)"
+      count_per_node: 8
+      memory_per_gpu_gb: 192
+      arch: cdna3
+      intra_node_interconnect: infinity-fabric
+    host:
+      cpu_architecture: x86_64
+    engine_image: "registry.redhat.io/rhaii/vllm-rocm-rhel9"
+    ampere_note: false

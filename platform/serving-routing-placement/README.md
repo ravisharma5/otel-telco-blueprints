@@ -81,6 +81,8 @@ None of these layers picks the tier. llm-d schedules within one cluster, so the 
 
 The figures cover weights only. The KV cache comes on top, so leave headroom for your context length and concurrency.
 
+<!-- generated:sizing start -->
+
 | Slot | Precision | Weights | Hardware class |
 |---|---|---|---|
 | LLM 31B | bf16 | about 62.6 GB | Single large GPU with about 141 GB or more, or a Multi-GPU core node with two GPUs of about 80 GB in tensor parallel |
@@ -90,6 +92,8 @@ The figures cover weights only. The KV cache comes on top, so leave headroom for
 | Classification 8.3B | bf16 or FP8 | about 17 GB in bf16, about 8.5 GB in FP8 | Small edge GPU (about 24 to 48 GB) |
 | Embedding and Reranker, 0.6B to 8B | bf16 | about 1.2 to 16 GB | Small edge GPU, or a slice of a Single large GPU |
 | Small Embedding models up to 335M | bf16 or fp32 | under 1.5 GB | CPU |
+
+<!-- generated:sizing end -->
 
 Safety and Classification figures assume about 2 bytes per parameter in bf16. The 31B FP8 figure comes from the FP8 build of its base model.
 
@@ -119,6 +123,8 @@ These failures are silent: the endpoint answers, but the output or the build is 
 
 ### Key flags per slot
 
+<!-- generated:flags-per-slot start -->
+
 ```text
 # LLM 31B (pin the revision; text-only; tool calling)
 --revision <sha> --enable-auto-tool-choice --tool-call-parser gemma4 \
@@ -132,6 +138,8 @@ These failures are silent: the endpoint answers, but the output or the build is 
 # Static LoRA only (never runtime hot-load)
 --enable-lora --lora-modules <name>=<path> --max-loras <n> --max-lora-rank <r>
 ```
+
+<!-- generated:flags-per-slot end -->
 
 Load adapters only at start, pinned by digest. Never enable runtime adapter loading: block `VLLM_ALLOW_RUNTIME_LORA_UPDATING` by policy, as the [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) recommends.
 

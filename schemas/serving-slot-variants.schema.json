@@ -34,7 +34,7 @@
       "additionalProperties": false,
       "required": ["id", "role", "size_label", "precision", "weights_gb", "gpu", "source", "checkpoint", "model_card", "red_hat_build", "note"],
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$" },
         "role": { "$ref": "#/$defs/role" },
         "size_label": { "type": "string", "minLength": 1 },
         "precision": { "type": "string", "enum": ["bf16", "fp32", "fp8", "w4a16"] },

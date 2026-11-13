@@ -1,0 +1,98 @@
+# Source of truth for the serving page "Key flags per slot" fence, rendered by
+# tools/site/render_serving.py (`make render`). Recipes copy these lines
+# verbatim, so the render hints (continue, trailing_comment, pad_to) keep the
+# fence byte for byte. Each flag carries a one-sentence why.
+
+per_slot:
+  - id: llm-31b
+    comment: "LLM 31B (pin the revision; text-only; tool calling)"
+    roles: [llm-large]
+    lines:
+      - args:
+          - flag: "--revision"
+            value: "<sha>"
+            why: "Pins the checkpoint, because the model card says the weights may change."
+          - flag: "--enable-auto-tool-choice"
+            value: null
+            why: "Lets the model decide when to call a tool, which agent workflows need."
+          - flag: "--tool-call-parser"
+            value: "gemma4"
+            why: "Parses Gemma 4 tool-call output into structured tool calls."
+        continue: true
+        trailing_comment: null
+        pad_to: null
+      - args:
+          - flag: "--limit-mm-per-prompt"
+            value: "'{\"image\": 0, \"audio\": 0}'"
+            why: "Turns off image and audio input, so the model serves text only and frees memory."
+        continue: false
+        trailing_comment: null
+        pad_to: null
+  - id: decision
+    comment: "Decision (card recipe)"
+    roles: [decision]
+    lines:
+      - args:
+          - flag: "--revision"
+            value: "<sha>"
+            why: "Pins the checkpoint, so routing thresholds stay tied to one set of weights."
+          - flag: "--max-logprobs"
+            value: "64"
+            why: "Returns enough log probabilities to read every label probability the thresholds use."
+          - flag: "--enable-prefix-caching"
+            value: null
+            why: "Reuses the shared prompt prefix across the questions asked about one request."
+          - flag: "--max-model-len"
+            value: "16384"
+            why: "Caps the context at the length the model card recipe uses, which bounds KV cache use."
+        continue: false
+        trailing_comment: null
+        pad_to: null
+  - id: classification-reranker
+    comment: "Classification (Gemma3TextForSequenceClassification) and Reranker (num_labels=1)"
+    roles: [classification, reranker]
+    lines:
+      - args:
+          - flag: "--runner"
+            value: "pooling"
+            why: "Runs the model as a pooling model that returns scores, not generated text."
+          - flag: "--convert"
+            value: "classify"
+            why: "Uses the sequence-classification head, which serves both the labels and the reranker score."
+        continue: false
+        trailing_comment: "endpoints /classify, /v1/score, /rerank"
+        pad_to: 43
+  - id: embedding
+    comment: "Embedding"
+    roles: [embedding]
+    lines:
+      - args:
+          - flag: "--runner"
+            value: "pooling"
+            why: "Runs the model as a pooling model that returns vectors, not generated text."
+          - flag: "--convert"
+            value: "embed"
+            why: "Serves embeddings from the model's pooled output."
+        continue: false
+        trailing_comment: "endpoint /v1/embeddings"
+        pad_to: 43
+  - id: static-lora
+    comment: "Static LoRA only (never runtime hot-load)"
+    roles: [llm-large, llm-small]
+    lines:
+      - args:
+          - flag: "--enable-lora"
+            value: null
+            why: "Turns on adapter serving on the shared base model."
+          - flag: "--lora-modules"
+            value: "<name>=<path>"
+            why: "Loads each adapter at start from a path pinned by digest, so no adapter arrives at runtime."
+          - flag: "--max-loras"
+            value: "<n>"
+            why: "Sets how many adapters can serve in one batch, which trades GPU memory for adapter count."
+          - flag: "--max-lora-rank"
+            value: "<r>"
+            why: "Must cover the highest rank you trained, or that adapter fails to load."
+        continue: false
+        trailing_comment: null
+        pad_to: null

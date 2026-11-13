@@ -8,7 +8,7 @@
 DOC_DIRS := README.md site-src framework architecture platform catalog templates
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale site serve ci hooks
+.PHONY: setup lint lint-structure lint-prose test test-vale render site serve ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -27,6 +27,11 @@ test:
 
 test-vale:
 	$(VALE) test .vale/styles/Blueprints
+
+# Rewrites the serving page blocks rendered from data/serving/*.yaml.
+# tools/tests/test_serving_data.py fails when the page drifts from the data.
+render:
+	uv run python -m tools.site.render_serving
 
 # NO_MKDOCS_2_WARNING silences the Material end-of-life banner in logs.
 site:
