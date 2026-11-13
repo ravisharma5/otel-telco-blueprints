@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://otel-telco-blueprints.invalid/schemas/serving-slot-variants.schema.json",
+  "title": "Serving slot variants and the sizing table",
+  "description": "Source of truth for the weights of each OTel slot variant. The serving page sizing table is rendered from sizing_table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["variants", "sizing_table"],
+  "properties": {
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/variant" }
+    },
+    "sizing_table": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sizing_row" }
+    }
+  },
+  "$defs": {
+    "role": {
+      "type": "string",
+      "enum": ["llm-large", "llm-small", "decision", "safety", "classification", "embedding", "reranker"]
+    },
+    "url_or_null": {
+      "anyOf": [
+        { "type": "string", "pattern": "^https://" },
+        { "type": "null" }
+      ]
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "size_label", "precision", "weights_gb", "gpu", "source", "checkpoint", "model_card", "red_hat_build", "note"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "role": { "$ref": "#/$defs/role" },
+        "size_label": { "type": "string", "minLength": 1 },
+        "precision": { "type": "string", "enum": ["bf16", "fp32", "fp8", "w4a16"] },
+        "weights_gb": { "type": "number", "exclusiveMinimum": 0 },
+        "gpu": { "type": "boolean" },
+        "source": { "type": "string", "enum": ["published", "operator-made"] },
+        "checkpoint": { "type": ["string", "null"] },
+        "model_card": { "$ref": "#/$defs/url_or_null" },
+        "red_hat_build": { "$ref": "#/$defs/url_or_null" },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "sizing_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot", "precision", "weights", "hardware_class", "variants"],
+      "properties": {
+        "slot": { "type": "string", "minLength": 1 },
+        "precision": { "type": "string", "minLength": 1 },
+        "weights": { "type": "string", "minLength": 1 },
+        "hardware_class": { "type": "string", "minLength": 1 },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

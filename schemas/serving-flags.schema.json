@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://otel-telco-blueprints.invalid/schemas/serving-flags.schema.json",
+  "title": "Serving flags per slot",
+  "description": "Source of truth for the serving page key flags fence. Each flag carries a one-sentence why; render hints keep the fence byte-identical.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["per_slot"],
+  "properties": {
+    "per_slot": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/block" }
+    }
+  },
+  "$defs": {
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "comment", "roles", "lines"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "comment": { "type": "string", "minLength": 1 },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "serving-slot-variants.schema.json#/$defs/role" }
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/line" }
+        }
+      }
+    },
+    "line": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["args", "continue", "trailing_comment", "pad_to"],
+      "properties": {
+        "args": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/arg" }
+        },
+        "continue": { "type": "boolean" },
+        "trailing_comment": { "type": ["string", "null"] },
+        "pad_to": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "arg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flag", "value", "why"],
+      "properties": {
+        "flag": { "type": "string", "pattern": "^--[a-z0-9][a-z0-9-]*$" },
+        "value": { "type": ["string", "null"] },
+        "why": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
