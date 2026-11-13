@@ -124,3 +124,47 @@ def test_no_prose_in_astro_files():
         text = astro.read_text(encoding="utf-8")
         for sample in samples:
             assert sample not in text, f"{astro.relative_to(REPO_ROOT)} hard-codes: {sample}"
+
+
+# Home sections the page renders; each lives under copy.home.
+HOME_SECTIONS = ["hero", "how", "goals", "gallery", "architects", "note"]
+COPY_REF = re.compile(r"(?<![/\w.])copy(?!\.md\b)((?:\.[A-Za-z_][\w]*|\[['\"][\w-]+['\"]\])+)")
+
+
+def _ref_path(ref):
+    return [p for p in re.split(r"\.|\[['\"]|['\"]\]", ref) if p]
+
+
+def test_home_copy_sections():
+    home = _copy()["home"]
+    missing = [s for s in HOME_SECTIONS if s not in home]
+    assert missing == []
+
+
+def test_copy_keys_used():
+    # Every copy.<path> referenced by an explorer template resolves in copy.md.
+    data = _copy()
+    refs = 0
+    bad = []
+    for astro in EXPLORER_SRC.rglob("*.astro"):
+        for match in COPY_REF.finditer(astro.read_text(encoding="utf-8")):
+            node = data
+            for key in _ref_path(match.group(1)):
+                if not isinstance(node, dict):
+                    break  # a method or index on a string or list
+                if key not in node:
+                    bad.append(f"{astro.name}: copy{match.group(1)}")
+                    break
+                node = node[key]
+            refs += 1
+    assert refs, "no copy references found"
+    assert bad == []
+
+
+def test_no_home_prose_in_astro_files():
+    # Any home string of three or more words typed into a template is a copy leak.
+    samples = [text for _, text in _strings(_copy()["home"]) if _words(text) >= 3]
+    for astro in EXPLORER_SRC.rglob("*.astro"):
+        text = astro.read_text(encoding="utf-8")
+        for sample in samples:
+            assert sample not in text, f"{astro.relative_to(REPO_ROOT)} hard-codes: {sample}"

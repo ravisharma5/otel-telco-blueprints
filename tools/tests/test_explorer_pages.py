@@ -198,3 +198,299 @@ def test_no_third_party_resources(explorer_dist):
             if OTHER_ORIGIN.match(ref):
                 hits.append(f"{css.name}: {ref}")
     assert hits == []
+
+
+# ---------- home page (site_output) ----------
+#
+# The home page is compared against explorer/src/generated/explorer.json (written by
+# make explorer-data) and copy.md, never hand-copied card text. Only the fixed
+# UI-SPEC labels (headings, counts words, status strings, architect links) are typed here.
+
+GENERATED = EXPLORER / "src/generated/explorer.json"
+VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+BAND_HEADINGS = [
+    ("h2", "How it works"),
+    ("h2", "What do you want to improve?"),
+    ("h2", "All use cases"),
+    ("h2", "Planning the platform?"),
+    ("h2", "Open source, every claim sourced"),
+]
+COUNT_WORDS = {
+    "slots": ("model slot", "model slots"),
+    "blueprints": ("platform blueprint", "platform blueprints"),
+    "tiers": ("site tier", "site tiers"),
+}
+RECIPE_STATUS = {"done": "Recipe published", "review": "Recipe in review", "draft": "Recipe in draft"}
+TIER_LABELS = {"far-edge": "Far edge", "regional": "Regional site", "core": "Core"}
+ARCHITECT_LINKS = [
+    ("Readiness questions", "framework/"),
+    ("Architecture overview", "architecture/"),
+    ("Platform blueprints", "platform/"),
+    ("All recipes", "recipes/"),
+]
+REPLACEABLE = "Any component can be replaced."
+
+
+class _Node:
+    def __init__(self, tag, attrs, parent=None):
+        self.tag = tag
+        self.attrs = dict(attrs)
+        self.parent = parent
+        self.children = []
+        self.order = 0
+
+    def text(self):
+        parts = []
+        for child in self.children:
+            parts.append(child if isinstance(child, str) else child.text())
+        return " ".join(" ".join(parts).split())
+
+    def walk(self):
+        for child in self.children:
+            if isinstance(child, _Node):
+                yield child
+                yield from child.walk()
+
+    def find_all(self, pred):
+        return [n for n in self.walk() if pred(n)]
+
+    def has_class(self, name):
+        return name in (self.attrs.get("class") or "").split()
+
+
+class _Tree(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.root = _Node("#root", [])
+        self.stack = [self.root]
+        self.count = 0
+        self.scripts = []
+        self._script = None
+
+    def handle_starttag(self, tag, attrs):
+        node = _Node(tag, attrs, self.stack[-1])
+        self.count += 1
+        node.order = self.count
+        self.stack[-1].children.append(node)
+        if tag == "script":
+            self._script = node
+        if tag not in VOID:
+            self.stack.append(node)
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in VOID:
+            self.stack.pop()
+
+    def handle_endtag(self, tag):
+        if tag in VOID:
+            return
+        for i in range(len(self.stack) - 1, 0, -1):
+            if self.stack[i].tag == tag:
+                del self.stack[i:]
+                break
+        if tag == "script":
+            self._script = None
+
+    def handle_data(self, data):
+        if self._script is not None:
+            self.scripts.append(data)
+            return
+        self.stack[-1].children.append(data)
+
+
+def _home(explorer_dist):
+    tree = _Tree()
+    tree.feed((explorer_dist / "index.html").read_text(encoding="utf-8"))
+    return tree
+
+
+def _data():
+    assert GENERATED.is_file(), "explorer.json missing: run make explorer"
+    return json.loads(GENERATED.read_text(encoding="utf-8"))
+
+
+def _used_tiers(data, uc):
+    state = uc["states"][data["default"]["setup"]][data["default"]["batch"]]
+    return [c["tier"] for c in state["tiers"] if c["used"]]
+
+
+def _counts_line(counts):
+    parts = []
+    for key in ("slots", "blueprints", "tiers"):
+        one, many = COUNT_WORDS[key]
+        n = counts[key]
+        parts.append(f"{n} {one if n == 1 else many}")
+    return " · ".join(parts)
+
+
+def _tiles(tree):
+    return tree.root.find_all(lambda n: n.tag == "a" and n.has_class("goal-tile"))
+
+
+def _cards(tree):
+    return tree.root.find_all(lambda n: "data-card" in n.attrs)
+
+
+@pytest.mark.site_output
+def test_home_title_and_lang(explorer_dist):
+    tree = _home(explorer_dist)
+    html = tree.root.find_all(lambda n: n.tag == "html")[0]
+    assert html.attrs.get("lang") == "en"
+    title = tree.root.find_all(lambda n: n.tag == "title")[0].text()
+    assert title == "OTel Telco Blueprints: telecom AI use cases in production"
+
+
+@pytest.mark.site_output
+def test_home_bands_in_order(explorer_dist):
+    tree = _home(explorer_dist)
+    h1 = tree.root.find_all(lambda n: n.tag == "h1")
+    assert len(h1) == 1
+    order = [h1[0].order]
+    for tag, text in BAND_HEADINGS:
+        hits = tree.root.find_all(lambda n, t=tag, x=text: n.tag == t and n.text() == x)
+        assert len(hits) == 1, f"expected one {tag} '{text}', found {len(hits)}"
+        order.append(hits[0].order)
+    footer = tree.root.find_all(lambda n: n.tag == "footer")
+    assert len(footer) == 1
+    order.append(footer[0].order)
+    assert order == sorted(order), "home bands are out of order"
+    steps = tree.root.find_all(lambda n: n.tag == "ol" and n.has_class("steps"))
+    assert len(steps) == 1
+    items = [c for c in steps[0].children if isinstance(c, _Node) and c.tag == "li"]
+    assert len(items) == 3
+    assert all(i.find_all(lambda n: n.tag == "h3") for i in items)
+    # How it works sits between the hero and the goal picker.
+    assert h1[0].order < steps[0].order < order[2]
+
+
+@pytest.mark.site_output
+def test_goal_tiles(explorer_dist):
+    data = _data()
+    tiles = _tiles(_home(explorer_dist))
+    assert len(tiles) == len(data["use_cases"])
+    by_href = {t.attrs["href"]: t for t in tiles}
+    for uc in data["use_cases"]:
+        href = f"{BASE}use-cases/{uc['slug']}/"
+        assert href in by_href, f"no goal tile for {uc['slug']}"
+        text = by_href[href].text()
+        assert uc["card"]["goal"] in text
+        assert uc["card"]["audience"] in text
+        assert uc["stage"]["label"] in text
+    slugs = {uc["slug"] for uc in data["use_cases"]}
+    for href in by_href:
+        assert re.fullmatch(rf"{re.escape(BASE)}use-cases/([a-z0-9-]+)/", href).group(1) in slugs
+
+
+@pytest.mark.site_output
+def test_gallery_cards(explorer_dist):
+    data = _data()
+    cards = _cards(_home(explorer_dist))
+    assert len(cards) == len(data["use_cases"])
+    by_slug = {c.attrs["data-card"]: c for c in cards}
+    assert set(by_slug) == {uc["slug"] for uc in data["use_cases"]}
+    for uc in data["use_cases"]:
+        card = by_slug[uc["slug"]]
+        text = card.text()
+        for value in (uc["domain_label"], uc["title"], uc["card"]["summary"], uc["stage"]["label"]):
+            assert value in text, f"{uc['slug']}: missing {value!r}"
+        tags = [n.text() for n in card.find_all(lambda n: n.has_class("tag"))]
+        assert tags == uc["slot_names"]
+        assert _counts_line(uc["counts"]) in text
+        assert RECIPE_STATUS[uc["doc_status"]] in text
+        links = card.find_all(lambda n: n.tag == "a")
+        assert [a.attrs["href"] for a in links] == [f"{BASE}use-cases/{uc['slug']}/"]
+        assert card.attrs["data-domain"] == uc["domain"]
+        assert card.attrs["data-stage"] == uc["stage"]["id"]
+        assert card.attrs["data-tiers"].split() == _used_tiers(data, uc)
+
+
+def test_counts_line_singular():
+    assert _counts_line({"slots": 1, "blueprints": 2, "tiers": 1}) == (
+        "1 model slot · 2 platform blueprints · 1 site tier"
+    )
+
+
+@pytest.mark.site_output
+def test_filter_chips_present_values_only(explorer_dist):
+    data = _data()
+    tree = _home(explorer_dist)
+    chips = tree.root.find_all(lambda n: n.tag == "button" and "data-group" in n.attrs)
+    assert chips and all(c.attrs.get("aria-pressed") == "false" for c in chips)
+    by_group = {}
+    for chip in chips:
+        by_group.setdefault(chip.attrs["data-group"], []).append((chip.attrs["data-value"], chip.text()))
+    f = data["filters"]
+    assert by_group["domain"] == [(d["id"], d["label"]) for d in f["domains"]]
+    assert by_group["stage"] == [(s["id"], s["label"]) for s in f["stages"]]
+    assert by_group["tiers"] == [(t, TIER_LABELS[t]) for t in f["tiers"]]
+    assert set(by_group) == {"domain", "stage", "tiers"}
+    # A chip only for a value at least one published use case has.
+    used = {
+        "domain": {uc["domain"] for uc in data["use_cases"]},
+        "stage": {uc["stage"]["id"] for uc in data["use_cases"]},
+        "tiers": {t for uc in data["use_cases"] for t in _used_tiers(data, uc)},
+    }
+    for group, values in by_group.items():
+        assert {v for v, _ in values} <= used[group]
+    if "far-edge" not in f["tiers"]:
+        assert "Far edge" not in [c.text() for c in chips]
+    groups = tree.root.find_all(lambda n: n.attrs.get("role") == "group")
+    assert len(groups) == 3
+    labels = []
+    for group in groups:
+        label_id = group.attrs.get("aria-labelledby")
+        assert label_id, "each chip group needs a visible label"
+        label = tree.root.find_all(lambda n, i=label_id: n.attrs.get("id") == i)
+        assert len(label) == 1 and not label[0].has_class("visually-hidden")
+        labels.append(label[0].text())
+    assert labels == ["Domain", "How far it goes", "Where it runs"]
+
+
+@pytest.mark.site_output
+def test_filter_bar_hidden_without_js(explorer_dist):
+    tree = _home(explorer_dist)
+    bars = tree.root.find_all(lambda n: "data-filter-bar" in n.attrs)
+    assert len(bars) == 1 and "hidden" in bars[0].attrs
+    cards = _cards(tree)
+    assert cards and all("hidden" not in c.attrs for c in cards)
+    empty = tree.root.find_all(lambda n: "data-empty" in n.attrs)
+    assert len(empty) == 1 and "hidden" in empty[0].attrs
+    count = tree.root.find_all(lambda n: "data-result-count" in n.attrs)
+    assert len(count) == 1 and count[0].attrs.get("aria-live") == "polite"
+
+
+@pytest.mark.site_output
+def test_architect_links_and_note(explorer_dist):
+    tree = _home(explorer_dist)
+    anchors = [(a.text(), a.attrs.get("href")) for a in tree.root.find_all(lambda n: n.tag == "a")]
+    for label, path in ARCHITECT_LINKS:
+        assert (label, BASE + path) in anchors, f"missing architect link {label}"
+    note = tree.root.find_all(lambda n: n.tag == "section" and n.has_class("oss-note"))
+    assert len(note) == 1 and REPLACEABLE in note[0].text()
+    otel = tree.root.find_all(lambda n: n.has_class("otel-line"))
+    assert len(otel) == 1
+    hrefs = [a.attrs.get("href") for a in otel[0].find_all(lambda n: n.tag == "a")]
+    assert hrefs == [BASE + "platform/intake-model-selection/"]
+
+
+@pytest.mark.site_output
+def test_no_coming_soon_and_no_innerhtml(explorer_dist):
+    for html in explorer_dist.rglob("*.html"):
+        text = html.read_text(encoding="utf-8")
+        assert "coming soon" not in text.lower(), html.name
+        tree = _Tree()
+        tree.feed(text)
+        assert "innerHTML" not in "".join(tree.scripts), html.name
+    for js in explorer_dist.rglob("*.js"):
+        assert "innerHTML" not in js.read_text(encoding="utf-8"), js.name
+
+
+def test_filter_script_reads_no_url_input():
+    # The filter script toggles hidden and aria-pressed and writes textContent only.
+    for astro in (EXPLORER / "src").rglob("*.astro"):
+        text = astro.read_text(encoding="utf-8")
+        assert "innerHTML" not in text, astro.name
+        if "data-filter-bar" in text:
+            for banned in ("location", "URLSearchParams", "localStorage", "sessionStorage", "document.cookie"):
+                assert banned not in text, f"{astro.name} uses {banned}"

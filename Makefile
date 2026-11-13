@@ -9,7 +9,7 @@
 DOC_DIRS := README.md site-src framework architecture platform catalog templates explorer/src/content
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale test-site render site serve explorer explorer-deps ci hooks
+.PHONY: setup lint lint-structure lint-prose test test-vale test-site render site serve explorer explorer-data explorer-deps ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -46,8 +46,13 @@ serve:
 explorer-deps:
 	npm ci --prefix explorer
 
+# Writes explorer/src/generated/explorer.json (untracked) from recipe front matter
+# and data/serving/*.yaml. The explorer build depends on it, so the JSON is always fresh.
+explorer-data:
+	uv run python -m tools.site.export_explorer
+
 # Builds the explorer into explorer/dist. Astro telemetry stays off.
-explorer:
+explorer: explorer-data
 	cd explorer && ASTRO_TELEMETRY_DISABLED=1 npx --no-install astro build
 
 # Tests that read built output (site/ and explorer/dist); run after site and explorer.
