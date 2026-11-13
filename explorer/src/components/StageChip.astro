@@ -1,0 +1,27 @@
+---
+// Static stage chip: the label text carries the meaning, the color only repeats it.
+import type { Stage } from '../lib/data';
+
+interface Props {
+  stage: Stage;
+}
+
+const { stage } = Astro.props;
+---
+<span class={`stage-chip stage-${stage.id}`}>
+  <span class="dot" aria-hidden="true"></span>{stage.label}
+</span>
+
+<style>
+  .stage-chip {
+    display: inline-flex; align-items: center; gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-control-x);
+    border-radius: var(--radius-full);
+    font-size: var(--text-label); font-weight: var(--weight-bold);
+    line-height: var(--leading-label);
+  }
+  .dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: currentColor; }
+  .stage-inform { background: var(--stage-inform-soft); color: var(--stage-inform-text); }
+  .stage-recommend { background: var(--stage-recommend-soft); color: var(--stage-recommend-text); }
+  .stage-act { background: var(--stage-act-soft); color: var(--stage-act-text); }
+</style>

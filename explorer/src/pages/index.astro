@@ -1,12 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
+import GoalTile from '../components/GoalTile.astro';
+import UseCaseCard from '../components/UseCaseCard.astro';
+import FilterChips from '../components/FilterChips.astro';
 import { frontmatter as copy } from '../content/copy.md';
+import { useCases } from '../lib/data';
 
 const base = import.meta.env.BASE_URL;
 const hero = copy.home.hero;
+const how = copy.home.how;
+const gallery = copy.home.gallery;
+const steps = how.steps.headings.map((title, i) => ({ n: i + 1, title, body: how.steps.notes[i] }));
 ---
 <Base title={copy.site.home_title} current="">
-  <section class="hero" aria-labelledby="hero-title">
+  <section class="band hero" aria-labelledby="hero-title">
     <p class="eyebrow">{hero.eyebrow}</p>
     <h1 id="hero-title">{hero.headline}</h1>
     <p class="lede">{hero.notes.lede}</p>
@@ -14,14 +21,122 @@ const hero = copy.home.hero;
       {hero.notes.otel} <a href={base + hero.otel_path}>{hero.buttons.otel_link}</a>
     </p>
   </section>
+
+  <section class="band how" aria-labelledby="how-title">
+    <h2 id="how-title">{copy.home.how.headings.title}</h2>
+    <ol class="steps">
+      {steps.map((step) => (
+        <li>
+          <span class="step-number" aria-hidden="true">{step.n}</span>
+          <h3>{step.title}</h3>
+          <p>{step.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="band goals" aria-labelledby="goals-title">
+    <h2 id="goals-title">{copy.home.goals.headings.title}</h2>
+    <ul class="goal-grid">
+      {useCases.map((uc) => <li><GoalTile useCase={uc} /></li>)}
+    </ul>
+  </section>
+
+  <section class="band gallery" aria-labelledby="gallery-title">
+    <h2 id="gallery-title">{copy.home.gallery.headings.title}</h2>
+    <FilterChips />
+    <ul class="card-grid">
+      {useCases.map((uc) => <UseCaseCard useCase={uc} />)}
+    </ul>
+    <div class="empty" data-empty hidden>
+      <h3>{copy.home.gallery.headings.empty}</h3>
+      <p>{copy.home.gallery.notes.empty}</p>
+      <button type="button" class="ghost" data-clear>{gallery.buttons.clear}</button>
+    </div>
+  </section>
+
+  <section class="band architects" aria-labelledby="architects-title">
+    <h2 id="architects-title">{copy.home.architects.headings.title}</h2>
+    <ul class="architect-links">
+      {copy.home.architects.links.map((link) => <li><a href={base + link.path}>{link.label}</a></li>)}
+    </ul>
+  </section>
+
+  <section class="band oss-note" aria-labelledby="note-title">
+    <div class="note-card">
+      <h2 id="note-title">{copy.home.note.headings.title}</h2>
+      <p>{copy.home.note.notes.body}</p>
+      <p class="replaceable">{copy.home.note.notes.replaceable}</p>
+    </div>
+  </section>
 </Base>
 
+<script>
+  // Gallery filters: OR within a group, AND across groups. Reads only data
+  // attributes on the page, toggles hidden and aria-pressed, writes textContent.
+  const bar = document.querySelector<HTMLElement>('[data-filter-bar]');
+  if (bar) {
+    const chips = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-group]'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-card]'));
+    const empty = document.querySelector<HTMLElement>('[data-empty]');
+    const count = bar.querySelector<HTMLElement>('[data-result-count]');
+    const barClear = bar.querySelector<HTMLElement>('[data-clear]');
+    const clears = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-clear]'));
+    const template = count?.dataset.template ?? '';
+
+    const update = () => {
+      const active = new Map<string, Set<string>>();
+      for (const chip of chips) {
+        if (chip.getAttribute('aria-pressed') !== 'true') continue;
+        const group = chip.dataset.group ?? '';
+        if (!active.has(group)) active.set(group, new Set());
+        active.get(group)?.add(chip.dataset.value ?? '');
+      }
+      let shown = 0;
+      for (const card of cards) {
+        let match = true;
+        for (const [group, values] of active) {
+          const own = (card.dataset[group] ?? '').split(' ');
+          if (!own.some((value) => values.has(value))) match = false;
+        }
+        card.hidden = !match;
+        if (match) shown += 1;
+      }
+      if (empty) empty.hidden = shown !== 0;
+      if (barClear) barClear.hidden = active.size === 0;
+      if (count) {
+        count.textContent = template
+          .replace('{n}', String(shown))
+          .replace('{total}', String(cards.length));
+      }
+    };
+
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        const pressed = chip.getAttribute('aria-pressed') === 'true';
+        chip.setAttribute('aria-pressed', String(!pressed));
+        update();
+      });
+    }
+    for (const button of clears) {
+      button.addEventListener('click', () => {
+        for (const chip of chips) chip.setAttribute('aria-pressed', 'false');
+        update();
+        chips[0]?.focus();
+      });
+    }
+    bar.hidden = false;
+    update();
+  }
+</script>
+
 <style>
-  .hero {
+  .band {
     max-width: var(--content-max-home);
     margin: 0 auto;
-    padding: var(--space-3xl) var(--space-xl);
+    padding: 0 var(--space-xl) var(--space-3xl);
   }
+  .hero { padding-top: var(--space-3xl); }
   .hero > * { max-width: var(--prose-max); }
   .eyebrow {
     margin: 0 0 var(--space-sm);
@@ -34,13 +149,72 @@ const hero = copy.home.hero;
     font-size: var(--text-display); line-height: var(--leading-display);
     letter-spacing: var(--tracking-tight);
   }
+  h2 {
+    margin: 0 0 var(--space-lg);
+    font-size: var(--text-heading); line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-tight);
+  }
+  h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
   .lede { margin: 0 0 var(--space-md); color: var(--color-text-muted); }
   .otel-line {
     margin: 0; color: var(--color-text-muted);
     font-size: var(--text-label); line-height: var(--leading-label);
   }
+  ul, ol { margin: 0; padding: 0; list-style: none; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+  .steps li { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .step-number {
+    color: var(--color-text-muted);
+    font-family: var(--font-display); font-weight: var(--weight-bold);
+    font-size: var(--text-heading); line-height: var(--leading-heading);
+  }
+  .steps p { margin: 0; }
+
+  .goal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+  .goal-grid li { display: flex; }
+  .goal-grid li > :global(a) { flex: 1; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: var(--space-lg);
+  }
+  .card-grid :global([data-card][hidden]) { display: none; }
+  .empty[hidden] { display: none; }
+  .empty {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-sm);
+    padding: var(--space-xl); max-width: var(--prose-max);
+  }
+  .empty p { margin: 0; color: var(--color-text-muted); }
+  .ghost {
+    min-height: var(--target-button); padding: 0 var(--space-control-x);
+    background: transparent; color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-full);
+    font: inherit; font-size: var(--text-label); cursor: pointer;
+  }
+  .ghost:hover { border-color: var(--color-text); }
+  .ghost:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+  .architect-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+
+  .oss-note { padding-bottom: 0; }
+  .note-card {
+    padding: var(--space-xl);
+    background: var(--color-surface-2);
+    border-radius: var(--radius-lg);
+  }
+  .note-card > * { max-width: var(--prose-max); }
+  .note-card p { margin: 0 0 var(--space-sm); }
+  .note-card .replaceable { margin: 0; font-weight: var(--weight-bold); }
+
+  :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
   @media (max-width: 639px) {
-    .hero { padding: var(--space-3xl) var(--space-md); }
+    .band { padding: 0 var(--space-md) var(--space-3xl); }
+    .hero { padding-top: var(--space-3xl); }
     h1 { font-size: var(--text-heading); line-height: var(--leading-heading); }
+    .steps, .goal-grid { grid-template-columns: 1fr; }
+    .note-card { padding: var(--space-lg) var(--space-md); }
   }
 </style>

@@ -1,0 +1,48 @@
+---
+// One goal tile per published use case. The whole tile is a single link.
+import StageChip from './StageChip.astro';
+import { useCasePath, type UseCase } from '../lib/data';
+
+interface Props {
+  useCase: UseCase;
+}
+
+const { useCase } = Astro.props;
+---
+<a class="goal-tile" href={useCasePath(useCase)}>
+  <span class="body">
+    <h3>{useCase.card.goal}</h3>
+    <span class="audience">{useCase.card.audience}</span>
+    <StageChip stage={useCase.stage} />
+  </span>
+  <span class="arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+  .goal-tile {
+    display: flex; align-items: center; gap: var(--space-md);
+    min-height: 96px; padding: var(--space-lg);
+    background: var(--color-surface); color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease,
+      transform var(--motion-fast) ease;
+  }
+  .goal-tile:hover {
+    color: var(--color-text); border-color: var(--color-text);
+    box-shadow: var(--shadow-md); transform: translateY(-2px);
+  }
+  .goal-tile:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-sm); flex: 1; }
+  h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+  .audience {
+    color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .arrow { font-size: var(--text-heading); transition: transform var(--motion-fast) ease; }
+  .goal-tile:hover .arrow { transform: translateX(4px); }
+  @media (prefers-reduced-motion: reduce) {
+    .goal-tile, .arrow { transition: border-color var(--motion-fast) ease; }
+    .goal-tile:hover, .goal-tile:hover .arrow { transform: none; }
+  }
+</style>

@@ -1,0 +1,90 @@
+---
+// Gallery card: one list item carrying the filter data attributes, wrapping one link.
+import StageChip from './StageChip.astro';
+import { frontmatter as copy } from '../content/copy.md';
+import { usedTiers, useCasePath, type UseCase } from '../lib/data';
+
+interface Props {
+  useCase: UseCase;
+}
+
+const { useCase } = Astro.props;
+const words = copy.home.gallery.counts;
+const counts = (['slots', 'blueprints', 'tiers'] as const)
+  .map((key) => {
+    const n = useCase.counts[key];
+    return `${n} ${n === 1 ? words[key].one : words[key].other}`;
+  })
+  .join(words.separator);
+const status = copy.home.gallery.status[useCase.doc_status];
+---
+<li
+  class="card-item"
+  data-card={useCase.slug}
+  data-domain={useCase.domain}
+  data-stage={useCase.stage.id}
+  data-tiers={usedTiers(useCase).join(' ')}
+>
+  <a class="card" href={useCasePath(useCase)}>
+    <span class="eyebrow">{useCase.domain_label}</span>
+    <h3>{useCase.title}</h3>
+    <span class="summary">{useCase.card.summary}</span>
+    <span class="stage"><StageChip stage={useCase.stage} /></span>
+    <ul class="tags">
+      {useCase.slot_names.map((name) => <li class="tag">{name}</li>)}
+    </ul>
+    <span class="footer">
+      <span class="counts">{counts}</span>
+      <span class="view">{copy.home.gallery.buttons.view} <span aria-hidden="true">→</span></span>
+    </span>
+    <span class="status">{status}</span>
+  </a>
+</li>
+
+<style>
+  .card-item { display: flex; }
+  .card {
+    display: flex; flex-direction: column; gap: var(--space-sm); flex: 1;
+    padding: var(--space-lg);
+    background: var(--color-surface); color: var(--color-text);
+    border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease,
+      transform var(--motion-fast) ease;
+  }
+  .card:hover {
+    color: var(--color-text); border-color: var(--color-text);
+    box-shadow: var(--shadow-md); transform: translateY(-2px);
+  }
+  .card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .eyebrow, .counts, .status {
+    color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .eyebrow { font-weight: var(--weight-bold); }
+  h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+  .summary { color: var(--color-text-muted); }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
+  .tag {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-surface-2); color: var(--color-text);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .footer {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-sm);
+    margin-top: auto; padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+  }
+  .view {
+    color: var(--color-primary-text);
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { transition: border-color var(--motion-fast) ease; }
+    .card:hover { transform: none; }
+  }
+  @media (max-width: 639px) {
+    .card { padding: var(--space-md); }
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+// Filter bar for the gallery. It ships with `hidden`; the page script removes it,
+// so without JavaScript the bar never shows and every card stays visible.
+// Chips render only for values the exporter found on a published use case.
+import { frontmatter as copy } from '../content/copy.md';
+import { filters, useCases } from '../lib/data';
+
+const labels = copy.home.gallery.filters;
+const groups = [
+  {
+    id: 'domain',
+    label: labels.headings.domain,
+    chips: filters.domains.map((d) => ({ value: d.id, label: d.label })),
+  },
+  {
+    id: 'stage',
+    label: labels.headings.stage,
+    chips: filters.stages.map((s) => ({ value: s.id, label: s.label })),
+  },
+  {
+    id: 'tiers',
+    label: labels.headings.tiers,
+    chips: filters.tiers.map((t) => ({ value: t, label: labels.tiers[t as keyof typeof labels.tiers] })),
+  },
+].filter((group) => group.chips.length > 0);
+const total = useCases.length;
+const template = copy.home.gallery.result_count;
+const initial = template.replace('{n}', String(total)).replace('{total}', String(total));
+---
+<div class="filter-bar" data-filter-bar hidden>
+  <div class="groups" role="region" aria-label={labels.label}>
+    {groups.map((group) => (
+      <div class="group" role="group" aria-labelledby={`filter-${group.id}`}>
+        <span class="group-label" id={`filter-${group.id}`}>{group.label}</span>
+        <span class="chips">
+          {group.chips.map((chip) => (
+            <button
+              type="button"
+              class="chip"
+              aria-pressed="false"
+              data-group={group.id}
+              data-value={chip.value}
+            >{chip.label}</button>
+          ))}
+        </span>
+      </div>
+    ))}
+    <button type="button" class="ghost" data-clear hidden>{copy.home.gallery.buttons.clear}</button>
+  </div>
+  <p class="result-count" data-result-count data-template={template} aria-live="polite">{initial}</p>
+</div>
+
+<style>
+  .filter-bar[hidden], .ghost[hidden] { display: none; }
+  .groups {
+    display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-lg);
+    padding: var(--space-md) 0;
+    border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);
+  }
+  .group { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .group-label {
+    color: var(--color-text-muted);
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  .chip, .ghost {
+    min-height: var(--target-chip); padding: 0 var(--space-control-x);
+    background: var(--color-surface); color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-full);
+    font: inherit; font-size: var(--text-label); font-weight: var(--weight-regular);
+    line-height: var(--leading-label); cursor: pointer;
+  }
+  .ghost { background: transparent; align-self: flex-end; }
+  .chip:hover, .ghost:hover { border-color: var(--color-text); }
+  .chip:focus-visible, .ghost:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .chip[aria-pressed='true'] {
+    background: var(--color-text); color: var(--color-bg); border-color: var(--color-text);
+  }
+  .chip[aria-pressed='true']::before { content: '✓ '; content: '✓ ' / ''; }
+  .result-count {
+    margin: var(--space-md) 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+</style>

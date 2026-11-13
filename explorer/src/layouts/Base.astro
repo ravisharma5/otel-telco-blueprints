@@ -53,7 +53,13 @@ const base = import.meta.env.BASE_URL;
       <slot />
     </main>
     <footer class="site-footer">
-      <p>{copy.footer.notes.licence}</p>
+      <p>
+        {copy.footer.notes.licence} ·
+        <a href={copy.site.repo_url}>
+          {copy.buttons.github} <span aria-hidden="true">↗</span>
+          <span class="visually-hidden">{copy.notes.external}</span>
+        </a>
+      </p>
       <p>{copy.footer.notes.otel}</p>
     </footer>
     <script>
@@ -145,6 +151,8 @@ const base = import.meta.env.BASE_URL;
     color: var(--color-text-muted);
     font-size: var(--text-label); line-height: var(--leading-label);
   }
+  .site-footer a { color: var(--color-text-muted); }
+  .site-footer a:hover { color: var(--color-primary-text); }
   .site-footer p { max-width: var(--content-max-page); margin: 0 auto var(--space-xs); }
   @media (max-width: 639px) {
     .header-inner { flex-wrap: wrap; padding: 0 var(--space-md); }
