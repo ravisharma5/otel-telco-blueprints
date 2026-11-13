@@ -89,7 +89,7 @@ options:
         reason: core-only
     where_it_helps:
       - use_case: UC-AGOPS-01
-        reason: A new revision of the large LLM that writes action requests reaches few incidents before it takes them all.
+        reason: A new revision of the large LLM that writes action requests handles a small share of incidents before it takes them all.
       - use_case: UC-KNOW-01
         reason: A new revision of the large LLM answers a small share of questions first, so citation quality can be compared.
     related: []
@@ -268,7 +268,7 @@ options:
     what: Constrains an answer to a JSON schema set in the request, so action requests and ticket fields follow it.
     set:
       - "`response_format` of type `json_schema` on requests that write action requests, tickets, or triage notes"
-    check: Measure the schema-valid rate on replayed tapes; gate and trajectory checks stay the same gates and must still pass.
+    check: Measure the schema-valid rate on replayed tapes; the same gates, including the gate and trajectory checks, must still pass.
     limits:
       - Set per request, not on the server.
       - A schema can lower answer quality on a fine-tune, so compare it with free text on the same gates.

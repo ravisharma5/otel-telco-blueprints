@@ -21,8 +21,8 @@ card:  # optional; the summary card on the explorer home page, in plain words
   audience: "<Who it serves, in 12 words or fewer>"
   measures: ["<First measure, 6 words or fewer>"]  # one to three measures
   risk: "<The main risk, in 15 words or fewer>"
-placement:  # optional; far-edge | regional | core; runs: llm-small | llm-large | embedding | reranker | safety | decision | classification
-  regional: {runs: ["llm-small", "safety"], note: ""}  # place every otel_slots entry; note: 15 words or fewer, say why when runs is empty
+placement:  # optional; one key per tier (far-edge | regional | core); runs lists roles: llm-small | llm-large | embedding | reranker | safety | decision | classification
+  regional: {runs: ["llm-small", "safety"], note: ""}  # put every otel_slots entry on a tier; note: 15 words or fewer, required when runs is empty to say why
 ---
 
 <!-- One template serves flagships and catalog entries.

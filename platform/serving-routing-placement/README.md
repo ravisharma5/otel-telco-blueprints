@@ -15,7 +15,7 @@ top_decisions:
   - "Keep the front door, content routing, and replica scheduling separate"
   - "Pick a serving option for each tier"
 agent_school: [104, 203]
-clarity_reviewed: "2026-11-11"
+clarity_reviewed: "2026-11-13"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -147,7 +147,7 @@ Load adapters only at start, pinned by digest. Never enable runtime adapter load
 
 ### Setup profiles
 
-Each setup is a hardware profile that a site can size its slots against; memory per GPU is the smallest card the setup allows.
+Each setup is a hardware profile to size a site's slots against. Memory per GPU is the smallest card the setup allows.
 
 <!-- vale Google.OxfordComma = NO -->
 <!-- generated:setups start -->
@@ -206,7 +206,7 @@ These are options to test, not defaults: turn one on, then check it on your traf
 | FP8 builds of the regional slots | Stores weights and activations in FP8, about half the bf16 size, so more slots fit on one regional GPU. | An FP8 W8A8 build of each regional slot that needs room, made from the pinned checkpoint, registered, and pinned by digest; W4A16 builds on Ampere GPUs | Show non-inferiority against the full-precision model on the same gates before the build serves traffic. | No OTel FP8 builds are published, so the operator makes them. Ampere GPUs have no FP8 W8A8 support. The Decision slot already ships as W4A16. | [vLLM quantization](https://docs.vllm.ai/en/stable/features/quantization/); [gemma-4-31B-it-FP8-dynamic model card](https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic) |
 | Adapter-aware routing | Routes a request that names a LoRA adapter to the pool of the base model that serves it. | The adapter names for each base model, unique across the fleet | Compare latency per adapter and adapter load churn with plain routing; each adapter must still pass the same gates. | Core only. Static, digest-pinned adapters only; never runtime adapter loading. | [llm-d multi-model routing](https://github.com/llm-d/llm-d/tree/main/guides/multi-model-routing); [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) |
 | FP8 KV cache | Stores the KV cache in FP8, about half its default size, so more context or more requests fit. | `--kv-cache-dtype fp8`, with scales calibrated through LLM Compressor; `--kv-cache-dtype-skip-layers sliding_window` if sliding-window layers lose accuracy | Compare concurrent requests per GPU and answer quality with the default KV cache; the same gates must still pass. | Without calibrated scales, accuracy can drop; sliding-window attention layers are the most sensitive. Keep it off the Decision slot unless you re-run its threshold checks. | [vLLM quantized KV cache](https://docs.vllm.ai/en/latest/features/quantization/quantized_kvcache/) |
-| Structured outputs | Constrains an answer to a JSON schema set in the request, so action requests and ticket fields follow it. | `response_format` of type `json_schema` on requests that write action requests, tickets, or triage notes | Measure the schema-valid rate on replayed tapes; gate and trajectory checks stay the same gates and must still pass. | Set per request, not on the server. A schema can lower answer quality on a fine-tune, so compare it with free text on the same gates. Never on the Decision slot, because it changes the label probabilities the gate reads. | [vLLM structured outputs](https://docs.vllm.ai/en/latest/features/structured_outputs/) |
+| Structured outputs | Constrains an answer to a JSON schema set in the request, so action requests and ticket fields follow it. | `response_format` of type `json_schema` on requests that write action requests, tickets, or triage notes | Measure the schema-valid rate on replayed tapes; the same gates, including the gate and trajectory checks, must still pass. | Set per request, not on the server. A schema can lower answer quality on a fine-tune, so compare it with free text on the same gates. Never on the Decision slot, because it changes the label probabilities the gate reads. | [vLLM structured outputs](https://docs.vllm.ai/en/latest/features/structured_outputs/) |
 
 <!-- generated:advanced-options end -->
 
@@ -223,7 +223,7 @@ Each row names a use case where the option fits its traffic, and why.
 | Prefix-aware scheduling | [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md) | A care conversation resends its earlier turns, so each new turn lands on the pod that holds them. |
 | Priority bands | [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md) | Incident triage keeps its latency while acceptance runs and data generation share the same large LLM pool. |
 | Priority bands | [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md) | Questions routed to the large LLM keep their latency while batch evaluation runs on the same pool. |
-| Weighted canary | [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md) | A new revision of the large LLM that writes action requests reaches few incidents before it takes them all. |
+| Weighted canary | [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md) | A new revision of the large LLM that writes action requests handles a small share of incidents before it takes them all. |
 | Weighted canary | [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md) | A new revision of the large LLM answers a small share of questions first, so citation quality can be compared. |
 | Speculative decoding | [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md) | Answers quote retrieved passages, so drafting from the prompt text can match many tokens. |
 | Speculative decoding | [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md) | Suggested answers reuse care knowledge-base text that is already in the prompt. |

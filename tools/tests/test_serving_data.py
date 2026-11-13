@@ -13,6 +13,7 @@ import difflib
 import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -637,3 +638,53 @@ def test_no_status_words_in_options():
         assert not STATUS_WORDS.search(s), s
         assert not PLANNING_ID_RE.search(s), s
         assert not PRODUCT_RELEASE.search(s), s
+
+
+# Internal-doc guard. The KV cache offload benchmark doc is internal, so it may
+# inform guidance but must never be linked or named in a tracked file. Both
+# forbidden strings are built from fragments so this file does not match itself.
+INTERNAL_DOC_HOST = "docs.goo" + "gle.com"
+INTERNAL_DOC_ID = "1Xc_V97ODm" + "bHTEmTaT6K7Sa3ooiiMMHma"
+
+
+def internal_doc_hits(paths: list[Path]) -> list[str]:
+    """Return 'path: string' for each file in paths that holds a forbidden string."""
+    hits = []
+    for path in paths:
+        try:
+            data = path.read_bytes()
+        except (FileNotFoundError, IsADirectoryError):
+            continue
+        if b"\0" in data[:8192]:
+            continue  # binary file
+        text = data.decode("utf-8", errors="ignore")
+        for needle in (INTERNAL_DOC_HOST, INTERNAL_DOC_ID):
+            if needle in text:
+                hits.append(f"{path}: {needle}")
+    return hits
+
+
+def tracked_files() -> list[Path]:
+    out = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=True,
+    ).stdout.decode()
+    return [REPO_ROOT / p for p in out.split("\0") if p]
+
+
+def test_internal_doc_guard_bites(tmp_path):
+    clean = tmp_path / "clean.md"
+    clean.write_text("No internal links here.\n")
+    planted_host = tmp_path / "host.md"
+    planted_host.write_text(f"See https://{INTERNAL_DOC_HOST}/document/d/x/edit\n")
+    planted_id = tmp_path / "id.md"
+    planted_id.write_text(f"doc {INTERNAL_DOC_ID}\n")
+    assert internal_doc_hits([clean]) == []
+    hits = internal_doc_hits([clean, planted_host, planted_id])
+    assert len(hits) == 2
+
+
+def test_no_internal_doc_reference():
+    assert internal_doc_hits(tracked_files()) == []
