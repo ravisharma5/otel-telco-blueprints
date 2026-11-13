@@ -200,7 +200,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 ## Deploy and verify
 
-Apply these settings in order. No action class rises above its stage until the gates pass.
+Apply these settings in order. No action class rises past its stage until the gates pass.
 
 1. Register each purpose as a `dpv:` scope, and wire the consent check into the Authorization Server.
 2. Configure the MCP Gateway with deny-unless-allowed rules and token exchange for the three device-status tools.

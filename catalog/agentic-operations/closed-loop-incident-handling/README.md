@@ -209,7 +209,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 ## Deploy and verify
 
-Apply these settings in order. No class rises above its stage until the gates pass.
+Apply these settings in order. No class rises past its stage until the gates pass.
 
 1. Pin the 2.0 checkpoint for each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
 2. Deploy the slots with the flags from What you need, and expose the gate endpoint inside the cluster behind a token.

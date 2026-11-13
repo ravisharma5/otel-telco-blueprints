@@ -202,7 +202,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 ## Deploy and verify
 
-Apply these settings in order. No fix ever gets an outcome above REVIEW.
+Apply these settings in order. No fix ever gets an outcome higher than REVIEW.
 
 1. Pin each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
 2. Register the corpora, then author the triage skill and a capability manifest for each tool.
