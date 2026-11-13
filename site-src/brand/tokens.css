@@ -1,0 +1,167 @@
+/*
+ * Shared design tokens for the docs site and the use-case explorer.
+ * One file, both sites. Colors follow prefers-color-scheme (no toggle, no storage).
+ * tools/tests/test_brand_tokens.py computes WCAG contrast for every pair the
+ * design contract names and fails below 4.5:1 (text) or 3:1 (non-text).
+ * Fonts are served from fonts/ next to this file (see fonts/PROVENANCE.txt);
+ * nothing loads from a third party.
+ */
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("fonts/RedHatDisplay-VF.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Red Hat Text";
+  src: url("fonts/RedHatText-VF.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Red Hat Mono";
+  src: url("fonts/RedHatMono-VF.woff2") format("woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* Type */
+  --font-display: "Red Hat Display", system-ui, sans-serif;
+  --font-text: "Red Hat Text", system-ui, sans-serif;
+  --font-mono: "Red Hat Mono", ui-monospace, monospace;
+  --text-body: 1rem;
+  --text-label: 0.875rem;
+  --text-heading: 1.5rem;
+  --text-display: 2.5rem;
+  --leading-body: 1.5;
+  --leading-label: 1.4;
+  --leading-heading: 1.25;
+  --leading-display: 1.1;
+  --weight-regular: 400;
+  --weight-bold: 700;
+  --tracking-tight: -0.01em;
+
+  /* Spacing (multiples of 4) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-control-x: 12px;
+  --target-button: 44px;
+  --target-chip: 36px;
+  --rail-width: 288px;
+  --content-max-home: 1200px;
+  --content-max-page: 1280px;
+  --prose-max: 720px;
+  --header-height: 56px;
+  --sticky-offset: 72px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Motion */
+  --motion-fast: 150ms ease;
+
+  /* Colors: light */
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F5F5F5;
+  --color-border: #E0E0E0;
+  --color-border-control: #8A8D90;
+  --color-text: #151515;
+  --color-text-muted: #6A6E73;
+  --color-primary: #EE0000;
+  --color-primary-hover: #BE0000;
+  --color-on-primary: #FFFFFF;
+  --color-primary-text: #BE0000;
+  --color-primary-soft: #FDE8E8;
+  --color-selected-border: #EE0000;
+  --color-focus: #151515;
+  --stage-inform-text: #2E6B28;
+  --stage-inform-soft: #E9F5E6;
+  --stage-recommend-text: #8A6100;
+  --stage-recommend-soft: #FDF3D8;
+  --stage-act-text: #A30000;
+  --stage-act-soft: #FBE7E5;
+  --fit-ok-fill: #3E8635;
+  --fit-tight-fill: #9E6A00;
+  --fit-over-fill: #C9190B;
+  --fit-track: #E0E0E0;
+  --fit-ok-text: #2E6B28;
+  --fit-tight-text: #8A6100;
+  --fit-over-text: #A30000;
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Colors: dark */
+    --color-bg: #0F0F10;
+    --color-surface: #18181A;
+    --color-surface-2: #222225;
+    --color-border: #2E2E32;
+    --color-border-control: #8A8A92;
+    --color-text: #F2F2F2;
+    --color-text-muted: #A2A5AA;
+    --color-primary: #EE0000;
+    --color-primary-hover: #BE0000;
+    --color-on-primary: #FFFFFF;
+    --color-primary-text: #FF8080;
+    --color-primary-soft: #3A1414;
+    --color-selected-border: #FF8080;
+    --color-focus: #F2F2F2;
+    --stage-inform-text: #7CC674;
+    --stage-inform-soft: #1D2B1B;
+    --stage-recommend-text: #F6C446;
+    --stage-recommend-soft: #2E2611;
+    --stage-act-text: #FF7468;
+    --stage-act-soft: #331A18;
+    --fit-ok-fill: #7CC674;
+    --fit-tight-fill: #F6C446;
+    --fit-over-fill: #FF7468;
+    --fit-track: #2E2E32;
+    --fit-ok-text: #7CC674;
+    --fit-tight-text: #F6C446;
+    --fit-over-text: #FF7468;
+    --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Focus ring: every interactive element, keyboard focus only. */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

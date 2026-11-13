@@ -1,0 +1,27 @@
+Vendored fonts: Red Hat Display, Red Hat Text, Red Hat Mono (variable, upright)
+
+Upstream repo:   https://github.com/RedHatOfficial/RedHatFont
+Commit:          6bb1048a6402b0076ea04f42951ec66263cd1437
+License:         SIL Open Font License 1.1 (OFL.txt in this folder, from the
+                 repository root at the same commit)
+Retrieved:       2026-11-13
+
+Files, SHA-256, and upstream path at the commit above:
+
+RedHatDisplay-VF.woff2  SHA-256: 69dca56dda2a2b067dee3e910323c97e54b8544f90f3d1c2192b5a37c0eb1ec3
+    upstream path: fonts/Proportional/RedHatDisplay/webfonts/RedHatDisplay-VF.woff2
+RedHatText-VF.woff2  SHA-256: 1a5c9a8a88447c5b171ae99dab5daa4c1d49e3502db0fdc0da65d59fc5603feb
+    upstream path: fonts/Proportional/RedHatText/webfonts/RedHatText-VF.woff2
+RedHatMono-VF.woff2  SHA-256: 54145e1e268b1c5359966336a6b6b12a5dfa046e493d3b4f2dc620c5edd12b62
+    upstream path: fonts/Mono/RedHatMono/webfonts/RedHatMono-VF.woff2
+OFL.txt  SHA-256: 4f1417e27511207cd217656c964f1b0d8b0c4a30156a1a699cf16dc5eba0dff6
+    upstream path: OFL.txt
+
+Each file is byte-identical to the upstream file: its git blob id matches the
+tree entry at the commit above. Nothing loads fonts from a third party; the
+sites serve these files from their own origin.
+
+Re-verify:
+  C=6bb1048a6402b0076ea04f42951ec66263cd1437
+  curl -fsSLO https://raw.githubusercontent.com/RedHatOfficial/RedHatFont/$C/fonts/Proportional/RedHatDisplay/webfonts/RedHatDisplay-VF.woff2
+  shasum -a 256 RedHatDisplay-VF.woff2   # must match the SHA-256 above
