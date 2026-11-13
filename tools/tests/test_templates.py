@@ -219,16 +219,71 @@ def test_template_front_matter_keys_match_schema(kind):
     assert set(fm) == set(schema["properties"])
 
 
-@pytest.mark.parametrize("kind", TEMPLATE_FILES)
-def test_template_has_diagram_slot_and_no_tier_field(kind):
-    text = TEMPLATE_FILES[kind].read_text()
+def test_template_has_diagram_slot_and_no_tier_field():
+    text = TEMPLATE_FILES["platform"].read_text()
     assert re.search(r"!\[[^\]]*\]\(diagrams/[^)]+\.svg\)", text)
     assert "candidate.json" in text
     assert not re.search(r"maturity|sandbox|maintained", text, re.I)
 
 
+def test_use_case_template_has_mermaid_slot_and_no_tier_field():
+    """Use cases draw one capability-only Mermaid flow instead of an archify image."""
+    text = TEMPLATE_FILES["use-case"].read_text()
+    _, body = split_doc(TEMPLATE_FILES["use-case"])
+    flow = section(body, "How it works")
+    fences = [t for t in flow if t.type == "fence" and t.info.strip() == "mermaid"]
+    assert text.count("```mermaid") == 1 and len(fences) == 1
+    assert "![" not in text and "diagrams/" not in text
+    assert not re.search(r"maturity|sandbox|maintained", text, re.I)
+    fence = fences[0].content
+    assert not re.search(r"Red Hat|OpenShift|vLLM|llm-d|\bL(?:10|[0-9])\b", fence)
+    notify = re.search(r'--\s*"NOTIFY"\s*-->\s*(\w+)', fence)
+    assert notify and re.search(rf'{notify.group(1)}\["[^"]*notification job', fence)
+
+
+USE_CASE_ACTION_HEADER = ["Action", "Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP)", "Approval", "AI Act class"]
+USE_CASE_PARAM_HEADER = ["Parameter", "What it controls", "Who sets it", "How to calibrate"]
+USE_CASE_RACI_HEADER = ["Activity", "Responsible", "Accountable", "Consulted", "Informed"]
+USE_CASE_VERIFY_HEADER = ["Check", "PB-02 gate or parameter", "Owner"]
+NO_DEFAULT = "This page gives no default values."
+
+
+def test_use_case_template_governance_tables():
+    _, body = split_doc(TEMPLATE_FILES["use-case"])
+    gov = section(body, "Governance")
+    headers = [tbl[0] for tbl in tables(gov)]
+    assert headers == [USE_CASE_ACTION_HEADER, USE_CASE_PARAM_HEADER, USE_CASE_RACI_HEADER]
+    assert [rows for _head, rows in tables(gov)[1:]] == [[], []], "parameter and RACI tables carry headers only"
+    assert any(NO_DEFAULT in p for p in paragraphs(gov))
+    assert any(h.endswith("architecture/decision-gate.md") for h in links(body_of(gov)))
+
+
+def test_use_case_template_deploy_and_verify():
+    _, body = split_doc(TEMPLATE_FILES["use-case"])
+    dv = section(body, "Deploy and verify")
+    assert any(t.type == "ordered_list_open" for t in dv)
+    assert [tbl[0] for tbl in tables(dv)] == [USE_CASE_VERIFY_HEADER]
+    items = [t.content for t in dv if t.type == "inline"]
+    bullets = [c for c in items if c.startswith(("Agent-school:", "NVIDIA", "LFN"))]
+    assert bullets and bullets[0].startswith("Agent-school:"), bullets
+
+
+def test_use_case_template_what_you_need_flags_and_decision():
+    _, body = split_doc(TEMPLATE_FILES["use-case"])
+    need = section(body, "What you need")
+    assert [tbl[0] for tbl in tables(need)] == [COMPONENT_HEADER]
+    assert any(t.type == "fence" and t.info.strip() == "text" for t in need)
+    assert any(h.endswith("serving-routing-placement/README.md#key-flags-per-slot") for h in links(body_of(need)))
+    assert any(t.type == "inline" and t.content.startswith("[ ] Decision engine:") for t in need)
+
+
 def paragraphs(toks: list) -> list[str]:
     return [toks[i + 1].content for i, t in enumerate(toks) if t.type == "paragraph_open"]
+
+
+def body_of(toks: list) -> str:
+    """Inline text of a token list, so links() can scan one section."""
+    return "\n".join(t.content for t in toks if t.type == "inline")
 
 
 def test_template_components_convention():

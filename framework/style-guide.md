@@ -75,6 +75,8 @@ Put page-specific parts under *The design* as H3 headings. The linter checks onl
 
 Some topics have no section of their own. Config artifacts become links under *Reference design*. Integrations and data or adaptation needs go into *What you need*. Related work (agent-school, NVIDIA and Databricks blueprints, LFN projects) goes into *Used by and next steps* on platform pages and into the related-work bullets under *Deploy and verify* on use-case pages.
 
+On use-case pages, *How it works* holds one Mermaid flowchart with capability names only, then H3 tables such as the slots table and a worked example in prose. *Governance* holds the action table, a parameter table with no values, and a RACI table. *Deploy and verify* holds numbered deploy steps and a `Check | PB-02 gate or parameter | Owner` table before the related-work bullets.
+
 Flagships and catalog entries share one use-case template. A catalog entry sets `flagship: false` and must fill At a glance, Governance, Sources, and Limitations. It may stub the other sections with a body that starts `_Stub:`. The linter picks budgets from the `flagship` flag.
 
 There's no Sandbox, Tested, or Maintained tier and no readiness level. Blueprints are recipes: each key claim names its basis and links its source.
@@ -124,6 +126,7 @@ Each section uses the unit that fits it. Tune the numbers in [`budgets.yaml`](ht
 
 - Draw flow diagrams as inline code fences tagged `mermaid`. They render on the docs site and on GitHub.
 - Author architecture diagrams with the archify skill. The architecture overview has one archify diagram.
+- Use-case pages draw their flow as one Mermaid fence and need no `diagrams/` folder.
 - Commit three files in a `diagrams/` folder beside the doc: the archify source HTML, its `candidate.json`, and the exported SVG.
 - Embed the SVG with a relative image link, for example `![Reference design](diagrams/reference-design.svg)`.
 - archify has no command-line export. Export the SVG from the archify viewer.
