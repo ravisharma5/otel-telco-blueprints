@@ -12,6 +12,11 @@
       "type": "string",
       "enum": ["llm", "embedding", "reranker", "safety", "decision", "classification"]
     },
+    "slot_role": {
+      "description": "An otel_slot value with llm split into llm-small and llm-large; used by the placement map.",
+      "type": "string",
+      "enum": ["llm-small", "llm-large", "embedding", "reranker", "safety", "decision", "classification"]
+    },
     "placement_tier": {
       "type": "string",
       "enum": ["far-edge", "regional", "core"]

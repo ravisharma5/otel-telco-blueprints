@@ -72,6 +72,53 @@
     "source": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "card": {
+      "description": "Director-facing summary for the explorer home page, written by the recipe author. Patterns enforce the word limits.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goal", "summary", "outcome", "audience", "measures", "risk"],
+      "properties": {
+        "goal": { "description": "8 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,7}\\s*$" },
+        "summary": { "description": "25 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,24}\\s*$" },
+        "outcome": { "description": "20 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,19}\\s*$" },
+        "audience": { "description": "12 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,11}\\s*$" },
+        "measures": {
+          "description": "One to three measures, each 6 words or fewer.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,5}\\s*$" }
+        },
+        "risk": { "description": "15 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,14}\\s*$" }
+      }
+    },
+    "placement": {
+      "description": "Slot roles that run at each tier. bplint checks the map against otel_slots and placement_tier.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "propertyNames": { "$ref": "common.schema.json#/$defs/placement_tier" },
+      "patternProperties": {
+        "^(far-edge|regional|core)$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["runs", "note"],
+          "properties": {
+            "runs": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "common.schema.json#/$defs/slot_role" }
+            },
+            "note": {
+              "description": "15 words or fewer; bplint requires one when runs is empty.",
+              "type": "string",
+              "pattern": "^\\s*(?:\\S+(?:\\s+\\S+){0,14})?\\s*$"
+            }
+          }
+        }
+      }
     }
   }
 }

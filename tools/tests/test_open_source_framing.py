@@ -28,6 +28,7 @@ LEGACY_FIELDS = ("critical_path_components", "status_verified_on")
 COMMON_DEFS = {
     "autonomy_ceiling",
     "otel_slot",
+    "slot_role",
     "placement_tier",
     "doc_status",
     "date",

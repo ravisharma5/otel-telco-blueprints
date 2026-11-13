@@ -8,6 +8,10 @@ from ..report import Finding
 
 _REQUIRED = re.compile(r"^'([^']+)' is a required property")
 _QUOTED = re.compile(r"'([^']+)'")
+_WORD_LIMIT = re.compile(r"\{0,(\d+)\}")
+
+# Placement roles split the llm slot by size; every other role is its slot.
+_ROLE_SLOT = {"llm-small": "llm", "llm-large": "llm"}
 
 
 def _key_line(doc, key) -> int:
@@ -34,6 +38,63 @@ def _json_path(err, key) -> str:
     if not parts and key:
         parts = [key]
     return "$" + "".join(f"[{p}]" if p.isdigit() else f".{p}" for p in parts)
+
+
+def _word_limit_message(err, path) -> str | None:
+    """'<path>: N words; the limit is L' for a word-limit pattern error, else None.
+
+    Applies to card fields and placement notes, whose patterns end in {0,K}
+    for an L = K + 1 word limit.
+    """
+    parts = [str(p) for p in err.absolute_path]
+    in_card = parts[:1] == ["card"]
+    in_note = len(parts) == 3 and parts[0] == "placement" and parts[2] == "note"
+    if err.validator != "pattern" or not (in_card or in_note) or not isinstance(err.instance, str):
+        return None
+    m = _WORD_LIMIT.search(str(err.validator_value))
+    if not m:
+        return None
+    limit = int(m.group(1)) + 1
+    count = len(err.instance.split())
+    if count == 0:
+        return f"{path}: is empty; write 1 to {limit} words"
+    return f"{path}: {count} words; the limit is {limit}"
+
+
+def _placement_messages(fm) -> list[str]:
+    """Consistency of the placement map with otel_slots and placement_tier.
+
+    Runs only when the schema accepts the page, so shapes are known.
+    """
+    placement = fm.get("placement")
+    if not isinstance(placement, dict):
+        return []
+    slots = list(fm.get("otel_slots") or [])
+    tiers = list(fm.get("placement_tier") or [])
+    out = []
+    used = {t for t, v in placement.items() if v.get("runs")}
+    for tier in tiers:
+        if tier not in used:
+            out.append(f"$.placement: tier '{tier}' is in placement_tier but runs no slot role in placement")
+    for tier in placement:
+        if tier in used and tier not in tiers:
+            out.append(f"$.placement.{tier}: tier '{tier}' runs slot roles but is not in placement_tier")
+    placed = set()
+    for tier, value in placement.items():
+        runs = value.get("runs") or []
+        if not runs and not str(value.get("note") or "").strip():
+            out.append(f"$.placement.{tier}.note: tier '{tier}' runs no slot role, so it needs a note saying why")
+        for role in runs:
+            slot = _ROLE_SLOT.get(role, role)
+            placed.add(slot)
+            if slot not in slots:
+                out.append(
+                    f"$.placement.{tier}.runs: role '{role}' needs slot '{slot}', which is not in otel_slots"
+                )
+    for slot in slots:
+        if slot not in placed:
+            out.append(f"$.placement: slot '{slot}' from otel_slots is not placed at any tier")
+    return out
 
 
 def check_type_binding(doc, ctx) -> list[Finding]:
@@ -99,14 +160,12 @@ def check(doc, ctx) -> list[Finding]:
         if err.validator == "additionalProperties":
             extras = _QUOTED.findall(err.message)
             line_key = extras[-1] if extras else None
-        out.append(
-            Finding(
-                doc.path,
-                _key_line(doc, line_key),
-                1,
-                "error",
-                code,
-                f"{_json_path(err, key)}: {err.message}",
-            )
+        path = _json_path(err, key)
+        text = _word_limit_message(err, path) or f"{path}: {err.message}"
+        out.append(Finding(doc.path, _key_line(doc, line_key), 1, "error", code, text))
+    if not out and btype == "use-case":
+        line = _key_line(doc, "placement")
+        out.extend(
+            Finding(doc.path, line, 1, "error", "FM002", text) for text in _placement_messages(fm)
         )
     return out

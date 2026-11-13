@@ -14,6 +14,15 @@ platform_blueprints: ["PB-04"]  # PB-<nn> ids this use case depends on
 agent_school: [301]  # agent-school course numbers (100-999)
 clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 source: ["<source-id>"]  # optional; where the use case came from
+card:  # optional; the summary card on the explorer home page, in plain words
+  goal: "<The goal, in 8 words or fewer>"
+  summary: "<What it does, in 25 words or fewer>"
+  outcome: "<What changes for the operator, in 20 words or fewer>"
+  audience: "<Who it serves, in 12 words or fewer>"
+  measures: ["<First measure, 6 words or fewer>"]  # one to three measures
+  risk: "<The main risk, in 15 words or fewer>"
+placement:  # optional; far-edge | regional | core; runs: llm-small | llm-large | embedding | reranker | safety | decision | classification
+  regional: {runs: ["llm-small", "safety"], note: ""}  # place every otel_slots entry; note: 15 words or fewer, say why when runs is empty
 ---
 
 <!-- One template serves flagships and catalog entries.
