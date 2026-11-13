@@ -465,7 +465,10 @@ def test_nav_order():
         "platform/intake-model-selection/README.md",
         "platform/compliance-operating-model/README.md",
     ]
-    assert _nav_children("Catalog") == ["catalog/index.md"]
+    assert _nav_children("Catalog") == [
+        "catalog/index.md",
+        "catalog/standards-knowledge/grounded-knowledge-assistant/README.md",
+    ]
 
 
 def test_start_here_labels():

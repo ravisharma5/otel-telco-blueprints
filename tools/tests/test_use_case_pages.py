@@ -71,12 +71,16 @@ from tools.tests.test_reference_pages import (
 
 # Grows by one entry per landed use case ({"<domain>/<slug>": id}), so a lost
 # or renamed page fails here instead of quietly dropping out of every check.
-EXPECTED_USE_CASE_PAGES: dict[str, str] = {}
+EXPECTED_USE_CASE_PAGES: dict[str, str] = {
+    "standards-knowledge/grounded-knowledge-assistant": "UC-KNOW-01",
+}
 
 # Parameters a use case may name that no platform page defines
 # ({"<domain>/<slug>": {name: owner}}). Add a name here only with an allowed
 # role as owner, and never give it a default value on the page.
-USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {}
+USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
+    "standards-knowledge/grounded-knowledge-assistant": {"Decision routing threshold": "Model owner"},
+}
 
 UC_ID = re.compile(r"^UC-[A-Z]+-[0-9]{2}$")
 ROADMAP_URL = "https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md"
@@ -619,3 +623,85 @@ def test_sync_verification_checks_tie_to_gates(path):
         cell = row[col]
         ok = EVALUATION_LINK in cell or any(n in cell.lower() for n in names)
         assert ok, row
+
+
+# ---------- grounded knowledge assistant ----------
+
+KNOWLEDGE = REPO_ROOT / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
+KNOWLEDGE_KEY = "standards-knowledge/grounded-knowledge-assistant"
+SLOTS_HEADER = ["Slot", "Checkpoint", "Role", "Placement"]
+ACTION_HEADER = ["Action", "Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP)", "Approval", "AI Act class"]
+MERMAID_NODE = re.compile(r'[A-Za-z0-9_]+\s*(\[|\{)"([^"]+)"[\]\}]')
+
+
+def _knowledge_nodes() -> list[tuple[str, str]]:
+    """(shape opener, text) for each Mermaid node on the knowledge page."""
+    return [(m.group(1), m.group(2)) for m in MERMAID_NODE.finditer(mermaid_fences(body(KNOWLEDGE))[0])]
+
+
+def test_knowledge_slots():
+    fm = front_matter(KNOWLEDGE) or {}
+    assert set(fm.get("otel_slots", [])) == {"embedding", "reranker", "safety", "decision", "llm"}
+    assert fm.get("autonomy_ceiling") == "inform"
+    assert "tmf_an_level_target" not in fm
+
+
+def test_knowledge_mermaid_abstain_and_size_routing():
+    nodes = _knowledge_nodes()
+    texts = [t for _, t in nodes]
+    assert any("Abstain" in t for t in texts), texts
+    assert any("Small" in t and "LLM" in t for t in texts), texts
+    assert any("Large" in t and "LLM" in t for t in texts), texts
+    diamonds = [t for shape, t in nodes if shape == "{"]
+    assert any(re.search(r"(?i)rout|size", t) for t in diamonds), diamonds
+
+
+def test_knowledge_released_checkpoints_only():
+    text = body(KNOWLEDGE)
+    for name in ("OTel-2.0-LLM-31B-IT", "OTel-2.0-Decision-26B-A4B-4bit", "OTel-Reranker", "OTel-Embedding", "Safety"):
+        assert name in text, name
+    assert not re.search(r"OTel-2\.5|2\.5-", text)
+    table = table_with_header(KNOWLEDGE, "How it works", SLOTS_HEADER)
+    col = table[0].index("Checkpoint")
+    assert len(table) > 1
+    for row in table[1:]:
+        assert row[col].endswith("pinned by revision"), row
+
+
+def test_knowledge_no_action_requests():
+    text = body(KNOWLEDGE)
+    assert "submit_action_request" not in text
+    table = table_with_header(KNOWLEDGE, "Governance", ACTION_HEADER)
+    col = table[0].index(ACTION_HEADER[1])
+    assert len(table) > 1
+    for row in table[1:]:
+        assert row[col] == "LOOK", row
+
+
+def test_knowledge_retrieval_prerequisites():
+    units = _sentences(body(KNOWLEDGE)) + [" | ".join(r) for t in page_tables(KNOWLEDGE) for r in t]
+    assert any("sentence-transformers" in u and re.search(r"(?i)reranker", u) for u in units)
+    assert any("re-index" in u and re.search(r"(?i)embedding", u) for u in units)
+    assert any(re.search(r"usage[- ]rights", u) and INTEGRATION_LINK in u for u in units)
+
+
+def test_knowledge_routing_threshold_allowlisted():
+    assert USE_CASE_LOCAL_PARAMS[KNOWLEDGE_KEY] == {"Decision routing threshold": "Model owner"}
+    table = table_with_header(KNOWLEDGE, "Governance", PARAM_TABLE_HEADER)
+    who = table[0].index("Who sets it")
+    rows = {row[0]: row[who] for row in table[1:]}
+    assert rows.get("Decision routing threshold") == "Model owner", rows
+
+
+def test_knowledge_raci_rows():
+    activities = {row[0] for table in raci_tables(KNOWLEDGE) for row in table[1:]}
+    assert {"Set Decision routing thresholds", "Tune Safety slot abstention"} <= activities, activities
+
+
+def test_knowledge_worked_example_abstains():
+    heading = next(
+        ln for ln in section_text(KNOWLEDGE, "How it works").splitlines() if ln.startswith("### Worked example:")
+    )
+    example = _h3_text(section_text(KNOWLEDGE, "How it works"), heading[4:])
+    assert re.search(r"(?i)abstain", example), example
+    assert "3GPP" in example or "TS " in example, example

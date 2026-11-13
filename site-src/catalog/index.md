@@ -9,6 +9,10 @@ doc_status: draft
 
 The catalog maps operator use cases to OTel model slots and platform blueprints. Four flagship use-case blueprints come first, then the full catalog. Each catalog entry links to its use-case blueprint and to the platform blueprints it depends on.
 
+| Blueprint | Topic | Domain |
+|---|---|---|
+| [UC-KNOW-01](standards-knowledge/grounded-knowledge-assistant/README.md) | Grounded knowledge assistant | Standards knowledge |
+
 Planned domains:
 
 - Knowledge assistance
