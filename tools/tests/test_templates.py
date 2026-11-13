@@ -318,8 +318,10 @@ def test_use_case_template_budget_comments_match_budgets(section):
     text = TEMPLATE_FILES["use-case"].read_text()
     heading = f"\n## {section['title']}\n"
     assert heading in text, f"{section['title']} missing from the use-case template"
-    match = BUDGET_COMMENT.search(text, text.index(heading))
-    assert match, f"no budget comment after ## {section['title']}"
+    start = text.index(heading)
+    end = text.find("\n## ", start + 1)
+    match = BUDGET_COMMENT.search(text, start, end if end != -1 else len(text))
+    assert match, f"no budget comment in ## {section['title']}"
     comment = match.group(1)
     for unit, limit in section.items():
         if unit == "title":
