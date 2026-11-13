@@ -2,7 +2,7 @@
 id: "UC-OPS-01"
 type: "use-case"
 title: "Adaptation ladder on alarm and root-cause triage"
-doc_status: draft
+doc_status: done
 domain: "network-operations"
 flagship: true
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
@@ -12,6 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Runs triage on RAN and transport alarms and recommends fixes for approval. Starts with retrieval and skills only, and earns a LoRA adapter only when evaluation shows a measured gap. Depends on the acceptance gates and a model registry that binds each adapter to its base revision."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
 agent_school: [101, 401, 402, 403]
+clarity_reviewed: "2026-11-12"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -33,7 +34,7 @@ agent_school: [101, 401, 402, 403]
 ## Problem and value
 
 A site power event can raise dozens of RAN and transport alarms, and engineers sort them by hand to find the one cause.
-This recipe runs triage on the cluster, writes a triage note, and proposes a fix for approval. It spends training effort only when paired evaluation runs show that retrieval and skills leave a gap.
+This recipe runs triage on the cluster, writes a triage note, and proposes a fix for approval. It trains an adapter only when paired evaluation runs show a gap that retrieval and skills leave open.
 The KPIs are mean time to identify and the share of incidents triaged without rework; any ROI is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures.
 
 ## How it works
@@ -81,7 +82,7 @@ Triage notes are NOTIFY from the assist stage up, and the [action layer](../../.
 | LoRA | An adapter trained on SDG Hub data and bound to one base revision | The when-to-train rule holds |
 | OSFT | A full fine-tune on a large proprietary corpus, served from its own pool | A LoRA adapter cannot close the gap; see [PB-03](../../../platform/adaptation/README.md) |
 
-The rungs and their order come from the [adaptation ladder](../../../architecture/adaptation-ladder.md). Each skills-only baseline is the bar the adapter must beat.
+The rungs and their order come from the [adaptation ladder](../../../architecture/adaptation-ladder.md). The skills-only baseline is the bar the adapter must beat.
 
 ### When to train a LoRA
 
@@ -101,11 +102,11 @@ The Classification card's head predicts eight drive-test throughput classes from
 
 ### Worked example: gNodeB alarm cluster after a site power event
 
-A site power event raises NG-link and cell-down alarms on `gnb-114`, opening incident `inc-5520`. `ran-triage-agent` writes a triage note, and the gate labels it NOTIFY under the assist-stage rule in the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table.
+A site power event raises NG-link and cell-down alarms on `gnb-114`, opening incident `inc-5520`. `ran-triage-agent` sends a triage note that points to the power event, the gate returns NOTIFY, and a notification job posts the note to the ticket, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table shows.
 
 In paired runs, the skills-only baseline labels power-related causes as transport faults and misses the note format. The facts are in retrieval and the procedure is right, so the gap is vocabulary and format, and it clears the Minimum measured gap to train. SDG Hub data from the tool catalog and replayed tapes holds LOOK, NOTIFY, REVIEW, and STOP cases. `alarm-triage-adapter` re-enters operator offline acceptance and meets the Non-inferiority margin.
 
-The agent then proposes restarting the NG interface in `req-5520-1`. The ceiling is REVIEW, so `dec-5520-1` records REVIEW, and the `approver` role signs off before the action layer runs it.
+The agent then proposes restarting the NG interface in `req-5520-1`. Even if the label reads ACT, the ceiling is REVIEW, so `dec-5520-1` records REVIEW. The `approver` role signs off before the action layer runs the restart.
 
 ## What you need
 
