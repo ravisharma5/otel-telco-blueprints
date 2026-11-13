@@ -383,6 +383,34 @@ def test_integration_writes_through_action_request():
     assert "submit_action_request" in body(INTEGRATION)
 
 
+# CAMARA's open issue on security, privacy, and consent guidance for MCP. The
+# consent claims cite it; the CAMARA MCP press release says nothing on consent.
+ICM_MCP_ISSUE = "https://github.com/camaraproject/IdentityAndConsentManagement/issues/347"
+
+
+def camara_consent_source_problems(path: Path) -> list[str]:
+    """The Sources table cites the consent issue as research for a consent
+    claim, and no camaraproject.org row claims anything about consent."""
+    table = tables(sections(body(path)).get("Sources and acceptance", []))[0]
+    claim, basis, source = (table[0].index(h) for h in ("Claim", "Basis", "Source"))
+    problems = []
+    if not any(
+        ICM_MCP_ISSUE in row[source] and row[basis] == "research" and "consent" in row[claim].lower()
+        for row in table[1:]
+    ):
+        problems.append("no research row citing the consent issue for a consent claim")
+    problems += [
+        f"press release cited for consent: {row[claim]}"
+        for row in table[1:]
+        if "camaraproject.org" in row[source] and "consent" in row[claim].lower()
+    ]
+    return problems
+
+
+def test_integration_camara_consent_source_is_issue_347():
+    assert camara_consent_source_problems(INTEGRATION) == []
+
+
 # ---------- safety and autonomy gating ----------
 
 GATING = REPO_ROOT / "platform/safety-autonomy-gating/README.md"
@@ -1806,3 +1834,12 @@ def test_compliance_mermaid_capabilities():
     for want in ("Classification record", "Legal review", "shadow baseline"):
         assert want in fence, want
     assert PRODUCT_TERMS.findall(fence) == []
+
+
+def test_compliance_camara_consent_source_is_issue_347():
+    assert camara_consent_source_problems(COMPLIANCE) == []
+    sentences = re.split(r"(?<=[.!?])\s+", body(COMPLIANCE))
+    assert not [s for s in sentences if "consent" in s.lower() and "still open" in s.lower()]
+    prose = [s for s in sentences if ICM_MCP_ISSUE in s and not s.lstrip().startswith("|")]
+    assert prose, "no prose sentence cites the consent issue"
+    assert all("consent" in s.lower() and "MCP" in s for s in prose), prose

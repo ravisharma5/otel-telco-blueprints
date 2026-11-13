@@ -15,7 +15,7 @@ top_decisions:
   - "Deny every tool unless a role allows it"
   - "Route every write through the action request"
 agent_school: [301, 302, 303, 401]
-clarity_reviewed: "2026-11-11"
+clarity_reviewed: "2026-11-12"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -173,9 +173,11 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 10 | TMF639 defines resource inventory operations | project documentation | [TMF639 Resource Inventory API](https://github.com/tmforum-apis/TMF639_ResourceInventory) |
 | 11 | TMF628 defines performance indicator and measurement job operations | project documentation | [TMF628 Performance Management API](https://github.com/tmforum-apis/TMF628_Performance) |
 | 12 | TM Forum publishes a Conformance Test Kit for each Open API | project documentation | [TM Forum Open API conformance](https://www.tmforum.org/conformance-certification/open-api-conformance/) |
-| 13 | An MCP server can translate CAMARA APIs into tools, with the declared purpose on each call and consent kept in CAMARA's own flow | industry use case | [CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/) |
-| 14 | CAMARA API Design Guide Appendix B sets `operationId` and description rules for MCP tool selection | project documentation | [CAMARA API Design Guide](https://github.com/camaraproject/Commonalities/blob/main/documentation/CAMARA-API-Design-Guide.md) |
-| 15 | NWDAF exposes network analytics to consumers in the 5G core | project documentation | [3GPP TS 23.288](https://www.3gpp.org/dynareport/23288.htm) |
+| 13 | An MCP server can translate CAMARA APIs into tools | industry use case | [CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/) |
+| 14 | Each CAMARA call declares its purpose, and the operator's Authorization Server checks consent, so consent stays in CAMARA's own flow | project documentation | [CAMARA API access and user consent](https://github.com/camaraproject/IdentityAndConsentManagement/blob/main/documentation/CAMARA-API-access-and-user-consent.md) |
+| 15 | CAMARA's MCP work does not yet define how a tool call carries consent | research | [CAMARA issue 347](https://github.com/camaraproject/IdentityAndConsentManagement/issues/347) |
+| 16 | CAMARA API Design Guide Appendix B sets `operationId` and description rules for MCP tool selection | project documentation | [CAMARA API Design Guide](https://github.com/camaraproject/Commonalities/blob/main/documentation/CAMARA-API-Design-Guide.md) |
+| 17 | NWDAF exposes network analytics to consumers in the 5G core | project documentation | [3GPP TS 23.288](https://www.3gpp.org/dynareport/23288.htm) |
 
 - Gate: the TM Forum Conformance Test Kit passes for each TMF API an MCP server fronts, at the pinned version.
 - Gate: for every tool, a call with a valid token and no role for that tool is rejected, and the rejection appears in the audit log.

@@ -13,7 +13,7 @@ top_decisions:
   - "Map each rule to the control that already produces its evidence"
   - "Measure value against the shadow-stage baseline"
 agent_school: [301, 401]
-clarity_reviewed: "2026-11-11"
+clarity_reviewed: "2026-11-12"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -162,7 +162,7 @@ Articles 9 to 15 and Article 26 apply only to high-risk systems. Map them anyway
 | Three-legged tokens | Authorization Code, CIBA, and JWT Bearer flows act for a user; client credentials serve only APIs that process no personal data | Identity in [PB-08](../security-identity-sandbox/README.md) | [CAMARA API access and user consent](https://github.com/camaraproject/IdentityAndConsentManagement/blob/main/documentation/CAMARA-API-access-and-user-consent.md) |
 | Token-only grant | The resource server grants access based solely on the access token | Consent stays in CAMARA's own flow, outside the agent, as [PB-05](../integration/README.md) states | [CAMARA API access and user consent](https://github.com/camaraproject/IdentityAndConsentManagement/blob/main/documentation/CAMARA-API-access-and-user-consent.md) |
 
-How consent couples to MCP tool calls is still open in CAMARA ([CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/)).
+CAMARA's Identity and Consent Management working group has [an open issue](https://github.com/camaraproject/IdentityAndConsentManagement/issues/347) to define security, privacy, and consent guidance for MCP tool servers. Until CAMARA publishes that guidance, its MCP work does not define how a tool call carries consent.
 
 ### GSMA Responsible AI map
 
@@ -275,8 +275,9 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 8 | The ePrivacy Directive limits the processing of traffic data and location data | project documentation | [ePrivacy Directive on EUR-Lex](https://eur-lex.europa.eu/eli/dir/2002/58/oj/eng) |
 | 9 | CAMARA carries the purpose as a `dpv:` scope, checks consent at the Authorization Server, and grants on the access token alone | project documentation | [CAMARA API access and user consent](https://github.com/camaraproject/IdentityAndConsentManagement/blob/main/documentation/CAMARA-API-access-and-user-consent.md) |
 | 10 | CAMARA is working out how network APIs reach AI agents through MCP | industry use case | [CAMARA and MCP](https://camaraproject.org/2026/01/12/camara-charts-a-path-for-network-aware-ai-applications-with-mcp/) |
-| 11 | The GSMA roadmap measures maturity at four named levels across five dimensions | industry use case | [GSMA Responsible AI Maturity Roadmap](https://www.gsma.com/solutions-and-impact/connectivity-for-good/external-affairs/wp-content/uploads/2024/09/GSMA-ai4i_The-GSMA-Responsible-AI-Maturity-Roadmap_v8.pdf) |
-| 12 | The GSMA roadmap builds on seven principles, from fairness to environmental impact | industry use case | [GSMA press release](https://www.gsma.com/newsroom/press-release/gsma-launches-maturity-roadmap-as-telecoms-industry-leads-the-way-in-the-deployment-of-responsible-ai/) |
+| 11 | CAMARA's Identity and Consent Management working group has an open issue to define security, privacy, and consent guidance for MCP | research | [CAMARA issue 347](https://github.com/camaraproject/IdentityAndConsentManagement/issues/347) |
+| 12 | The GSMA roadmap measures maturity at four named levels across five dimensions | industry use case | [GSMA Responsible AI Maturity Roadmap](https://www.gsma.com/solutions-and-impact/connectivity-for-good/external-affairs/wp-content/uploads/2024/09/GSMA-ai4i_The-GSMA-Responsible-AI-Maturity-Roadmap_v8.pdf) |
+| 13 | The GSMA roadmap builds on seven principles, from fairness to environmental impact | industry use case | [GSMA press release](https://www.gsma.com/newsroom/press-release/gsma-launches-maturity-roadmap-as-telecoms-industry-leads-the-way-in-the-deployment-of-responsible-ai/) |
 
 - Gate: no use case enters the shadow stage without a classification record and legal sign-off.
 - Gate: no stage promotion happens without the accountable owner named in the RACI.
