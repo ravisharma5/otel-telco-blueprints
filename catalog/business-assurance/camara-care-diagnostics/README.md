@@ -2,7 +2,7 @@
 id: "UC-CARE-01"
 type: "use-case"
 title: "CAMARA customer-care diagnostics"
-doc_status: draft
+doc_status: done
 domain: "business-assurance"
 flagship: true
 otel_slots: ["llm", "safety", "embedding", "reranker", "decision"]
@@ -12,6 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Suggests answers to a care agent from CAMARA device diagnostics, with the customer's consent checked before any tool call. Recommends only; the care agent decides. Depends on the operator's consent service and the MCP gateway."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [303, 304]
+clarity_reviewed: "2026-11-12"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -70,7 +71,7 @@ flowchart TD
 3. The Authorization Server issues a per-subscriber three-legged token. The MCP Gateway exchanges it for a token scoped to the CAMARA backend, and the token never enters model context.
 4. The copilot calls the three device-status tools through the MCP Gateway. Each request carries no `device` identifier, because the token identifies the subject. The gateway denies any call unless a role allows it, the deny-unless-allowed rule in [PB-05](../../../platform/integration/README.md#per-tool-authorization).
 5. The Embedding and Reranker slots search the care knowledge base, and the LLM slot drafts an answer that cites the passages.
-6. The Safety slot checks that the evidence supports the answer and abstains when it doesn't; the care agent then follows the usual care process. Output guardrails screen the suggestion for personal data.
+6. The Safety slot checks that the evidence supports the answer. If it doesn't, the Safety slot abstains and the care agent follows the usual care process. Output guardrails screen the suggestion for personal data.
 7. The care agent reads the suggestion, decides, and talks to the customer.
 8. To add a case note or open a TMF621 network trouble ticket, the copilot sends an action request with `submit_action_request`, and the Decision slot answers a fixed label question for the [decision gate](../../../architecture/decision-gate.md). A case note becomes a notification job (NOTIFY), a ticket waits for the approver (REVIEW), and STOP changes nothing.
 
@@ -90,7 +91,7 @@ Number Verification is a session result from the customer's app, not a copilot t
 
 ### Consent and privacy
 
-Consent stays in CAMARA's own flow, outside the copilot. Each purpose is registered as a `dpv:` scope, and the Authorization Server checks the legal basis and, where consent is needed, the Consent Master before it issues a token. The MCP Gateway exchanges that token for the backend audience, so the CAMARA backend grants access on the token alone. Three-legged tokens are required, because the CAMARA specifications make them mandatory where personal data is processed.
+Consent stays in CAMARA's own flow, outside the copilot. Each purpose is registered as a `dpv:` scope, and the Authorization Server checks the legal basis and, where consent is needed, the Consent Master before it issues a token. The MCP Gateway exchanges that token for one scoped to the CAMARA backend, which grants access on the token alone. Three-legged tokens are required, because the CAMARA specifications make them mandatory where personal data is processed.
 
 CAMARA's Identity and Consent Management working group has [an open issue](https://github.com/camaraproject/IdentityAndConsentManagement/issues/347) to define security, privacy, and consent guidance for MCP tool servers. Until CAMARA publishes that guidance, its MCP work does not define how a tool call carries consent.
 
@@ -100,7 +101,7 @@ Traces hold metadata only; span content capture runs only as an opt-in that the 
 
 A customer abroad reports no mobile data, and the care agent opens `case-8841` for subscriber `+44 7700 900123`. The customer's app ran Number Verification on the device, and the copilot `care-copilot` receives `true`.
 
-With the token from the consent check, roaming status returns `roaming: true` and `countryCode: 262`, reachability returns `connectivity: ["SMS"]` only, and network type returns `4G`. The copilot cites the care knowledge base and suggests checking that data roaming is on in the device settings and in the plan. The care agent explains this to the customer, and data returns.
+With the token from the consent check, roaming status returns `roaming: true` and `countryCode: 262`, reachability returns `connectivity: ["SMS"]` only, and network type returns `4G`. The copilot cites the care knowledge base and suggests checking that data roaming is on in the device settings and in the plan. The care agent walks the customer through it, and data returns.
 
 The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify` request, and the gate's NOTIFY outcome becomes a notification job that writes the note, per the [policy table](../../../architecture/decision-gate.md#policy-table). No ticket is needed.
 
@@ -226,5 +227,5 @@ Apply these settings in order. Every action class stays at REVIEW until the gate
 - It never commits credits, refunds, or service-level statements.
 - It does not draw legal conclusions on consent or privacy; your legal team does.
 - CAMARA's MCP consent guidance is the [open issue](https://github.com/camaraproject/IdentityAndConsentManagement/issues/347) in the Identity and Consent Management working group.
-- This recipe leaves out a customer-facing variant; it does not cover a copilot that answers customers directly.
+- It covers no customer-facing variant that answers customers directly.
 - It reads device state only for the subscriber the token names.
