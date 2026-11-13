@@ -36,6 +36,15 @@ SIZING_COLUMNS = (
 SETUP_COLUMNS = ("Setup", "Tier", "GPUs per node", "Memory per GPU", "Notes")
 SETUP_FLAG_COLUMNS = ("Setup", "Setting", "Value", "Why")
 AMPERE_NOTE = "Ampere cards use W4A16 instead of FP8"
+OPTION_COLUMNS = (
+    "Option",
+    "What it does",
+    "What to set",
+    "How to check on your traffic",
+    "Limits",
+    "Source",
+)
+OPTION_FIT_COLUMNS = ("Option", "Use case", "Where it helps")
 
 
 def _load(data_dir: Path, name: str):
@@ -140,13 +149,84 @@ def setup_flags_table(data_dir: Path = DATA_DIR) -> str:
     return _table(SETUP_FLAG_COLUMNS, rows)
 
 
-def blocks(data_dir: Path = DATA_DIR) -> dict[str, str]:
+def _source_labels(page_text: str) -> dict[str, str]:
+    """Source URL -> link label, read from the page's Sources table."""
+    labels: dict[str, str] = {}
+    for line in page_text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) == 4 and cells[0].isdigit():
+            for label, url in re.findall(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", cells[3]):
+                labels.setdefault(url, label)
+    return labels
+
+
+def options_table(page_text: str, data_dir: Path = DATA_DIR) -> str:
+    """The "Advanced serving options" table, one row per option in options.yaml order.
+
+    Each source links with the label its row in the page's Sources table uses, so
+    every option source must also be in that table.
+    """
+    labels = _source_labels(page_text)
+    rows = []
+    for o in _load(data_dir, "options.yaml")["options"]:
+        missing = [u for u in o["sources"] if u not in labels]
+        if missing:
+            raise SystemExit(
+                f"render_serving: option {o['id']!r} cites sources missing from the "
+                f"Sources table: {', '.join(missing)}"
+            )
+        rows.append(
+            [
+                o["name"],
+                o["what"],
+                "; ".join(o["set"]),
+                o["check"],
+                " ".join(o["limits"]),
+                "; ".join(f"[{labels[u]}]({u})" for u in o["sources"]),
+            ]
+        )
+    return _table(OPTION_COLUMNS, rows)
+
+
+def _use_cases() -> dict[str, tuple[str, str]]:
+    """Use-case id -> (title, path relative to the repository root)."""
+    out = {}
+    for path in sorted((ROOT / "catalog").glob("*/*/README.md")):
+        text = path.read_text(encoding="utf-8")
+        if not text.startswith("---"):
+            continue
+        fm = yaml.safe_load(text.split("---", 2)[1]) or {}
+        if fm.get("id"):
+            out[fm["id"]] = (fm["title"], path.relative_to(ROOT).as_posix())
+    return out
+
+
+def option_fit_table(data_dir: Path = DATA_DIR) -> str:
+    """The "Where each option helps" table, one row per where_it_helps entry.
+
+    Use-case links stay source-relative (../../catalog/...); the site hook remaps them.
+    """
+    use_cases = _use_cases()
+    rows = []
+    for o in _load(data_dir, "options.yaml")["options"]:
+        for fit in o["where_it_helps"]:
+            uc = fit["use_case"]
+            if uc not in use_cases:
+                raise SystemExit(f"render_serving: option {o['id']!r} names unknown use case {uc!r}")
+            title, rel = use_cases[uc]
+            rows.append([o["name"], f"[{uc} {title}](../../{rel})", fit["reason"]])
+    return _table(OPTION_FIT_COLUMNS, rows)
+
+
+def blocks(data_dir: Path = DATA_DIR, page_text: str = "") -> dict[str, str]:
     """Marker name -> rendered text. A blank line separates each block from its markers."""
     return {
         "sizing": f"\n{sizing_table(data_dir)}\n\n",
         "flags-per-slot": f"\n{flags_fence(data_dir)}\n\n",
         "setups": f"\n{setups_table(data_dir)}\n\n",
         "setup-flags": f"\n{setup_flags_table(data_dir)}\n\n",
+        "advanced-options": f"\n{options_table(page_text, data_dir)}\n\n",
+        "option-fit": f"\n{option_fit_table(data_dir)}\n\n",
     }
 
 
@@ -158,7 +238,7 @@ def render(page_text: str, data_dir: Path | None = None) -> str:
     """page_text with every generated block replaced by its render."""
     data_dir = data_dir or DATA_DIR
     out = page_text
-    for name, content in blocks(data_dir).items():
+    for name, content in blocks(data_dir, page_text).items():
         starts = list(_marker(name, "start").finditer(out))
         ends = list(_marker(name, "end").finditer(out))
         if len(starts) != 1 or len(ends) != 1:
@@ -175,7 +255,7 @@ def render(page_text: str, data_dir: Path | None = None) -> str:
 
 def _drifted(old: str, new: str) -> list[str]:
     names = []
-    for name in blocks():
+    for name in blocks(page_text=old):
         pat = re.compile(
             rf"<!-- generated:{re.escape(name)} start -->(.*?)<!-- generated:{re.escape(name)} end -->",
             re.S,

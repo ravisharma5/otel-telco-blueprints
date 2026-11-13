@@ -1,0 +1,287 @@
+# Advanced serving options for the serving page (platform/serving-routing-placement/README.md).
+# Each option is an option to test: what it does, what to set, how to check it on
+# your traffic with the same gates, its limits, and its sources. Every source URL
+# also appears in the page's Sources table.
+#
+# applies_when holds the explorer's applicability rules. A rule lists the allowed
+# values for one setup property (tier, vendor, batch, arch); when the setup falls
+# outside them, the explorer shows the reason id's text.
+# where_it_helps feeds the "Where each option helps" table, one row per entry.
+# related links inference-playbooks recipes as link plus source only.
+# The option count is read from this file; nothing else fixes it.
+
+options:
+  - id: prefix-scheduling
+    name: Prefix-aware scheduling
+    engine: llm-d
+    tiers: [core]
+    what: Sends each request to the pod that most likely already holds its prompt prefix in KV cache, balanced against pod load.
+    set:
+      - Prefix-cache aware replica scheduling for the generative pool, with the default approximate prefix scoring
+    check: Replay recorded traffic and compare time to first token and prefix-cache hits with and without it; the same gates must still pass.
+    limits:
+      - Core only, inside one model's pool.
+      - Scoring is approximate by default; precise scoring needs the model's tokenizer files mirrored to the router, which takes extra work at a disconnected site.
+    sources:
+      - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes
+      - https://github.com/llm-d/llm-d/tree/main/guides/optimized-baseline
+      - https://github.com/llm-d/llm-d/tree/main/guides/precise-prefix-cache-routing
+    applies_when:
+      - rule: tier
+        allowed: [core]
+        reason: core-only
+    where_it_helps:
+      - use_case: UC-AGOPS-01
+        reason: Each investigation step resends the same long system prompt and tool list, so later steps reuse the cached prefix.
+      - use_case: UC-KNOW-01
+        reason: Questions to the large LLM share one long instruction prompt, so its prefix stays cached across requests.
+      - use_case: UC-CARE-01
+        reason: A care conversation resends its earlier turns, so each new turn lands on the pod that holds them.
+    related: []
+    excluded_slots: []
+
+  - id: priority-bands
+    name: Priority bands
+    engine: llm-d
+    tiers: [core]
+    what: Queues requests by priority when the pool is saturated, so interactive work goes ahead of batch work on the same pool.
+    set:
+      - One `InferenceObjective` per traffic class, with interactive triage ranked ahead of batch evaluation and data generation
+    check: Run a batch job during replayed interactive traffic and confirm the interactive latency target holds; the same gates must still pass.
+    limits:
+      - Core only.
+      - Only matters when batch work shares the pool; it orders requests and adds no capacity.
+    sources:
+      - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes
+      - https://github.com/llm-d/llm-d/tree/main/guides/flow-control
+    applies_when:
+      - rule: tier
+        allowed: [core]
+        reason: core-only
+      - rule: batch
+        allowed: ["yes"]
+        reason: batch-only
+    where_it_helps:
+      - use_case: UC-AGOPS-01
+        reason: Incident triage keeps its latency while acceptance runs and data generation share the same large LLM pool.
+      - use_case: UC-KNOW-01
+        reason: Questions routed to the large LLM keep their latency while batch evaluation runs on the same pool.
+    related: []
+    excluded_slots: []
+
+  - id: weighted-canary
+    name: Weighted canary
+    engine: llm-d
+    tiers: [core]
+    what: Sends a set share of traffic to a new model revision before it takes the whole pool.
+    set:
+      - A traffic weight for the new revision, raised step by step while the gates pass
+    check: Compare the canary's results with the current revision on the same gates before each weight step; roll back by setting its weight to zero.
+    limits:
+      - Core only.
+      - The new revision's pods need time to load weights and warm up before they take traffic.
+    sources:
+      - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes
+      - https://github.com/llm-d/llm-d/tree/main/guides/rollouts
+    applies_when:
+      - rule: tier
+        allowed: [core]
+        reason: core-only
+    where_it_helps:
+      - use_case: UC-AGOPS-01
+        reason: A new revision of the large LLM that writes action requests reaches few incidents before it takes them all.
+      - use_case: UC-KNOW-01
+        reason: A new revision of the large LLM answers a small share of questions first, so citation quality can be compared.
+    related: []
+    excluded_slots: []
+
+  - id: speculative-decoding
+    name: Speculative decoding
+    engine: vLLM
+    tiers: [regional, core]
+    what: A drafter proposes several tokens and the target model checks them in one pass, which can cut decode latency.
+    set:
+      - n-gram or suffix drafting, with no extra model
+      - the MTP drafter google/gemma-4-31B-it-assistant for the 31B
+      - the EAGLE-3 speculator RedHatAI/gemma-4-31B-it-speculator.eagle3 for the 31B
+    check: Measure the acceptance rate and decode latency on replayed OTel traffic; answers must still pass the same gates.
+    limits:
+      - Both drafters were trained against the base Gemma 4 31B, so measure their acceptance rate on the OTel fine-tune.
+      - A model drafter takes extra GPU memory.
+      - Keep it off the Decision slot, because vLLM does not guarantee stable log probabilities with it.
+    sources:
+      - https://docs.vllm.ai/en/latest/features/speculative_decoding/
+      - https://huggingface.co/google/gemma-4-31B-it-assistant
+      - https://huggingface.co/RedHatAI/gemma-4-31B-it-speculator.eagle3
+    applies_when: []
+    where_it_helps:
+      - use_case: UC-KNOW-01
+        reason: Answers quote retrieved passages, so drafting from the prompt text can match many tokens.
+      - use_case: UC-CARE-01
+        reason: Suggested answers reuse care knowledge-base text that is already in the prompt.
+      - use_case: UC-AGOPS-01
+        reason: Ticket fields repeat device names and alarm text from the investigation.
+    related:
+      - title: Gemma 4 26B-A4B MTP recipe (base model)
+        url: https://github.com/openshift-psap/inference-playbooks/blob/main/models/gemma-4/recipes/h200-x8-mtp-single-gpu-8k1k/recipe.yaml
+        source: inference-playbooks
+    excluded_slots: [decision]
+
+  - id: pd-split
+    name: Prefill/decode split
+    engine: llm-d
+    tiers: [core]
+    what: Runs prompt processing and token generation in separate pools that move the KV cache between them, so each pool scales on its own.
+    set:
+      - Size a prefill pool and a decode pool for the large LLM from your prompt and answer lengths
+    check: Replay peak traffic and compare time to first token and tokens per second with a single pool; the same gates must still pass.
+    limits:
+      - Core only; needs several GPUs and a fast network between them.
+      - Red Hat's llm-d paths for AMD GPUs do not include it.
+    sources:
+      - https://github.com/llm-d/llm-d/tree/main/guides/pd-disaggregation
+      - https://access.redhat.com/articles/7136620
+    applies_when:
+      - rule: tier
+        allowed: [core]
+        reason: core-only
+      - rule: vendor
+        allowed: [nvidia]
+        reason: not-amd-paths
+    where_it_helps:
+      - use_case: UC-KNOW-01
+        reason: Long prompts full of retrieved passages make prefill the heavy step, so a separate prefill pool can absorb it.
+    related: []
+    excluded_slots: []
+
+  - id: autoscaling
+    name: Autoscaling on inference load
+    engine: llm-d
+    tiers: [core]
+    what: Adds or removes model replicas on queue depth, in-flight requests, and KV cache pressure instead of GPU use.
+    set:
+      - Minimum and maximum replica counts, plus a scaling target on the scheduler's queue or saturation metrics
+    check: Replay an incident storm and confirm the latency target holds while replicas scale; the same gates must still pass.
+    limits:
+      - Core only; needs a Prometheus monitoring stack.
+      - A new replica takes time to load weights, so keep a minimum that covers the first minutes of a surge.
+    sources:
+      - https://github.com/llm-d/llm-d/tree/main/guides/workload-autoscaling
+    applies_when:
+      - rule: tier
+        allowed: [core]
+        reason: core-only
+    where_it_helps:
+      - use_case: UC-AGOPS-01
+        reason: Incident storms arrive in bursts, and the pool can grow for the storm and shrink after it.
+      - use_case: UC-CARE-01
+        reason: Care calls follow the working day, so the pool can follow the call volume.
+    related: []
+    excluded_slots: []
+
+  - id: fp8-regional
+    name: FP8 builds of the regional slots
+    engine: LLM Compressor
+    tiers: [regional]
+    what: Stores weights and activations in FP8, about half the bf16 size, so more slots fit on one regional GPU.
+    set:
+      - An FP8 W8A8 build of each regional slot that needs room, made from the pinned checkpoint, registered, and pinned by digest
+      - W4A16 builds on Ampere GPUs
+    check: Show non-inferiority against the full-precision model on the same gates before the build serves traffic.
+    limits:
+      - No OTel FP8 builds are published, so the operator makes them.
+      - Ampere GPUs have no FP8 W8A8 support.
+      - The Decision slot already ships as W4A16.
+    sources:
+      - https://docs.vllm.ai/en/stable/features/quantization/
+      - https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic
+    applies_when:
+      - rule: tier
+        allowed: [regional]
+        reason: not-needed-at-core
+    where_it_helps:
+      - use_case: UC-OPS-01
+        reason: Classification, Safety, and the small LLM fit beside retrieval on one regional GPU.
+      - use_case: UC-AGOPS-01
+        reason: Safety and Classification fit beside the Decision slot on one regional GPU.
+      - use_case: UC-KNOW-01
+        reason: Safety and the small LLM fit beside Embedding, Reranker, and the Decision slot on one regional GPU.
+    related: []
+    excluded_slots: [decision]
+
+  - id: adapter-routing
+    name: Adapter-aware routing
+    engine: llm-d
+    tiers: [core]
+    what: Routes a request that names a LoRA adapter to the pool of the base model that serves it.
+    set:
+      - The adapter names for each base model, unique across the fleet
+    check: Compare latency per adapter and adapter load churn with plain routing; each adapter must still pass the same gates.
+    limits:
+      - Core only.
+      - Static, digest-pinned adapters only; never runtime adapter loading.
+    sources:
+      - https://github.com/llm-d/llm-d/tree/main/guides/multi-model-routing
+      - https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk
+    applies_when:
+      - rule: tier
+        allowed: [core]
+        reason: core-only
+    where_it_helps:
+      - use_case: UC-OPS-01
+        reason: At the core, where evaluation runs, each candidate triage adapter is called by name from the shared base pool.
+    related: []
+    excluded_slots: []
+
+  - id: fp8-kv-cache
+    name: FP8 KV cache
+    engine: vLLM
+    tiers: [regional, core]
+    what: Stores the KV cache in FP8, about half its default size, so more context or more requests fit.
+    set:
+      - "`--kv-cache-dtype fp8`, with scales calibrated through LLM Compressor"
+      - "`--kv-cache-dtype-skip-layers sliding_window` if sliding-window layers lose accuracy"
+    check: Compare concurrent requests per GPU and answer quality with the default KV cache; the same gates must still pass.
+    limits:
+      - Without calibrated scales, accuracy can drop; sliding-window attention layers are the most sensitive.
+      - Keep it off the Decision slot unless you re-run its threshold checks.
+    sources:
+      - https://docs.vllm.ai/en/latest/features/quantization/quantized_kvcache/
+    applies_when: []
+    where_it_helps:
+      - use_case: UC-KNOW-01
+        reason: Long prompts of retrieved passages fill the KV cache, and FP8 fits more of them per GPU.
+      - use_case: UC-AGOPS-01
+        reason: Long investigations carry tool output in context, and FP8 keeps more of them in memory.
+      - use_case: UC-CARE-01
+        reason: Multi-turn care conversations keep more turns in memory per GPU.
+    related:
+      - title: Gemma 4 26B-A4B single-GPU recipe with FP8 KV cache
+        url: https://github.com/openshift-psap/inference-playbooks/blob/main/models/gemma-4/recipes/h200-x1-tp1-guidellm-8k1k/recipe.yaml
+        source: inference-playbooks
+    excluded_slots: [decision]
+
+  - id: structured-outputs
+    name: Structured outputs
+    engine: request option
+    tiers: [regional, core]
+    what: Constrains an answer to a JSON schema set in the request, so action requests and ticket fields follow it.
+    set:
+      - "`response_format` of type `json_schema` on requests that write action requests, tickets, or triage notes"
+    check: Measure the schema-valid rate on replayed tapes; gate and trajectory checks stay the same gates and must still pass.
+    limits:
+      - Set per request, not on the server.
+      - A schema can lower answer quality on a fine-tune, so compare it with free text on the same gates.
+      - Never on the Decision slot, because it changes the label probabilities the gate reads.
+    sources:
+      - https://docs.vllm.ai/en/latest/features/structured_outputs/
+    applies_when: []
+    where_it_helps:
+      - use_case: UC-AGOPS-01
+        reason: Action requests and ticket fields must match the automation workflow's schema before the gate sees them.
+      - use_case: UC-OPS-01
+        reason: Triage notes and fix proposals follow a fixed shape that the approver and the ticket system read.
+      - use_case: UC-CARE-01
+        reason: Suggested answers reach the care agent's screen in a fixed shape with their citations.
+    related: []
+    excluded_slots: [decision]
