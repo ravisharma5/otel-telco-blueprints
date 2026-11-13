@@ -22,8 +22,8 @@ card:
   risk: "It reads subscriber data, so your consent service checks consent before any tool call."
 placement:
   far-edge: {runs: [], note: "Not used: the copilot serves care agents, not network sites."}
-  regional: {runs: ["embedding", "reranker", "safety", "decision"], note: "Knowledge search, evidence checks, and the gate label run here."}
-  core: {runs: ["llm-large"], note: "The LLM drafts each suggestion from the passages and device status."}
+  regional: {runs: ["embedding", "reranker", "safety", "decision", "llm-small"], note: "Knowledge search, evidence checks, the gate label, and the small LLM run here."}
+  core: {runs: ["llm-large"], note: "The large LLM drafts suggestions for the harder cases routed up."}
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -37,7 +37,7 @@ placement:
 | One-liner | Suggests answers to a care agent from CAMARA device diagnostics, with the customer's consent checked before any tool call. Recommends only; the care agent decides. Depends on the operator's consent service and the MCP gateway. |
 | Problem | Care agents can't see network state on "no service" calls; the KPIs are average handling time and first-contact resolution |
 | Audience | Care agents, care operations, the data protection officer, and the risk owner |
-| OTel slots | `llm`: drafts the suggestion; `safety`: abstains when evidence is missing; `embedding` and `reranker`: search the care knowledge base; `decision`: the gate label for case notes and tickets |
+| OTel slots | `llm`: drafts the suggestion, small at the regional site and large at the core; `safety`: abstains when evidence is missing; `embedding` and `reranker`: search the care knowledge base; `decision`: picks the LLM size, and the gate label for case notes and tickets |
 | Autonomy ceiling | Recommend with approval |
 | Placement tier | Regional and core |
 | Agent-school courses | 303 and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md); no course covers CAMARA |
@@ -83,7 +83,7 @@ flowchart TD
 2. The operator's consent service checks the legal basis and consent before any tool call. The purpose travels as a `dpv:` scope, and the Authorization Server checks the Consent Master where consent is needed; a CIBA flow can ask the customer out of band.
 3. The Authorization Server issues a per-subscriber three-legged token. The MCP Gateway exchanges it for a token scoped to the CAMARA backend, and the token never enters model context.
 4. The copilot calls the three device-status tools through the MCP Gateway. Each request carries no `device` identifier, because the token identifies the subject. The gateway denies any call unless a role allows it, the deny-unless-allowed rule in [PB-05](../../../platform/integration/README.md#per-tool-authorization).
-5. The Embedding and Reranker slots search the care knowledge base, and the LLM slot drafts an answer that cites the passages.
+5. The Embedding and Reranker slots search the care knowledge base. The Decision slot picks the small or large LLM, and that LLM drafts an answer that cites the passages.
 6. The Safety slot checks that the evidence supports the answer. If it doesn't, the Safety slot abstains and the care agent follows the usual care process. Output guardrails screen the suggestion for personal data.
 7. The care agent reads the suggestion, decides, and talks to the customer.
 8. To add a case note or open a TMF621 network trouble ticket, the copilot sends an action request with `submit_action_request`, and the Decision slot answers a fixed label question for the [decision gate](../../../architecture/decision-gate.md). From the assist stage up, a case note becomes a notification job (NOTIFY). From the recommend stage up, a ticket waits for the approver (REVIEW). STOP changes nothing.
@@ -128,7 +128,7 @@ The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify
 - [ ] Tokens: three-legged tokens only, and per-tool authorization that denies a call unless a role allows it
 - [ ] Data: a care knowledge base with usage rights recorded in the [PB-05 corpus register](../../../platform/integration/README.md#knowledge-sources-and-usage-rights)
 - [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
-- [ ] Placement: the regional site runs Embedding, Reranker, Safety, and Decision. The core runs the large LLM.
+- [ ] Placement: the regional site runs Embedding, Reranker, Safety, Decision, and the small LLM. The core runs the large LLM for harder cases.
 - [ ] Commitments: no credits, refunds, or service-level statements in a suggestion without a deterministic policy lookup
 - [ ] Stage register: every action class starts at the shadow stage
 
@@ -141,7 +141,7 @@ The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify
 | Inference engine for every slot | Red Hat AI Inference (vLLM) |
 | Input and output guardrails | NeMo Guardrails in Red Hat OpenShift AI |
 
-Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-placement/README.md#key-flags-per-slot). Start the Safety slot with its own pinned revision and no tool-calling flags.
+Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-placement/README.md#key-flags-per-slot). Start the Safety slot and the small LLM each with its own pinned revision, and the Safety slot with no tool-calling flags.
 
 ```text
 # LLM 31B (pin the revision; text-only; tool calling)
@@ -174,6 +174,7 @@ Each action request passes the [decision gate](../../../architecture/decision-ga
 | Safety false-abstention ceiling | The highest share of sufficient-context items where the Safety slot abstains | Business owner | Measure abstention on items with full evidence, and weigh it against the human workload |
 | LLM groundedness floor | The lowest share of answers whose claims the cited passages support | Risk owner, with SME review | Score a golden set of operator questions with SME-checked answers and a calibrated judge |
 | Embedding and Reranker recall-at-k floor | The lowest share of questions with a correct passage in the top results | Platform team, with SME review | Label relevant passages for operator questions; the reranker must beat retriever-only on the same set |
+| Decision routing threshold | The label probability over which the large LLM drafts the suggestion instead of the small LLM | Model owner | [Evaluation and acceptance](../../../platform/evaluation-acceptance/README.md): run the small and large LLM on the same golden set, and keep a case band on the small LLM only while it meets the same gates |
 | Ceiling for read requests | The highest outcome for requests that only read | Risk owner, with SME review | [Evaluation and acceptance method](../../../platform/evaluation-acceptance/README.md): review the gate set for read requests and the human review load |
 | Ceiling for notify requests | The highest outcome for notifications and ticket notes | Risk owner, with SME review | [Evaluation and acceptance method](../../../platform/evaluation-acceptance/README.md): review notify cases for duplicates and noise |
 | Ceiling for low-risk writes | The highest outcome for reversible changes such as an interface restart | Risk owner | [Evaluation and acceptance method](../../../platform/evaluation-acceptance/README.md): raise it only after a canary window with no false ACT label |
@@ -209,6 +210,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 10 | By default a valid user can call every tool behind the gateway | Red Hat guidance | [Locking down MCP at the gateway](https://developers.redhat.com/articles/2026/10/23/locking-down-mcp-at-the-gateway) |
 | 11 | The Safety model is trained to refuse when retrieved context is insufficient; measure correct abstention in the full pipeline before deployment | model card | [OTel-LLM-12B-Safety model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-12B-Safety) |
 | 12 | Capturing prompts, completions, and retrieval content needs an explicit opt-in | project documentation | [GenAI spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-spans.md) |
+| 13 | Use the Decision model's label probabilities for confidence thresholds and routing | model card | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 
 ## Deploy and verify
 

@@ -85,6 +85,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
 # role as owner, and never give it a default value on the page.
 USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     "standards-knowledge/grounded-knowledge-assistant": {"Decision routing threshold": "Model owner"},
+    "business-assurance/camara-care-diagnostics": {"Decision routing threshold": "Model owner"},
 }
 
 # RACI activities a use case may name that no platform page defines
