@@ -204,6 +204,27 @@ def stage_targets() -> dict[str, str | None]:
     return out
 
 
+GATE_LABEL = re.compile(r"\b(LOOK|NOTIFY|REVIEW|ACT|STOP)\b")
+# A stage register that skips the shadow stage ("every class starts at REVIEW").
+SKIPPED_SHADOW = re.compile(r"(?i)\b(?:starts?|stays?) at (?:NOTIFY|REVIEW|ACT)\b")
+
+
+def stage_rows() -> list[tuple[str, str, set[str]]]:
+    """(stage, autonomy ceiling, gate outcomes allowed) per row of the gating stage table, in order."""
+    table = table_with_header(GATING, "Reference design", STAGE_HEADER)
+    stage, ceiling, allowed = (STAGE_HEADER.index(c) for c in ("Stage", "Autonomy ceiling", "Gate outcomes allowed"))
+    return [(row[stage], row[ceiling].split(",")[0].strip(), set(GATE_LABEL.findall(row[allowed]))) for row in table[1:]]
+
+
+def first_stage_for_label() -> dict[str, int]:
+    """Gate outcome -> index of the first stage in the gating stage table that allows it."""
+    out: dict[str, int] = {}
+    for i, (_, _, allowed) in enumerate(stage_rows()):
+        for label in allowed:
+            out.setdefault(label, i)
+    return out
+
+
 def platform_params() -> dict[str, str]:
     """Parameter name -> normalised owner, over platform pages and the gate page."""
     out: dict[str, str] = {}
@@ -511,6 +532,18 @@ def test_sync_stage_table_present():
     }
 
 
+def test_sync_stage_outcomes_present():
+    rows = stage_rows()
+    assert [stage for stage, _, _ in rows] == ["Shadow", "Assist", "Recommend", "Act"]
+    first = first_stage_for_label()
+    assert {label: rows[i][0] for label, i in first.items()} == {
+        "LOOK": "Shadow",
+        "NOTIFY": "Assist",
+        "REVIEW": "Recommend",
+        "ACT": "Act",
+    }
+
+
 def test_sync_platform_params_present():
     params = platform_params()
     assert len(params) >= 40
@@ -616,6 +649,29 @@ def test_sync_stage_tmf_mapping(path):
         assert "tmf_an_level_target" not in fm
     else:
         assert fm.get("tmf_an_level_target") == int(target.split()[1]), (ceiling, target)
+
+
+@PAGES
+def test_sync_outcomes_qualified_by_stage(path):
+    """Each Governance outcome above LOOK names the first stage that allows it,
+    read from the gating stage table, and no outcome needs a stage above the
+    page's autonomy ceiling. The stage register never skips the shadow stage."""
+    rows = stage_rows()
+    first = first_stage_for_label()
+    ceilings = [ceiling for _, ceiling, _ in rows]
+    page_ceiling = (front_matter(path) or {}).get("autonomy_ceiling")
+    assert page_ceiling in ceilings, page_ceiling
+    top = ceilings.index(page_ceiling)
+    table = table_with_header(path, "Governance", ACTION_HEADER)
+    col = table[0].index(ACTION_HEADER[1])
+    for row in table[1:]:
+        for label in set(GATE_LABEL.findall(row[col])) - {"LOOK", "STOP"}:
+            need = first[label]
+            assert need <= top, f"{row[0]}: {label} needs the {rows[need][0]} stage, above {page_ceiling}"
+            if need > 0:
+                phrase = f"{rows[need][0].lower()} stage"
+                assert phrase in row[col], f"{row[0]}: {label} without '{phrase}'"
+    assert SKIPPED_SHADOW.findall(flat(body(path))) == []
 
 
 @PAGES
