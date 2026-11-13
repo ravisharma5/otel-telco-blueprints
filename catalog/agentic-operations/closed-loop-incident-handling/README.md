@@ -67,7 +67,7 @@ flowchart TD
 5. Action orchestration checks the request against the decision gate schema. A REST API step asks the Decision slot a fixed label question on `/v1/chat/completions` with log probabilities; the agent's own label is advisory.
 6. A switch step takes the lower of the model label and the policy ceiling. A label mass below the Label-mass floor fails closed to STOP, and STOP ends the step with no change.
 7. REVIEW waits for the `approver` role. ACT runs only an approved playbook within policy. NOTIFY runs a notification job that posts to the ticket or the operations channel, with no network change.
-8. A job template runs the playbook, a verification job reads the same object, and a rollback job runs if verification fails. The workflow writes the audit record, updates the TMF621 ticket, and clears the TMF642 alarm through `/clearAlarm`.
+8. A job template runs the playbook, a verification job reads the same object, and a rollback job runs if verification fails. The workflow writes the audit record, updates the TMF621 ticket, and, once verification passes, clears the TMF642 alarm through `/clearAlarm`.
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. A confirmed false ACT drops the use case and its action class back one stage, as [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy) sets out. A blocked prompt injection in alarm, ticket, or device text opens a SOC case and does not drop a stage.
 
@@ -101,9 +101,9 @@ Risk classes follow the [decision gate schema](https://github.com/ravisharma5/ot
 
 A BGP session from PE router `pe7` flaps after a CPU spike, and the TMF642 alarm opens incident `inc-3107`. `noc-loop-agent` reads the alarm, the BGP neighbour state and CPU history on `pe7`, the KPIs, and the topology, and finds no open TMF621 ticket.
 
-Its request `req-3107-1` creates the ticket. Ticket creation is `notify` class at the assist stage, so `dec-3107-1` records NOTIFY and the notification job opens the ticket, per the gate [policy table](../../../architecture/decision-gate.md#policy-table).
+Request `req-3107-1` to create the ticket is `notify` class at the assist stage, so `dec-3107-1` records NOTIFY and the notification job opens the ticket, per the gate [policy table](../../../architecture/decision-gate.md#policy-table).
 
-Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request. The stage register holds this class at the recommend stage, so `dec-3107-2` records REVIEW even though the label reads ACT. After the `approver` role signs off, the playbook runs, the verification job reads the session state, and the workflow clears the alarm and updates the ticket. The soft reset runs as ACT only once its class earns the act stage. A traffic drain on `pe7` is `write_high` and never runs without approval.
+Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request. The stage register holds this class at the recommend stage, so `dec-3107-2` records REVIEW even though the label reads ACT. After the `approver` role signs off, the playbook runs, the verification job reads the session state, and the workflow clears the alarm and updates the ticket. The soft reset runs as ACT only once its class earns the act stage. A traffic drain on `pe7` is `write_high` and always needs approval.
 
 ## What you need
 
@@ -155,6 +155,7 @@ Each action request passes the [decision gate](../../../architecture/decision-ga
 | Comment on or acknowledge the TMF642 alarm, `notify` | NOTIFY, from the assist stage up | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 | BGP soft reset, `write_low` | REVIEW from the recommend stage up, then ACT within policy once the act stage is earned | The `approver` role while the outcome is REVIEW | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 | Drain traffic, `write_high` | REVIEW, from the recommend stage up | The `approver` role | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
+| Clear the TMF642 alarm, a step of the approved playbook run | The playbook's outcome; runs only after verification passes | The playbook's approval | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 | Any action the label marks STOP | STOP | None | [Recorded by your legal team in the classification record](../../../platform/compliance-operating-model/README.md) |
 
 | Parameter | What it controls | Who sets it | How to calibrate |
