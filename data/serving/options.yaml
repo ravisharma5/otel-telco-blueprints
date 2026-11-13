@@ -95,6 +95,37 @@ options:
     related: []
     excluded_slots: []
 
+  - id: kv-offload
+    name: KV cache offload to CPU memory and storage
+    engine: vLLM
+    tiers: [regional, core]
+    what: Keeps KV cache blocks that leave GPU memory in CPU memory, and optionally on storage, then loads them back when a later turn reuses the prefix instead of recomputing it.
+    set:
+      - CPU memory first, with `--kv-offloading-backend native --kv-offloading-size <GB>` sized larger than the GPU KV cache
+      - on a single node, add a local NVMe filesystem tier behind the CPU tier
+      - on several nodes, point that filesystem tier at a shared filesystem instead, which keeps the cache through restarts and shares prefixes across replicas
+    check: "Replay recorded traffic and compare time to first token on resumed turns, throughput, and offload cache hits, with offload off and with each tier added; the same gates must still pass. Before adding a storage tier, run the crossover check: divide the storage's p99 read latency at the offload block size by the per-token prefill time (time to first token over prompt length on one uncached request); storage pays off only when your typical context is longer than that."
+    limits:
+      - Runs on CUDA, ROCm, and XPU only.
+      - The CPU tier counts toward the pod's memory limit, so leave headroom for the rest of the host.
+      - Gemma 4 models, including the 31B, need `--no-disable-hybrid-kv-cache-manager`, or the server does not start.
+      - Storage tiers do not work on an engine whose workers span several nodes, and a shared filesystem tier never evicts, so manage its capacity.
+      - Built for long or resumed contexts on the large LLM; measure before using it on the Decision slot, and leave it off the pooling slots.
+    sources:
+      - https://docs.vllm.ai/en/latest/features/kv_offloading_usage/
+      - https://github.com/llm-d/llm-d/blob/main/docs/architecture/kv-management/kv-offloader.md
+      - https://github.com/llm-d/llm-d/tree/main/guides/tiered-prefix-cache
+    applies_when: []
+    where_it_helps:
+      - use_case: UC-AGOPS-01
+        reason: A long investigation pauses for tool calls and approvals, so its context can leave GPU memory and load back instead of being recomputed.
+      - use_case: UC-CARE-01
+        reason: A harder care conversation routed to the large LLM comes back turn after turn, so its earlier turns load back instead of being recomputed.
+      - use_case: UC-KNOW-01
+        reason: Questions to the large LLM share a long instruction prompt, which stays reusable in CPU memory after it leaves GPU memory.
+    related: []
+    excluded_slots: [classification, embedding, reranker]
+
   - id: speculative-decoding
     name: Speculative decoding
     engine: vLLM

@@ -491,10 +491,24 @@ def test_options_schema_rejects_unknown_keys():
 def test_option_ids_and_order():
     ids = [o["id"] for o in options()]
     assert len(ids) == len(set(ids)), "duplicate option id"
-    if KV_OFFLOAD_ID in ids:
-        assert ids.count(KV_OFFLOAD_ID) == 1
-        assert ids[ids.index(KV_OFFLOAD_ID) - 1] == "weighted-canary"
+    assert ids.count(KV_OFFLOAD_ID) == 1, "kv-offload missing"
+    assert ids[ids.index(KV_OFFLOAD_ID) - 1] == "weighted-canary"
     assert [i for i in ids if i != KV_OFFLOAD_ID] == BASE_OPTION_IDS
+
+
+def test_kv_offload_tiers_and_crossover():
+    """KV offload is tiered (CPU, local NVMe, shared filesystem) with a crossover check."""
+    o = {o["id"]: o for o in options()}[KV_OFFLOAD_ID]
+    assert "KV cache offload to CPU memory" in o["name"]
+    joined_set = " ".join(o["set"])
+    pos = [joined_set.find(s) for s in ("CPU", "NVMe", "shared")]
+    assert all(p >= 0 for p in pos) and pos == sorted(pos), o["set"]
+    check = o["check"].lower()
+    assert "p99" in check and "prefill" in check, o["check"]
+    limits = " ".join(o["limits"])
+    assert "CUDA, ROCm, and XPU" in limits
+    assert "headroom" in limits
+    assert {"classification", "embedding", "reranker"} <= set(o["excluded_slots"])
 
 
 def option_table() -> list[list[str]]:
