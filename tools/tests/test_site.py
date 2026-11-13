@@ -360,15 +360,26 @@ def test_banner_unit_platform_done_unknown_or_non_string(status):
     assert _banner(src, {"type": "platform", "doc_status": status}) == src
 
 
+def test_banner_unit_use_case_draft():
+    out = _banner("# Title\n\nBody\n", {"type": "use-case", "doc_status": "draft"})
+    assert _line_after_h1(out, "# Title") == '!!! warning "Draft: content may change"'
+
+
+def test_banner_unit_use_case_review():
+    out = _banner("# Title\n\nBody\n", {"type": "use-case", "doc_status": "review"})
+    assert _line_after_h1(out, "# Title") == '!!! warning "In review"'
+
+
+@pytest.mark.parametrize("status", ["done", "weird", None, 3])
+def test_banner_unit_use_case_done_unknown_or_non_string(status):
+    src = "# Title\n\nBody\n"
+    assert _banner(src, {"type": "use-case", "doc_status": status}) == src
+
+
 @pytest.mark.parametrize("doc_type", [["platform"], {"a": 1}, 3])
 def test_banner_unit_non_string_type_untouched(doc_type):
     src = "# Title\n\nBody\n"
     assert _banner(src, {"type": doc_type, "doc_status": "draft"}) == src
-
-
-def test_banner_unit_use_case_untouched():
-    src = "# Title\n\nBody\n"
-    assert _banner(src, {"type": "use-case", "doc_status": "draft"}) == src
 
 
 def _make_reference(root, status):
@@ -454,6 +465,7 @@ def test_nav_order():
         "platform/intake-model-selection/README.md",
         "platform/compliance-operating-model/README.md",
     ]
+    assert _nav_children("Catalog") == ["catalog/index.md"]
 
 
 def test_start_here_labels():

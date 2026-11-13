@@ -61,7 +61,8 @@ nav:
       - Adaptation ladder: architecture/adaptation-ladder.md
       - Placement: architecture/placement.md
       - Crosswalk: architecture/crosswalk.md
-  - Catalog: catalog/index.md
+  - Catalog:
+      - Overview: catalog/index.md
   - Platform:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md

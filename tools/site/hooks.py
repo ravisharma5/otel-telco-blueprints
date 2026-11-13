@@ -11,8 +11,8 @@ folder (or the folder itself) stops the build, so a link cannot publish
 content from outside the allowlist. Any path that resolves outside its folder
 is skipped as a second line of defence.
 
-Reference and platform pages (front matter ``type: reference`` or
-``type: platform``) get a banner right after the H1, chosen by ``doc_status``:
+Reference, platform, and use-case pages (front matter ``type: reference``,
+``type: platform``, or ``type: use-case``) get a banner right after the H1, chosen by ``doc_status``:
 draft and review pages show a fixed warning, done pages show none. The text
 comes only from the BANNERS map, never from front matter, and other doc types
 are left untouched. The H1 search skips
@@ -32,7 +32,7 @@ INCLUDE = ["framework", "architecture", "platform", "catalog"]
 SUFFIXES = {".md", ".svg", ".png", ".jpg", ".jpeg"}
 BANNERS = {"draft": "Draft: content may change", "review": "In review"}
 # Doc types that get a banner; every other type is left untouched.
-BANNER_TYPES = frozenset({"reference", "platform"})
+BANNER_TYPES = frozenset({"reference", "platform", "use-case"})
 # A code fence line: up to 3 spaces, a run of 3+ backticks or tildes, then the rest.
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 # An HTML comment block starts with up to 3 spaces and "<!--".
@@ -84,7 +84,7 @@ def on_files(files, config):
 
 
 def on_page_markdown(markdown, page, config, files):
-    """Reference and platform pages only: a draft or review banner after the H1."""
+    """Reference, platform, and use-case pages only: a draft or review banner after the H1."""
     meta = page.meta or {}
     doc_type = meta.get("type")
     # A list or mapping type is unhashable, so test the type before membership.
