@@ -20,6 +20,7 @@ from tools.guards.patterns import PLANNING_ID_RE
 from tools.tests.conftest import REPO_ROOT
 from tools.tests.test_open_source_framing import STANDARD_LINE
 from tools.tests.test_platform_pages import (
+    ACCEPTANCE,
     ADAPTATION,
     ALLOWED_ROLES,
     BLOG_URL,
@@ -259,6 +260,25 @@ def param_tables(path: Path) -> list[list[list[str]]]:
 def known_params(path: Path) -> dict[str, str]:
     local = {k: normalise_owner(v) for k, v in USE_CASE_LOCAL_PARAMS.get(page_key(path), {}).items()}
     return {**platform_params(), **local}
+
+
+GATE_LINK_CELL = re.compile(
+    r"\[([^\]]+)\]\(" + re.escape(EVALUATION_LINK) + r"(?:#([a-z0-9-]+))?\)"
+)
+
+
+def heading_slug(title: str) -> str:
+    """GitHub-style anchor for a heading."""
+    return re.sub(r"\s+", "-", re.sub(r"[^\w\s-]", "", title.strip().lower()))
+
+
+def evaluation_gate_targets() -> tuple[set[str], set[str]]:
+    """(anchors of the evaluation page Reference design H3 headings, acceptance ladder stage names)."""
+    design = section_text(ACCEPTANCE, "Reference design")
+    headings = re.findall(r"^### (.+)$", design, re.M)
+    anchors = {heading_slug(h) for h in headings if not h.startswith("Worked example")}
+    ladder = table_with_header(ACCEPTANCE, "Reference design", ["Stage", "What it checks", "Blocks promotion when"])
+    return anchors, {row[0] for row in ladder[1:]}
 
 
 def verification_table(path: Path) -> list[list[str]]:
@@ -673,15 +693,42 @@ def test_sync_outcomes_qualified_by_stage(path):
     assert SKIPPED_SHADOW.findall(flat(body(path))) == []
 
 
+def gate_cell_ok(cell: str, known: dict[str, str]) -> bool:
+    """True when a verification cell names one gate: a parameter or one evaluation-page link."""
+    anchors, stages = evaluation_gate_targets()
+    link = GATE_LINK_CELL.fullmatch(cell.strip())
+    if link:
+        text, anchor = link.group(1), link.group(2)
+        return anchor in anchors if anchor else text in stages
+    return cell.split(",")[0].strip() in known
+
+
+@pytest.mark.parametrize(
+    ("cell", "ok"),
+    [
+        ("Decision false-ACT budget", True),
+        ("Non-inferiority margin, at the Decision routing threshold", True),
+        (f"[Trajectory checks]({EVALUATION_LINK}#trajectory-checks)", True),
+        (f"[Intake and smoke]({EVALUATION_LINK})", True),
+        ("Checked unlike the Canary window", False),
+        (f"[Trajectory checks]({EVALUATION_LINK}#no-such-gate)", False),
+        (f"[Some page]({EVALUATION_LINK})", False),
+        (f"See [Trajectory checks]({EVALUATION_LINK}#trajectory-checks)", False),
+    ],
+)
+def test_sync_gate_cell_rule_cases(cell, ok):
+    assert gate_cell_ok(cell, platform_params()) is ok
+
+
 @PAGES
 def test_sync_verification_checks_tie_to_gates(path):
-    names = [n.lower() for n in known_params(path)]
+    """Each check names one parameter (optionally with a ", ..." qualifier), or is
+    one link to an evaluation page gate heading or acceptance ladder stage."""
+    known = known_params(path)
     table = verification_table(path)
     col = table[0].index("PB-02 gate or parameter")
     for row in table[1:]:
-        cell = row[col]
-        ok = EVALUATION_LINK in cell or any(n in cell.lower() for n in names)
-        assert ok, row
+        assert gate_cell_ok(row[col], known), row
 
 
 # ---------- grounded knowledge assistant ----------
