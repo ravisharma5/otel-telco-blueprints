@@ -12,6 +12,7 @@ The catalog maps operator use cases to OTel model slots and platform blueprints.
 | Blueprint | Topic | Domain |
 |---|---|---|
 | [UC-KNOW-01](standards-knowledge/grounded-knowledge-assistant/README.md) | Grounded knowledge assistant | Standards knowledge |
+| [UC-AGOPS-01](agentic-operations/closed-loop-incident-handling/README.md) | Governed closed-loop incident handling | Agentic operations |
 
 Planned domains:
 

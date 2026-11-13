@@ -468,6 +468,7 @@ def test_nav_order():
     assert _nav_children("Catalog") == [
         "catalog/index.md",
         "catalog/standards-knowledge/grounded-knowledge-assistant/README.md",
+        "catalog/agentic-operations/closed-loop-incident-handling/README.md",
     ]
 
 

@@ -64,6 +64,7 @@ nav:
   - Catalog:
       - Overview: catalog/index.md
       - Grounded knowledge assistant: catalog/standards-knowledge/grounded-knowledge-assistant/README.md
+      - Governed closed-loop incident handling: catalog/agentic-operations/closed-loop-incident-handling/README.md
   - Platform:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md

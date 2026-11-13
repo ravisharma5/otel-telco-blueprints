@@ -73,6 +73,7 @@ from tools.tests.test_reference_pages import (
 # or renamed page fails here instead of quietly dropping out of every check.
 EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "standards-knowledge/grounded-knowledge-assistant": "UC-KNOW-01",
+    "agentic-operations/closed-loop-incident-handling": "UC-AGOPS-01",
 }
 
 # Parameters a use case may name that no platform page defines
@@ -705,3 +706,118 @@ def test_knowledge_worked_example_abstains():
     example = _h3_text(section_text(KNOWLEDGE, "How it works"), heading[4:])
     assert re.search(r"(?i)abstain", example), example
     assert "3GPP" in example or "TS " in example, example
+
+
+# ---------- closed-loop incident handling ----------
+
+CLOSED_LOOP = REPO_ROOT / "catalog/agentic-operations/closed-loop-incident-handling/README.md"
+NODE_DEF = re.compile(r'([A-Za-z0-9_]+)\s*(\[|\{)"([^"]+)"[\]\}]')
+EDGE = re.compile(r'([A-Za-z0-9_]+)(?:\s*[\[\{]"[^"]*"[\]\}])?\s*--\s*"([^"]+)"\s*-->\s*([A-Za-z0-9_]+)')
+SWAP_STEPS = ("Baseline", "Swap", "Promote or roll back")
+
+
+def _loop_units() -> list[str]:
+    """Prose sentences plus table rows on the closed-loop page."""
+    return _sentences(body(CLOSED_LOOP)) + [" | ".join(r) for t in page_tables(CLOSED_LOOP) for r in t]
+
+
+def _loop_graph() -> tuple[dict[str, tuple[str, str]], list[tuple[str, str, str]]]:
+    """Node id -> (shape opener, text), and (from, label, to) edges, from the Mermaid fence."""
+    fence = mermaid_fences(body(CLOSED_LOOP))[0]
+    nodes = {m.group(1): (m.group(2), m.group(3)) for m in NODE_DEF.finditer(fence)}
+    return nodes, EDGE.findall(fence)
+
+
+def _swap_steps() -> list[str]:
+    """The Baseline, Swap, and Promote or roll back steps of Deploy and verify, in page order."""
+    steps = _ordered_steps(section_text(CLOSED_LOOP, "Deploy and verify"))
+    found = []
+    for prefix in SWAP_STEPS:
+        idx = next((i for i, s in enumerate(steps) if s.startswith(prefix)), None)
+        assert idx is not None, f"no Deploy and verify step starts with {prefix!r}"
+        found.append((idx, steps[idx]))
+    assert [i for i, _ in found] == sorted(i for i, _ in found), "steps out of order"
+    return [s for _, s in found]
+
+
+def test_closed_loop_tmf_loop():
+    text = body(CLOSED_LOOP)
+    for term in ("TMF642", "TMF621", "/troubleTicket", "router state"):
+        assert term in text, term
+    assert "alarmCreateEvent" in text or "/hub" in text
+    steps = _ordered_steps(section_text(CLOSED_LOOP, "How it works"))
+    alarm = next(i for i, s in enumerate(steps) if "TMF642" in s)
+    ticket = next(i for i, s in enumerate(steps) if "TMF621" in s)
+    assert alarm < ticket, (alarm, ticket)
+
+
+def test_closed_loop_writes_through_action_request():
+    assert "submit_action_request" in section_text(CLOSED_LOOP, "How it works")
+    assert "submit_action_request" in section_text(CLOSED_LOOP, "What you need")
+    units = _loop_units()
+    assert any("write credentials" in u and re.search(r"\b(no|never)\b", u) for u in units)
+    assert any(
+        re.search(r"(?i)ticket creation|creat\w*[^.|]*ticket", u) and "action request" in u.lower() for u in units
+    )
+
+
+def test_closed_loop_gate_and_workflow():
+    nodes, edges = _loop_graph()
+    gates = [i for i, (shape, t) in nodes.items() if shape == "{" and "lower of the label and the policy ceiling" in t]
+    assert gates, nodes
+    review = [dst for src, label, dst in edges if src in gates and "REVIEW" in label]
+    assert any("approver" in nodes[d][1].lower() for d in review), review
+    act = [dst for src, label, dst in edges if src in gates and re.search(r"\bACT\b", label)]
+    assert any("playbook" in nodes[d][1] for d in act), act
+    assert "Ansible Automation Platform" in section_text(CLOSED_LOOP, "What you need")
+
+
+def test_closed_loop_swap_procedure():
+    steps = _swap_steps()
+    joined = " ".join(steps)
+    for term in ("replayed incidents", "registry", "Non-inferiority margin", "canary", "pinned 2.0 revision"):
+        assert term in joined, term
+    stripped = re.sub(r"\b2\.[05]\b|PB-\d{2}|TMF\d{3}|Level \d", "", joined)
+    assert not re.search(r"\d", stripped), stripped
+
+
+def test_closed_loop_no_2_0_loop_claim():
+    claim = re.compile(r"(?i)\b2\.0\b[^.]*\b(runs|handles|closes|completes) the loop")
+    assert [s for s in _sentences(body(CLOSED_LOOP)) if claim.search(s)] == []
+    table = tables(sections(body(CLOSED_LOOP)).get("Sources", []))[0]
+    claim_col, basis, source = (table[0].index(c) for c in ("Claim", "Basis", "Source"))
+    rows = [r for r in table[1:] if r[basis] == "model card" and "OTel-2.0-LLM-31B-IT" in r[source]]
+    assert any(re.search(r"(?i)tool[- ]calling|closed[- ]loop", r[claim_col]) for r in rows), rows
+
+
+def test_closed_loop_risk_classes():
+    text = body(CLOSED_LOOP)
+    assert "write_low" in text and "write_high" in text
+    table = table_with_header(CLOSED_LOOP, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    assert any("ticket" in r[0].lower() and "NOTIFY" in r[out] for r in rows), rows
+    assert any("soft reset" in r[0].lower() and "REVIEW" in r[out] and "ACT" in r[out] for r in rows), rows
+    assert any("drain" in r[0].lower() and r[out] == "REVIEW" for r in rows), rows
+
+
+def test_closed_loop_zero_tolerance():
+    assert any(re.search(r"(?i)zero[- ]tolerance", u) for u in _loop_units())
+    text = flat(body(CLOSED_LOOP))
+    for term in ("duplicate ticket", "outside the allowed set", "secret"):
+        assert term in text, term
+
+
+def test_closed_loop_gate_endpoint_and_label_mass():
+    assert "Label-mass floor" in body(CLOSED_LOOP)
+    units = _loop_units()
+    assert any("fails closed" in u and "STOP" in u for u in units)
+    assert any(re.search(r"(?i)\brequire", u) and "token" in u and "gate endpoint" in u for u in units)
+
+
+def test_closed_loop_example_ids():
+    how = section_text(CLOSED_LOOP, "How it works")
+    heading = next(ln for ln in how.splitlines() if ln.startswith("### Worked example:"))
+    example = _h3_text(how, heading[4:])
+    for ident in ("inc-3107", "req-3107-1", "dec-3107-1"):
+        assert ident in example, ident
