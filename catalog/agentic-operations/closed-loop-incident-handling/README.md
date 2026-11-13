@@ -13,6 +13,17 @@ one_liner: "Handles router incidents from alarm to ticket with read-only tools, 
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [101, 301, 302, 403]
 clarity_reviewed: "2026-11-13"
+card:
+  goal: "Resolve incidents with less manual work"
+  summary: "An agent investigates router alarms with read-only tools and opens tickets. Every fix passes a gate, and an approver signs off unless policy allows."
+  outcome: "Incidents reach a cause and a ticket sooner, with fewer duplicates, and every change leaves an audit record."
+  audience: "Operations engineers, approvers, and risk owners who run incident handling"
+  measures: ["Mean time to identify", "Incidents handled without rework", "Duplicate tickets avoided"]
+  risk: "It can change the network, so every write passes the gate and an approved playbook."
+placement:
+  far-edge: {runs: [], note: "Not used: the agent and its gate run at regional and core sites."}
+  regional: {runs: ["decision", "safety", "classification"], note: "The gate label, evidence checks, and cause labels run here."}
+  core: {runs: ["llm-large"], note: "The agent reads, reasons, and writes action requests here."}
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->

@@ -13,6 +13,17 @@ one_liner: "Suggests answers to a care agent from CAMARA device diagnostics, wit
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [303, 304]
 clarity_reviewed: "2026-11-13"
+card:
+  goal: "Help care agents diagnose customer issues"
+  summary: "Suggests answers to care agents on no-service calls, using device status read through CAMARA APIs with the customer's consent."
+  outcome: "Care agents see whether a device is roaming, reachable, and on which network, so more calls resolve first time."
+  audience: "Care agents, care operations, the data protection officer, and the risk owner"
+  measures: ["Average handling time", "First-contact resolution"]
+  risk: "It reads subscriber data, so consent is checked before any tool call."
+placement:
+  far-edge: {runs: [], note: "Not used: the copilot serves care agents, not network sites."}
+  regional: {runs: ["embedding", "reranker", "safety", "decision"], note: "Knowledge search, evidence checks, and the gate label run here."}
+  core: {runs: ["llm-large"], note: "The LLM drafts each suggestion from the passages and device status."}
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -117,6 +128,7 @@ The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify
 - [ ] Tokens: three-legged tokens only, and per-tool authorization that denies a call unless a role allows it
 - [ ] Data: a care knowledge base with usage rights recorded in the [PB-05 corpus register](../../../platform/integration/README.md#knowledge-sources-and-usage-rights)
 - [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
+- [ ] Placement: the regional site runs Embedding, Reranker, Safety, and Decision. The core runs the large LLM.
 - [ ] Commitments: no credits, refunds, or service-level statements in a suggestion without a deterministic policy lookup
 - [ ] Stage register: every action class starts at the shadow stage
 

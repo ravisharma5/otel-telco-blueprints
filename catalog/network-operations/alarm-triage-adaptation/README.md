@@ -13,6 +13,17 @@ one_liner: "Runs triage on RAN and transport alarms and recommends fixes for app
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
 agent_school: [101, 401, 402, 403]
 clarity_reviewed: "2026-11-13"
+card:
+  goal: "Triage alarms more accurately"
+  summary: "Finds the likely cause in RAN and transport alarms and proposes fixes for approval. It fine-tunes the model only when evaluation shows a gap."
+  outcome: "Engineers find the one cause in an alarm storm sooner, with causes labelled in your own taxonomy."
+  audience: "Model owners, operations engineers, approvers, and risk owners who run alarm triage"
+  measures: ["Mean time to identify", "Incidents triaged without rework"]
+  risk: "Every fix needs approval, and each new base model means retraining and re-checking."
+placement:
+  far-edge: {runs: [], note: "Not used: triage runs at the regional site."}
+  regional: {runs: ["llm-large", "classification", "safety", "decision", "embedding", "reranker"], note: "The triage agent, retrieval, and the gate run here."}
+  core: {runs: ["llm-large", "classification"], note: "Data generation, training, and evaluation of the adapter and the Classification head."}
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -121,6 +132,7 @@ The agent then proposes restarting the NG interface in `req-5520-1`. Fixes are a
 - [ ] Adapter storage: internal object storage, because the inference service rejects OCI URIs for adapters ([KServe issue 6094](https://github.com/kserve/kserve/issues/6094))
 - [ ] Adapter rank: `--max-lora-rank` set to the highest trained rank
 - [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
+- [ ] Placement: the regional site runs the large LLM, Classification, Safety, Decision, Embedding, and Reranker for triage. The core runs the large LLM and Classification for data generation, training, and evaluation.
 
 | Component role | Red Hat product used |
 |---|---|
