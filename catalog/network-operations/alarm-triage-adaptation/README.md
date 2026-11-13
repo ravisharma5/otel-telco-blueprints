@@ -12,7 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Runs triage on RAN and transport alarms and recommends fixes for approval. Starts with retrieval and skills only, and earns a LoRA adapter only when evaluation shows a measured gap. Depends on the acceptance gates and a model registry that binds each adapter to its base revision."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
 agent_school: [101, 401, 402, 403]
-clarity_reviewed: "2026-11-12"
+clarity_reviewed: "2026-11-13"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
