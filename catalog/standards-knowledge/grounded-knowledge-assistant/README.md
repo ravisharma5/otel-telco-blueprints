@@ -2,7 +2,7 @@
 id: "UC-KNOW-01"
 type: "use-case"
 title: "Grounded knowledge assistant"
-doc_status: "draft"
+doc_status: done
 domain: "standards-knowledge"
 flagship: true
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
@@ -11,6 +11,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Answers standards and runbook questions with citations, or abstains and lists what it searched. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10"]
 agent_school: [103, 201, 203, 402]
+clarity_reviewed: "2026-11-12"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -31,10 +32,9 @@ agent_school: [103, 201, 203, 402]
 
 ## Problem and value
 
-Operations engineers and support staff search 3GPP, IETF, TM Forum, vendor documents, and runbooks by hand, and an answer without citations can send a change down the wrong path.
+Engineers search 3GPP, IETF, TM Forum, vendor documents, and runbooks by hand, and an answer without citations can send a change down the wrong path.
 This assistant answers from your own indexed documents and cites each passage it used, or abstains and says what it searched.
-The KPIs are time to a cited answer and the share of answers a reviewer accepts.
-Any ROI is a target, measured against the shadow-stage baseline with the measures in [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi), such as engineer hours and the cases the system would abstain on.
+The KPIs are time to a cited answer and the share of answers a reviewer accepts; any ROI is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures, such as engineer hours and the cases the system would abstain on.
 
 ## How it works
 
@@ -59,12 +59,12 @@ flowchart TD
 1. An engineer asks a question. The front door checks identity and the team's token limit, and input guardrails screen the text.
 2. The agent runtime rewrites the query. The Embedding slot retrieves candidate passages from registered corpora only, and the Reranker slot puts the best evidence first.
 3. The Safety slot checks whether the passages support an answer. This check is the gate in this flow: when the passages fall short, the assistant abstains and returns the corpora and query it searched, with no answer.
-4. The platform asks the Decision slot a fixed label question about how hard the question is, and compares the label probability with the Decision routing threshold to pick the small or large LLM.
+4. The platform asks the Decision slot a fixed label question, such as whether the request needs the large model. It compares the label probability with the Decision routing threshold and picks the small or large LLM.
 5. The chosen LLM answers from the passages only and cites each one.
 6. Output guardrails screen the answer before the engineer sees it.
 7. Each step writes to the trace, as [PB-09](../../../platform/quality-operations/README.md) sets out: retrieval ids, rerank scores, the abstain outcome, the model size, and the Decision probabilities.
 
-No step changes the network. The flow makes no state-changing calls, so every outcome is LOOK, the only outcome the shadow stage allows in [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy).
+No step changes the network, so every outcome is LOOK, the only outcome the shadow stage allows in [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy).
 
 ### Slots and checkpoints
 
@@ -77,13 +77,15 @@ No step changes the network. The flow makes no state-changing calls, so every ou
 | `llm`, small | A 1B to 14B OTel LLM, pinned by revision | Answers routine lookups with citations | Regional |
 | `llm`, large | OTel-2.0-LLM-31B-IT, pinned by revision | Answers questions that need the large model, with citations | Core |
 
-The Decision routing threshold is yours to set, with no default. Questions whose label probability exceeds it go to the large LLM at the core.
+You set the Decision routing threshold; this page gives no default. Questions whose label probability exceeds it go to the large LLM at the core.
 
 ### Worked example: a timer question on RRC re-establishment
 
-An operations engineer asks which timers govern RRC re-establishment in the 5G NR release the network runs. Retrieval returns a passage from 3GPP TS 38.331 and the operator runbook for radio link failures, and the Reranker puts the TS 38.331 passage first. The Safety slot finds that the passages support an answer, and the Decision slot routes this short lookup to the small LLM. The answer names timers T311 and T301, says what starts each one, and cites TS 38.331 and the runbook section.
+An operations engineer asks which timers govern RRC re-establishment in the 5G NR release the network runs. Retrieval returns a passage from 3GPP TS 38.331 and the operator runbook for radio link failures, and the Reranker puts the TS 38.331 passage first.
 
-A second engineer asks about the same timers in a vendor's new software release. That release's manual has no entry in the corpus register, so it was never indexed. The Safety slot finds no passage that covers the release and abstains. The reply lists the corpora and the query it searched, and says the manual for that release isn't in the register.
+The Safety slot finds that the passages support an answer, and the Decision slot routes this short lookup to the small LLM. The answer names timers T311 and T301, says what starts each one, and cites TS 38.331 and the runbook section.
+
+A second engineer asks about the same timers in a vendor's new software release. That release's manual has no entry in the corpus register, so nobody indexed it, and the Safety slot abstains because no passage covers the release. The reply lists the corpora and the query it searched, and says the manual for that release isn't in the register.
 
 ## What you need
 
