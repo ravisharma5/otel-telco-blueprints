@@ -4,6 +4,7 @@
 # Security: triggers are push to main and manual dispatch only (no PR events),
 # read-only token by default,
 # pages/id-token write only on the deploy job, every action pinned by commit SHA.
+# The explorer's Node dependencies install with npm ci only, scripts blocked, telemetry off.
 name: pages
 on:
   push:
@@ -18,6 +19,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Astro collects telemetry by default; keep it off in CI.
+      ASTRO_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
@@ -27,6 +31,13 @@ jobs:
           version: "0.9.28"
       # --locked fails instead of re-resolving when uv.lock is stale.
       - run: uv sync --all-extras --locked
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: explorer/.node-version
+          # No dependency cache: npm ci installs from the lockfile every run.
+          package-manager-cache: false
+      # npm ci installs exactly the lockfile; explorer/.npmrc blocks install scripts.
+      - run: npm ci --prefix explorer
       - run: make site
         env:
           NO_MKDOCS_2_WARNING: "1"

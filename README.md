@@ -29,19 +29,25 @@ In this repository, "OTel" means the OTel model family, not OpenTelemetry.
 
 ## How to lint
 
-You need `uv` and Vale 3.26.0.
+You need `uv`, Vale 3.26.0, and Node (the version in `explorer/.node-version`).
 
 | Command | What it does |
 |---|---|
 | `make setup` | Installs the locked Python dependencies (the Google Vale style is vendored at `.vale/styles/Google`, so nothing downloads) |
 | `make lint` | Runs the structural linter and Vale |
-| `make ci` | Runs tests, Vale rule tests, `make lint`, and `make site`, the same as CI |
+| `make ci` | Runs tests, Vale rule tests, `make lint`, `make site`, `make explorer`, and `make test-site`, the same as CI |
 | `make site` | Builds the docs site in strict mode |
 | `make serve` | Previews the docs site at `http://127.0.0.1:8000` |
+| `make explorer-deps` | Installs the locked explorer dependencies with `npm ci` (install scripts stay blocked) |
+| `make explorer` | Builds the use-case explorer into `explorer/dist` |
+| `make test-site` | Runs the tests that read the built site and explorer |
 | `make hooks` | Installs the git guards that stop internal files and messages from being committed or pushed |
+
+Local build: install Node from `explorer/.node-version`, then run `make explorer-deps`. No `.gitignore` is tracked, so add these lines to `.git/info/exclude`: `/explorer/node_modules/`, `/explorer/dist/`, `/explorer/.astro/`, and `/explorer/src/generated/`.
 
 ## License
 
-- Code uses the `Apache-2.0` license. This covers `tools/`, `schemas/`, `.github/`, `Makefile`, `mkdocs.yml`, and `tools/site/`. See [LICENSE](LICENSE).
+- Code uses the `Apache-2.0` license. This covers `tools/`, `schemas/`, `.github/`, `Makefile`, `mkdocs.yml`, `tools/site/`, and `explorer/`. See [LICENSE](LICENSE).
 - Documentation uses the `CC-BY-4.0` license. This covers `framework/`, `architecture/`, `platform/`, `catalog/`, `templates/`, the `site-src/` pages, and this README. See [LICENSE-docs](LICENSE-docs).
 - The vendored Google Vale style in `.vale/styles/Google/` uses the `MIT` license. See its [LICENSE](.vale/styles/Google/LICENSE) and [PROVENANCE.txt](.vale/styles/Google/PROVENANCE.txt).
+- The vendored Red Hat Display, Text, and Mono fonts in `site-src/brand/fonts/` use the SIL Open Font License 1.1. See [OFL.txt](site-src/brand/fonts/OFL.txt) and [PROVENANCE.txt](site-src/brand/fonts/PROVENANCE.txt).

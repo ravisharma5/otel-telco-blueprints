@@ -124,3 +124,43 @@ def test_build_uses_locked_sync_and_make_site():
 def test_deploy_environment():
     assert WORKFLOW["jobs"]["deploy"]["needs"] == "build"
     assert WORKFLOW["jobs"]["deploy"]["environment"]["name"] == "github-pages"
+
+
+# ---------- Node toolchain for the explorer ----------
+
+SETUP_NODE = "actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1"
+BUILD_STEPS = WORKFLOW["jobs"]["build"]["steps"]
+# No install script was needed (npm ci + astro build pass with ignore-scripts=true),
+# so no run step may re-enable scripts.
+SCRIPT_ENABLERS = re.compile(
+    r"--ignore-scripts=false|ignore-scripts\s+false|npm config set ignore-scripts|npm rebuild"
+)
+
+
+def _build_runs():
+    return [s.get("run", "") for s in BUILD_STEPS]
+
+
+def test_setup_node_pinned():
+    steps = [s for s in BUILD_STEPS if s.get("uses", "").startswith("actions/setup-node@")]
+    assert len(steps) == 1
+    assert steps[0]["uses"] == SETUP_NODE
+    assert SHA_PIN.fullmatch(steps[0]["uses"])
+    assert steps[0]["with"]["node-version-file"] == "explorer/.node-version"
+    assert steps[0]["with"]["package-manager-cache"] is False
+
+
+def test_npm_ci_only():
+    runs = _build_runs()
+    assert any("npm ci --prefix explorer" in r for r in runs)
+    assert not any("npm install" in r for r in runs)
+
+
+def test_scripts_stay_blocked():
+    assert not [r for r in _build_runs() if SCRIPT_ENABLERS.search(r)]
+    assert SCRIPT_ENABLERS.search("npm rebuild esbuild --ignore-scripts=false")
+
+
+def test_astro_telemetry_disabled():
+    env = WORKFLOW["jobs"]["build"].get("env", {})
+    assert env.get("ASTRO_TELEMETRY_DISABLED") == "1"

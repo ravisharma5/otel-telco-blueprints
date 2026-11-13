@@ -19,6 +19,8 @@ jobs:
       # that a tampered release (tarball and checksums swapped together) cannot match.
       VALE_SHA256: "22aa69a556558e4a9dfc63c17030777383d8d3c48dcdfad655fa98e839d666ed"
       REQUIRE_VALE: "1"
+      # Astro collects telemetry by default; keep it off in CI.
+      ASTRO_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
@@ -36,4 +38,11 @@ jobs:
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       # --locked fails instead of re-resolving when uv.lock is stale.
       - run: uv sync --all-extras --locked
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: explorer/.node-version
+          # No dependency cache: npm ci installs from the lockfile every run.
+          package-manager-cache: false
+      # npm ci installs exactly the lockfile; explorer/.npmrc blocks install scripts.
+      - run: npm ci --prefix explorer
       - run: make ci

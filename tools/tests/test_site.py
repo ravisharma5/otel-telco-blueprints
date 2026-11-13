@@ -506,7 +506,7 @@ def test_readiness_links_architecture_pages():
 # ---------- no internal phase numbers on published pages ----------
 
 PHASE_NUMBER = re.compile(r"(?i)\bphases? [0-9]")
-PUBLISHED_DIRS = ["site-src", "framework", "templates", "architecture", "platform", "catalog"]
+PUBLISHED_DIRS = ["site-src", "framework", "templates", "architecture", "platform", "catalog", "explorer/src/content"]
 
 
 def _published_markdown():

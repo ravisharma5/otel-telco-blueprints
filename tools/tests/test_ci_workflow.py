@@ -74,3 +74,64 @@ def test_last_step_runs_make_ci():
 
 def test_no_vale_sync():
     assert not any("vale sync" in r for r in _run_steps())
+
+
+# ---------- Node toolchain for the explorer ----------
+
+SETUP_NODE = "actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1"
+SHA_PIN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.\-/]+@[0-9a-f]{40}")
+MAKEFILE = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+# No install script was needed (npm ci + astro build pass with ignore-scripts=true),
+# so neither CI nor the Makefile may re-enable scripts.
+SCRIPT_ENABLERS = re.compile(
+    r"--ignore-scripts=false|ignore-scripts\s+false|npm config set ignore-scripts|npm rebuild"
+)
+
+
+def _makefile_recipes():
+    return [line.strip() for line in MAKEFILE.splitlines() if line.startswith("\t")]
+
+
+def test_setup_node_pinned():
+    steps = [s for s in STEPS if s.get("uses", "").startswith("actions/setup-node@")]
+    assert len(steps) == 1
+    assert steps[0]["uses"] == SETUP_NODE
+    assert SHA_PIN.fullmatch(steps[0]["uses"])
+    assert steps[0]["with"]["node-version-file"] == "explorer/.node-version"
+    assert steps[0]["with"]["package-manager-cache"] is False
+
+
+def test_all_actions_sha_pinned():
+    uses = [s["uses"] for s in STEPS if "uses" in s]
+    assert uses and all(SHA_PIN.fullmatch(u) for u in uses)
+
+
+def test_npm_ci_only():
+    runs = _run_steps()
+    assert any("npm ci --prefix explorer" in r for r in runs)
+    assert not any("npm install" in r for r in runs)
+    assert not [line for line in _makefile_recipes() if "npm install" in line]
+
+
+def test_scripts_stay_blocked():
+    assert not [r for r in _run_steps() if SCRIPT_ENABLERS.search(r)]
+    assert not [line for line in _makefile_recipes() if SCRIPT_ENABLERS.search(line)]
+
+
+def test_astro_telemetry_disabled():
+    env = WORKFLOW["jobs"]["lint"].get("env", {})
+    assert env.get("ASTRO_TELEMETRY_DISABLED") == "1"
+
+
+def test_makefile_telemetry():
+    astro_lines = [line for line in _makefile_recipes() if re.search(r"\bastro\b", line)]
+    assert astro_lines, "no Makefile recipe runs astro"
+    assert all("ASTRO_TELEMETRY_DISABLED=1" in line for line in astro_lines)
+
+
+def test_makefile_ci_order():
+    assert re.search(r"(?m)^ci: test test-vale lint site explorer test-site$", MAKEFILE)
+    assert re.search(r"(?m)^explorer-deps:\n\tnpm ci --prefix explorer$", MAKEFILE)
+    assert re.search(r"(?m)^test-site:\n\tuv run pytest -q -m site_output$", MAKEFILE)
+    doc_dirs = re.search(r"(?m)^DOC_DIRS := (.*)$", MAKEFILE).group(1).split()
+    assert "explorer/src/content" in doc_dirs

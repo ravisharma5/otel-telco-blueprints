@@ -5,10 +5,11 @@
 # $(wildcard ...) drops directories that do not exist yet (platform/, catalog/).
 # The Google Vale style is vendored at .vale/styles/Google (see PROVENANCE.txt);
 # no target downloads styles.
-DOC_DIRS := README.md site-src framework architecture platform catalog templates
+# explorer/src/content holds every explorer UI string (copy.md), so Vale lints it.
+DOC_DIRS := README.md site-src framework architecture platform catalog templates explorer/src/content
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale render site serve ci hooks
+.PHONY: setup lint lint-structure lint-prose test test-vale test-site render site serve explorer explorer-deps ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -40,7 +41,20 @@ site:
 serve:
 	NO_MKDOCS_2_WARNING=1 uv run mkdocs serve --strict
 
-ci: test test-vale lint site
+# Installs the explorer's locked Node dependencies. npm ci only; explorer/.npmrc
+# sets ignore-scripts=true, so no package install script runs.
+explorer-deps:
+	npm ci --prefix explorer
+
+# Builds the explorer into explorer/dist. Astro telemetry stays off.
+explorer:
+	cd explorer && ASTRO_TELEMETRY_DISABLED=1 npx --no-install astro build
+
+# Tests that read built output (site/ and explorer/dist); run after site and explorer.
+test-site:
+	uv run pytest -q -m site_output
+
+ci: test test-vale lint site explorer test-site
 
 # Installs the versioned git guards (core.hooksPath = tools/git-hooks); not part of `ci`.
 hooks:
