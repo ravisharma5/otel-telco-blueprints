@@ -62,8 +62,10 @@ flowchart TD
   DG -- "NOTIFY" --> NJ["Run the notification job"]
   DG -- "REVIEW" --> HU["Human approver"]
   DG -- "LOOK or STOP: no change" --> AU["Audit record"]
+  HU -- "approve" --> RUN["Run the approved job and verify it"]
+  HU -- "reject" --> AU
+  RUN --> AU
   NJ --> AU
-  HU --> AU
 ```
 
 1. The customer contacts care, and the care agent opens a case. If the customer's app has run Number Verification in its own session on the device, the copilot receives only the true or false result. The copilot never receives a phone number from the model and never sends one to a tool.

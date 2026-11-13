@@ -56,8 +56,10 @@ flowchart TD
   DG -- "NOTIFY" --> NJ["Notification job posts the triage note"]
   DG -- "REVIEW" --> HA["Human approver"]
   DG -- "LOOK or STOP: no change" --> AU["Audit record"]
+  HA -- "approve" --> RUN["Run the approved job, verify, and roll back"]
+  HA -- "reject" --> AU
+  RUN --> AU
   NJ --> AU
-  HA --> AU
 ```
 
 1. The platform team registers runbooks, alarm dictionaries, and past root-cause reports as retrieval corpora, each with a usage-rights entry ([PB-05](../../../platform/integration/README.md)).
