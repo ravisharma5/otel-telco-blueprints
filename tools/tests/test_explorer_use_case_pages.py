@@ -24,7 +24,7 @@ from tools.tests.test_explorer_pages import BASE, COPY_PATH, _data, _Node, _Tree
 
 # Provisional uncompressed ceiling per built use-case page, in kilobytes. Set to the
 # measured maximum plus 25%, rounded up to the next 25 KB, capped at 400.
-PAGE_SIZE_LIMIT_KB = 400
+PAGE_SIZE_LIMIT_KB = 350
 FRAMEWORK_INDEX = REPO_ROOT / "framework/index.md"
 SECTION_IDS = ["why", "setup", "needs", "recipe"]
 PLAYBOOKS = "https://github.com/openshift-psap/inference-playbooks/"
