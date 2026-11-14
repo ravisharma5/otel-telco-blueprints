@@ -41,6 +41,11 @@ def _plain(text):
     return " ".join(text.replace("`", "").split())
 
 
+def _squash(text):
+    """Text with all whitespace removed; the tree joins inline children with spaces."""
+    return re.sub(r"\s+", "", text)
+
+
 def _num(value):
     return f"{value:g}"
 
@@ -359,11 +364,11 @@ def test_key_settings_match_state(explorer_dist, data, copy):
             rows = tables[0].find_all(lambda n: n.tag == "tr" and "data-flag" in n.attrs)
             assert len(rows) == len(state["flags"]), key
             for row, flag in zip(rows, state["flags"]):
-                text = row.text()
-                assert _plain(flag["setting"]) in text
-                assert _plain(flag["why"]) in text
+                text = _squash(row.text())
+                assert _squash(_plain(flag["setting"])) in text
+                assert _squash(_plain(flag["why"])) in text
                 if flag["value"]:
-                    assert _plain(flag["value"]) in text
+                    assert _squash(_plain(flag["value"])) in text
 
 
 @pytest.mark.site_output
@@ -405,15 +410,15 @@ def test_option_cards(explorer_dist, data, copy):
                 assert ("hidden" in card.attrs) == (not _shown_by_default(option)), (key, option["id"])
                 if option["state"] == "helps":
                     assert opt["helps"].split("{")[0].strip() in text
-                    assert _plain(option["reason_text"]) in text
+                    assert _squash(_plain(option["reason_text"])) in _squash(text)
                 elif option["state"] == "little":
                     assert opt["little"] in text
                 else:
                     assert opt["not_applicable"].split("{")[0].strip() in text
                     reason = option["reason_text"] or reasons[option["reason_id"]]
-                    assert _plain(reason) in text
-                assert _plain(option["what"]) in text
-                assert _plain(option["check"]) in text
+                    assert _squash(_plain(reason)) in _squash(text)
+                assert _squash(_plain(option["what"])) in _squash(text)
+                assert _squash(_plain(option["check"])) in _squash(text)
                 for related in option["related"]:
                     links = card.find_all(lambda n, u=related["url"]: n.tag == "a" and n.attrs.get("href") == u)
                     assert len(links) == 1, (key, option["id"])
@@ -458,7 +463,9 @@ def test_model_variants(explorer_dist, data, copy):
             for variant in state["variants"]:
                 assert variant["slot_name"] in text
                 if variant["operator_made"]:
-                    template = models["operator_made"][variant["precision"]]
+                    template = models["operator_made"].replace(
+                        "{precision}", models["precision"][variant["precision"]]
+                    )
                 else:
                     template = models["published"]
                 assert template.replace("{checkpoint}", variant["checkpoint"]) in text, (key, variant)
@@ -476,7 +483,7 @@ def test_platform_and_approvals_once(explorer_dist, data, copy):
             assert len(body) == len(rows)
             for tr, row in zip(body, rows):
                 for cell in row:
-                    assert _plain(cell) in tr.text()
+                    assert _squash(_plain(cell)) in _squash(tr.text())
         assert needs["notes"]["replaceable"] in tree.root.text()
 
 

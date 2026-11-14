@@ -1,0 +1,24 @@
+---
+// Thresholds you set: Parameter and Owner only. No values column, no defaults.
+// The table does not change with the setup, so it renders once.
+import { frontmatter as copy } from '../content/copy.md';
+
+interface Props {
+  parameters: string[][];
+}
+
+const { parameters } = Astro.props;
+const t = copy.use_case.thresholds;
+---
+<table class="mini thresholds-table">
+  <caption class="visually-hidden">{t.caption}</caption>
+  <thead>
+    <tr><th scope="col">{t.columns.parameter}</th><th scope="col">{t.columns.owner}</th></tr>
+  </thead>
+  <tbody>
+    {parameters.map(([parameter, owner]) => (
+      <tr><th scope="row">{parameter}</th><td>{owner}</td></tr>
+    ))}
+  </tbody>
+</table>
+<p class="note">{t.notes.no_defaults}</p>

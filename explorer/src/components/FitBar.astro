@@ -1,0 +1,60 @@
+---
+// One fit bar per GPU. The graphic is aria-hidden; the text rows carry the meaning.
+// Band and percent come from the exporter, never from client code.
+import { frontmatter as copy } from '../content/copy.md';
+import { fill, num, type FitEntry } from '../lib/data';
+
+interface Props {
+  entry: FitEntry;
+}
+
+const { entry } = Astro.props;
+const fit = copy.use_case.fit;
+const band = fit.bands[entry.band];
+const title =
+  entry.gpu_count > 1
+    ? fill(fit.gpu_title, {
+        n: entry.gpu_index,
+        count: entry.gpu_count,
+        slots: entry.slots.map((s) => s.slot_name).join(', '),
+      })
+    : '';
+const width = Math.min(entry.pct, 100);
+---
+<div class={`fit-bar band-${entry.band}`}>
+  {title && <p class="fit-title">{title}</p>}
+  <p class="fit-row">
+    <span>{fill(fit.weights, { gb: num(entry.weights_gb), total: num(entry.total_gb) })}</span>
+    <span class="fit-pct">{fill(fit.pct, { pct: entry.pct, band })}</span>
+  </p>
+  <div class="fit-track" aria-hidden="true">
+    <span class="fit-fill" style={`width: ${width}%`}></span>
+    <span class="fit-tick" style="left: 60%"></span>
+    <span class="fit-tick" style="left: 80%"></span>
+  </div>
+  <p class="fit-message">{fit.messages[entry.band]}</p>
+</div>
+
+<style>
+  .fit-bar { display: flex; flex-direction: column; gap: var(--space-sm); margin-top: var(--space-md); }
+  .fit-bar p { margin: 0; font-size: var(--text-label); line-height: var(--leading-label); }
+  .fit-title { font-weight: var(--weight-bold); }
+  .fit-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-sm); }
+  .fit-pct { font-weight: var(--weight-bold); }
+  .band-fits .fit-pct { color: var(--fit-ok-text); }
+  .band-tight .fit-pct { color: var(--fit-tight-text); }
+  .band-too-tight .fit-pct { color: var(--fit-over-text); }
+  .fit-track {
+    position: relative; height: 8px; border-radius: var(--radius-full);
+    background: var(--fit-track); margin: 2px 0;
+  }
+  .fit-fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--radius-full); }
+  .band-fits .fit-fill { background: var(--fit-ok-fill); }
+  .band-tight .fit-fill { background: var(--fit-tight-fill); }
+  .band-too-tight .fit-fill { background: var(--fit-over-fill); }
+  .fit-tick {
+    position: absolute; top: -2px; bottom: -2px; width: 2px;
+    background: var(--color-text-muted);
+  }
+  .fit-message { color: var(--color-text-muted); }
+</style>

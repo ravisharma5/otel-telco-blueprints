@@ -1,0 +1,107 @@
+---
+// Your setup. The form ships hidden and the page script shows it, so without
+// JavaScript the static default-setup line and the no-JS notes show instead.
+// The script accepts only the ids in data-setup-ids and "yes"/"no".
+import { frontmatter as copy } from '../content/copy.md';
+import { batchValues, defaults, fill, setups, stateKey, statesOf, type UseCase } from '../lib/data';
+
+interface Props {
+  useCase: UseCase;
+}
+
+const { useCase } = Astro.props;
+const s = copy.use_case.setup;
+const defaultKey = stateKey(defaults.setup, defaults.batch);
+const defaultSetup = setups.find((setup) => setup.id === defaults.setup);
+const words = copy.home.gallery.counts;
+---
+<p class="invalid-notice" role="status" data-invalid-notice hidden>
+  {s.notes.invalid} <span class="wide-only">{s.notes.invalid_wide}</span><span class="narrow-only">{s.notes.invalid_narrow}</span>
+</p>
+<form
+  class="setup-form"
+  data-setup-form
+  data-setup-ids={setups.map((setup) => setup.id).join(' ')}
+  data-ampere-ids={setups.filter((setup) => setup.ampere_note).map((setup) => setup.id).join(' ')}
+  data-default-setup={defaults.setup}
+  data-default-batch={defaults.batch}
+  data-announce={s.announce}
+  data-announce-yes={s.announce_batch.yes}
+  data-announce-no={s.announce_batch.no}
+  hidden
+>
+  <div class="field">
+    <label for="setup-select">{s.headings.question}</label>
+    <select id="setup-select" name="setup" aria-describedby="setup-helper">
+      {setups.map((setup) => (
+        <option value={setup.id} selected={setup.id === defaults.setup}>{setup.label}</option>
+      ))}
+    </select>
+    <p id="setup-helper" class="helper" hidden={!defaultSetup?.ampere_note}>{s.notes.ampere}</p>
+  </div>
+  <fieldset>
+    <legend>{s.headings.batch}</legend>
+    {batchValues.map((value) => (
+      <label class="radio-row">
+        <input type="radio" name="batch" value={value} checked={value === defaults.batch} />
+        <span>{s.batch_options[value]}</span>
+      </label>
+    ))}
+  </fieldset>
+</form>
+<noscript>
+  <p class="no-js-setup">{fill(s.no_js_setup, { setup: defaultSetup?.label ?? '' })} {s.batch_sentence[defaults.batch as 'yes' | 'no']}</p>
+  <p class="helper">{copy.notes.no_js}</p>
+  <p class="helper">{copy.notes.no_js_link}</p>
+</noscript>
+<div class="options-counts">
+  {statesOf(useCase).map(({ key, state }) => (
+    <p class="options-count" data-for-state={key} hidden={key !== defaultKey}>
+      <span class="count-number">{state.options_worth_testing}</span>
+      <span class="count-caption">{s.count_caption}</span>
+    </p>
+  ))}
+</div>
+<p class="visually-hidden" aria-live="polite" data-announcer></p>
+
+<style>
+  .setup-form[hidden], .invalid-notice[hidden], .helper[hidden], .options-count[hidden] { display: none; }
+  .setup-form { display: flex; flex-direction: column; gap: var(--space-md); }
+  .field { display: flex; flex-direction: column; gap: var(--space-sm); }
+  label[for], legend {
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  select {
+    width: 100%; min-height: var(--target-button); padding: 0 var(--space-control-x);
+    background: var(--color-surface); color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-md);
+    font: inherit; font-size: var(--text-label);
+  }
+  select:hover { border-color: var(--color-text); }
+  .helper, .invalid-notice, .no-js-setup {
+    margin: 0; color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .invalid-notice { color: var(--color-text); margin-bottom: var(--space-md); }
+  noscript p { margin: 0 0 var(--space-sm); }
+  .no-js-setup { color: var(--color-text); font-weight: var(--weight-bold); }
+  fieldset { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: var(--space-xs); }
+  legend { padding: 0; margin-bottom: var(--space-sm); }
+  .radio-row {
+    display: flex; align-items: center; gap: var(--space-sm); min-height: var(--target-chip);
+    font-size: var(--text-label); line-height: var(--leading-label); cursor: pointer;
+  }
+  .radio-row input { accent-color: var(--color-text); margin: 0; width: 18px; height: 18px; flex-shrink: 0; }
+  .options-counts { margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border); }
+  .options-count { display: flex; align-items: baseline; gap: var(--space-sm); margin: 0; }
+  .count-number {
+    font-family: var(--font-display); font-weight: var(--weight-bold);
+    font-size: var(--text-heading); line-height: var(--leading-heading);
+  }
+  .count-caption { color: var(--color-text-muted); font-size: var(--text-label); line-height: var(--leading-label); }
+  .narrow-only { display: none; }
+  @media (max-width: 1023px) {
+    .wide-only { display: none; }
+    .narrow-only { display: inline; }
+  }
+</style>

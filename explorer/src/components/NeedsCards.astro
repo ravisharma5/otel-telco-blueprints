@@ -1,0 +1,82 @@
+---
+// What you need: Models (one table per setup state), Platform, and Approvals
+// (rendered once; they do not change with the setup).
+import Rich from './Rich.astro';
+import { frontmatter as copy } from '../content/copy.md';
+import { defaults, fill, stateKey, statesOf, type UseCase, type Variant } from '../lib/data';
+
+interface Props {
+  useCase: UseCase;
+}
+
+const { useCase } = Astro.props;
+const n = copy.use_case.needs;
+const m = copy.use_case.models;
+const precision = m.precision as Record<string, string>;
+const defaultKey = stateKey(defaults.setup, defaults.batch);
+const model = (v: Variant) =>
+  v.operator_made
+    ? fill(m.operator_made, { precision: precision[v.precision] ?? v.precision, checkpoint: v.checkpoint })
+    : fill(m.published, { checkpoint: v.checkpoint });
+---
+<div class="needs-grid">
+  <div class="need-card">
+    <h3>{n.headings.models}</h3>
+    {statesOf(useCase).map(({ key, state }) => (
+      <div class="models-part" data-for-state={key} hidden={key !== defaultKey}>
+        <table class="mini">
+          <caption class="visually-hidden">{n.headings.models}</caption>
+          <thead><tr><th scope="col">{n.columns.slot}</th><th scope="col">{n.columns.model}</th></tr></thead>
+          <tbody>
+            {state.variants.map((v) => (
+              <tr><th scope="row">{v.slot_name}</th><td>{model(v)}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ))}
+  </div>
+  <div class="need-card">
+    <h3>{n.headings.platform}</h3>
+    <table class="mini platform-table">
+      <caption class="visually-hidden">{n.headings.platform}</caption>
+      <thead><tr><th scope="col">{n.columns.role}</th><th scope="col">{n.columns.product}</th></tr></thead>
+      <tbody>
+        {useCase.platform_rows.map(([role, product]) => (
+          <tr><th scope="row"><Rich text={role} /></th><td><Rich text={product} /></td></tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="note">{n.notes.replaceable}</p>
+  </div>
+  <div class="need-card wide">
+    <h3>{n.headings.approvals}</h3>
+    <table class="mini approvals-table">
+      <caption class="visually-hidden">{n.headings.approvals}</caption>
+      <thead>
+        <tr><th scope="col">{n.columns.action}</th><th scope="col">{n.columns.gate}</th><th scope="col">{n.columns.approver}</th></tr>
+      </thead>
+      <tbody>
+        {useCase.approvals.map(([action, gate, who]) => (
+          <tr><th scope="row"><Rich text={action} /></th><td><code>{gate}</code></td><td><Rich text={who} /></td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .needs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+  .need-card {
+    padding: var(--space-lg); border-radius: var(--radius-lg);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    min-width: 0;
+  }
+  .need-card.wide { grid-column: 1 / -1; }
+  .need-card h3 { margin: 0 0 var(--space-md); }
+  .models-part[hidden] { display: none; }
+  @media (max-width: 1023px) {
+    .needs-grid { grid-template-columns: 1fr; }
+    .need-card { padding: var(--space-md); }
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+// Where each model runs: one card per tier for one setup state, with the fit
+// bars on the regional card of a regional setup.
+import FitBar from './FitBar.astro';
+import { frontmatter as copy } from '../content/copy.md';
+import type { FitEntry, TierCard } from '../lib/data';
+
+interface Props {
+  tiers: TierCard[];
+  fit: FitEntry[];
+}
+
+const { tiers, fit } = Astro.props;
+const labels = copy.home.gallery.filters.tiers;
+---
+<ul class="tier-grid">
+  {tiers.map((tier) => (
+    <li
+      class:list={['tier-card', { used: tier.used, unused: !tier.used, selected: tier.matches_setup }]}
+      data-tier={tier.tier}
+    >
+      <p class="tier-head">
+        <span class="eyebrow">{labels[tier.tier as keyof typeof labels]}</span>
+        {tier.matches_setup && <span class="tag your-setup">{copy.use_case.tiers.your_setup}</span>}
+      </p>
+      {tier.slots.length > 0 && (
+        <ul class="tags">{tier.slots.map((slot) => <li class="tag">{slot.slot_name}</li>)}</ul>
+      )}
+      <p class="tier-note">{tier.note}</p>
+      {tier.matches_setup && tier.tier === 'regional' && fit.map((entry) => <FitBar entry={entry} />)}
+    </li>
+  ))}
+</ul>
+{fit.length > 0 && <p class="fit-footnote">{copy.use_case.fit.footnote}</p>}
+
+<style>
+  .tier-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md);
+    margin: 0; padding: 0; list-style: none;
+  }
+  .tier-card {
+    display: flex; flex-direction: column; gap: var(--space-sm);
+    padding: var(--space-md); border-radius: var(--radius-lg);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+  }
+  .tier-card.selected { border: 2px solid var(--color-selected-border); }
+  .tier-card.unused { background: var(--color-surface-2); border-color: transparent; }
+  .tier-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); margin: 0; }
+  .eyebrow {
+    color: var(--color-text-muted); font-size: var(--text-label);
+    font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
+  .tag {
+    padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm);
+    background: var(--color-surface-2); color: var(--color-text);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .unused .tag { background: var(--color-surface); }
+  .your-setup { font-weight: var(--weight-bold); }
+  .tier-note { margin: 0; }
+  .fit-footnote {
+    margin: var(--space-md) 0 0; color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  @media (max-width: 639px) {
+    .tier-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,35 @@
+---
+// On this page: four links to the page sections. The page script marks the
+// current one with aria-current and moves focus to the section heading.
+import { frontmatter as copy } from '../content/copy.md';
+
+const ids = ['why', 'setup', 'needs', 'recipe'] as const;
+const labels = copy.use_case.sections.nav;
+---
+<nav class="section-nav" aria-label={copy.use_case.rail.headings.nav} data-section-nav>
+  <ul>
+    {ids.map((id, i) => (
+      <li><a href={`#${id}`} aria-current={i === 0 ? 'true' : undefined}>{labels[id]}</a></li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  ul { margin: 0; padding: 0; list-style: none; }
+  a {
+    display: block; padding: var(--space-sm) 0 var(--space-sm) var(--space-control-x);
+    border-left: 2px solid var(--color-border);
+    color: var(--color-text-muted); text-decoration: none;
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  a:hover { color: var(--color-text); }
+  a[aria-current='true'] {
+    color: var(--color-text); font-weight: var(--weight-bold);
+    border-left-color: var(--color-primary);
+  }
+  @media (max-width: 1023px) {
+    ul { display: flex; gap: var(--space-lg); overflow-x: auto; }
+    a { border-left: 0; border-bottom: 2px solid transparent; padding: var(--space-sm) 0; white-space: nowrap; }
+    a[aria-current='true'] { border-bottom-color: var(--color-primary); }
+  }
+</style>

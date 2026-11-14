@@ -1,0 +1,238 @@
+---
+// One page per published use case. Every setup state is rendered at build time;
+// setup-dependent parts carry data-state (the main block) or data-for-state, and
+// only the default state lacks hidden. Setup-independent content renders once.
+import Base from '../../layouts/Base.astro';
+import Rail from '../../components/Rail.astro';
+import TierCards from '../../components/TierCards.astro';
+import KeySettings from '../../components/KeySettings.astro';
+import Thresholds from '../../components/Thresholds.astro';
+import OptionCard from '../../components/OptionCard.astro';
+import NeedsCards from '../../components/NeedsCards.astro';
+import RecipeCard from '../../components/RecipeCard.astro';
+import { frontmatter as copy } from '../../content/copy.md';
+import {
+  defaults,
+  fill,
+  stateKey,
+  statesOf,
+  useCases,
+  usedTiers,
+  type Option,
+  type UseCase,
+} from '../../lib/data';
+
+export function getStaticPaths() {
+  return useCases.map((useCase) => ({ params: { slug: useCase.slug }, props: { useCase } }));
+}
+
+interface Props {
+  useCase: UseCase;
+}
+
+const { useCase } = Astro.props;
+const sections = copy.use_case.sections;
+const why = copy.use_case.why;
+const words = copy.home.gallery.counts;
+const tierLabels = copy.home.gallery.filters.tiers;
+const defaultKey = stateKey(defaults.setup, defaults.batch);
+const states = statesOf(useCase);
+const plural = (key: 'slots' | 'blueprints') => {
+  const n = useCase.counts[key];
+  return `${n} ${n === 1 ? words[key].one : words[key].other}`;
+};
+const takes = fill(why.takes, { slots: plural('slots'), blueprints: plural('blueprints') });
+const sites = usedTiers(useCase)
+  .map((tier) => tierLabels[tier as keyof typeof tierLabels])
+  .join(why.sites_join);
+
+// Default view: helps first, then not-applicable options that would help on
+// another setup; the rest show after the toggle. Order inside each group follows options.yaml.
+const shown = (o: Option) => o.state === 'helps' || (o.state === 'not-applicable' && o.would_help);
+const ordered = (options: Option[]) => [
+  ...options.filter((o) => o.state === 'helps'),
+  ...options.filter((o) => o.state === 'not-applicable' && o.would_help),
+  ...options.filter((o) => !shown(o)),
+];
+const batchSentence = copy.use_case.setup.batch_sentence as Record<string, string>;
+---
+<Base title={fill(copy.use_case.page_title, { title: useCase.title, site: copy.site.name })} current="">
+  <div class="use-case-page">
+    <Rail useCase={useCase} />
+    <div class="main-column">
+      <section id="why" class="page-section" aria-labelledby="why-title">
+        <p class="eyebrow">{useCase.domain_label}</p>
+        <h1 id="why-title" tabindex="-1">{useCase.title}</h1>
+        <p class="lede">{useCase.card.summary}</p>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h3>{why.headings.why}</h3>
+            <p class="outcome">{useCase.card.outcome}</p>
+            <table class="mini">
+              <caption class="visually-hidden">{why.headings.why}</caption>
+              <tbody>
+                <tr><th scope="row">{why.rows.who}</th><td>{useCase.card.audience}</td></tr>
+                <tr><th scope="row">{why.rows.know}</th><td>{useCase.card.measures.join(' · ')}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="summary-card">
+            <h3>{why.headings.takes}</h3>
+            <table class="mini">
+              <caption class="visually-hidden">{why.headings.takes}</caption>
+              <tbody>
+                <tr><th scope="row">{why.rows.stage}</th><td>{copy.use_case.stages[useCase.stage.id as 'inform' | 'recommend' | 'act']}</td></tr>
+                <tr><th scope="row">{why.rows.risk}</th><td>{useCase.card.risk}</td></tr>
+                <tr><th scope="row">{why.rows.sites}</th><td>{sites}</td></tr>
+                <tr><th scope="row">{why.rows.takes}</th><td>{takes}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="setup" class="page-section" aria-labelledby="setup-title">
+        <h2 id="setup-title" tabindex="-1">{sections.headings.setup}</h2>
+        {states.map(({ key, setup, batch, state }) => (
+          <div class="state-block" data-state={key} hidden={key !== defaultKey}>
+            <p class="sub">{fill(sections.notes.setup_sub, { setup: setup.label, batch: batchSentence[batch] })}</p>
+            <h3>{sections.headings.where}</h3>
+            <TierCards tiers={state.tiers} fit={state.fit} />
+            <h3>{sections.headings.settings}</h3>
+            <div class="table-scroll"><KeySettings flags={state.flags} /></div>
+          </div>
+        ))}
+        <h3>{sections.headings.thresholds}</h3>
+        <Thresholds parameters={useCase.parameters} />
+        {states.filter(({ state }) => state.quantized_check).map(({ key }) => (
+          <p class="note quantized-check" data-for-state={key} hidden={key !== defaultKey}>{copy.use_case.thresholds.notes.quantized}</p>
+        ))}
+        <h3>{sections.headings.advanced}</h3>
+        <p class="sub">{copy.use_case.advanced.notes.sub}</p>
+        {states.map(({ key, state }, i) => (
+          <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
+            <button
+              type="button"
+              class="ghost options-toggle"
+              aria-pressed="false"
+              aria-controls={`options-${i}`}
+              data-label-all={fill(copy.buttons.show_all_options, { count: state.options.length })}
+              data-label-fewer={copy.use_case.advanced.toggle_fewer}
+            >{fill(copy.buttons.show_all_options, { count: state.options.length })}</button>
+            <ul class="option-grid" id={`options-${i}`}>
+              {ordered(state.options).map((option) => <OptionCard option={option} shown={shown(option)} />)}
+            </ul>
+          </div>
+        ))}
+      </section>
+
+      <section id="needs" class="page-section" aria-labelledby="needs-title">
+        <h2 id="needs-title" tabindex="-1">{sections.headings.needs}</h2>
+        <NeedsCards useCase={useCase} />
+      </section>
+
+      <section id="recipe" class="page-section" aria-labelledby="recipe-title">
+        <h2 id="recipe-title" tabindex="-1">{sections.headings.recipe}</h2>
+        <RecipeCard useCase={useCase} />
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .use-case-page {
+    display: grid; grid-template-columns: var(--rail-width, 288px) minmax(0, 1fr);
+    gap: var(--space-2xl); align-items: start;
+    max-width: var(--content-max-page); margin: 0 auto;
+    padding: var(--space-xl) var(--space-xl) 0;
+  }
+  .main-column { min-width: 0; }
+  .page-section {
+    padding-bottom: var(--space-2xl); margin-bottom: var(--space-2xl);
+    border-bottom: 1px solid var(--color-border);
+    scroll-margin-top: var(--sticky-offset);
+  }
+  .page-section:last-child { border-bottom: 0; margin-bottom: 0; }
+  .page-section h1, .page-section h2 { scroll-margin-top: var(--sticky-offset); }
+  .page-section h1:focus, .page-section h2:focus { outline: none; }
+  .page-section h1:focus-visible, .page-section h2:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .eyebrow {
+    margin: 0 0 var(--space-sm); color: var(--color-text-muted);
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  h1 {
+    margin: 0 0 var(--space-md); font-size: var(--text-display);
+    line-height: var(--leading-display); letter-spacing: var(--tracking-tight);
+  }
+  h2 {
+    margin: 0 0 var(--space-sm); font-size: var(--text-heading);
+    line-height: var(--leading-heading); letter-spacing: var(--tracking-tight);
+  }
+  h3 { margin: var(--space-xl) 0 var(--space-md); font-size: var(--text-body); line-height: var(--leading-body); }
+  .lede { max-width: var(--prose-max); margin: 0 0 var(--space-lg); color: var(--color-text-muted); }
+  .sub { margin: 0 0 var(--space-md); color: var(--color-text-muted); max-width: var(--prose-max); }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+  .summary-card {
+    padding: var(--space-lg); border-radius: var(--radius-lg);
+    background: var(--color-surface); border: 1px solid var(--color-border); min-width: 0;
+  }
+  .summary-card h3 { margin-top: 0; }
+  .outcome { margin: 0 0 var(--space-md); font-weight: var(--weight-bold); }
+  .state-block[hidden], .options-part[hidden], .quantized-check[hidden] { display: none; }
+  .table-scroll { overflow-x: auto; }
+  .options-toggle { margin-bottom: var(--space-md); }
+  .option-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: var(--space-md); margin: 0; padding: 0; list-style: none;
+  }
+
+  :global(.mini) { width: 100%; border-collapse: collapse; font-size: var(--text-body); }
+  :global(.mini th), :global(.mini td) {
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; text-align: left; vertical-align: top;
+    border-top: 1px solid var(--color-border);
+  }
+  :global(.mini thead th), :global(.mini tbody th[scope='row']) {
+    color: var(--color-text-muted); font-size: var(--text-label);
+    font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  :global(.mini thead th) { border-top: 0; }
+  :global(.mini tbody th[scope='row']) { width: 160px; }
+  :global(.mini .scope-row th) { color: var(--color-text); font-size: var(--text-label); padding-top: var(--space-md); }
+  :global(.mini code), :global(.recipe-card code) {
+    font-family: var(--font-mono); font-size: var(--text-label);
+    background: var(--color-surface-2); padding: 2px 4px; border-radius: var(--radius-sm);
+    overflow-wrap: anywhere;
+  }
+  :global(.note) { margin: var(--space-md) 0 0; color: var(--color-text-muted); font-size: var(--text-label); line-height: var(--leading-label); }
+  :global(.muted) { color: var(--color-text-muted); }
+  :global(.primary-button) {
+    display: inline-flex; align-items: center; gap: var(--space-sm);
+    min-height: var(--target-button); padding: 12px 20px;
+    background: var(--color-primary); color: var(--color-on-primary);
+    border-radius: var(--radius-full); text-decoration: none;
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  :global(.primary-button:hover) { background: var(--color-primary-hover); color: var(--color-on-primary); }
+  :global(.ghost) {
+    min-height: var(--target-button); padding: 0 var(--space-control-x);
+    background: transparent; color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-full);
+    font: inherit; font-size: var(--text-label); cursor: pointer;
+  }
+  :global(.ghost:hover) { border-color: var(--color-text); }
+  :global(.use-case-page :focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html) { scroll-behavior: smooth; }
+  }
+  @media (max-width: 1023px) {
+    .use-case-page { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 639px) {
+    .use-case-page { padding: var(--space-md) var(--space-md) 0; }
+    h1 { font-size: var(--text-heading); line-height: var(--leading-heading); }
+    .summary-card { padding: var(--space-md); }
+    :global(.mini tbody th[scope='row']) { width: 96px; }
+  }
+</style>

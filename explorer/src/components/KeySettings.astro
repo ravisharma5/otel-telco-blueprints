@@ -1,0 +1,40 @@
+---
+// Key settings for one setup state. Rows keep the exporter's order; a group row
+// names each scope (the setup, or the slot block the flags belong to).
+import Rich from './Rich.astro';
+import { frontmatter as copy } from '../content/copy.md';
+import type { Flag } from '../lib/data';
+
+interface Props {
+  flags: Flag[];
+}
+
+const { flags } = Astro.props;
+const s = copy.use_case.settings;
+const groups: { scope: string; flags: Flag[] }[] = [];
+for (const flag of flags) {
+  const last = groups[groups.length - 1];
+  if (last && last.scope === flag.scope) last.flags.push(flag);
+  else groups.push({ scope: flag.scope, flags: [flag] });
+}
+---
+<table class="mini settings-table">
+  <caption class="visually-hidden">{s.caption}</caption>
+  <thead>
+    <tr><th scope="col">{s.columns.setting}</th><th scope="col">{s.columns.value}</th><th scope="col">{s.columns.why}</th></tr>
+  </thead>
+  {groups.map((group) => (
+    <tbody>
+      <tr class="scope-row">
+        <th scope="rowgroup" colspan="3">{group.scope === 'setup' ? s.scope_setup : group.scope}</th>
+      </tr>
+      {group.flags.map((flag) => (
+        <tr data-flag>
+          <th scope="row"><code><Rich text={flag.setting} /></code></th>
+          <td>{flag.value ? <code><Rich text={flag.value} /></code> : <span class="muted">{s.no_value}</span>}</td>
+          <td><Rich text={flag.why} /></td>
+        </tr>
+      ))}
+    </tbody>
+  ))}
+</table>

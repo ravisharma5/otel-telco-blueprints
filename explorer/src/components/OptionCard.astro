@@ -1,0 +1,93 @@
+---
+// One advanced serving option for one setup state. Static text comes from the
+// exported option entry; the applicability box comes from the state.
+import Rich from './Rich.astro';
+import { frontmatter as copy } from '../content/copy.md';
+import { fill, type Option } from '../lib/data';
+
+interface Props {
+  option: Option;
+  shown: boolean;
+}
+
+const { option, shown } = Astro.props;
+const a = copy.use_case.advanced;
+const reasons = copy.use_case.reasons as Record<string, string>;
+const tierWords = a.tiers as Record<string, string>;
+const tag = [option.engine, option.tiers.map((t) => tierWords[t] ?? t).join(', ')].join(a.tag_join);
+let prefix = '';
+let reason = '';
+if (option.state === 'helps') {
+  prefix = fill(a.helps, { reason: '' }).trim();
+  reason = option.reason_text ?? '';
+} else if (option.state === 'not-applicable') {
+  prefix = fill(a.not_applicable, { reason: '' }).trim();
+  reason = option.reason_text ?? reasons[option.reason_id ?? ''] ?? '';
+} else {
+  prefix = a.little;
+}
+---
+<li class={`option-card state-${option.state}`} data-option-id={option.id} hidden={!shown}>
+  <div class="option-head">
+    <h4>{option.name}</h4>
+    <span class="option-tag">{tag}</span>
+  </div>
+  <p class="option-what"><Rich text={option.what} /></p>
+  <p class="applicability">{prefix}{reason && ' '}{reason && <Rich text={reason} />}</p>
+  <dl>
+    <dt>{a.labels.set}</dt>
+    <dd>
+      {option.set.length === 1 ? <Rich text={option.set[0]} /> : (
+        <ul>{option.set.map((item) => <li><Rich text={item} /></li>)}</ul>
+      )}
+    </dd>
+    <dt>{a.labels.check}</dt>
+    <dd><Rich text={option.check} /></dd>
+    <dt>{a.labels.limits}</dt>
+    <dd>
+      {option.limits.length === 1 ? <Rich text={option.limits[0]} /> : (
+        <ul>{option.limits.map((item) => <li><Rich text={item} /></li>)}</ul>
+      )}
+    </dd>
+  </dl>
+  {option.related.map((rel) => (
+    <p class="related">
+      <a href={rel.url}>
+        {fill(a.labels.related, { title: rel.title, source: rel.source })} <span aria-hidden="true">↗</span>
+        <span class="visually-hidden">{copy.notes.external}</span>
+      </a>
+    </p>
+  ))}
+</li>
+
+<style>
+  .option-card {
+    display: flex; flex-direction: column; gap: var(--space-sm);
+    padding: var(--space-md); border-radius: var(--radius-lg);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+  }
+  .option-card[hidden] { display: none; }
+  .state-helps { border-color: var(--color-border-control); }
+  .state-not-applicable { background: var(--color-surface-2); border-color: transparent; }
+  .option-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-sm); }
+  h4 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+  .option-tag {
+    flex-shrink: 0; font-family: var(--font-mono); font-size: var(--text-label);
+    line-height: var(--leading-label); color: var(--color-text-muted);
+  }
+  p { margin: 0; }
+  .applicability {
+    padding: var(--space-sm); border-radius: var(--radius-sm);
+    font-size: var(--text-label); line-height: var(--leading-label);
+    background: var(--color-surface-2); color: var(--color-text);
+  }
+  .state-helps .applicability { background: var(--color-primary-soft); }
+  .state-not-applicable .applicability { background: var(--color-surface); }
+  dl { margin: 0; font-size: var(--text-label); line-height: var(--leading-label); }
+  dt { margin-top: var(--space-sm); font-weight: var(--weight-bold); color: var(--color-text-muted); }
+  dd { margin: 0; }
+  dd ul { margin: 0; padding-left: var(--space-md); }
+  .related { font-size: var(--text-label); line-height: var(--leading-label); }
+  code { font-family: var(--font-mono); background: var(--color-surface-2); padding: 2px 4px; border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+  .state-not-applicable code { background: var(--color-surface); }
+</style>

@@ -1,0 +1,46 @@
+---
+// Recipe card: the link to the static recipe. The setup never carries into it.
+import { frontmatter as copy } from '../content/copy.md';
+import { fill, type UseCase } from '../lib/data';
+
+interface Props {
+  useCase: UseCase;
+}
+
+const { useCase } = Astro.props;
+const r = copy.use_case.recipe;
+const href = import.meta.env.BASE_URL + useCase.recipe_url;
+---
+<div class="recipe-card">
+  <div class="recipe-text">
+    <p class="eyebrow">{copy.home.gallery.status[useCase.doc_status]}</p>
+    <h3>{fill(r.title, { title: useCase.title })}</h3>
+    <p class="muted">{r.notes.body}</p>
+    <ul class="tags">{r.tags.map((tag) => <li class="tag">{tag}</li>)}</ul>
+  </div>
+  <a class="primary-button" href={href}>{copy.buttons.open_recipe} <span aria-hidden="true">→</span></a>
+</div>
+
+<style>
+  .recipe-card {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--space-lg); padding: var(--space-xl);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  }
+  .recipe-text { display: flex; flex-direction: column; gap: var(--space-sm); flex: 1 1 360px; }
+  .recipe-text p, .recipe-text h3 { margin: 0; }
+  .eyebrow {
+    color: var(--color-text-muted); font-size: var(--text-label);
+    font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  .muted { color: var(--color-text-muted); }
+  .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
+  .tag {
+    padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm);
+    background: var(--color-surface-2); font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  @media (max-width: 639px) {
+    .recipe-card { padding: var(--space-lg) var(--space-md); }
+    .recipe-card .primary-button { width: 100%; justify-content: center; }
+  }
+</style>

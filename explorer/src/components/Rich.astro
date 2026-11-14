@@ -1,0 +1,11 @@
+---
+// Data text with `code` spans: split on backticks at build time, never parsed as HTML.
+import { codeParts } from '../lib/data';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+{codeParts(text).map((part) => (part.code ? <code>{part.text}</code> : part.text))}
