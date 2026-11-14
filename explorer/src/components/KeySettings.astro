@@ -30,7 +30,7 @@ for (const flag of flags) {
       </tr>
       {group.flags.map((flag) => (
         <tr data-flag>
-          <th scope="row"><code><Rich text={flag.setting} /></code></th>
+          <th scope="row">{flag.setting.startsWith('-') ? <code><Rich text={flag.setting} /></code> : <Rich text={flag.setting} />}</th>
           <td>{flag.value ? <code><Rich text={flag.value} /></code> : <span class="muted">{s.no_value}</span>}</td>
           <td><Rich text={flag.why} /></td>
         </tr>
