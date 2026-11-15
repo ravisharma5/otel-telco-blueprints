@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -174,11 +175,23 @@ def _fp8_variant(role: str, variants) -> dict | None:
     return min(builds, key=lambda v: v["weights_gb"]) if builds else None
 
 
+def _shown_pct(share: float, bands: dict) -> float:
+    """Percent for display. Whole numbers, except one decimal (rounded up) when
+    rounding would land on a band edge the share is past, so 60.2% never reads 60%."""
+    pct = round(share)
+    if pct in (bands["fits_max_pct"], bands["tight_max_pct"]) and share > pct:
+        return math.ceil(share * 10) / 10
+    return pct
+
+
 def _gpu_fit(bins, gpu_gb: float, bands: dict) -> list[dict]:
+    """Fit per GPU. The band comes from the unrounded share; only display values round."""
     fit = []
     for i, b in enumerate(bins):
-        weights = round(sum(w for _, w in b), 1)
-        pct = round(100 * weights / gpu_gb)
+        total = sum(w for _, w in b)
+        share = 100 * total / gpu_gb
+        weights = round(total, 1)
+        pct = _shown_pct(share, bands)
         fit.append(
             {
                 "gpu_index": i + 1,
@@ -187,7 +200,7 @@ def _gpu_fit(bins, gpu_gb: float, bands: dict) -> list[dict]:
                 "weights_gb": weights,
                 "total_gb": gpu_gb,
                 "pct": pct,
-                "band": band(pct, bands),
+                "band": band(share, bands),
             }
         )
     return fit

@@ -93,6 +93,21 @@ def test_band_boundaries():
     assert ex.band(81, BANDS) == "too-tight"
 
 
+@pytest.mark.parametrize(
+    "weights,gpu_gb,expected",
+    [(28.8, 48, "fits"), (28.9, 48, "tight"), (38.4, 48, "tight"), (38.5, 48, "too-tight")],
+)
+def test_band_uses_the_unrounded_share(weights, gpu_gb, expected):
+    # 28.9 GB of 48 GB is 60.2%: over the fits edge, so Tight, though it rounds to 60%.
+    fit = ex._gpu_fit([[("safety", weights)]], gpu_gb, BANDS)[0]
+    assert fit["band"] == expected
+    edges = (BANDS["fits_max_pct"], BANDS["tight_max_pct"])
+    # The percent shown never sits on an edge the band is past.
+    if fit["band"] != ex.band(fit["pct"], BANDS):
+        raise AssertionError(f"{fit['pct']}% shown with band {fit['band']}")
+    assert fit["pct"] not in edges or 100 * weights / gpu_gb <= fit["pct"]
+
+
 def test_pack_first_fit_decreasing():
     items = [("a", 17), ("b", 17), ("c", 8), ("d", 1.2), ("e", 1.2)]
     bins = ex.pack(items, 2, 48)
@@ -193,10 +208,12 @@ def test_fit_entries_follow_rules(data):
         slots_on_gpus = []
         for f in state["fit"]:
             assert f["total_gb"] == acc["memory_per_gpu_gb"]
-            weights = round(sum(s["weights_gb"] for s in f["slots"]), 1)
-            assert f["weights_gb"] == weights
-            assert f["pct"] == round(100 * weights / f["total_gb"])
-            assert f["band"] == ex.band(f["pct"], BANDS)
+            total = sum(s["weights_gb"] for s in f["slots"])
+            share = 100 * total / f["total_gb"]
+            assert f["weights_gb"] == round(total, 1)
+            assert abs(f["pct"] - share) < 0.5 + 1e-9
+            assert f["band"] == ex.band(share, BANDS), "band from the unrounded share"
+            assert ex.band(f["pct"], BANDS) == f["band"], "shown percent agrees with the band"
             slots_on_gpus += [s["role"] for s in f["slots"]]
         assert sorted(slots_on_gpus) == sorted(placed(uc["id"], "regional"))
         weights_by_role = {v["role"]: VARIANT_BY_ID[v["variant_id"]]["weights_gb"] for v in state["variants"]}
@@ -271,7 +288,7 @@ def test_fp8_swap_only_when_needed(data):
             acc["memory_per_gpu_gb"],
             fill_pct=BANDS["fits_max_pct"],
         )
-        start_bands = [ex.band(round(100 * sum(w for _, w in b) / acc["memory_per_gpu_gb"]), BANDS) for b in start]
+        start_bands = [ex.band(100 * sum(w for _, w in b) / acc["memory_per_gpu_gb"], BANDS) for b in start]
         swapped = [v for v in state["variants"] if v["operator_made"]]
         if swapped:
             assert any(b != "fits" for b in start_bands), f"{uc['id']} {setup['id']}: FP8 swap without need"
