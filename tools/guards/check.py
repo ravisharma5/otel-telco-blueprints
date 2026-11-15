@@ -129,7 +129,7 @@ class Report:
         except UnicodeDecodeError:
             self.hit(where, "unreadable content", "(binary or non-UTF-8 text in a non-binary file type)")
             return
-        self.text_hits(where, patterns.scan_text(text, extra, joined=True))
+        self.text_hits(where, patterns.scan_text(text, extra, joined=True, vendored=name in patterns.VENDORED))
 
     def exit_code(self) -> int:
         return 1 if self.hits else 0

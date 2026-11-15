@@ -151,6 +151,16 @@ def test_fragment_form_is_joined(extra):
     assert "term" not in _kinds(line, extra, joined=False)
 
 
+def test_vendored_runs_term_check_only(extra):
+    text = TERM + " and `" + PLAN_DIR + "` and 62.7" + "-77"
+    assert _kinds(text, extra, vendored=True) == ["term"]
+    assert set(_kinds(text, extra)) == {"term", "mention", "planning-id"}
+
+
+def test_vendored_list_is_minimal():
+    assert patterns.VENDORED == {"site-src/brand/vendor/mermaid/mermaid.min.js"}
+
+
 @pytest.mark.parametrize("value", [None, patterns.ExtraTerms((), (), ())])
 def test_no_extra_terms_skips_term_checks_only(value):
     text = TERM + " and `" + PLAN_DIR + "` and (02" + "-01)"

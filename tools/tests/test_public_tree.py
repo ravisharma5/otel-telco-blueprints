@@ -33,6 +33,7 @@ from tools.guards.patterns import (
     MENTIONS_RE,
     PLANNING_ID_RE,
     SELF_EXCLUDED,
+    VENDORED,
     forbidden_path,
     load_extra_terms,
     resolve_extra_terms_path,
@@ -118,6 +119,8 @@ def test_no_sensitive_terms():
 def test_no_internal_path_mentions():
     hits = []
     for path, text in _public_texts():
+        if path in VENDORED:
+            continue
         for lineno, line in enumerate(text.splitlines(), 1):
             match = MENTIONS_RE.search(line)
             if match:
@@ -128,6 +131,8 @@ def test_no_internal_path_mentions():
 def test_no_planning_ids():
     hits = []
     for path, text in _public_texts():
+        if path in VENDORED:
+            continue
         for lineno, line in enumerate(text.splitlines(), 1):
             match = PLANNING_ID_RE.search(line)
             if match:

@@ -114,6 +114,12 @@ BINARY_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".gif", ".ico", ".woff", "
 # checks would still flag. Keep this list minimal.
 SELF_EXCLUDED = frozenset({"tools/tests/test_public_tree.py"})
 
+# Third-party files vendored byte for byte (a SHA-256 in their PROVENANCE.txt is
+# checked by test). Their numbers and paths are not ours: minified SVG path
+# coordinates can match the planning-id shapes above. Only the
+# private-term check runs on them. Keep this list minimal.
+VENDORED = frozenset({"site-src/brand/vendor/mermaid/mermaid.min.js"})
+
 # Lines for .git/info/exclude written by the hook installer.
 EXCLUDE_LINES = (
     "/" + PLAN_DIR + "/",
@@ -229,10 +235,13 @@ def term_number(text: str, extra: Optional[ExtraTerms]) -> Optional[int]:
     return None
 
 
-def scan_text(text: str, extra: Optional[ExtraTerms] = None, *, joined: bool = True) -> list:
+def scan_text(
+    text: str, extra: Optional[ExtraTerms] = None, *, joined: bool = True, vendored: bool = False
+) -> list:
     """Return (lineno, kind, match) hits; kind is "term", "mention", or "planning-id".
 
-    Term hits report "private term #<n>", never the term text.
+    Term hits report "private term #<n>", never the term text. vendored=True
+    (files in VENDORED) runs the term check only.
     """
     hits: list = []
     for lineno, line in enumerate(text.splitlines(), 1):
@@ -245,6 +254,8 @@ def scan_text(text: str, extra: Optional[ExtraTerms] = None, *, joined: bool = T
                 if n is not None:
                     hits.append((lineno, "term", f"private term #{n}"))
                     break
+        if vendored:
+            continue
         m = MENTIONS_RE.search(line)
         if m:
             hits.append((lineno, "mention", m.group(0)))
