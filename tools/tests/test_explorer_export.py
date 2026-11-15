@@ -128,6 +128,30 @@ def test_choose_variants_swaps_largest_first():
     assert by_role["decision"]["source"] == "published", "Decision has no FP8 build"
 
 
+def test_fp8_swap_never_grows_a_slot():
+    # An operator-made FP8 build bigger than the current build (an FP8 Decision at
+    # about 26 GB against the 17 GB W4A16) is never swapped in or suggested.
+    big = {
+        **VARIANT_BY_ID["decision-26b-a4b-w4a16"],
+        "id": "decision-fp8-test",
+        "precision": "fp8",
+        "weights_gb": 26,
+        "source": "operator-made",
+    }
+    variants = VARIANTS + [big]
+    setup = SETUP_BY_ID["regional-48"]
+    chosen, fit = ex.choose_variants(["safety", "llm-small", "decision"], setup, variants, BANDS)
+    by_role = {v["role"]: v for v in chosen}
+    assert by_role["decision"]["id"] == "decision-26b-a4b-w4a16"
+    chosen, fit = ex.choose_variants(["decision"], setup, variants, BANDS)
+    assert chosen[0]["id"] == "decision-26b-a4b-w4a16"
+    # Too tight with only a bigger FP8 build left: the message must not suggest FP8.
+    small = {**SETUP_BY_ID["regional-48"], "accelerators": {**setup["accelerators"], "memory_per_gpu_gb": 20}}
+    chosen, fit = ex.choose_variants(["decision"], small, variants, BANDS)
+    assert chosen[0]["id"] == "decision-26b-a4b-w4a16"
+    assert fit[0]["band"] == "too-tight" and fit[0]["message_id"] == "too-tight-after-fp8"
+
+
 # --- state matrix -----------------------------------------------------------
 
 

@@ -186,6 +186,14 @@ def _shown_pct(share: float, bands: dict) -> float:
     return pct
 
 
+def _smaller_fp8(role: str, current: dict, variants) -> dict | None:
+    """The role's operator-made FP8 build, only when it is smaller than the current build."""
+    build = _fp8_variant(role, variants)
+    if build and build["id"] != current["id"] and build["weights_gb"] < current["weights_gb"]:
+        return build
+    return None
+
+
 def _gpu_fit(bins, gpu_gb: float, bands: dict) -> list[dict]:
     """Fit per GPU. The band comes from the unrounded share; only display values round."""
     fit = []
@@ -233,7 +241,7 @@ def choose_variants(roles, setup: dict, variants, bands: dict):
         for b, f in zip(bins, fit):
             if f["band"] == "fits":
                 continue
-            options = [r for r, _ in b if r not in swapped and _fp8_variant(r, variants)]
+            options = [r for r, _ in b if r not in swapped and _smaller_fp8(r, current[r], variants)]
             if options:
                 candidate = min(options, key=lambda r: (-current[r]["weights_gb"], order.index(r)))
                 break
@@ -243,10 +251,7 @@ def choose_variants(roles, setup: dict, variants, bands: dict):
         swapped.add(candidate)
     fp8_arch = acc["arch"] in FP8_ARCHES
     for f in fit:
-        fp8_left = fp8_arch and any(
-            (build := _fp8_variant(s["role"], variants)) and build["id"] != current[s["role"]]["id"]
-            for s in f["slots"]
-        )
+        fp8_left = fp8_arch and any(_smaller_fp8(s["role"], current[s["role"]], variants) for s in f["slots"])
         # A too-tight GPU suggests FP8 only while one of its slots still has an unused build.
         f["message_id"] = (
             ("too-tight" if fp8_left else "too-tight-after-fp8") if f["band"] == "too-tight" else f["band"]
