@@ -319,7 +319,9 @@ def test_fit_bars_match_state(explorer_dist, data, copy):
                     "{band}", _band_word(copy, entry["band"])
                 )
                 assert pct in text, (key, text)
-                assert fit["messages"][entry["band"]] in text
+                assert fit["messages"][entry["message_id"]] in text
+                if entry["message_id"] == "too-tight-after-fp8":
+                    assert "Use FP8" not in text, (key, text)
                 assert len(bar.find_all(lambda n: n.has_class("fit-tick"))) == 2
                 graphic = bar.find_all(lambda n: n.has_class("fit-track"))
                 assert graphic and graphic[0].attrs.get("aria-hidden") == "true"
@@ -343,10 +345,12 @@ def test_too_tight_is_stated(explorer_dist, data, copy):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)
         for key, _, state in _states(uc):
-            if any(e["band"] == "too-tight" for e in state["fit"]):
+            for entry in state["fit"]:
+                if entry["band"] != "too-tight":
+                    continue
                 text = " ".join(p.text() for p in _parts(tree, key))
                 assert _band_word(copy, "too-tight") in text
-                assert fit["messages"]["too-tight"] in text
+                assert fit["messages"][entry["message_id"]] in text
                 seen += 1
     assert seen, "expected at least one too-tight state in the data"
 

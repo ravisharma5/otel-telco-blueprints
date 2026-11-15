@@ -204,6 +204,32 @@ def test_fit_entries_follow_rules(data):
                 assert s["weights_gb"] == weights_by_role[s["role"]]
 
 
+def test_fit_message_never_suggests_applied_fp8(data):
+    # A too-tight GPU suggests FP8 builds only while one of its slots still has an
+    # unused FP8 build; once they are all in, the message suggests something else.
+    seen = set()
+    for uc, setup, batch, state in regional_states(data):
+        chosen = {v["role"]: v["variant_id"] for v in state["variants"]}
+        fp8_arch = setup["accelerators"]["arch"] in ex.FP8_ARCHES
+        for f in state["fit"]:
+            fp8_left = fp8_arch and any(
+                v["role"] == s["role"]
+                and v["source"] == "operator-made"
+                and v["precision"] == "fp8"
+                and v["gpu"]
+                and v["id"] != chosen[s["role"]]
+                for s in f["slots"]
+                for v in VARIANTS
+            )
+            if f["band"] == "too-tight":
+                expected = "too-tight" if fp8_left else "too-tight-after-fp8"
+            else:
+                expected = f["band"]
+            assert f["message_id"] == expected, (uc["id"], setup["id"], f["gpu_index"])
+            seen.add(f["message_id"])
+    assert "too-tight-after-fp8" in seen, "expected alarm triage on one 48 GB GPU to need it"
+
+
 def test_core_has_no_fit_and_no_swaps(data):
     for uc, setup, batch, state in all_states(data):
         if setup["tier"] != "core":
