@@ -41,6 +41,7 @@ content checks it defines.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import subprocess
@@ -114,11 +115,24 @@ BINARY_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".gif", ".ico", ".woff", "
 # checks would still flag. Keep this list minimal.
 SELF_EXCLUDED = frozenset({"tools/tests/test_public_tree.py"})
 
-# Third-party files vendored byte for byte (a SHA-256 in their PROVENANCE.txt is
-# checked by test). Their numbers and paths are not ours: minified SVG path
-# coordinates can match the planning-id shapes above. Only the
-# private-term check runs on them. Keep this list minimal.
-VENDORED = frozenset({"site-src/brand/vendor/mermaid/mermaid.min.js"})
+# Third-party files vendored byte for byte, with the SHA-256 of the exact bytes
+# (also in their PROVENANCE.txt and pinned again by test). Their numbers and
+# paths are not ours: minified SVG path coordinates can match the planning-id
+# shapes above. Only the private-term check runs on them, and only while the
+# content matches the pinned hash; any other content gets every check. Keep
+# this list minimal.
+VENDORED = {
+    "site-src/brand/vendor/mermaid/mermaid.min.js": "581ed7d74bd9048d0e3a91363927d72ef22942d7722546b27f7cc29e35390eb8",
+}
+
+
+def is_vendored(name: str, data: Union[bytes, str]) -> bool:
+    """True only for a VENDORED path whose content matches its pinned SHA-256."""
+    expected = VENDORED.get(name)
+    if expected is None:
+        return False
+    raw = data.encode("utf-8") if isinstance(data, str) else data
+    return hashlib.sha256(raw).hexdigest() == expected
 
 # Lines for .git/info/exclude written by the hook installer.
 EXCLUDE_LINES = (

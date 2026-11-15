@@ -41,5 +41,11 @@ def test_vendored_mermaid_license():
     data = (folder / "mermaid.min.js").read_bytes()
     assert "mermaid" in prov and "11.17.2" in prov
     assert re.search(r"^integrity: sha512-[A-Za-z0-9+/=]+$", prov, re.M)
-    assert f"sha256: {hashlib.sha256(data).hexdigest()}" in prov
+    digest = hashlib.sha256(data).hexdigest()
+    assert f"sha256: {digest}" in prov
+    # The hash is also pinned in code, so editing the file and PROVENANCE.txt together fails.
+    from tools.guards.patterns import VENDORED
+    from tools.tests.test_guard_patterns import MERMAID_SHA256
+
+    assert digest == MERMAID_SHA256 == VENDORED["site-src/brand/vendor/mermaid/mermaid.min.js"]
     assert re.search(rf"^size_bytes: {len(data)}$", prov, re.M)

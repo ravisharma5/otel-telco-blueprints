@@ -157,8 +157,31 @@ def test_vendored_runs_term_check_only(extra):
     assert set(_kinds(text, extra)) == {"term", "mention", "planning-id"}
 
 
+MERMAID = "site-src/brand/vendor/mermaid/mermaid.min.js"
+# Pinned here as well as in patterns.VENDORED, so editing the file and its
+# pinned hash together still fails this test.
+MERMAID_SHA256 = "581ed7d74bd9048d0e3a91363927d72ef22942d7722546b27f7cc29e35390eb8"
+
+
 def test_vendored_list_is_minimal():
-    assert patterns.VENDORED == {"site-src/brand/vendor/mermaid/mermaid.min.js"}
+    assert set(patterns.VENDORED) == {MERMAID}
+    assert patterns.VENDORED[MERMAID] == MERMAID_SHA256
+
+
+def test_vendored_exemption_needs_the_pinned_bytes():
+    # The exemption is for the exact vendored bytes only: the same path with any
+    # other content gets every content check.
+    from tools.guards.check import Report
+    from tools.tests.conftest import REPO_ROOT
+
+    data = (REPO_ROOT / MERMAID).read_bytes()
+    assert patterns.is_vendored(MERMAID, data)
+    tampered = data + ("\n// see `" + PLAN_DIR + "` 62.7" + "-77\n").encode()
+    assert not patterns.is_vendored(MERMAID, tampered)
+    assert not patterns.is_vendored("site-src/other.js", data)
+    report = Report("pre-commit")
+    report.content(MERMAID, MERMAID, tampered, None)
+    assert report.hits >= 2
 
 
 @pytest.mark.parametrize("value", [None, patterns.ExtraTerms((), (), ())])
