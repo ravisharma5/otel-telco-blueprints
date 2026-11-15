@@ -199,7 +199,8 @@ use_case:
       too-tight: Use FP8 builds, smaller slots, or move a slot to core.
       # Too tight with every FP8 build on this GPU already in use.
       too-tight-after-fp8: Even with FP8 builds, the slots are too big. Use smaller slots, a GPU with more memory, or move a slot to core.
-    footnote: "Estimate: the smallest build of each slot, weights only. Leave room for the KV cache. Fits: 60% or less. Tight: up to 80%. Too tight: over 80%."
+    # {fits} and {tight} are the band edges from data/serving/setups.yaml fit_bands.
+    footnote: "Estimate: the smallest build of each slot, weights only. Leave room for the KV cache. Fits: {fits}% or less. Tight: up to {tight}%. Too tight: over {tight}%."
   settings:
     caption: Key settings for this setup
     columns:

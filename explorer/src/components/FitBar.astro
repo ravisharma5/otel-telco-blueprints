@@ -2,7 +2,7 @@
 // One fit bar per GPU. The graphic is aria-hidden; the text rows carry the meaning.
 // Band and percent come from the exporter, never from client code.
 import { frontmatter as copy } from '../content/copy.md';
-import { fill, num, type FitEntry } from '../lib/data';
+import { fill, fitBands, num, type FitEntry } from '../lib/data';
 
 interface Props {
   entry: FitEntry;
@@ -29,8 +29,8 @@ const width = Math.min(entry.pct, 100);
   </p>
   <div class="fit-track" aria-hidden="true">
     <span class="fit-fill" style={`width: ${width}%`}></span>
-    <span class="fit-tick" style="left: 60%"></span>
-    <span class="fit-tick" style="left: 80%"></span>
+    <span class="fit-tick" style={`left: ${fitBands.fits_max_pct}%`}></span>
+    <span class="fit-tick" style={`left: ${fitBands.tight_max_pct}%`}></span>
   </div>
   <p class="fit-message">{fit.messages[entry.message_id]}</p>
 </div>

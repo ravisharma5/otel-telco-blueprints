@@ -136,6 +136,11 @@ export interface Filters {
   tiers: string[];
 }
 
+export interface FitBands {
+  fits_max_pct: number;
+  tight_max_pct: number;
+}
+
 export interface Default {
   setup: string;
   batch: string;
@@ -145,6 +150,8 @@ export const useCases = data.use_cases as unknown as UseCase[];
 export const filters = data.filters as Filters;
 export const defaults = data.default as Default;
 export const setups = data.setups as Setup[];
+/** Fit band edges from data/serving/setups.yaml; ticks and footnote read these. */
+export const fitBands = data.fit_bands as FitBands;
 export const batchValues = ['yes', 'no'] as const;
 
 /** Key of one precomputed state, as used in data-state attributes. */

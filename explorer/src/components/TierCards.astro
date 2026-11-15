@@ -3,7 +3,7 @@
 // bars on the regional card of a regional setup.
 import FitBar from './FitBar.astro';
 import { frontmatter as copy } from '../content/copy.md';
-import type { FitEntry, TierCard } from '../lib/data';
+import { fill, fitBands, type FitEntry, type TierCard } from '../lib/data';
 
 interface Props {
   tiers: TierCard[];
@@ -12,6 +12,7 @@ interface Props {
 
 const { tiers, fit } = Astro.props;
 const labels = copy.home.gallery.filters.tiers;
+const footnote = fill(copy.use_case.fit.footnote, { fits: fitBands.fits_max_pct, tight: fitBands.tight_max_pct });
 ---
 <ul class="tier-grid">
   {tiers.map((tier) => (
@@ -31,7 +32,7 @@ const labels = copy.home.gallery.filters.tiers;
     </li>
   ))}
 </ul>
-{fit.length > 0 && <p class="fit-footnote">{copy.use_case.fit.footnote}</p>}
+{fit.length > 0 && <p class="fit-footnote">{footnote}</p>}
 
 <style>
   .tier-grid {

@@ -332,7 +332,12 @@ def test_fit_bars_match_state(explorer_dist, data, copy):
                 assert fit["messages"][entry["message_id"]] in text
                 if entry["message_id"] == "too-tight-after-fp8":
                     assert "Use FP8" not in text, (key, text)
-                assert len(bar.find_all(lambda n: n.has_class("fit-tick"))) == 2
+                ticks = bar.find_all(lambda n: n.has_class("fit-tick"))
+                bands = data["fit_bands"]
+                assert [t.attrs.get("style") for t in ticks] == [
+                    f"left: {bands['fits_max_pct']}%",
+                    f"left: {bands['tight_max_pct']}%",
+                ], key
                 graphic = bar.find_all(lambda n: n.has_class("fit-track"))
                 assert graphic and graphic[0].attrs.get("aria-hidden") == "true"
                 if entry["gpu_count"] > 1:
@@ -342,9 +347,21 @@ def test_fit_bars_match_state(explorer_dist, data, copy):
                     ).replace("{slots}", names)
                     assert title in text
             notes = _in_parts(tree, key, lambda n: n.has_class("fit-footnote"))
-            assert len(notes) == 1 and notes[0].text() == fit["footnote"]
+            footnote = fit["footnote"].replace("{fits}", str(data["fit_bands"]["fits_max_pct"]))
+            footnote = footnote.replace("{tight}", str(data["fit_bands"]["tight_max_pct"]))
+            assert len(notes) == 1 and notes[0].text() == footnote
             found_footnote = True
     assert found_footnote
+
+
+def test_fit_bands_never_typed():
+    # The 60/80 band edges come from data/serving/setups.yaml through explorer.json.
+    copy = _copy()
+    footnote = copy["use_case"]["fit"]["footnote"]
+    assert "{fits}" in footnote and "{tight}" in footnote
+    assert not re.search(r"\d+%", footnote), footnote
+    bar = (REPO_ROOT / "explorer/src/components/FitBar.astro").read_text(encoding="utf-8")
+    assert not re.search(r"left:\s*\d", bar), "FitBar types a tick position"
 
 
 @pytest.mark.site_output
