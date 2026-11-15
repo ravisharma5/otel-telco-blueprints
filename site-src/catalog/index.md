@@ -1,13 +1,13 @@
 ---
-title: "Catalog"
+title: "Recipes"
 doc_status: draft
 ---
 
 <!-- Stub: delete this file in the phase that adds catalog/index.md (the site build fails on the collision). -->
 
-# Catalog
+# Recipes
 
-The catalog maps operator use cases to OTel model slots and platform blueprints. Four flagship use-case blueprints come first, then the full catalog. Each catalog entry links to its use-case blueprint and to the platform blueprints it depends on.
+The recipes map operator use cases to OTel model slots and platform blueprints. Four flagship recipes come first, then the planned domains. Each recipe links to the platform blueprints it depends on.
 
 | Blueprint | Topic | Domain |
 |---|---|---|

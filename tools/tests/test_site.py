@@ -526,6 +526,13 @@ def test_no_mkdocs_home(site_copy):
     assert not (site_copy / "out/index.html").exists()
 
 
+def test_recipes_overview_title():
+    text = (REPO_ROOT / "site-src/catalog/index.md").read_text(encoding="utf-8")
+    assert 'title: "Recipes"' in text
+    assert "\n# Recipes\n" in text
+    assert "Catalog" not in text
+
+
 def test_overview_links_pages():
     text = (REPO_ROOT / "architecture/index.md").read_text(encoding="utf-8")
     for target in (
