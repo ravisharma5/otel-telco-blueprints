@@ -14,6 +14,12 @@ hooks:
 copyright: Docs CC BY 4.0, code Apache-2.0
 theme:
   name: material
+  # Light and dark follow the system setting, like brand/tokens.css (no toggle).
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
   # No Google Fonts: the brand fonts are served from brand/fonts/.
   font: false
   features:
@@ -22,10 +28,16 @@ theme:
     - navigation.indexes
     - search.suggest
     - search.highlight
-# Loaded before Material's bundle, so Material never fetches Mermaid from unpkg.
+extra_css:
+  - brand/tokens.css
+  - brand/material.css
+# Runs before Material renders diagrams (on DOMContentLoaded), so window.mermaid
+# exists and Material never fetches Mermaid from unpkg.
 extra_javascript:
   - brand/vendor/mermaid/mermaid.min.js
 extra:
+  # The logo goes to the site root (the explorer), relative so previews work.
+  homepage: ./
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/ravisharma5/otel-telco-blueprints
@@ -52,26 +64,22 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 validation:
-  omitted_files: warn
-  absolute_links: warn
-  unrecognized_links: warn
-  anchors: warn
+  nav:
+    omitted_files: warn
+    not_found: warn
+    # Only the Use cases entry: the explorer at the site root, outside docs_dir.
+    absolute_links: info
+  links:
+    not_found: warn
+    absolute_links: warn
+    unrecognized_links: warn
+    anchors: warn
 not_in_nav: |
   /platform/*/sources/
   /catalog/*/*/sources/
 nav:
-  - Framework:
-      - Readiness questions: framework/index.md
-      - Definitions: framework/definitions.md
-      - Glossary: framework/glossary.md
-      - Style guide: framework/style-guide.md
-      - Review checklist: framework/review-checklist.md
-  - Architecture:
-      - Overview: architecture/index.md
-      - Decision gate: architecture/decision-gate.md
-      - Adaptation ladder: architecture/adaptation-ladder.md
-      - Placement: architecture/placement.md
-      - Crosswalk: architecture/crosswalk.md
+  # Same order as the explorer header; Use cases is the explorer at the site root.
+  - Use cases: /otel-telco-blueprints/
   - Recipes:
       - Overview: catalog/index.md
       - Grounded knowledge assistant: catalog/standards-knowledge/grounded-knowledge-assistant/README.md
@@ -90,4 +98,16 @@ nav:
       - Security, identity, and sandbox: platform/security-identity-sandbox/README.md
       - Intake and model selection: platform/intake-model-selection/README.md
       - Compliance, sovereignty, and operating model: platform/compliance-operating-model/README.md
+  - Architecture:
+      - Overview: architecture/index.md
+      - Decision gate: architecture/decision-gate.md
+      - Adaptation ladder: architecture/adaptation-ladder.md
+      - Placement: architecture/placement.md
+      - Crosswalk: architecture/crosswalk.md
+  - Framework:
+      - Readiness questions: framework/index.md
+      - Definitions: framework/definitions.md
+      - Glossary: framework/glossary.md
+      - Style guide: framework/style-guide.md
+      - Review checklist: framework/review-checklist.md
   - Templates: templates.md

@@ -23,8 +23,9 @@ folder outside the repository, and its sha512 matched the registry integrity
 above before extraction. No package scripts were run, and the package is not a
 dependency of anything in this repository.
 
-The docs pages load this file before Material's bundle, so Material finds
-window.mermaid and never fetches Mermaid from a CDN.
+Every docs page loads this file as a plain script. Material renders diagrams
+only on DOMContentLoaded, after this script has set window.mermaid, so
+Material never fetches Mermaid from a CDN.
 
 Re-verify:
   npm pack mermaid@11.17.2 --ignore-scripts

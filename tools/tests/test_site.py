@@ -536,6 +536,45 @@ def test_mermaid_vendored():
     assert (REPO_ROOT / "site-src" / path).is_file()
 
 
+def test_brand_css_wired():
+    css = CONFIG.get("extra_css") or []
+    assert css[:2] == ["brand/tokens.css", "brand/material.css"]
+    for path in css[:2]:
+        assert (REPO_ROOT / "site-src" / path).is_file(), path
+
+
+def test_palette_follows_system():
+    palette = CONFIG["theme"]["palette"]
+    assert [p["media"] for p in palette] == [
+        "(prefers-color-scheme: light)",
+        "(prefers-color-scheme: dark)",
+    ]
+    assert [p["scheme"] for p in palette] == ["default", "slate"]
+    # No toggle: tokens.css follows the system setting only.
+    assert not any("toggle" in p for p in palette)
+
+
+def test_nav_matches_explorer_header():
+    titles = [next(iter(item)) for item in CONFIG["nav"]]
+    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework", "Templates"]
+    from urllib.parse import urlsplit
+
+    root_path = urlsplit(CONFIG["site_url"]).path
+    assert CONFIG["nav"][0]["Use cases"] == root_path
+    assert CONFIG["extra"]["homepage"] in ("./", CONFIG["site_url"], root_path)
+
+
+def test_material_css_uses_tokens():
+    text = (REPO_ROOT / "site-src/brand/material.css").read_text(encoding="utf-8")
+    assert re.search(r"--md-text-font:\s*\"Red Hat Text\"", text)
+    assert re.search(r"--md-code-font:\s*\"Red Hat Mono\"", text)
+    # Colors come from tokens.css: no hex color, except as a var() fallback.
+    no_fallbacks = re.sub(r"var\([^()]*\)", "", text)
+    no_comments = re.sub(r"/\*.*?\*/", "", no_fallbacks, flags=re.S)
+    assert not re.findall(r"#[0-9a-fA-F]{3,8}\b", no_comments)
+    assert not re.search(r"\b(?:rgb|rgba|hsl|hsla)\(", no_comments)
+
+
 def test_recipes_overview_title():
     text = (REPO_ROOT / "site-src/catalog/index.md").read_text(encoding="utf-8")
     assert 'title: "Recipes"' in text
