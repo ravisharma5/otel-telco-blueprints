@@ -42,7 +42,7 @@ def test_forbidden_path_hits(path):
     "path",
     [
         "framework/definitions.md",
-        "site-src/index.md",
+        "site-src/catalog/index.md",
         "tools/guards/patterns.py",
         "plan" + "ning/notes.md",
         "templates/use-case-blueprint.md",

@@ -86,7 +86,7 @@ def test_clean_build_strict(site_copy):
     code, out = _build(site_copy)
     assert code == 0, out
     assert "WARNING" not in out, out
-    assert (site_copy / "out/index.html").is_file()
+    assert (site_copy / "out/recipes/index.html").is_file()
     assert (site_copy / "out/framework/definitions/index.html").is_file()
 
 
@@ -125,17 +125,28 @@ def test_strict_failures(site_copy, fault):
     assert "WARNING" in out, out
 
 
+COPY_PATH = REPO_ROOT / "explorer/src/content/copy.md"
+
+
+def _architect_links():
+    """The architect links on the explorer home (the old Start here routes)."""
+    text = COPY_PATH.read_text(encoding="utf-8")
+    front = yaml.safe_load(text.split("---", 2)[1])
+    return {link["label"]: link["path"] for link in front["home"]["architects"]["links"]}
+
+
 def test_routes():
-    text = (REPO_ROOT / "site-src/index.md").read_text(encoding="utf-8")
-    assert "# Start here" in text
-    for target in ("catalog/index.md", "framework/index.md", "architecture/index.md"):
-        assert f"]({target})" in text, target
+    paths = set(_architect_links().values())
+    for target in ("recipes/", "framework/", "architecture/", "platform/"):
+        assert target in paths, target
 
 
 def test_nav_sections():
     titles = [next(iter(item)) for item in CONFIG["nav"]]
-    for want in ("Start here", "Framework", "Architecture", "Catalog", "Platform", "Templates"):
+    for want in ("Framework", "Architecture", "Recipes", "Platform", "Templates"):
         assert want in titles, want
+    assert "Start here" not in titles
+    assert "Catalog" not in titles
     assert "search" in CONFIG["plugins"]
     assert CONFIG["strict"] is True
 
@@ -224,12 +235,12 @@ def test_symlink_rejected(site_copy, kind):
 
 def test_mermaid(site_copy):
     _append(
-        site_copy / "site-src/index.md",
+        site_copy / "site-src/templates.md",
         "\n```mermaid\ngraph LR\n  A --> B\n```\n",
     )
     code, out = _build(site_copy)
     assert code == 0, out
-    html = (site_copy / "out/index.html").read_text(encoding="utf-8")
+    html = (site_copy / "out/templates/index.html").read_text(encoding="utf-8")
     assert 'class="mermaid"' in html
 
 
@@ -465,7 +476,7 @@ def test_nav_order():
         "platform/intake-model-selection/README.md",
         "platform/compliance-operating-model/README.md",
     ]
-    assert _nav_children("Catalog") == [
+    assert _nav_children("Recipes") == [
         "catalog/index.md",
         "catalog/standards-knowledge/grounded-knowledge-assistant/README.md",
         "catalog/agentic-operations/closed-loop-incident-handling/README.md",
@@ -475,9 +486,44 @@ def test_nav_order():
 
 
 def test_start_here_labels():
-    text = (REPO_ROOT / "site-src/index.md").read_text(encoding="utf-8")
-    assert "[Readiness questions](framework/index.md)" in text
-    assert "[Architecture overview](architecture/index.md)" in text
+    links = _architect_links()
+    assert links["Readiness questions"] == "framework/"
+    assert links["Architecture overview"] == "architecture/"
+    assert links["Platform blueprints"] == "platform/"
+    assert links["All recipes"] == "recipes/"
+
+
+# ---------- recipes served under recipes/, no MkDocs home ----------
+
+FLAGSHIPS = [
+    "standards-knowledge/grounded-knowledge-assistant",
+    "agentic-operations/closed-loop-incident-handling",
+    "network-operations/alarm-triage-adaptation",
+    "business-assurance/camara-care-diagnostics",
+]
+
+
+def test_recipes_remap(site_copy):
+    code, out = _build(site_copy)
+    assert code == 0, out
+    built = site_copy / "out"
+    assert (built / "recipes/index.html").is_file()
+    for slug in FLAGSHIPS:
+        assert (built / "recipes" / slug / "index.html").is_file(), slug
+    assert not (built / "catalog").exists()
+    html = (built / "platform/action-layer/index.html").read_text(encoding="utf-8")
+    assert 'href="../../recipes/agentic-operations/closed-loop-incident-handling/"' in html
+    assert 'href="../../catalog/' not in html
+
+
+def test_no_mkdocs_home(site_copy):
+    titles = [next(iter(item)) for item in CONFIG["nav"]]
+    assert "Start here" not in titles
+    assert "Recipes" in titles and "Catalog" not in titles
+    assert not (REPO_ROOT / "site-src/index.md").exists()
+    code, out = _build(site_copy)
+    assert code == 0, out
+    assert not (site_copy / "out/index.html").exists()
 
 
 def test_overview_links_pages():

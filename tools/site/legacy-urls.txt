@@ -1,0 +1,8 @@
+# Every URL published under catalog/ before recipes moved to recipes/.
+# Frozen: one path per line, relative to the site root, with a trailing slash.
+# tools/site/merge_site.py writes a redirect page for each line. Never remove a line.
+catalog/
+catalog/agentic-operations/closed-loop-incident-handling/
+catalog/business-assurance/camara-care-diagnostics/
+catalog/network-operations/alarm-triage-adaptation/
+catalog/standards-knowledge/grounded-knowledge-assistant/

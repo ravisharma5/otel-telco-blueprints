@@ -130,7 +130,7 @@ def test_makefile_telemetry():
 
 
 def test_makefile_ci_order():
-    assert re.search(r"(?m)^ci: test test-vale lint site explorer test-site$", MAKEFILE)
+    assert re.search(r"(?m)^ci: test test-vale lint site test-site$", MAKEFILE)
     assert re.search(r"(?m)^explorer-deps:\n\tnpm ci --prefix explorer$", MAKEFILE)
     assert re.search(r"(?m)^test-site:\n\tuv run pytest -q -m site_output$", MAKEFILE)
     doc_dirs = re.search(r"(?m)^DOC_DIRS := (.*)$", MAKEFILE).group(1).split()
