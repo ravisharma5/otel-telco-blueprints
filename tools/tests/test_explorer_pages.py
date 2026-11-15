@@ -11,6 +11,7 @@ nothing in the build loads a resource from another origin.
 
 from __future__ import annotations
 
+import functools
 import json
 import re
 import subprocess
@@ -305,9 +306,23 @@ def _home(explorer_dist):
     return tree
 
 
+@functools.cache
+def _fresh_export():
+    from tools.site.export_explorer import build_explorer_data
+
+    return build_explorer_data(REPO_ROOT)
+
+
 def _data():
+    """explorer.json as built, checked against a fresh export of the source data.
+
+    The page tests compare built HTML with this JSON, so a JSON left over from
+    before a data or recipe edit would let a stale page pass.
+    """
     assert GENERATED.is_file(), "explorer.json missing: run make explorer"
-    return json.loads(GENERATED.read_text(encoding="utf-8"))
+    data = json.loads(GENERATED.read_text(encoding="utf-8"))
+    assert data == _fresh_export(), "explorer.json is stale: run make explorer (make test-site rebuilds it)"
+    return data
 
 
 def _used_tiers(data, uc):
