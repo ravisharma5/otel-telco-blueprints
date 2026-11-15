@@ -466,7 +466,23 @@ def test_model_variants(explorer_dist, data, copy):
             assert len(parts) == 1, key
             text = parts[0].text()
             rows = parts[0].find_all(lambda n: n.tag == "tr" and n.find_all(lambda c: c.tag == "td"))
-            assert len(rows) == len(state["variants"])
+            others = state["other_tier_variants"]
+            assert len(rows) == len(state["variants"]) + len(others), key
+            # One group row per tier, the setup's own tier first and marked as yours.
+            groups = parts[0].find_all(lambda n: n.tag == "th" and n.attrs.get("scope") == "rowgroup")
+            tiers = [state["variants"][0]["tier"]] if state["variants"] else []
+            tiers += [t for t in dict.fromkeys(v["tier"] for v in others)]
+            assert len(groups) == len(tiers), key
+            tier_labels = copy["home"]["gallery"]["filters"]["tiers"]
+            for group, tier in zip(groups, tiers):
+                assert tier_labels[tier] in group.text()
+            if state["variants"]:
+                assert copy["use_case"]["tiers"]["your_setup"] in groups[0].text()
+            for tier in dict.fromkeys(v["tier"] for v in others):
+                assert models["other_tier"][tier] in text, (key, tier)
+            for variant in others:
+                assert variant["slot_name"] in text
+                assert models["published"].replace("{checkpoint}", variant["checkpoint"]) in text
             for variant in state["variants"]:
                 assert variant["slot_name"] in text
                 if variant["operator_made"]:

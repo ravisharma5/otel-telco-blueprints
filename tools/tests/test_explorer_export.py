@@ -230,6 +230,24 @@ def test_fit_message_never_suggests_applied_fp8(data):
     assert "too-tight-after-fp8" in seen, "expected alarm triage on one 48 GB GPU to need it"
 
 
+def test_every_placed_slot_has_a_model_row(data):
+    # Models shows the full picture: the setup tier's builds plus every slot that
+    # runs at another tier, at that tier's starting (published) build.
+    for uc, setup, batch, state in all_states(data):
+        others = state["other_tier_variants"]
+        for v in state["variants"]:
+            assert v["tier"] == setup["tier"]
+        for v in others:
+            assert v["tier"] != setup["tier"]
+            assert v["operator_made"] is False
+            assert v["variant_id"] == ex._start_variant(v["role"], VARIANTS)["id"]
+        got = sorted((v["tier"], v["role"]) for v in state["variants"] + others)
+        want = sorted((tier, role) for tier in TIERS for role in placed(uc["id"], tier))
+        assert got == want, (uc["id"], setup["id"])
+        tiers = [v["tier"] for v in others]
+        assert tiers == sorted(tiers, key=TIERS.index), "other tiers follow far edge, regional, core"
+
+
 def test_core_has_no_fit_and_no_swaps(data):
     for uc, setup, batch, state in all_states(data):
         if setup["tier"] != "core":
