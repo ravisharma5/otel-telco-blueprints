@@ -35,6 +35,17 @@
             { "type": "null" }
           ]
         },
+        "when_roles": {
+          "description": "The explorer shows the row only when one of these roles runs at the setup's tier.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "serving-slot-variants.schema.json#/$defs/role" }
+        },
+        "when_fp8_swap": {
+          "description": "true: the explorer shows the row only when its fit rule swapped in an FP8 build for the use case and setup.",
+          "const": true
+        },
         "source": { "type": "string", "pattern": "^https://" }
       }
     },

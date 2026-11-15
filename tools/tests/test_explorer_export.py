@@ -9,6 +9,7 @@ run time and assert rules, not hand-copied numbers.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -305,20 +306,84 @@ def test_quantized_check_matches_variants(data):
         assert state["quantized_check"] == any(v["operator_made"] for v in state["variants"])
 
 
-def test_flags_follow_setup_and_placement(data):
+# Words that name a slot in a Key settings row (setting, value, or why). Matched
+# case-sensitively, so "reranker score" in a pooling flag's why names no slot.
+SLOT_WORDS = {
+    "llm-large": (r"\b31B\b", r"\blarge LLM\b"),
+    "llm-small": (r"\bsmall LLM\b",),
+    "decision": (r"\bDecision\b",),
+    "safety": (r"\bSafety\b",),
+    "classification": (r"\bClassification\b",),
+    "embedding": (r"\bEmbedding\b",),
+    "reranker": (r"\bReranker\b",),
+}
+
+
+def _row_text(flag):
+    return " ".join(str(flag[k] or "") for k in ("setting", "value", "why"))
+
+
+def test_settings_name_only_placed_slots(data):
+    # A Key settings row that names a slot (the 31B, Decision, ...) shows only on a
+    # setup whose tier runs that slot, read from the recipe's placement.
+    bad = []
+    for uc, setup, batch, state in all_states(data):
+        roles = set(placed(uc["id"], setup["tier"]))
+        for flag in state["flags"]:
+            text = _row_text(flag)
+            for role, patterns in SLOT_WORDS.items():
+                if role not in roles and any(re.search(p, text) for p in patterns):
+                    bad.append(f"{uc['id']} {setup['id']}|{batch}: {flag['setting']} names {role}")
+    assert bad == []
+
+
+def test_decision_only_settings_need_decision(data):
+    for uc, setup, batch, state in all_states(data):
+        if "decision" in placed(uc["id"], setup["tier"]):
+            continue
+        rows = [f["setting"] for f in state["flags"] if "Decision slot only" in f["why"]]
+        assert rows == [], (uc["id"], setup["id"], batch)
+
+
+def _start_bands(uc_id, setup):
+    """Bands per GPU with every placed slot at its starting build, from the data files."""
+    acc = setup["accelerators"]
+    weights = unswapped_weights(placed(uc_id, setup["tier"]))
+    bins = ex.pack(weights, acc["count_per_node"], acc["memory_per_gpu_gb"], fill_pct=BANDS["fits_max_pct"])
+    return [ex.band(100 * sum(w for _, w in b) / acc["memory_per_gpu_gb"], BANDS) for b in bins]
+
+
+def test_fp8_build_row_only_where_fp8_is_used(data):
+    # No "Model build: FP8" row where the full-precision builds fit, where the FP8
+    # option says it is not needed, or where Models lists no FP8 build.
+    bad = []
+    for uc, setup, batch, state in all_states(data):
+        rows = [f for f in state["flags"] if f["setting"] == "Model build" and "FP8" in f["value"]]
+        if not rows:
+            continue
+        where = f"{uc['id']} {setup['id']}|{batch}"
+        fp8_models = [v for v in state["variants"] if VARIANT_BY_ID[v["variant_id"]]["precision"] == "fp8"]
+        if not fp8_models:
+            bad.append(f"{where}: FP8 build row, but Models lists no FP8 build")
+        if option(state, "fp8-regional")["state"] != "helps":
+            bad.append(f"{where}: FP8 build row, but the FP8 option says it is not needed")
+        if setup["tier"] != "regional" or all(b == "fits" for b in _start_bands(uc["id"], setup)):
+            bad.append(f"{where}: FP8 build row, but the full-precision builds fit")
+    assert bad == []
+
+
+def test_setup_rows_follow_setup_and_batch(data):
+    # Every per-setup row shown belongs to the setup and its batch value.
     flags = load("flags.yaml")
     for uc, setup, batch, state in all_states(data):
-        expected = [
+        allowed = {
             (r["setting"], r["value"], r["why"])
             for r in flags["per_setup"]
             if r["setup"] == setup["id"] and r["when_batch"] in (None, batch)
-        ]
-        roles = set(placed(uc["id"], setup["tier"]))
-        for block in flags["per_slot"]:
-            if roles & set(block["roles"]):
-                for line in block["lines"]:
-                    expected += [(a["flag"], a["value"], a["why"]) for a in line["args"]]
-        assert [(f["setting"], f["value"], f["why"]) for f in state["flags"]] == expected
+        }
+        for f in state["flags"]:
+            if f["scope"] == "setup":
+                assert (f["setting"], f["value"], f["why"]) in allowed, (uc["id"], setup["id"], batch)
 
 
 # --- options ----------------------------------------------------------------

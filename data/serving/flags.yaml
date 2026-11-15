@@ -100,8 +100,10 @@ per_slot:
 # Settings on top of the per-slot flags, for each setup profile in setups.yaml,
 # in setup order. Values are flags or settings from the cited source, or
 # placeholders in angle brackets with no default. when_batch: yes means the
-# row applies only when batch work shares the pool. Every source is a Source
-# link in the serving page Sources table.
+# row applies only when batch work shares the pool. The explorer shows a row
+# with when_roles only when one of those roles runs at the setup's tier, and a
+# row with when_fp8_swap: true only when its fit rule swapped in an FP8 build.
+# Every source is a Source link in the serving page Sources table.
 
 per_setup:
   - setup: regional-48
@@ -109,6 +111,7 @@ per_setup:
     value: "FP8 W8A8, made by the operator (W4A16 on Ampere)"
     why: "No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU."
     when_batch: null
+    when_fp8_swap: true
     source: "https://docs.vllm.ai/en/stable/features/quantization/"
   - setup: regional-48
     setting: "--max-model-len"
@@ -127,6 +130,8 @@ per_setup:
     value: "FP8 W8A8 for the 31B, made by the operator"
     why: "The 31B in FP8 needs about 33 GB, which leaves room on 96 GB for the other regional slots."
     when_batch: null
+    when_roles: [llm-large]
+    when_fp8_swap: true
     source: "https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic"
   - setup: regional-96
     setting: "--gpu-memory-utilization"
@@ -139,6 +144,7 @@ per_setup:
     value: "FP8 W8A8, made by the operator (W4A16 on Ampere)"
     why: "No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU."
     when_batch: null
+    when_fp8_swap: true
     source: "https://docs.vllm.ai/en/stable/features/quantization/"
   - setup: regional-2x48
     setting: "--tensor-parallel-size"
@@ -193,4 +199,5 @@ per_setup:
     value: "triton"
     why: "Decision slot only: the Red Hat AI Inference build of vLLM needs it to serve the Gemma 4 MoE on ROCm."
     when_batch: null
+    when_roles: [decision]
     source: "https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes"

@@ -365,11 +365,23 @@ def _tier_cards(placement: dict, setup: dict) -> list[dict]:
     return cards
 
 
-def _flags(flags: dict, setup: dict, batch: str, roles: list[str]) -> list[dict]:
+def _setup_row_applies(row: dict, setup: dict, batch: str, roles: list[str], swapped: bool) -> bool:
+    """A per-setup row shows for its setup and batch value, and only when its
+    when_roles (a role placed at the tier) and when_fp8_swap (an FP8 build was
+    swapped in) conditions hold."""
+    return (
+        row["setup"] == setup["id"]
+        and row.get("when_batch") in (None, batch)
+        and (not row.get("when_roles") or bool(set(row["when_roles"]) & set(roles)))
+        and (not row.get("when_fp8_swap") or swapped)
+    )
+
+
+def _flags(flags: dict, setup: dict, batch: str, roles: list[str], swapped: bool = False) -> list[dict]:
     out = [
         {"setting": r["setting"], "value": r["value"], "why": r["why"], "scope": "setup"}
         for r in flags["per_setup"]
-        if r["setup"] == setup["id"] and r.get("when_batch") in (None, batch)
+        if _setup_row_applies(r, setup, batch, roles, swapped)
     ]
     for block in flags["per_slot"]:
         if set(roles) & set(block["roles"]):
@@ -421,7 +433,7 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
     return {
         "tiers": _tier_cards(placement, setup),
         "fit": fit,
-        "flags": _flags(data["flags"], setup, batch, roles),
+        "flags": _flags(data["flags"], setup, batch, roles, swapped),
         "variants": variants,
         "other_tier_variants": other_tier_variants,
         "quantized_check": any(v["operator_made"] for v in variants),
