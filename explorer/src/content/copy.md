@@ -53,7 +53,7 @@ home:
         - Follow the recipe
       notes:
         - Start from the outcome you want.
-        - Models, sizing, settings, and approvals for your hardware.
+        - Models, sizing, settings, and approvals for your setup.
         - Step-by-step build, gates, and sources.
   goals:
     headings:
@@ -176,7 +176,7 @@ use_case:
   stages:
     inform: Never changes the network. People read and decide.
     recommend: Suggests fixes. An approver signs off every change.
-    act: Runs approved low-risk actions once it has earned that stage. Everything else goes to a person.
+    act: Runs approved low-risk actions after evaluation earns that stage. Everything else goes to a person.
   tiers:
     your_setup: Your setup
   fit:
@@ -208,7 +208,7 @@ use_case:
       parameter: Parameter
       owner: Owner
     notes:
-      no_defaults: No defaults. Each owner sets the value from your own evaluation.
+      no_defaults: No defaults. Each owner sets the value from evaluation on your traffic.
       quantized: "A quantized build adds one check: it must do no worse than the full-precision model on the same gates."
   advanced:
     notes:
@@ -236,7 +236,7 @@ use_case:
   reasons:
     core-only: Core only. Your setup is a regional site.
     regional-only: Regional only. Your setup is a core pool.
-    not-amd-paths: Not in llm-d's AMD paths.
+    not-amd-paths: Not in llm-d's documented paths for AMD GPUs.
     batch-only: Only matters when batch work shares the GPUs.
     not-needed-at-core: "Not needed at core: these GPUs fit the full-precision models."
     fits-without-fp8: "Not needed here: the full-precision builds fit this setup."
