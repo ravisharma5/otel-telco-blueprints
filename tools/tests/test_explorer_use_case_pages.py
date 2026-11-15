@@ -555,6 +555,7 @@ def test_no_overlay_and_clean_recipe_links(explorer_dist, data):
 # ---------- copy, no-JS, size, script ----------
 
 
+@pytest.mark.site_output
 def test_reason_ids_have_copy():
     data = _data()
     reasons = _copy()["use_case"]["reasons"]
