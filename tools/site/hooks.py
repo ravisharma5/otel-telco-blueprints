@@ -11,6 +11,13 @@ folder (or the folder itself) stops the build, so a link cannot publish
 content from outside the allowlist. Any path that resolves outside its folder
 is skipped as a second line of defence.
 
+Recipes are published under ``recipes/`` while their sources stay in ``catalog/``:
+each catalog file gets a ``dest_uri`` under ``recipes/`` (see ``_dest_for``), and the
+site-src stub ``catalog/index.md`` becomes ``recipes/index.html``. Nav entries and
+links keep using source paths, so MkDocs rewrites every link to the new URLs. The
+old catalog URLs get redirect pages from tools/site/merge_site.py. There is no
+MkDocs home page: the explorer owns ``index.html``.
+
 Reference, platform, and use-case pages (front matter ``type: reference``,
 ``type: platform``, or ``type: use-case``) get a banner right after the H1, chosen by ``doc_status``:
 draft and review pages show a fixed warning, done pages show none. The text
@@ -22,6 +29,7 @@ character at least as long as the opener) and HTML comment blocks.
 
 from __future__ import annotations
 
+import posixpath
 import re
 from pathlib import Path
 
@@ -39,6 +47,36 @@ FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 COMMENT = re.compile(r"^ {0,3}<!--")
 
 
+def _dest_for(rel):
+    """Output path under recipes/ for a catalog source path; None for anything else."""
+    if not rel.startswith("catalog/"):
+        return None
+    parent, name = posixpath.split(rel[len("catalog/") :])
+    stem, ext = posixpath.splitext(name)
+    if ext.lower() != ".md":
+        return posixpath.join("recipes", parent, name)
+    leaf = "" if stem in ("README", "index") else stem
+    return posixpath.join("recipes", parent, leaf, "index.html")
+
+
+def _remap_stubs(files, config):
+    """Move site-src stubs under catalog/ to their recipes/ output path."""
+    for old in list(files):
+        dest = _dest_for(old.src_uri)
+        if dest is None:
+            continue
+        files.remove(old)
+        files.append(
+            File(
+                old.src_uri,
+                src_dir=old.src_dir,
+                dest_dir=config["site_dir"],
+                use_directory_urls=config["use_directory_urls"],
+                dest_uri=dest,
+            )
+        )
+
+
 def _refuse_symlink(path):
     """Stop the build if path, or any folder between it and ROOT, is a symlink."""
     for part in [path, *path.parents]:
@@ -51,6 +89,7 @@ def _refuse_symlink(path):
 
 
 def on_files(files, config):
+    _remap_stubs(files, config)
     for top in INCLUDE:
         base = ROOT / top
         if base.is_symlink():
@@ -70,6 +109,7 @@ def on_files(files, config):
                 src_dir=str(ROOT),
                 dest_dir=config["site_dir"],
                 use_directory_urls=config["use_directory_urls"],
+                dest_uri=_dest_for(rel),
             )
             clash = files.get_file_from_path(rel) or next(
                 (f for f in files if f.dest_uri == new.dest_uri), None

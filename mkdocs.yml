@@ -1,6 +1,7 @@
 # Docs site. Build: `make site` (strict). Preview: `make serve`.
 # Pages come from site-src/ plus framework/, architecture/, platform/ and
-# catalog/ (added in place by tools/site/hooks.py). Every page needs a nav line.
+# catalog/ (added in place by tools/site/hooks.py, which publishes catalog/ under
+# recipes/). Every page needs a nav line. The explorer owns the home page.
 site_name: OTel Telco Production Blueprints
 site_url: https://ravisharma5.github.io/otel-telco-blueprints/
 repo_url: https://github.com/ravisharma5/otel-telco-blueprints
@@ -48,7 +49,6 @@ not_in_nav: |
   /platform/*/sources/
   /catalog/*/*/sources/
 nav:
-  - Start here: index.md
   - Framework:
       - Readiness questions: framework/index.md
       - Definitions: framework/definitions.md
@@ -61,7 +61,7 @@ nav:
       - Adaptation ladder: architecture/adaptation-ladder.md
       - Placement: architecture/placement.md
       - Crosswalk: architecture/crosswalk.md
-  - Catalog:
+  - Recipes:
       - Overview: catalog/index.md
       - Grounded knowledge assistant: catalog/standards-knowledge/grounded-knowledge-assistant/README.md
       - Governed closed-loop incident handling: catalog/agentic-operations/closed-loop-incident-handling/README.md
