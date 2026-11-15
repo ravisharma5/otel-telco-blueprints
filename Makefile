@@ -69,8 +69,9 @@ explorer-data:
 explorer: explorer-data
 	cd explorer && ASTRO_TELEMETRY_DISABLED=1 npx --no-install astro build
 
-# Tests that read built output (site/ and explorer/dist); run after site and explorer.
-test-site:
+# Tests that read built output (site/ and explorer/dist). Depends on site, so the
+# build always runs first and is fresh, also under make -j.
+test-site: site
 	uv run pytest -q -m site_output
 
 ci: test test-vale lint site test-site

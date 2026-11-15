@@ -132,6 +132,7 @@ def test_makefile_telemetry():
 def test_makefile_ci_order():
     assert re.search(r"(?m)^ci: test test-vale lint site test-site$", MAKEFILE)
     assert re.search(r"(?m)^explorer-deps:\n\tnpm ci --prefix explorer$", MAKEFILE)
-    assert re.search(r"(?m)^test-site:\n\tuv run pytest -q -m site_output$", MAKEFILE)
+    # test-site builds first through its prerequisite, so make -j never reads a stale build.
+    assert re.search(r"(?m)^test-site: site\n\tuv run pytest -q -m site_output$", MAKEFILE)
     doc_dirs = re.search(r"(?m)^DOC_DIRS := (.*)$", MAKEFILE).group(1).split()
     assert "explorer/src/content" in doc_dirs
