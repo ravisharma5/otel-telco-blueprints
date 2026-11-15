@@ -417,6 +417,9 @@ def test_option_cards(explorer_dist, data, copy):
                     assert opt["not_applicable"].split("{")[0].strip() in text
                     reason = option["reason_text"] or reasons[option["reason_id"]]
                     assert _squash(_plain(reason)) in _squash(text)
+                if option.get("fit_note_id"):
+                    note = copy["use_case"]["advanced"]["fit_notes"][option["fit_note_id"]]
+                    assert _squash(note) in _squash(text), (key, option["id"])
                 assert _squash(_plain(option["what"])) in _squash(text)
                 assert _squash(_plain(option["check"])) in _squash(text)
                 for related in option["related"]:

@@ -309,6 +309,7 @@ def test_option_states_follow_rules(data):
             "vendor": setup["accelerators"]["vendor"],
             "batch": batch,
             "arch": setup["accelerators"]["arch"],
+            "fp8_swap": "yes" if any(v["operator_made"] for v in state["variants"]) else "no",
         }
         for src, o in zip(OPTIONS, state["options"]):
             for key in ("name", "engine", "tiers", "what", "set", "check", "limits", "related"):
@@ -327,6 +328,55 @@ def test_option_states_follow_rules(data):
             else:
                 assert o["state"] == "little"
                 assert o["reason_text"] is None and o["reason_id"] is None
+
+
+def worst_band(fit):
+    order = ["fits", "tight", "too-tight"]
+    return max((f["band"] for f in fit), key=order.index, default="fits")
+
+
+def test_fp8_option_follows_fit(data):
+    # The FP8 option helps exactly where FP8 builds were swapped in, says when the
+    # setup is still tight or too tight, and is "not needed" where bf16 fits.
+    seen = {"helps": 0, "fits-without-fp8": 0, "still-tight": 0, "still-too-tight": 0}
+    for uc, setup, batch, state in all_states(data):
+        o = option(state, "fp8-regional")
+        for other in state["options"]:
+            assert "fit_note_id" in other
+            if other["id"] != "fp8-regional":
+                assert other["fit_note_id"] is None
+        if setup["tier"] != "regional":
+            assert o["fit_note_id"] is None
+            continue
+        swapped = [v for v in state["variants"] if v["operator_made"]]
+        if swapped:
+            assert o["state"] == "helps", (uc["id"], setup["id"])
+            seen["helps"] += 1
+            reason = o["reason_text"].lower()
+            for v in swapped:
+                assert v["slot_name"].lower() in reason, (uc["id"], setup["id"], v["slot_name"], reason)
+            band = worst_band(state["fit"])
+            expected = {"fits": None, "tight": "still-tight", "too-tight": "still-too-tight"}[band]
+            assert o["fit_note_id"] == expected, (uc["id"], setup["id"])
+            if expected:
+                seen[expected] += 1
+        else:
+            assert o["state"] == "not-applicable" and o["reason_id"] == "fits-without-fp8", (uc["id"], setup["id"])
+            assert o["fit_note_id"] is None
+            seen["fits-without-fp8"] += 1
+    assert all(seen.values()), seen
+
+
+def test_fp8_swap_needs_a_reason():
+    # A use case whose state swaps in FP8 builds must have a where_it_helps reason,
+    # so the option never reads "little benefit" next to an FP8 build.
+    serving = ex._serving_data(REPO_ROOT)
+    for o in serving["options"]:
+        if o["id"] == "fp8-regional":
+            o["where_it_helps"] = [w for w in o["where_it_helps"] if w["use_case"] != "UC-OPS-01"]
+    placement = {"regional": {"runs": placed("UC-OPS-01", "regional")}}
+    with pytest.raises(SystemExit, match="UC-OPS-01"):
+        ex._state("UC-OPS-01", placement, SETUP_BY_ID["regional-48"], "yes", serving)
 
 
 def test_option_state_function():

@@ -449,7 +449,7 @@ SOURCE_HOSTS = {
     "access.redhat.com",
 }
 GITHUB_SOURCE_PREFIXES = ("https://github.com/vllm-project/", "https://github.com/llm-d/")
-REASON_IDS = {"core-only", "not-amd-paths", "batch-only", "not-needed-at-core", "regional-only"}
+REASON_IDS = {"core-only", "not-amd-paths", "batch-only", "not-needed-at-core", "regional-only", "fits-without-fp8"}
 DECISION_KEPT_OFF = ("speculative-decoding", "fp8-kv-cache", "structured-outputs")
 EXCLUDED_FEATURES = ("wide expert parallelism", "sleep mode", "chunked prefill")
 RELATED_PREFIX = "https://github.com/openshift-psap/inference-playbooks/"
@@ -603,6 +603,15 @@ def test_applies_when_rules():
     assert rules("pd-split").get(("vendor", "not-amd-paths")) == {"nvidia"}
     assert rules("priority-bands").get(("batch", "batch-only")) == {"yes"}
     assert rules("fp8-regional").get(("tier", "not-needed-at-core")) == {"regional"}
+    # The FP8 option follows the computed fit: it only helps where the exporter swapped in FP8 builds.
+    assert rules("fp8-regional").get(("fp8_swap", "fits-without-fp8")) == {"yes"}
+
+
+def test_fp8_reasons_make_no_fit_claim():
+    # Whether slots fit is the fit bar's job; a reason that says "fit" can contradict it.
+    fp8 = next(o for o in options() if o["id"] == "fp8-regional")
+    for entry in fp8["where_it_helps"]:
+        assert not re.search(r"\bfits?\b", entry["reason"]), entry
 
 
 def test_related_recipes():
