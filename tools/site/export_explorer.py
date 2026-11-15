@@ -255,6 +255,7 @@ def option_state(
     use_case_id: str,
     fp8_swap: bool = False,
     band_after: str = "fits",
+    placement: dict | None = None,
 ) -> dict:
     """State of one advanced option for a use case at a setup and batch value.
 
@@ -262,6 +263,11 @@ def option_state(
     tightest band after the swaps. An option with an fp8_swap rule follows the
     fit: it helps only where builds were swapped, and its fit_note_id says when
     the setup is still tight or too tight.
+
+    placement is the recipe's placement map. When given, an option helps only if
+    a role its where_it_helps entry names, and the option does not exclude, runs
+    at the setup's tier; if those roles run only at another tier, the option does
+    not apply here and its reason id names that tier (helps-at-<tier>).
     """
     props = {
         "tier": setup["tier"],
@@ -289,6 +295,30 @@ def option_state(
             f"data/serving/options.yaml: {option['id']}.where_it_helps needs a reason for {use_case_id}, "
             "whose state swaps in FP8 builds"
         )
+    if would_help and placement is not None:
+        entry = next(w for w in option["where_it_helps"] if w["use_case"] == use_case_id)
+        excluded = set(option.get("excluded_slots") or [])
+        targets = [r for r in entry["roles"] if r not in excluded]
+        if not targets:
+            raise SystemExit(
+                f"data/serving/options.yaml: {option['id']}.where_it_helps for {use_case_id} "
+                "names only excluded slots"
+            )
+        runs_at = {t: set((placement.get(t) or {}).get("runs") or []) for t in TIERS}
+        if not set(targets) & runs_at[setup["tier"]]:
+            other = next((t for t in TIERS if set(targets) & runs_at[t]), None)
+            if other is None:
+                raise SystemExit(
+                    f"data/serving/options.yaml: {option['id']}.where_it_helps for {use_case_id} "
+                    f"names roles {', '.join(targets)} that its recipe places nowhere"
+                )
+            return {
+                "state": "not-applicable",
+                "reason_id": f"helps-at-{other}",
+                "reason_text": None,
+                "would_help": True,
+                "fit_note_id": None,
+            }
     if would_help:
         return {
             "state": "helps",
@@ -428,7 +458,7 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
     options = []
     for opt in data["options"]:
         row = {"id": opt["id"], **{k: opt.get(k) for k in OPTION_TEXT_KEYS}}
-        row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit)))
+        row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit), placement))
         options.append(row)
     return {
         "tiers": _tier_cards(placement, setup),

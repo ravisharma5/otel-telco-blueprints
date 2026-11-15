@@ -101,9 +101,16 @@
     "fit": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["use_case", "reason"],
+      "required": ["use_case", "roles", "reason"],
       "properties": {
         "use_case": { "type": "string", "pattern": "^UC-[A-Z]+-[0-9]{2}$" },
+        "roles": {
+          "description": "The slots the reason is about; the option helps only at a tier that runs one of them.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "serving-slot-variants.schema.json#/$defs/role" }
+        },
         "reason": { "type": "string", "minLength": 1 }
       }
     },

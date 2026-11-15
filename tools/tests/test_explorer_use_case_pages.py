@@ -436,6 +436,19 @@ def test_option_cards(explorer_dist, data, copy):
 
 
 @pytest.mark.site_output
+def test_rail_count_matches_helps_cards(explorer_dist, data):
+    # The rail's "options worth testing" number is the number of "Helps here" cards
+    # the same state shows, counted in the built page.
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, _, _ in _states(uc):
+            counts = _in_parts(tree, key, lambda n: n.has_class("count-number"))
+            helps = _in_parts(tree, key, lambda n: n.has_class("option-card") and n.has_class("state-helps"))
+            assert len(counts) == 1, key
+            assert counts[0].text() == str(len(helps)), (uc["slug"], key)
+
+
+@pytest.mark.site_output
 def test_toggle_label_count(explorer_dist, data, copy):
     template = copy["buttons"]["show_all_options"]
     assert "{count}" in template

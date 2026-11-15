@@ -241,6 +241,9 @@ use_case:
     batch-only: Only matters when batch work shares the GPUs.
     not-needed-at-core: "Not needed at core: these GPUs fit the full-precision models."
     fits-without-fp8: "Not needed here: the full-precision builds fit this setup."
+    # The option helps this use case only through slots that run at another tier.
+    helps-at-core: For this use case, it helps only the slots that run at the core.
+    helps-at-regional: For this use case, it helps only the slots that run at the regional site.
   needs:
     headings:
       models: Models

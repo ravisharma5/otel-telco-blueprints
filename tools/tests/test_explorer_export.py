@@ -430,6 +430,8 @@ def test_option_states_follow_rules(data):
                 assert o["state"] == "not-applicable"
                 assert o["reason_id"] == failing[0]["reason"]
                 assert o["reason_text"] is None
+            elif uc["id"] in helps and not set(_helps_roles(src, uc["id"])) & set(placed(uc["id"], setup["tier"])):
+                assert o["state"] == "not-applicable" and o["reason_id"].startswith("helps-at-")
             elif uc["id"] in helps:
                 assert o["state"] == "helps"
                 assert o["reason_text"] == helps[uc["id"]]
@@ -437,6 +439,56 @@ def test_option_states_follow_rules(data):
             else:
                 assert o["state"] == "little"
                 assert o["reason_text"] is None and o["reason_id"] is None
+
+
+def _helps_roles(src, uc_id):
+    """Slots an option's where_it_helps reason is about for a use case, minus excluded slots."""
+    entry = next((w for w in src["where_it_helps"] if w["use_case"] == uc_id), None)
+    return [r for r in (entry["roles"] if entry else []) if r not in src["excluded_slots"]]
+
+
+def test_helps_only_where_a_target_slot_runs(data):
+    # "Helps here" needs a slot the reason is about running at the setup's tier,
+    # read from the recipe placement and options.yaml; excluded slots never count.
+    bad = []
+    for uc, setup, batch, state in all_states(data):
+        roles = set(placed(uc["id"], setup["tier"]))
+        for src in OPTIONS:
+            o = option(state, src["id"])
+            if o["state"] == "helps" and not set(_helps_roles(src, uc["id"])) & roles:
+                bad.append(f"{src['id']} for {uc['id']} on {setup['id']}|{batch}")
+    assert bad == []
+
+
+def test_option_helping_at_another_tier_says_so(data):
+    # An option that helps this use case only at another tier reads "doesn't apply"
+    # on this setup, never "little benefit", and its reason names that tier.
+    seen = 0
+    for uc, setup, batch, state in all_states(data):
+        roles = set(placed(uc["id"], setup["tier"]))
+        for src in OPTIONS:
+            targets = set(_helps_roles(src, uc["id"]))
+            o = option(state, src["id"])
+            if not targets or targets & roles:
+                continue
+            seen += 1
+            assert o["state"] == "not-applicable", (src["id"], uc["id"], setup["id"], batch)
+            assert o["would_help"] is True
+            others = [t for t in TIERS if t != setup["tier"] and targets & set(placed(uc["id"], t))]
+            if o["reason_id"].startswith("helps-at-"):
+                assert o["reason_id"] == f"helps-at-{others[0]}", (src["id"], uc["id"], setup["id"])
+    assert seen
+
+
+def test_helps_roles_are_never_excluded():
+    for src in OPTIONS:
+        for entry in src["where_it_helps"]:
+            assert not set(entry["roles"]) & set(src["excluded_slots"]), (src["id"], entry["use_case"])
+
+
+def test_options_worth_testing_counts_helps(data):
+    for uc, setup, batch, state in all_states(data):
+        assert state["options_worth_testing"] == sum(o["state"] == "helps" for o in state["options"])
 
 
 def worst_band(fit):
