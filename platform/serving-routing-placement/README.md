@@ -15,7 +15,7 @@ top_decisions:
   - "Keep the front door, content routing, and replica scheduling separate"
   - "Pick a serving option for each tier"
 agent_school: [104, 203]
-clarity_reviewed: "2026-11-13"
+clarity_reviewed: "2026-11-14"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -235,7 +235,7 @@ Each row names a use case where the option fits its traffic, and why.
 | Prefill/decode split | [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md) | Long prompts full of retrieved passages make prefill the heavy step, so a separate prefill pool can absorb it. |
 | Autoscaling on inference load | [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md) | Incident storms arrive in bursts, and the pool can grow for the storm and shrink after it. |
 | Autoscaling on inference load | [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md) | Care calls follow the working day, so the pool can follow the call volume. |
-| FP8 builds of the regional slots | [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](../../catalog/network-operations/alarm-triage-adaptation/README.md) | FP8 builds halve the weights of the large LLM, Classification, and Safety, the heaviest slots triage runs at the regional site. |
+| FP8 builds of the regional slots | [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](../../catalog/network-operations/alarm-triage-adaptation/README.md) | FP8 builds halve the weights of the heaviest slots triage runs at the regional site: the large LLM, Classification, and Safety. |
 | FP8 builds of the regional slots | [UC-AGOPS-01 Governed closed-loop incident handling](../../catalog/agentic-operations/closed-loop-incident-handling/README.md) | FP8 builds of Safety and Classification make room for them beside the Decision slot on a regional GPU. |
 | FP8 builds of the regional slots | [UC-KNOW-01 Grounded knowledge assistant](../../catalog/standards-knowledge/grounded-knowledge-assistant/README.md) | FP8 builds of Safety and the small LLM make room for them beside Embedding, Reranker, and the Decision slot. |
 | FP8 builds of the regional slots | [UC-CARE-01 CAMARA customer-care diagnostics](../../catalog/business-assurance/camara-care-diagnostics/README.md) | FP8 builds of Safety and the small LLM make room for them beside retrieval and the Decision slot on a regional GPU. |

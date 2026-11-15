@@ -7,9 +7,9 @@ doc_status: draft
 
 # Recipes
 
-The recipes map operator use cases to OTel model slots and platform blueprints. Four flagship recipes come first, then the planned domains. Each recipe links to the platform blueprints it depends on.
+Each recipe maps an operator use case to OTel model slots and the platform blueprints it depends on. Four recipes are published; the domains after the table are planned.
 
-| Blueprint | Topic | Domain |
+| Recipe | Topic | Domain |
 |---|---|---|
 | [UC-KNOW-01](standards-knowledge/grounded-knowledge-assistant/README.md) | Grounded knowledge assistant | Standards knowledge |
 | [UC-AGOPS-01](agentic-operations/closed-loop-incident-handling/README.md) | Governed closed-loop incident handling | Agentic operations |
@@ -18,10 +18,6 @@ The recipes map operator use cases to OTel model slots and platform blueprints. 
 
 Planned domains:
 
-- Knowledge assistance
-- Closed-loop incident handling
-- Alarm and root-cause triage
-- Customer-care diagnostics
 - Churn
 - Revenue assurance
 - Energy

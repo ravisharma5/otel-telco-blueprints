@@ -238,7 +238,7 @@ options:
         reason: fits-without-fp8
     where_it_helps:
       - use_case: UC-OPS-01
-        reason: FP8 builds halve the weights of the large LLM, Classification, and Safety, the heaviest slots triage runs at the regional site.
+        reason: "FP8 builds halve the weights of the heaviest slots triage runs at the regional site: the large LLM, Classification, and Safety."
       - use_case: UC-AGOPS-01
         reason: FP8 builds of Safety and Classification make room for them beside the Decision slot on a regional GPU.
       - use_case: UC-KNOW-01
