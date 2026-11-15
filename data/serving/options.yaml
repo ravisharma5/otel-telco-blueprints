@@ -226,17 +226,25 @@ options:
     sources:
       - https://docs.vllm.ai/en/stable/features/quantization/
       - https://huggingface.co/RedHatAI/gemma-4-31B-it-FP8-dynamic
+    # fp8_swap is "yes" when the explorer's fit rule swapped in an FP8 build for this
+    # use case and setup; the explorer adds a note when the setup is still tight.
+    # Reasons name the slots that get FP8 builds and leave the fit itself to the fit bar.
     applies_when:
       - rule: tier
         allowed: [regional]
         reason: not-needed-at-core
+      - rule: fp8_swap
+        allowed: ["yes"]
+        reason: fits-without-fp8
     where_it_helps:
       - use_case: UC-OPS-01
-        reason: Classification, Safety, and the small LLM fit beside retrieval on one regional GPU.
+        reason: FP8 builds halve the weights of the large LLM, Classification, and Safety, the heaviest slots triage runs at the regional site.
       - use_case: UC-AGOPS-01
-        reason: Safety and Classification fit beside the Decision slot on one regional GPU.
+        reason: FP8 builds of Safety and Classification make room for them beside the Decision slot on a regional GPU.
       - use_case: UC-KNOW-01
-        reason: Safety and the small LLM fit beside Embedding, Reranker, and the Decision slot on one regional GPU.
+        reason: FP8 builds of Safety and the small LLM make room for them beside Embedding, Reranker, and the Decision slot.
+      - use_case: UC-CARE-01
+        reason: FP8 builds of Safety and the small LLM make room for them beside retrieval and the Decision slot on a regional GPU.
     related: []
     excluded_slots: [decision]
 

@@ -86,6 +86,7 @@ export interface Option {
   reason_id: string | null;
   reason_text: string | null;
   would_help: boolean;
+  fit_note_id: string | null;
 }
 
 export interface State {

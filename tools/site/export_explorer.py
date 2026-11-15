@@ -229,24 +229,65 @@ def choose_variants(roles, setup: dict, variants, bands: dict):
     return [current[r] for r in roles], fit
 
 
-def option_state(option: dict, setup: dict, batch: str, use_case_id: str) -> dict:
-    """State of one advanced option for a use case at a setup and batch value."""
+FIT_NOTES = {"fits": None, "tight": "still-tight", "too-tight": "still-too-tight"}
+BAND_ORDER = ("fits", "tight", "too-tight")
+
+
+def worst_band(fit) -> str:
+    """Tightest band across a state's GPUs; fits when there is no fit bar."""
+    return max((f["band"] for f in fit), key=BAND_ORDER.index, default="fits")
+
+
+def option_state(
+    option: dict,
+    setup: dict,
+    batch: str,
+    use_case_id: str,
+    fp8_swap: bool = False,
+    band_after: str = "fits",
+) -> dict:
+    """State of one advanced option for a use case at a setup and batch value.
+
+    fp8_swap says whether the fit rule swapped in an FP8 build; band_after is the
+    tightest band after the swaps. An option with an fp8_swap rule follows the
+    fit: it helps only where builds were swapped, and its fit_note_id says when
+    the setup is still tight or too tight.
+    """
     props = {
         "tier": setup["tier"],
         "vendor": setup["accelerators"]["vendor"],
         "batch": batch,
         "arch": setup["accelerators"]["arch"],
+        "fp8_swap": "yes" if fp8_swap else "no",
     }
+    fit_dependent = any(r["rule"] == "fp8_swap" for r in option.get("applies_when") or [])
     helps = {w["use_case"]: w["reason"] for w in option.get("where_it_helps") or []}
     would_help = use_case_id in helps
     for rule in option.get("applies_when") or []:
         if rule["rule"] not in props:
             raise SystemExit(f"data/serving/options.yaml: {option['id']}.applies_when has unknown rule {rule['rule']}")
         if props[rule["rule"]] not in rule["allowed"]:
-            return {"state": "not-applicable", "reason_id": rule["reason"], "reason_text": None, "would_help": would_help}
+            return {
+                "state": "not-applicable",
+                "reason_id": rule["reason"],
+                "reason_text": None,
+                "would_help": would_help,
+                "fit_note_id": None,
+            }
+    if fit_dependent and not would_help:
+        raise SystemExit(
+            f"data/serving/options.yaml: {option['id']}.where_it_helps needs a reason for {use_case_id}, "
+            "whose state swaps in FP8 builds"
+        )
     if would_help:
-        return {"state": "helps", "reason_id": None, "reason_text": helps[use_case_id], "would_help": True}
-    return {"state": "little", "reason_id": None, "reason_text": None, "would_help": False}
+        return {
+            "state": "helps",
+            "reason_id": None,
+            "reason_text": helps[use_case_id],
+            "would_help": True,
+            "fit_note_id": FIT_NOTES[band_after] if fit_dependent else None,
+        }
+    return {"state": "little", "reason_id": None, "reason_text": None, "would_help": False, "fit_note_id": None}
 
 
 # --- recipe pages -----------------------------------------------------------
@@ -354,10 +395,11 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
     roles = list((placement.get(setup["tier"]) or {}).get("runs") or [])
     chosen, fit = choose_variants(roles, setup, data["variants"], data["bands"])
     variants = _variant_rows(chosen, setup["tier"])
+    swapped = any(v["operator_made"] for v in variants)
     options = []
     for opt in data["options"]:
         row = {"id": opt["id"], **{k: opt.get(k) for k in OPTION_TEXT_KEYS}}
-        row.update(option_state(opt, setup, batch, uc_id))
+        row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit)))
         options.append(row)
     return {
         "tiers": _tier_cards(placement, setup),

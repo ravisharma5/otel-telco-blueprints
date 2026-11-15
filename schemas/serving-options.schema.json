@@ -86,7 +86,7 @@
       "additionalProperties": false,
       "required": ["rule", "allowed", "reason"],
       "properties": {
-        "rule": { "enum": ["tier", "vendor", "batch", "arch"] },
+        "rule": { "enum": ["tier", "vendor", "batch", "arch", "fp8_swap"] },
         "allowed": {
           "type": "array",
           "minItems": 1,
@@ -94,7 +94,7 @@
           "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
         },
         "reason": {
-          "enum": ["core-only", "not-amd-paths", "batch-only", "not-needed-at-core", "regional-only"]
+          "enum": ["core-only", "not-amd-paths", "batch-only", "not-needed-at-core", "regional-only", "fits-without-fp8"]
         }
       }
     },

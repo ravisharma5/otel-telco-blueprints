@@ -222,6 +222,10 @@ use_case:
       limits: Limits
       related: "Related recipe: {title} ({source})"
     tag_join: " · "
+    # Added after a "Helps here" reason when the setup stays tight with the builds swapped in.
+    fit_notes:
+      still-tight: Even with these builds, the fit bar shows Tight on this setup.
+      still-too-tight: Even with these builds, the slots are too big for this setup. See the fit bar.
     tiers:
       far-edge: far edge
       regional: regional
@@ -233,6 +237,7 @@ use_case:
     not-amd-paths: Not in llm-d's AMD paths.
     batch-only: Only matters when batch work shares the GPUs.
     not-needed-at-core: "Not needed at core: these GPUs fit the full-precision models."
+    fits-without-fp8: "Not needed here: the full-precision builds fit this setup."
   needs:
     headings:
       models: Models

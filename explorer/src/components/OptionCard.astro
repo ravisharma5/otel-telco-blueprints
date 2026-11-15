@@ -14,6 +14,8 @@ const { option, shown } = Astro.props;
 const a = copy.use_case.advanced;
 const reasons = copy.use_case.reasons as Record<string, string>;
 const tierWords = a.tiers as Record<string, string>;
+const fitNotes = a.fit_notes as Record<string, string>;
+const fitNote = option.fit_note_id ? fitNotes[option.fit_note_id] ?? '' : '';
 const tag = [option.engine, option.tiers.map((t) => tierWords[t] ?? t).join(', ')].join(a.tag_join);
 let prefix = '';
 let reason = '';
@@ -33,7 +35,7 @@ if (option.state === 'helps') {
     <span class="option-tag">{tag}</span>
   </div>
   <p class="option-what"><Rich text={option.what} /></p>
-  <p class="applicability">{prefix}{reason && ' '}{reason && <Rich text={reason} />}</p>
+  <p class="applicability">{prefix}{reason && ' '}{reason && <Rich text={reason} />}{fitNote && ` ${fitNote}`}</p>
   <dl>
     <dt>{a.labels.set}</dt>
     <dd>
