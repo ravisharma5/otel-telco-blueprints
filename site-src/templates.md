@@ -1,11 +1,17 @@
 ---
-title: "Templates"
+title: "Write a blueprint"
 doc_status: draft
 ---
 
-# Templates
+# Write a blueprint
 
-These are the starting points for blueprint authors. Copy the raw file from the repository and fill in each section.
+This page is for anyone writing a new platform or use-case blueprint.
+
+To propose a use case, [open an issue](https://github.com/ravisharma5/otel-telco-blueprints/issues/new) that names the operator problem and the OTel model slots it needs. To add a blueprint, [open a pull request](https://github.com/ravisharma5/otel-telco-blueprints/pulls) with a page built from a template below.
+
+Every page passes the structural linter, Vale, and a clarity review before it publishes. The [style guide](framework/style-guide.md) sets the page shape and writing rules. The [review checklist](framework/review-checklist.md) lists the checks.
+
+Copy the raw template from the repository and fill in each section.
 
 ## Platform blueprint template
 

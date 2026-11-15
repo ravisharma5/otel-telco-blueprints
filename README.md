@@ -1,7 +1,7 @@
 ---
 title: "OTel Telco Production Blueprints"
 doc_status: done
-clarity_reviewed: "2026-11-09"
+clarity_reviewed: "2026-11-14"
 ---
 
 # OTel Telco Production Blueprints
@@ -25,7 +25,8 @@ In this repository, "OTel" means the OTel model family, not OpenTelemetry.
 - [Glossary](framework/glossary.md): one meaning per term.
 - [Style guide](framework/style-guide.md): page skeletons, budgets, and writing rules.
 - [Review checklist](framework/review-checklist.md): what a doc needs before it's done.
-- [Templates](templates/): starting points for platform and use-case blueprints.
+- [Write a blueprint](https://ravisharma5.github.io/otel-telco-blueprints/templates/): how to propose a use case, the three templates, and the checks every page passes.
+- [Templates](templates/): the raw template files.
 
 ## How to lint
 

@@ -22,6 +22,7 @@ nav:
 buttons:
   menu: Menu
   github: GitHub
+  write: Write a blueprint
   open_recipe: Open the recipe
   # {count} is the number of options in the setup state, filled at build time.
   show_all_options: "Show all {count} options"

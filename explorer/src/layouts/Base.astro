@@ -54,11 +54,12 @@ const base = import.meta.env.BASE_URL;
     </main>
     <footer class="site-footer">
       <p>
-        {copy.footer.notes.licence} ·
+        {copy.footer.notes.licence} ·{' '}
         <a href={copy.site.repo_url}>
           {copy.buttons.github} <span aria-hidden="true">↗</span>
           <span class="visually-hidden">{copy.notes.external}</span>
-        </a>
+        </a> ·{' '}
+        <a href={`${base}templates/`}>{copy.buttons.write}</a>
       </p>
       <p>{copy.footer.notes.otel}</p>
     </footer>

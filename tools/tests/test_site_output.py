@@ -179,3 +179,29 @@ def test_no_repo_stats_widget(site_dir):
         if 'data-md-component="source"' in page.read_text(encoding="utf-8")
     ]
     assert not bad, bad[:10]
+
+
+FOOTER = re.compile(r"<footer\b.*?</footer>", re.S)
+CONTRIBUTOR_LINK = re.compile(r'<a href="(?:/otel-telco-blueprints/|\.\./)*templates/"[^>]*>\s*Write a blueprint\s*</a>')
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        "index.html",
+        "use-cases/alarm-triage-adaptation/index.html",
+        "recipes/network-operations/alarm-triage-adaptation/index.html",
+        "platform/serving-routing-placement/index.html",
+    ],
+)
+def test_footer_links_contributor_page(site_dir, page):
+    html = (site_dir / page).read_text(encoding="utf-8")
+    footers = FOOTER.findall(html)
+    assert footers, page
+    assert any(CONTRIBUTOR_LINK.search(f) for f in footers), page
+
+
+def test_contributor_page_title(site_dir):
+    html = (site_dir / "templates/index.html").read_text(encoding="utf-8")
+    assert re.search(r'<h1 id="write-a-blueprint">Write a blueprint<', html)
+    assert "<title>Write a blueprint" in html

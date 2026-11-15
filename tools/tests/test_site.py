@@ -143,8 +143,9 @@ def test_routes():
 
 def test_nav_sections():
     titles = [next(iter(item)) for item in CONFIG["nav"]]
-    for want in ("Framework", "Architecture", "Recipes", "Platform", "Templates"):
-        assert want in titles, want
+    # Same five items as the explorer header; the contributor page sits in the footer.
+    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework"]
+    assert "/templates.md" in CONFIG["not_in_nav"]
     assert "Start here" not in titles
     assert "Catalog" not in titles
     assert "search" in CONFIG["plugins"]
@@ -210,6 +211,29 @@ def test_snippet_escape_fails(site_copy, target):
     assert code != 0, out
     html = site_copy / "out/templates/index.html"
     assert not (html.is_file() and "Internal page" in html.read_text(encoding="utf-8"))
+
+
+def test_contributor_page_source():
+    text = (REPO_ROOT / "site-src/templates.md").read_text(encoding="utf-8")
+    assert 'title: "Write a blueprint"' in text
+    assert "\n# Write a blueprint\n" in text
+    assert "Templates" not in text
+    for link in (
+        "https://github.com/ravisharma5/otel-telco-blueprints/issues/new",
+        "https://github.com/ravisharma5/otel-telco-blueprints/pulls",
+        "framework/style-guide.md",
+        "framework/review-checklist.md",
+    ):
+        assert link in text, link
+
+
+def test_contributor_link_in_footer_config():
+    assert 'href="/otel-telco-blueprints/templates/">Write a blueprint</a>' in CONFIG["copyright"]
+
+
+def test_readme_links_contributor_page():
+    text = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    assert "[Write a blueprint](https://ravisharma5.github.io/otel-telco-blueprints/templates/)" in text
 
 
 def test_templates_page_renders(site_copy):
@@ -556,7 +580,7 @@ def test_palette_follows_system():
 
 def test_nav_matches_explorer_header():
     titles = [next(iter(item)) for item in CONFIG["nav"]]
-    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework", "Templates"]
+    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework"]
     from urllib.parse import urlsplit
 
     root_path = urlsplit(CONFIG["site_url"]).path

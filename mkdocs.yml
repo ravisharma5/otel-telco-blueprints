@@ -11,7 +11,11 @@ site_dir: site
 strict: true
 hooks:
   - tools/site/hooks.py
-copyright: Docs CC BY 4.0, code Apache-2.0
+# The footer carries the contributor page link; absolute because every page
+# depth shares this line (the merge link check resolves it).
+copyright: >-
+  Docs CC BY 4.0, code Apache-2.0 ·
+  <a href="/otel-telco-blueprints/templates/">Write a blueprint</a>
 theme:
   name: material
   # Light and dark follow the system setting, like brand/tokens.css (no toggle).
@@ -77,6 +81,7 @@ validation:
 not_in_nav: |
   /platform/*/sources/
   /catalog/*/*/sources/
+  /templates.md
 nav:
   # Same order as the explorer header; Use cases is the explorer at the site root.
   - Use cases: /otel-telco-blueprints/
@@ -110,4 +115,3 @@ nav:
       - Glossary: framework/glossary.md
       - Style guide: framework/style-guide.md
       - Review checklist: framework/review-checklist.md
-  - Templates: templates.md
