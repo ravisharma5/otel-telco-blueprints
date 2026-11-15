@@ -109,9 +109,14 @@ def test_triggers():
 
 
 def test_build_uses_locked_sync_and_make_site():
-    runs = [s.get("run", "").strip() for s in WORKFLOW["jobs"]["build"]["steps"]]
+    steps = WORKFLOW["jobs"]["build"]["steps"]
+    runs = [s.get("run", "").strip() for s in steps]
     assert any("uv sync" in r and "--locked" in r for r in runs)
-    assert "make site" in runs
+    # make test-site builds the site (its prerequisite) and runs the built-output
+    # checks; both test runs come before the upload so a failure stops the deploy.
+    assert "make test" in runs and "make test-site" in runs
+    upload = next(i for i, s in enumerate(steps) if s.get("uses", "").startswith("actions/upload-pages-artifact@"))
+    assert runs.index("make test") < upload and runs.index("make test-site") < upload
     uv_steps = [
         s
         for s in WORKFLOW["jobs"]["build"]["steps"]
