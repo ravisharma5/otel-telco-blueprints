@@ -44,6 +44,7 @@ export interface FitEntry {
   total_gb: number;
   pct: number;
   band: 'fits' | 'tight' | 'too-tight';
+  message_id: 'fits' | 'tight' | 'too-tight' | 'too-tight-after-fp8';
 }
 
 export interface Flag {

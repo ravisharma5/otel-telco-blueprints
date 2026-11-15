@@ -226,6 +226,16 @@ def choose_variants(roles, setup: dict, variants, bands: dict):
             break
         current[candidate] = _fp8_variant(candidate, variants)
         swapped.add(candidate)
+    fp8_arch = acc["arch"] in FP8_ARCHES
+    for f in fit:
+        fp8_left = fp8_arch and any(
+            (build := _fp8_variant(s["role"], variants)) and build["id"] != current[s["role"]]["id"]
+            for s in f["slots"]
+        )
+        # A too-tight GPU suggests FP8 only while one of its slots still has an unused build.
+        f["message_id"] = (
+            ("too-tight" if fp8_left else "too-tight-after-fp8") if f["band"] == "too-tight" else f["band"]
+        )
     return [current[r] for r in roles], fit
 
 
