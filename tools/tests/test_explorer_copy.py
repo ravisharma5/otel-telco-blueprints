@@ -185,3 +185,89 @@ def test_copy_never_types_a_setup():
         if needle in text.lower()
     ]
     assert hits == []
+
+
+# ---------- text the explorer shows from data, not copy.md ----------
+# Recipe card fields and placement notes (front matter, which Vale skips), and
+# flag whys and option text from data/serving/*.yaml (some shown nowhere else)
+# reach the page through explorer.json, so they get the same checks as copy.md.
+
+
+def _exported_strings(repo_root=REPO_ROOT):
+    """(key path, string) for every string the exporter emits, minus URLs."""
+    from tools.site.export_explorer import build_explorer_data
+
+    for path, text in _strings(build_explorer_data(repo_root)):
+        if text.startswith("https://") or path[-1] in ("url", "model_card", "red_hat_build", "recipe_url"):
+            continue
+        yield path, text
+
+
+def _exported_prose(repo_root=REPO_ROOT):
+    """Unique prose strings shown on use-case pages, in first-seen order."""
+    from tools.site.export_explorer import build_explorer_data
+
+    seen = {}
+    for uc in build_explorer_data(repo_root)["use_cases"]:
+        for value in uc["card"].values():
+            for text in value if isinstance(value, list) else [value]:
+                seen.setdefault(text, None)
+        for by_batch in uc["states"].values():
+            for state in by_batch.values():
+                for tier in state["tiers"]:
+                    seen.setdefault(tier["note"], None)
+                for flag in state["flags"]:
+                    seen.setdefault(flag["why"], None)
+                for option in state["options"]:
+                    for key in ("what", "check", "reason_text"):
+                        seen.setdefault(option[key], None)
+                    for text in option["set"] + option["limits"]:
+                        seen.setdefault(text, None)
+    return [t for t in seen if t]
+
+
+def test_no_banned_terms_in_exported_text():
+    hits = [f"{'.'.join(path[-4:])}: {hit}" for path, text in _exported_strings() for hit in _banned_hits(text)]
+    assert hits == []
+
+
+def test_exported_text_check_bites(tmp_path):
+    import shutil
+
+    for name in ("data", "catalog"):
+        shutil.copytree(REPO_ROOT / name, tmp_path / name)
+    dest = tmp_path / "platform/serving-routing-placement"
+    dest.mkdir(parents=True)
+    shutil.copy(REPO_ROOT / "platform/serving-routing-placement/README.md", dest / "README.md")
+    page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
+    text = page.read_text(encoding="utf-8")
+    page.write_text(text.replace('  risk: "', '  risk: "A validated, seamless flow. ', 1), encoding="utf-8")
+    hits = [hit for _, t in _exported_strings(tmp_path) for hit in _banned_hits(t)]
+    assert "validated" in hits and "seamless" in hits
+
+
+def test_exported_prose_passes_vale():
+    # The same Vale config as repo prose; errors and warnings fail, as in make lint-prose.
+    import json
+    import subprocess
+
+    from tools.tests.conftest import vale_or_skip
+
+    vale = vale_or_skip()
+    body = "# Explorer text from data\n\n" + "\n\n".join(_exported_prose()) + "\n"
+    proc = subprocess.run(
+        [vale, "--config", ".vale.ini", "--ext=.md", "--output=JSON"],
+        cwd=REPO_ROOT,
+        input=body,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode in (0, 1), proc.stderr
+    alerts = [a for found in json.loads(proc.stdout or "{}").values() for a in found]
+    lines = body.splitlines()
+    bad = [
+        f"{a['Severity']} {a['Check']}: {lines[a['Line'] - 1][:80]}"
+        for a in alerts
+        if a["Severity"] in ("error", "warning")
+    ]
+    assert bad == []
