@@ -28,7 +28,8 @@ buttons:
   show_all_options: "Show all {count} options"
 notes:
   external: (external site)
-  no_js: Turn on JavaScript to change the setup. This page shows a regional site with one 96 GB GPU, with batch work sharing the GPUs.
+  # The default setup is named by use_case.setup.no_js_setup, filled from setups.yaml.
+  no_js: Turn on JavaScript to change the setup.
   no_js_link: It may not match the setup in a shared link.
 footer:
   notes:

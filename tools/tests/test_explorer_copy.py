@@ -168,3 +168,20 @@ def test_no_home_prose_in_astro_files():
         text = astro.read_text(encoding="utf-8")
         for sample in samples:
             assert sample not in text, f"{astro.relative_to(REPO_ROOT)} hard-codes: {sample}"
+
+
+def test_copy_never_types_a_setup():
+    # The default setup comes from data/serving/setups.yaml through placeholders, so
+    # no copy string may type a setup's label or GPU memory size and drift from it.
+    setups = yaml.safe_load((REPO_ROOT / "data/serving/setups.yaml").read_text(encoding="utf-8"))["setups"]
+    needles = set()
+    for setup in setups:
+        needles.add(setup["label"].lower())
+        needles.add(f"{setup['accelerators']['memory_per_gpu_gb']} gb")
+    hits = [
+        f"{'.'.join(path)}: {needle}"
+        for path, text in _strings(_copy())
+        for needle in needles
+        if needle in text.lower()
+    ]
+    assert hits == []
