@@ -1,0 +1,14 @@
+---
+// External source links for a claim, labelled as in the serving page Sources table.
+import { frontmatter as copy } from '../content/copy.md';
+import type { Source } from '../lib/data';
+
+interface Props {
+  sources: Source[];
+}
+
+const { sources } = Astro.props;
+---
+{sources.map((source, i) => (
+  <>{i > 0 && copy.use_case.sources.separator}<a class="source-link" href={source.url}>{source.label}<span aria-hidden="true"> ↗</span><span class="visually-hidden"> {copy.notes.external}</span></a></>
+))}

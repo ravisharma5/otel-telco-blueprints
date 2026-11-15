@@ -208,6 +208,7 @@ use_case:
       value: Value
       why: Why
     scope_setup: For this setup
+    sources: "Sources:"
     no_value: No value
   thresholds:
     caption: Thresholds and who sets them
@@ -245,6 +246,11 @@ use_case:
       check: Check
       limits: Limits
       related: "Related recipe: {title} ({source})"
+    # Each option's sources sit in its row of the serving page's options table;
+    # listing them in every setup state would make the page too heavy.
+    sources_lead: "Sources for each option:"
+    sources_link: the options table on the serving page
+    sources_path: platform/serving-routing-placement/#advanced-serving-options
     tag_join: " · "
     # Added after a "Helps here" reason when the setup stays tight with the builds swapped in.
     fit_notes:
@@ -265,6 +271,9 @@ use_case:
     # The option helps this use case only through slots that run at another tier.
     helps-at-core: For this use case, it helps only the slots that run at the core.
     helps-at-regional: For this use case, it helps only the slots that run at the regional site.
+  # Source links read their labels from the serving page Sources table.
+  sources:
+    separator: " · "
   needs:
     headings:
       models: Models

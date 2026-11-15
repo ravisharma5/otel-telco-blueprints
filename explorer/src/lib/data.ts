@@ -47,11 +47,17 @@ export interface FitEntry {
   message_id: 'fits' | 'tight' | 'too-tight' | 'too-tight-after-fp8';
 }
 
+export interface Source {
+  url: string;
+  label: string;
+}
+
 export interface Flag {
   setting: string;
   value: string | null;
   why: string;
   scope: string;
+  sources: Source[];
 }
 
 export interface Variant {
@@ -82,6 +88,7 @@ export interface Option {
   check: string;
   limits: string[];
   related: Related[];
+  sources: Source[];
   excluded_slots: string[];
   state: 'helps' | 'little' | 'not-applicable';
   reason_id: string | null;

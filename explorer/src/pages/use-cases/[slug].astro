@@ -109,6 +109,10 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
         ))}
         <h3>{sections.headings.advanced}</h3>
         <p class="sub">{copy.use_case.advanced.notes.sub}</p>
+        <p class="note option-sources">
+          {copy.use_case.advanced.sources_lead}{' '}
+          <a href={import.meta.env.BASE_URL + copy.use_case.advanced.sources_path}>{copy.use_case.advanced.sources_link}</a>
+        </p>
         {states.map(({ key, state }, i) => (
           <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
             <button
@@ -206,6 +210,12 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
     font-family: var(--font-mono); font-size: var(--text-label);
     background: var(--color-surface-2); padding: 2px 4px; border-radius: var(--radius-sm);
     overflow-wrap: anywhere;
+  }
+  /* Key settings source lines; global so KeySettings carries no scoped-style attributes. */
+  :global(.settings-sources) {
+    display: block; margin-top: var(--space-xs);
+    color: var(--color-text-muted); font-size: var(--text-label); font-weight: var(--weight-regular);
+    line-height: var(--leading-label);
   }
   :global(.note) { margin: var(--space-md) 0 0; color: var(--color-text-muted); font-size: var(--text-label); line-height: var(--leading-label); }
   :global(.muted) { color: var(--color-text-muted); }

@@ -1,12 +1,17 @@
 # Source of truth for the serving page "Key flags per slot" fence, rendered by
 # tools/site/render_serving.py (`make render`). Recipes copy these lines
 # verbatim, so the render hints (continue, trailing_comment, pad_to) keep the
-# fence byte for byte. Each flag carries a one-sentence why.
+# fence byte for byte. Each flag carries a one-sentence why, and each block
+# lists the sources of its whys; every source is a Source link in the serving
+# page Sources table, and the explorer links them next to the flags.
 
 per_slot:
   - id: llm-31b
     comment: "LLM 31B (pin the revision; text-only; tool calling)"
     roles: [llm-large]
+    sources:
+      - https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT
+      - https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html
     lines:
       - args:
           - flag: "--revision"
@@ -31,6 +36,8 @@ per_slot:
   - id: decision
     comment: "Decision (card recipe)"
     roles: [decision]
+    sources:
+      - https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit
     lines:
       - args:
           - flag: "--revision"
@@ -51,6 +58,8 @@ per_slot:
   - id: classification-reranker
     comment: "Classification (Gemma3TextForSequenceClassification) and Reranker (num_labels=1)"
     roles: [classification, reranker]
+    sources:
+      - https://docs.vllm.ai/en/latest/models/pooling_models/
     lines:
       - args:
           - flag: "--runner"
@@ -65,6 +74,8 @@ per_slot:
   - id: embedding
     comment: "Embedding"
     roles: [embedding]
+    sources:
+      - https://docs.vllm.ai/en/latest/models/pooling_models/
     lines:
       - args:
           - flag: "--runner"
@@ -79,6 +90,9 @@ per_slot:
   - id: static-lora
     comment: "Static LoRA only (never runtime hot-load)"
     roles: [llm-large, llm-small]
+    sources:
+      - https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk
+      - https://docs.vllm.ai/en/latest/configuration/engine_args/
     lines:
       - args:
           - flag: "--enable-lora"

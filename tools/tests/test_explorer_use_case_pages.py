@@ -402,6 +402,55 @@ def test_key_settings_match_state(explorer_dist, data, copy):
                     assert _squash(_plain(flag["value"])) in text
 
 
+def _links(node):
+    return [(a.attrs.get("href"), a.text()) for a in node.find_all(lambda n: n.tag == "a")]
+
+
+@pytest.mark.site_output
+def test_key_settings_link_their_sources(explorer_dist, data, copy):
+    # Each per-setup row links its source; each slot block links its sources on its
+    # group row. Link text is the label of that source's row in the serving page Sources table.
+    external = copy["notes"]["external"]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, _, state in _states(uc):
+            table = _in_parts(tree, key, lambda n: n.tag == "table" and n.has_class("settings-table"))[0]
+            rows = table.find_all(lambda n: n.tag == "tr" and "data-flag" in n.attrs)
+            for row, flag in zip(rows, state["flags"]):
+                if flag["scope"] != "setup":
+                    continue
+                got = [(href, _squash(text)) for href, text in _links(row)]
+                want = [(s["url"], _squash(f"{s['label']} ↗ {external}")) for s in flag["sources"]]
+                assert got == want, (uc["slug"], key, flag["setting"])
+            groups = table.find_all(lambda n: n.tag == "th" and n.attrs.get("scope") == "rowgroup")
+            slot_flags = {}
+            for flag in state["flags"]:
+                if flag["scope"] != "setup":
+                    slot_flags.setdefault(flag["scope"], flag["sources"])
+            slot_groups = [g for g in groups if g.text().split(copy["use_case"]["settings"]["sources"])[0].strip() in slot_flags]
+            assert len(slot_groups) == len(slot_flags), key
+            for group in slot_groups:
+                scope = group.text().split(copy["use_case"]["settings"]["sources"])[0].strip()
+                assert [href for href, _ in _links(group)] == [s["url"] for s in slot_flags[scope]], (key, scope)
+
+
+@pytest.mark.site_output
+def test_option_sources_link_resolves(explorer_dist, site_dir, copy):
+    # The options' sources note links the serving page's options table, which lists
+    # every option's sources; the anchor must exist in the built docs.
+    adv = copy["use_case"]["advanced"]
+    path, _, anchor = adv["sources_path"].partition("#")
+    page = site_dir / path / "index.html"
+    assert page.is_file(), page
+    assert f'id="{anchor}"' in page.read_text(encoding="utf-8")
+    for html in (explorer_dist / "use-cases").rglob("index.html"):
+        tree = _Tree()
+        tree.feed(html.read_text(encoding="utf-8"))
+        notes = tree.root.find_all(lambda n: n.has_class("option-sources"))
+        assert len(notes) == 1 and _state_of(notes[0]) is None, html
+        assert _links(notes[0]) == [(BASE + adv["sources_path"], adv["sources_link"])]
+
+
 @pytest.mark.site_output
 def test_thresholds_have_no_values(explorer_dist, data, copy):
     th_copy = copy["use_case"]["thresholds"]

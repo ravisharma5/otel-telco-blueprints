@@ -2,6 +2,7 @@
 // Key settings for one setup state. Rows keep the exporter's order; a group row
 // names each scope (the setup, or the slot block the flags belong to).
 import Rich from './Rich.astro';
+import SourceLinks from './SourceLinks.astro';
 import { frontmatter as copy } from '../content/copy.md';
 import type { Flag } from '../lib/data';
 
@@ -26,15 +27,26 @@ for (const flag of flags) {
   {groups.map((group) => (
     <tbody>
       <tr class="scope-row">
-        <th scope="rowgroup" colspan="3">{group.scope === 'setup' ? s.scope_setup : group.scope}</th>
+        <th scope="rowgroup" colspan="3">
+          {group.scope === 'setup' ? s.scope_setup : group.scope}
+          {group.scope !== 'setup' && (
+            <span class="settings-sources">{s.sources} <SourceLinks sources={group.flags[0].sources} /></span>
+          )}
+        </th>
       </tr>
       {group.flags.map((flag) => (
         <tr data-flag>
           <th scope="row">{flag.setting.startsWith('-') ? <code><Rich text={flag.setting} /></code> : <Rich text={flag.setting} />}</th>
           <td>{flag.value ? <code><Rich text={flag.value} /></code> : <span class="muted">{s.no_value}</span>}</td>
-          <td><Rich text={flag.why} /></td>
+          <td>
+            <Rich text={flag.why} />
+            {group.scope === 'setup' && (
+              <span class="settings-sources">{s.sources} <SourceLinks sources={flag.sources} /></span>
+            )}
+          </td>
         </tr>
       ))}
     </tbody>
   ))}
 </table>
+

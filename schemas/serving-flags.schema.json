@@ -52,10 +52,17 @@
     "block": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "comment", "roles", "lines"],
+      "required": ["id", "comment", "roles", "sources", "lines"],
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
         "comment": { "type": "string", "minLength": 1 },
+        "sources": {
+          "description": "Sources of the block's whys; each is a Source link in the serving page Sources table.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^https://" }
+        },
         "roles": {
           "type": "array",
           "minItems": 1,

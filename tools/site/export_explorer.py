@@ -32,9 +32,11 @@ from markdown_it import MarkdownIt
 
 from tools.bplint.loader import load_yaml
 from tools.bplint.markdown import parse_doc
+from tools.site.render_serving import _source_labels
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "explorer/src/generated/explorer.json"
+SERVING_PAGE = "platform/serving-routing-placement/README.md"
 
 TIERS = ("far-edge", "regional", "core")
 BATCH_VALUES = ("yes", "no")
@@ -445,17 +447,38 @@ def _setup_row_applies(row: dict, setup: dict, batch: str, roles: list[str], swa
     )
 
 
-def _flags(flags: dict, setup: dict, batch: str, roles: list[str], swapped: bool = False) -> list[dict]:
+def _sources(urls: list[str], labels: dict[str, str], where: str) -> list[dict]:
+    """URLs as {url, label}, each label read from the serving page Sources table."""
+    missing = [u for u in urls if u not in labels]
+    if missing:
+        raise SystemExit(f"{where}: source missing from the {SERVING_PAGE} Sources table: {', '.join(missing)}")
+    return [{"url": u, "label": labels[u]} for u in urls]
+
+
+def _flags(flags: dict, setup: dict, batch: str, roles: list[str], swapped: bool, labels: dict) -> list[dict]:
     out = [
-        {"setting": r["setting"], "value": r["value"], "why": r["why"], "scope": "setup"}
+        {
+            "setting": r["setting"],
+            "value": r["value"],
+            "why": r["why"],
+            "scope": "setup",
+            "sources": _sources([r["source"]], labels, f"data/serving/flags.yaml: per_setup {r['setting']}"),
+        }
         for r in flags["per_setup"]
         if _setup_row_applies(r, setup, batch, roles, swapped)
     ]
     for block in flags["per_slot"]:
         if set(roles) & set(block["roles"]):
+            sources = _sources(block["sources"], labels, f"data/serving/flags.yaml: per_slot {block['id']}")
             for line in block["lines"]:
                 out += [
-                    {"setting": a["flag"], "value": a["value"], "why": a["why"], "scope": block["comment"]}
+                    {
+                        "setting": a["flag"],
+                        "value": a["value"],
+                        "why": a["why"],
+                        "scope": block["comment"],
+                        "sources": sources,
+                    }
                     for a in line["args"]
                 ]
     return out
@@ -497,12 +520,13 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
     options = []
     for opt in data["options"]:
         row = {"id": opt["id"], **{k: opt.get(k) for k in OPTION_TEXT_KEYS}}
+        row["sources"] = _sources(opt["sources"], data["source_labels"], f"data/serving/options.yaml: {opt['id']}")
         row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit), placement, swapped_roles))
         options.append(row)
     return {
         "tiers": _tier_cards(placement, setup),
         "fit": fit,
-        "flags": _flags(data["flags"], setup, batch, roles, swapped),
+        "flags": _flags(data["flags"], setup, batch, roles, swapped, data["source_labels"]),
         "variants": variants,
         "other_tier_variants": other_tier_variants,
         "quantized_check": any(v["operator_made"] for v in variants),
@@ -597,7 +621,11 @@ def _serving_data(repo_root: Path) -> dict:
     ids = [o["id"] for o in options]
     if len(set(ids)) != len(ids):
         raise SystemExit("data/serving/options.yaml: option ids must be unique")
+    page = repo_root / SERVING_PAGE
+    if not page.is_file():
+        raise SystemExit(f"{SERVING_PAGE}: file not found")
     return {
+        "source_labels": _source_labels(page.read_text(encoding="utf-8")),
         "setups_doc": setups,
         "setups": setups["setups"],
         "bands": setups["fit_bands"],

@@ -403,6 +403,32 @@ def test_setup_rows_follow_setup_and_batch(data):
                 assert (f["setting"], f["value"], f["why"]) in allowed, (uc["id"], setup["id"], batch)
 
 
+def _serving_source_labels():
+    from tools.site.render_serving import _source_labels
+
+    return _source_labels(SERVING_PAGE.read_text(encoding="utf-8"))
+
+
+def test_every_setting_and_option_carries_its_sources(data):
+    # Every Key settings row and option card the explorer shows names its sources,
+    # with the label of that source's row in the serving page Sources table.
+    labels = _serving_source_labels()
+    flags = load("flags.yaml")
+    slot_sources = {b["comment"]: b["sources"] for b in flags["per_slot"]}
+    by_id = {o["id"]: o for o in OPTIONS}
+    for uc, setup, batch, state in all_states(data):
+        for f in state["flags"]:
+            assert f["sources"], (uc["id"], setup["id"], f["setting"])
+            for src in f["sources"]:
+                assert src["label"] == labels[src["url"]], src
+            if f["scope"] != "setup":
+                assert [s["url"] for s in f["sources"]] == slot_sources[f["scope"]]
+        for o in state["options"]:
+            assert [s["url"] for s in o["sources"]] == by_id[o["id"]]["sources"]
+            for src in o["sources"]:
+                assert src["label"] == labels[src["url"]], src
+
+
 # --- options ----------------------------------------------------------------
 
 
@@ -626,10 +652,18 @@ def test_tables_from_recipe(data):
         assert all("](" not in c for r in uc["platform_rows"] + uc["approvals"] for c in r), "markdown links left in cells"
 
 
+def _copy_serving_page(tmp_path):
+    """The exporter reads source labels from the serving page's Sources table."""
+    dest = tmp_path / "platform/serving-routing-placement"
+    dest.mkdir(parents=True)
+    shutil.copy(SERVING_PAGE, dest / "README.md")
+
+
 def test_table_headers_shared(tmp_path):
     assert ex.EXPORTER_TABLE_HEADERS == CARD_TABLE_HEADERS
     shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
     shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
     page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
     page.write_text(page.read_text(encoding="utf-8").replace("| Who sets it |", "| Owner |", 1), encoding="utf-8")
     with pytest.raises(SystemExit) as exc:
@@ -641,6 +675,7 @@ def test_table_headers_shared(tmp_path):
 def test_missing_variant_fails(tmp_path):
     shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
     shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
     path = tmp_path / "data/serving/slot-variants.yaml"
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
     doc["variants"] = [v for v in doc["variants"] if v["role"] != "reranker"]
@@ -663,6 +698,7 @@ def test_published_only_and_unique_slugs(data):
 def test_unpublished_page_skipped(tmp_path):
     shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
     shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
     page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
     text = page.read_text(encoding="utf-8")
     start = text.index("\ncard:")
