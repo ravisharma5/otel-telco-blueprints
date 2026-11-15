@@ -95,6 +95,7 @@ export interface State {
   fit: FitEntry[];
   flags: Flag[];
   variants: Variant[];
+  other_tier_variants: Variant[];
   quantized_check: boolean;
   options: Option[];
   options_worth_testing: number;

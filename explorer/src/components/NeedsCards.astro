@@ -14,6 +14,19 @@ const n = copy.use_case.needs;
 const m = copy.use_case.models;
 const precision = m.precision as Record<string, string>;
 const defaultKey = stateKey(defaults.setup, defaults.batch);
+const tierLabels = copy.home.gallery.filters.tiers;
+const otherTier = m.other_tier as Record<string, string>;
+// The setup's own tier first, then each other tier the use case runs in.
+const groups = (own: Variant[], others: Variant[]) => {
+  const out: { tier: string; yours: boolean; rows: Variant[] }[] = [];
+  if (own.length) out.push({ tier: own[0].tier, yours: true, rows: own });
+  for (const v of others) {
+    const last = out[out.length - 1];
+    if (last && !last.yours && last.tier === v.tier) last.rows.push(v);
+    else out.push({ tier: v.tier, yours: false, rows: [v] });
+  }
+  return out;
+};
 const model = (v: Variant) =>
   v.operator_made
     ? fill(m.operator_made, { precision: precision[v.precision] ?? v.precision, checkpoint: v.checkpoint })
@@ -27,11 +40,20 @@ const model = (v: Variant) =>
         <table class="mini">
           <caption class="visually-hidden">{n.headings.models}</caption>
           <thead><tr><th scope="col">{n.columns.slot}</th><th scope="col">{n.columns.model}</th></tr></thead>
-          <tbody>
-            {state.variants.map((v) => (
-              <tr><th scope="row">{v.slot_name}</th><td>{model(v)}</td></tr>
-            ))}
-          </tbody>
+          {groups(state.variants, state.other_tier_variants).map((group) => (
+            <tbody>
+              <tr class="scope-row">
+                <th scope="rowgroup" colspan="2">
+                  {tierLabels[group.tier as keyof typeof tierLabels]}
+                  {group.yours && <span class="tag">{copy.use_case.tiers.your_setup}</span>}
+                  {!group.yours && <span class="group-note">{otherTier[group.tier]}</span>}
+                </th>
+              </tr>
+              {group.rows.map((v) => (
+                <tr><th scope="row">{v.slot_name}</th><td>{model(v)}</td></tr>
+              ))}
+            </tbody>
+          ))}
         </table>
       </div>
     ))}
@@ -75,6 +97,13 @@ const model = (v: Variant) =>
   .need-card.wide { grid-column: 1 / -1; }
   .need-card h3 { margin: 0 0 var(--space-md); }
   .models-part[hidden] { display: none; }
+  .tag {
+    padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm);
+    background: var(--color-surface-2); color: var(--color-text);
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  .tag { margin-left: var(--space-sm); }
+  .group-note { display: block; margin-top: var(--space-xs); color: var(--color-text-muted); font-weight: var(--weight-regular); }
   @media (max-width: 1023px) {
     .needs-grid { grid-template-columns: 1fr; }
     .need-card { padding: var(--space-md); }

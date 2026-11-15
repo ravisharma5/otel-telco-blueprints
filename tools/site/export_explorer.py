@@ -405,6 +405,13 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
     roles = list((placement.get(setup["tier"]) or {}).get("runs") or [])
     chosen, fit = choose_variants(roles, setup, data["variants"], data["bands"])
     variants = _variant_rows(chosen, setup["tier"])
+    # Slots at the other tiers keep their starting build, so Models shows every slot.
+    other_tier_variants = []
+    for tier in TIERS:
+        if tier == setup["tier"]:
+            continue
+        runs = list((placement.get(tier) or {}).get("runs") or [])
+        other_tier_variants += _variant_rows([_start_variant(r, data["variants"]) for r in runs], tier)
     swapped = any(v["operator_made"] for v in variants)
     options = []
     for opt in data["options"]:
@@ -416,6 +423,7 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
         "fit": fit,
         "flags": _flags(data["flags"], setup, batch, roles),
         "variants": variants,
+        "other_tier_variants": other_tier_variants,
         "quantized_check": any(v["operator_made"] for v in variants),
         "options": options,
         "options_worth_testing": sum(1 for o in options if o["state"] == "helps"),

@@ -257,6 +257,11 @@ use_case:
       approver: Who approves
   models:
     published: "{checkpoint}, pinned by revision"
+    # Under the tier heading for slots that run at another tier than the chosen setup.
+    other_tier:
+      far-edge: Sized for the far-edge site's own hardware.
+      regional: Sized for the regional site's own GPUs. Pick a regional setup to see the builds that fit.
+      core: Runs at the core on the published builds. Pick a core setup to see its settings.
     # {precision} is FP8, or W4A16 for an Ampere build.
     operator_made: "Operator-made {precision} build of {checkpoint}. Build it with LLM Compressor and register it, pinned by digest."
     precision:
