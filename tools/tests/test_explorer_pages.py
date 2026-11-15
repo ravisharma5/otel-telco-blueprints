@@ -183,6 +183,32 @@ def test_header_nav(explorer_dist):
     assert [href for href, _ in links] == [BASE + p for p in NAV_PATHS]
 
 
+JS_MARKER = "document.documentElement.classList.add('js')"
+
+
+@pytest.mark.site_output
+def test_phone_nav_reachable_without_js(explorer_dist):
+    # The header nav collapses behind the Menu button only once a script has
+    # marked the page with html.js, so without JavaScript the links stay visible.
+    for html in explorer_dist.rglob("*.html"):
+        text = html.read_text(encoding="utf-8")
+        if 'id="site-nav"' not in text:
+            continue
+        head = text.split("</head>", 1)[0]
+        assert JS_MARKER in head, f"{html.relative_to(explorer_dist)}: no js marker in head"
+    css = "".join(p.read_text(encoding="utf-8") for p in explorer_dist.rglob("*.css"))
+    hiding = []
+    for rule in css.replace("\n", "").split("}"):
+        selector, _, body = rule.rpartition("{")
+        selector = selector.split("{")[-1]
+        if re.search(r"display:\s*none", body):
+            for part in selector.split(","):
+                if re.search(r"\.(?:site-nav)(?![\w-])(?!\S*\.is-open)", part) and " ul" not in part:
+                    hiding.append(part.strip())
+    assert hiding, "expected a rule that collapses the nav"
+    assert all(part.startswith(".js ") for part in hiding), hiding
+
+
 @pytest.mark.site_output
 def test_no_third_party_resources(explorer_dist):
     hits = []
