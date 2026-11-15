@@ -69,7 +69,14 @@ function initSetup(): void {
 
   form.hidden = false;
   show(setup, batch);
-  if (notice) notice.hidden = setupOk && batchOk;
+  if (notice) {
+    // Name which value was bad; each prerendered text names what the page shows.
+    const which = !setupOk && !batchOk ? 'both' : !setupOk ? 'setup' : 'batch';
+    for (const text of Array.from(notice.querySelectorAll<HTMLElement>('[data-invalid]'))) {
+      text.hidden = text.dataset.invalid !== which;
+    }
+    notice.hidden = setupOk && batchOk;
+  }
 
   select.addEventListener('change', onChange);
   for (const radio of radios) radio.addEventListener('change', onChange);

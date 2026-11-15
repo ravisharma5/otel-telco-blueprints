@@ -262,7 +262,17 @@ def test_rail_contents(explorer_dist, data, copy):
         notice = rail.find_all(lambda n: "data-invalid-notice" in n.attrs)
         assert len(notice) == 1
         assert notice[0].attrs.get("role") == "status" and "hidden" in notice[0].attrs
-        assert setup_copy["notes"]["invalid"] in notice[0].text()
+        default_setup = _setup(data, data["default"]["setup"])
+        default_batch = setup_copy["batch_sentence"][data["default"]["batch"]]
+        texts = notice[0].find_all(lambda n: "data-invalid" in n.attrs)
+        assert sorted(t.attrs["data-invalid"] for t in texts) == ["batch", "both", "setup"]
+        for t in texts:
+            assert "hidden" in t.attrs
+            want = setup_copy["notes"][f"invalid_{t.attrs['data-invalid']}"]
+            want = want.replace("{setup}", default_setup["label"]).replace("{batch}", default_batch)
+            assert t.text() == want
+            assert "{" not in t.text()
+        assert default_setup["label"] in texts[0].text() or default_batch in texts[0].text()
         # On this page.
         navs = rail.find_all(lambda n: n.tag == "nav" and n.attrs.get("aria-label") == rail_copy["headings"]["nav"])
         assert len(navs) == 1

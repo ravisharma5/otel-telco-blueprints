@@ -128,7 +128,11 @@ use_case:
       batch: Does batch work share the GPUs?
     notes:
       ampere: On Ampere cards, use W4A16 builds instead of FP8.
-      invalid: That setup isn't in the list, so this page shows a regional site with one 96 GB GPU.
+      # Link values that fail the check. {setup} is the default setup's label and
+      # {batch} its batch_sentence, both filled at build time.
+      invalid_setup: "The setup in the link isn't in the list, so this page shows the default: {setup}."
+      invalid_batch: "The batch value in the link isn't valid, so this page shows the default. {batch}"
+      invalid_both: "The setup and batch values in the link aren't valid, so this page shows the defaults: {setup}. {batch}"
       invalid_wide: Pick your setup on the left.
       invalid_narrow: Pick your setup above.
     batch_options:

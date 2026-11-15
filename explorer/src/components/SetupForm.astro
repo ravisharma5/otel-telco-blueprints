@@ -13,10 +13,18 @@ const { useCase } = Astro.props;
 const s = copy.use_case.setup;
 const defaultKey = stateKey(defaults.setup, defaults.batch);
 const defaultSetup = setups.find((setup) => setup.id === defaults.setup);
-const words = copy.home.gallery.counts;
+const defaultBatchSentence = s.batch_sentence[defaults.batch as 'yes' | 'no'];
+// One notice per kind of bad link value; the script shows the one that applies.
+const invalidNotes = (['setup', 'batch', 'both'] as const).map((which) => ({
+  which,
+  text: fill(s.notes[`invalid_${which}`], { setup: defaultSetup?.label ?? '', batch: defaultBatchSentence }),
+}));
 ---
 <p class="invalid-notice" role="status" data-invalid-notice hidden>
-  {s.notes.invalid} <span class="wide-only">{s.notes.invalid_wide}</span><span class="narrow-only">{s.notes.invalid_narrow}</span>
+  {invalidNotes.map(({ which, text }) => (
+    <span class="invalid-text" data-invalid={which} hidden>{text} </span>
+  ))}
+  <span class="wide-only">{s.notes.invalid_wide}</span><span class="narrow-only">{s.notes.invalid_narrow}</span>
 </p>
 <form
   class="setup-form"
@@ -50,7 +58,7 @@ const words = copy.home.gallery.counts;
   </fieldset>
 </form>
 <noscript>
-  <p class="no-js-setup">{fill(s.no_js_setup, { setup: defaultSetup?.label ?? '' })} {s.batch_sentence[defaults.batch as 'yes' | 'no']}</p>
+  <p class="no-js-setup">{fill(s.no_js_setup, { setup: defaultSetup?.label ?? '' })} {defaultBatchSentence}</p>
   <p class="helper">{copy.notes.no_js}</p>
   <p class="helper">{copy.notes.no_js_link}</p>
 </noscript>
@@ -65,7 +73,7 @@ const words = copy.home.gallery.counts;
 <p class="visually-hidden" aria-live="polite" data-announcer></p>
 
 <style>
-  .setup-form[hidden], .invalid-notice[hidden], .helper[hidden], .options-count[hidden] { display: none; }
+  .setup-form[hidden], .invalid-notice[hidden], .invalid-text[hidden], .helper[hidden], .options-count[hidden] { display: none; }
   .setup-form { display: flex; flex-direction: column; gap: var(--space-md); }
   .field { display: flex; flex-direction: column; gap: var(--space-sm); }
   label[for], legend {
