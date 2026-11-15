@@ -29,3 +29,17 @@ def test_readme_states_license_split():
 
 def test_vendored_vale_style_keeps_mit_license():
     assert (REPO_ROOT / ".vale/styles/Google/LICENSE").is_file()
+
+
+def test_vendored_mermaid_license():
+    import hashlib
+    import re
+
+    folder = REPO_ROOT / "site-src/brand/vendor/mermaid"
+    assert "MIT" in (folder / "LICENSE").read_text(encoding="utf-8")
+    prov = (folder / "PROVENANCE.txt").read_text(encoding="utf-8")
+    data = (folder / "mermaid.min.js").read_bytes()
+    assert "mermaid" in prov and "11.17.2" in prov
+    assert re.search(r"^integrity: sha512-[A-Za-z0-9+/=]+$", prov, re.M)
+    assert f"sha256: {hashlib.sha256(data).hexdigest()}" in prov
+    assert re.search(rf"^size_bytes: {len(data)}$", prov, re.M)

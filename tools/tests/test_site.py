@@ -526,6 +526,16 @@ def test_no_mkdocs_home(site_copy):
     assert not (site_copy / "out/index.html").exists()
 
 
+def test_material_fonts_off():
+    assert CONFIG["theme"].get("font") is False
+
+
+def test_mermaid_vendored():
+    path = "brand/vendor/mermaid/mermaid.min.js"
+    assert path in (CONFIG.get("extra_javascript") or [])
+    assert (REPO_ROOT / "site-src" / path).is_file()
+
+
 def test_recipes_overview_title():
     text = (REPO_ROOT / "site-src/catalog/index.md").read_text(encoding="utf-8")
     assert 'title: "Recipes"' in text

@@ -4,7 +4,8 @@
 # recipes/). Every page needs a nav line. The explorer owns the home page.
 site_name: OTel Telco Production Blueprints
 site_url: https://ravisharma5.github.io/otel-telco-blueprints/
-repo_url: https://github.com/ravisharma5/otel-telco-blueprints
+# No repo_url: Material's repo widget fetches stats from api.github.com. The
+# GitHub link sits in extra.social instead (a plain link, no request).
 docs_dir: site-src
 site_dir: site
 strict: true
@@ -13,12 +14,22 @@ hooks:
 copyright: Docs CC BY 4.0, code Apache-2.0
 theme:
   name: material
+  # No Google Fonts: the brand fonts are served from brand/fonts/.
+  font: false
   features:
     - navigation.tabs
     - navigation.sections
     - navigation.indexes
     - search.suggest
     - search.highlight
+# Loaded before Material's bundle, so Material never fetches Mermaid from unpkg.
+extra_javascript:
+  - brand/vendor/mermaid/mermaid.min.js
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ravisharma5/otel-telco-blueprints
+      name: GitHub
 plugins:
   - search
 markdown_extensions:
