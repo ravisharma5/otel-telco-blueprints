@@ -1,6 +1,9 @@
 # Same targets run locally and in CI (.github/workflows/lint.yml runs `make ci`).
-# `make site` builds the docs site in strict mode (mkdocs.yml); `make ci` runs it,
-# so a broken link, anchor, or nav entry fails CI. `make serve` previews locally.
+# `make site` builds the docs (strict MkDocs, `make docs`) and the explorer, then
+# merges them into site/ with a collision check, writes redirects for the old
+# catalog/ URLs, and checks every internal link. `make ci` runs it, so a broken
+# link, anchor, nav entry, or redirect fails CI. `make preview` serves the merged
+# site under its base path; `make serve` previews the docs alone.
 # Doc paths only, so tools/tests/fixtures is never prose-linted.
 # $(wildcard ...) drops directories that do not exist yet (platform/, catalog/).
 # The Google Vale style is vendored at .vale/styles/Google (see PROVENANCE.txt);
@@ -9,7 +12,7 @@
 DOC_DIRS := README.md site-src framework architecture platform catalog templates explorer/src/content
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale test-site render site serve explorer explorer-data explorer-deps ci hooks
+.PHONY: setup lint lint-structure lint-prose test test-vale test-site render docs site preview serve explorer explorer-data explorer-deps ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -35,8 +38,19 @@ render:
 	uv run python -m tools.site.render_serving
 
 # NO_MKDOCS_2_WARNING silences the Material end-of-life banner in logs.
-site:
+docs:
 	NO_MKDOCS_2_WARNING=1 uv run mkdocs build --strict --clean
+
+# One artifact for Pages: docs plus explorer, merged by tools/site/merge_site.py.
+site: docs explorer
+	uv run python -m tools.site.merge_site
+
+# Serves the merged site at http://127.0.0.1:8000/otel-telco-blueprints/ (run make site first).
+preview:
+	rm -rf .preview
+	mkdir -p .preview
+	cp -R site .preview/otel-telco-blueprints
+	python3 -m http.server 8000 -d .preview
 
 serve:
 	NO_MKDOCS_2_WARNING=1 uv run mkdocs serve --strict
@@ -59,7 +73,7 @@ explorer: explorer-data
 test-site:
 	uv run pytest -q -m site_output
 
-ci: test test-vale lint site explorer test-site
+ci: test test-vale lint site test-site
 
 # Installs the versioned git guards (core.hooksPath = tools/git-hooks); not part of `ci`.
 hooks:

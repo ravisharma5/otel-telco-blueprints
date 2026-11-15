@@ -1,0 +1,221 @@
+"""Merge the explorer build into the docs site, write legacy redirects, check links.
+
+`make site` builds MkDocs into site/ and the explorer into explorer/dist/, then runs
+this step, which does three things in order:
+
+1. merge: copy every file from explorer/dist into site/. A file that exists in both
+   builds with different bytes stops the run. MkDocs owns the only 404 page, so an
+   explorer/dist/404.html stops the run even if the bytes match.
+2. write_redirects: for every path in tools/site/legacy-urls.txt (the frozen list of
+   URLs published under catalog/ before recipes moved to recipes/), write a short
+   redirect page to the matching recipes/ URL. Targets come only from that list and
+   titles only from the recipe front matter; nothing is read from a URL or query.
+3. check_links: parse every HTML file in site/ and report any internal href or src
+   (relative, or under the site base path) that resolves to no file.
+
+Usage:
+    python -m tools.site.merge_site
+"""
+
+from __future__ import annotations
+
+import html
+import posixpath
+import re
+import shutil
+import sys
+from html.parser import HTMLParser
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
+
+ROOT = Path(__file__).resolve().parents[2]
+DIST = ROOT / "explorer/dist"
+SITE = ROOT / "site"
+LEGACY = ROOT / "tools/site/legacy-urls.txt"
+MKDOCS_CONFIG = ROOT / "mkdocs.yml"
+BASE_PATH = "/otel-telco-blueprints/"
+OLD_PREFIX = "catalog/"
+NEW_PREFIX = "recipes/"
+# A legacy entry: catalog/ plus lowercase path segments, each ending in a slash.
+LEGACY_ENTRY = re.compile(r"^catalog/(?:[a-z0-9][a-z0-9-]*/)*$")
+SKIP_SCHEMES = ("http:", "https:", "mailto:", "tel:", "data:", "javascript:")
+
+REDIRECT = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moved: {title}</title>
+<link rel="canonical" href="{canonical}">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url={rel}">
+<script>location.replace("{rel}" + location.hash)</script>
+</head>
+<body>
+<p>This page moved to <a href="{rel}">{title}</a>.</p>
+</body>
+</html>
+"""
+
+
+# ---------- merge ----------
+
+
+def merge(dist: Path, site: Path) -> None:
+    """Copy every file in dist into site; stop on a collision or an explorer 404 page."""
+    if not dist.is_dir():
+        raise SystemExit(f"merge: {dist} is missing; build the explorer first")
+    if (dist / "404.html").exists():
+        raise SystemExit(
+            "merge: explorer/dist/404.html found; MkDocs owns the 404 page, "
+            "remove src/pages/404.astro"
+        )
+    files = sorted(p for p in dist.rglob("*") if p.is_file())
+    for src in files:
+        rel = src.relative_to(dist)
+        dest = site / rel
+        if dest.exists() and (not dest.is_file() or dest.read_bytes() != src.read_bytes()):
+            raise SystemExit(f"merge: {rel.as_posix()} exists in both builds")
+    for src in files:
+        dest = site / src.relative_to(dist)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest)
+
+
+# ---------- redirects ----------
+
+
+def read_legacy(path: Path) -> list[str]:
+    """Return the legacy paths in the frozen list (comments and blank lines skipped)."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return [ln.strip() for ln in lines if ln.strip() and not ln.lstrip().startswith("#")]
+
+
+def _front_matter_title(path: Path) -> str:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0].strip() != "---":
+        raise SystemExit(f"redirect: {path.relative_to(ROOT)} has no front matter")
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        m = re.match(r"^title:\s*(.+?)\s*$", line)
+        if m:
+            value = m.group(1)
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            return value
+    raise SystemExit(f"redirect: {path.relative_to(ROOT)} has no title")
+
+
+def _title_for(entry: str) -> str:
+    """Title from the recipe source that the legacy path was built from."""
+    sub = entry[len(OLD_PREFIX) :]
+    candidates = [ROOT / "catalog" / sub / name for name in ("README.md", "index.md")]
+    candidates.append(ROOT / "site-src/catalog" / sub / "index.md")
+    for path in candidates:
+        if path.is_file():
+            return _front_matter_title(path)
+    raise SystemExit(f"redirect: no source page for {entry}")
+
+
+def write_redirects(site: Path, legacy_list: list[str], site_url: str) -> None:
+    """Write a redirect stub at site/<entry>/index.html for every legacy entry."""
+    if not site_url.endswith("/"):
+        site_url += "/"
+    for entry in legacy_list:
+        if not LEGACY_ENTRY.fullmatch(entry):
+            raise SystemExit(f"redirect: bad legacy entry {entry!r}")
+        target = NEW_PREFIX + entry[len(OLD_PREFIX) :]
+        if not (site / target / "index.html").is_file():
+            raise SystemExit(f"redirect: target {target} for {entry} is missing")
+        page = site / entry / "index.html"
+        if page.exists():
+            raise SystemExit(f"redirect: {entry} is still built; it must only redirect")
+        rel = "../" * entry.count("/") + target
+        title = html.escape(_title_for(entry), quote=True)
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(
+            REDIRECT.format(title=title, canonical=site_url + target, rel=rel),
+            encoding="utf-8",
+        )
+
+
+# ---------- link check ----------
+
+
+class _Refs(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.refs: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        for name, value in attrs:
+            if name in ("href", "src") and value:
+                self.refs.append(value)
+
+
+def _resolve(site: Path, page: Path, ref: str) -> Path | None:
+    """File a reference points to, or None when it is external or fragment-only."""
+    ref = ref.strip()
+    if not ref or ref.startswith("#") or ref.startswith("//"):
+        return None
+    if ref.lower().startswith(SKIP_SCHEMES):
+        return None
+    path = unquote(urlsplit(ref).path)
+    if not path:
+        return None
+    if path.startswith("/"):
+        if not (path + "/").startswith(BASE_PATH):
+            return site / "__outside_base__" / path.lstrip("/")
+        joined = path[len(BASE_PATH) :] if len(path) >= len(BASE_PATH) else ""
+    else:
+        here = page.parent.relative_to(site).as_posix()
+        joined = posixpath.join(here, path)
+    norm = posixpath.normpath(joined) if joined else "."
+    if norm == ".." or norm.startswith("../"):
+        return site / "__outside_site__" / norm
+    target = site if norm == "." else site / norm
+    if target.is_dir() or path.endswith("/"):
+        target = target / "index.html"
+    return target
+
+
+def check_links(site: Path) -> list[str]:
+    """Return 'page: ref' for every internal href or src that resolves to no file."""
+    broken = []
+    for page in sorted(site.rglob("*.html")):
+        parser = _Refs()
+        parser.feed(page.read_text(encoding="utf-8", errors="replace"))
+        for ref in parser.refs:
+            target = _resolve(site, page, ref)
+            if target is not None and not target.is_file():
+                broken.append(f"{page.relative_to(site).as_posix()}: {ref}")
+    return broken
+
+
+# ---------- CLI ----------
+
+
+def _site_url() -> str:
+    m = re.search(r"(?m)^site_url:\s*(\S+)\s*$", MKDOCS_CONFIG.read_text(encoding="utf-8"))
+    if not m:
+        raise SystemExit("merge: site_url missing from mkdocs.yml")
+    return m.group(1)
+
+
+def main() -> int:
+    if not SITE.is_dir():
+        raise SystemExit("merge: site/ is missing; build the docs first")
+    merge(DIST, SITE)
+    write_redirects(SITE, read_legacy(LEGACY), _site_url())
+    broken = check_links(SITE)
+    if broken:
+        print(f"links: {len(broken)} internal link(s) resolve to no file:", file=sys.stderr)
+        for item in broken:
+            print(f"  {item}", file=sys.stderr)
+        return 1
+    print("merge: explorer merged, redirects written, links resolve")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
