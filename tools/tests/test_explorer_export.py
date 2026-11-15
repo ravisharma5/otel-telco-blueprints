@@ -432,6 +432,8 @@ def test_option_states_follow_rules(data):
                 assert o["reason_text"] is None
             elif uc["id"] in helps and not set(_helps_roles(src, uc["id"])) & set(placed(uc["id"], setup["tier"])):
                 assert o["state"] == "not-applicable" and o["reason_id"].startswith("helps-at-")
+            elif uc["id"] in helps and props["fp8_swap"] == "yes" and src["id"] == "fp8-regional":
+                assert o["state"] == "helps" and o["reason_id"] == "fp8-swapped"
             elif uc["id"] in helps:
                 assert o["state"] == "helps"
                 assert o["reason_text"] == helps[uc["id"]]
@@ -513,9 +515,9 @@ def test_fp8_option_follows_fit(data):
         if swapped:
             assert o["state"] == "helps", (uc["id"], setup["id"])
             seen["helps"] += 1
-            reason = o["reason_text"].lower()
-            for v in swapped:
-                assert v["slot_name"].lower() in reason, (uc["id"], setup["id"], v["slot_name"], reason)
+            # The reason names exactly the slots swapped in this state, in placement order.
+            assert o["reason_id"] == "fp8-swapped" and o["reason_text"] is None
+            assert o["reason_roles"] == [v["role"] for v in swapped], (uc["id"], setup["id"])
             band = worst_band(state["fit"])
             expected = {"fits": None, "tight": "still-tight", "too-tight": "still-too-tight"}[band]
             assert o["fit_note_id"] == expected, (uc["id"], setup["id"])
@@ -560,7 +562,7 @@ def test_helps_text_from_page(data):
     seen = 0
     for uc, setup, batch, state in all_states(data):
         for o in state["options"]:
-            if o["state"] == "helps":
+            if o["state"] == "helps" and o["reason_text"] is not None:
                 seen += 1
                 hits = [
                     r for r in rows if r[0] == names[o["id"]] and uc["id"] in r[1] and r[2] == o["reason_text"]

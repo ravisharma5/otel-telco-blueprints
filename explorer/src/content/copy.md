@@ -222,6 +222,21 @@ use_case:
     # Toggle label once every option shows; the UI-SPEC wording runs past the 4-word button limit.
     toggle_fewer: Show options for this use case
     helps: "Helps here: {reason}"
+    # Helps reasons built from the state, keyed by reason id. {slots} lists the
+    # slots the fit rule gave FP8 builds, as slot_phrases joined with list_and.
+    helps_reasons:
+      fp8-swapped:
+        one: "An FP8 build of {slots} halves its weights, which makes room on this setup."
+        other: "FP8 builds of {slots} halve their weights, which makes room on this setup."
+    slot_phrases:
+      llm-large: the large LLM
+      llm-small: the small LLM
+      decision: Decision
+      safety: Safety
+      classification: Classification
+      embedding: Embedding
+      reranker: Reranker
+    list_and: and
     little: Little benefit for this use case.
     not_applicable: "Doesn't apply to this setup: {reason}"
     labels:

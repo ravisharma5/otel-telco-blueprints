@@ -424,7 +424,14 @@ def test_option_cards(explorer_dist, data, copy):
                 assert ("hidden" in card.attrs) == (not _shown_by_default(option)), (key, option["id"])
                 if option["state"] == "helps":
                     assert opt["helps"].split("{")[0].strip() in text
-                    assert _squash(_plain(option["reason_text"])) in _squash(text)
+                    if option["reason_id"]:
+                        phrases = [opt["slot_phrases"][r] for r in option["reason_roles"]]
+                        assert phrases and all(_squash(p) in _squash(text) for p in phrases), (key, option["id"])
+                        form = "one" if len(phrases) == 1 else "other"
+                        lead = opt["helps_reasons"][option["reason_id"]][form].split("{")[0]
+                        assert _squash(lead) in _squash(text), (key, option["id"])
+                    else:
+                        assert _squash(_plain(option["reason_text"])) in _squash(text)
                 elif option["state"] == "little":
                     assert opt["little"] in text
                 else:
@@ -443,6 +450,37 @@ def test_option_cards(explorer_dist, data, copy):
                     assert related["title"] in links[0].text()
                     hidden = links[0].find_all(lambda n: n.has_class("visually-hidden"))
                     assert hidden and hidden[0].text() == copy["notes"]["external"]
+
+
+# Words that name a slot in card text, matched case-sensitively.
+SLOT_WORDS = {
+    "llm-large": r"\b(?:31B|large LLM)\b",
+    "llm-small": r"\bsmall LLM\b",
+    "decision": r"\bDecision\b",
+    "safety": r"\bSafety\b",
+    "classification": r"\bClassification\b",
+    "embedding": r"\bEmbedding\b",
+    "reranker": r"\bReranker\b",
+}
+
+
+@pytest.mark.site_output
+def test_fp8_card_names_only_swapped_slots(explorer_dist, data):
+    # Where FP8 builds help, the card's reason names exactly the slots that got an
+    # FP8 build in this state (the Models card), and no other slot.
+    seen = 0
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, _, state in _states(uc):
+            swapped = {v["role"] for v in state["variants"] if v["operator_made"]}
+            if not swapped:
+                continue
+            cards = _in_parts(tree, key, lambda n: n.attrs.get("data-option-id") == "fp8-regional")
+            box = cards[0].find_all(lambda n: n.has_class("applicability"))[0].text()
+            named = {role for role, pattern in SLOT_WORDS.items() if re.search(pattern, box)}
+            assert named == swapped, (uc["slug"], key, box)
+            seen += 1
+    assert seen
 
 
 @pytest.mark.site_output
@@ -590,7 +628,8 @@ def test_reason_ids_have_copy():
         if o["reason_id"]
     }
     assert ids, "expected reason ids in the data"
-    assert sorted(ids - set(reasons)) == []
+    helps_reasons = _copy()["use_case"]["advanced"]["helps_reasons"]
+    assert sorted(ids - set(reasons) - set(helps_reasons)) == []
 
 
 @pytest.mark.site_output

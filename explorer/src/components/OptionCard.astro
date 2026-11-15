@@ -3,7 +3,7 @@
 // exported option entry; the applicability box comes from the state.
 import Rich from './Rich.astro';
 import { frontmatter as copy } from '../content/copy.md';
-import { fill, type Option } from '../lib/data';
+import { fill, joinList, type Option } from '../lib/data';
 
 interface Props {
   option: Option;
@@ -19,9 +19,15 @@ const fitNote = option.fit_note_id ? fitNotes[option.fit_note_id] ?? '' : '';
 const tag = [option.engine, option.tiers.map((t) => tierWords[t] ?? t).join(', ')].join(a.tag_join);
 let prefix = '';
 let reason = '';
+const helpsReasons = a.helps_reasons as Record<string, { one: string; other: string }>;
+const slotPhrases = a.slot_phrases as Record<string, string>;
 if (option.state === 'helps') {
   prefix = fill(a.helps, { reason: '' }).trim();
-  reason = option.reason_text ?? '';
+  reason = option.reason_id
+    ? fill(helpsReasons[option.reason_id]?.[option.reason_roles.length === 1 ? 'one' : 'other'] ?? '', {
+        slots: joinList(option.reason_roles.map((r) => slotPhrases[r] ?? r), a.list_and),
+      })
+    : option.reason_text ?? '';
 } else if (option.state === 'not-applicable') {
   prefix = fill(a.not_applicable, { reason: '' }).trim();
   reason = option.reason_text ?? reasons[option.reason_id ?? ''] ?? '';

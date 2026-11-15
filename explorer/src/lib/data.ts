@@ -86,6 +86,7 @@ export interface Option {
   state: 'helps' | 'little' | 'not-applicable';
   reason_id: string | null;
   reason_text: string | null;
+  reason_roles: string[];
   would_help: boolean;
   fit_note_id: string | null;
 }
@@ -167,6 +168,12 @@ export function fill(template: string, values: Record<string, string | number>):
   return template.replace(/\{(\w+)\}/g, (match, name) =>
     name in values ? String(values[name]) : match,
   );
+}
+
+/** Join list items as prose: "a", "a and b", "a, b, and c". */
+export function joinList(items: string[], and: string): string {
+  if (items.length <= 2) return items.join(` ${and} `);
+  return `${items.slice(0, -1).join(', ')}, ${and} ${items[items.length - 1]}`;
 }
 
 /** Split data text on backticks so code spans render as <code> (no HTML parsing). */

@@ -256,6 +256,7 @@ def option_state(
     fp8_swap: bool = False,
     band_after: str = "fits",
     placement: dict | None = None,
+    swapped_roles: list[str] | None = None,
 ) -> dict:
     """State of one advanced option for a use case at a setup and batch value.
 
@@ -268,6 +269,10 @@ def option_state(
     a role its where_it_helps entry names, and the option does not exclude, runs
     at the setup's tier; if those roles run only at another tier, the option does
     not apply here and its reason id names that tier (helps-at-<tier>).
+
+    swapped_roles lists the roles the fit rule swapped to FP8 builds, in placement
+    order. A fit-dependent option that helps returns reason id fp8-swapped with
+    those roles in reason_roles, so its reason names only the swapped slots.
     """
     props = {
         "tier": setup["tier"],
@@ -287,6 +292,7 @@ def option_state(
                 "state": "not-applicable",
                 "reason_id": rule["reason"],
                 "reason_text": None,
+                "reason_roles": [],
                 "would_help": would_help,
                 "fit_note_id": None,
             }
@@ -316,18 +322,37 @@ def option_state(
                 "state": "not-applicable",
                 "reason_id": f"helps-at-{other}",
                 "reason_text": None,
+                "reason_roles": [],
                 "would_help": True,
                 "fit_note_id": None,
             }
+    if would_help and fit_dependent and swapped_roles:
+        # The reason names the slots this state swapped, not the use case's general text.
+        return {
+            "state": "helps",
+            "reason_id": "fp8-swapped",
+            "reason_text": None,
+            "reason_roles": list(swapped_roles),
+            "would_help": True,
+            "fit_note_id": FIT_NOTES[band_after],
+        }
     if would_help:
         return {
             "state": "helps",
             "reason_id": None,
             "reason_text": helps[use_case_id],
+            "reason_roles": [],
             "would_help": True,
             "fit_note_id": FIT_NOTES[band_after] if fit_dependent else None,
         }
-    return {"state": "little", "reason_id": None, "reason_text": None, "would_help": False, "fit_note_id": None}
+    return {
+        "state": "little",
+        "reason_id": None,
+        "reason_text": None,
+        "reason_roles": [],
+        "would_help": False,
+        "fit_note_id": None,
+    }
 
 
 # --- recipe pages -----------------------------------------------------------
@@ -454,11 +479,12 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
             continue
         runs = list((placement.get(tier) or {}).get("runs") or [])
         other_tier_variants += _variant_rows([_start_variant(r, data["variants"]) for r in runs], tier)
-    swapped = any(v["operator_made"] for v in variants)
+    swapped_roles = [v["role"] for v in variants if v["operator_made"]]
+    swapped = bool(swapped_roles)
     options = []
     for opt in data["options"]:
         row = {"id": opt["id"], **{k: opt.get(k) for k in OPTION_TEXT_KEYS}}
-        row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit), placement))
+        row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit), placement, swapped_roles))
         options.append(row)
     return {
         "tiers": _tier_cards(placement, setup),
