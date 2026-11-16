@@ -12,7 +12,7 @@
 DOC_DIRS := README.md site-src framework architecture platform catalog templates explorer/src/content
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale test-site render docs site preview serve explorer explorer-data explorer-deps ci hooks
+.PHONY: setup lint lint-structure lint-prose test test-vale test-site render facts docs site preview serve explorer explorer-data explorer-deps ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -41,6 +41,13 @@ render:
 	uv run python -m tools.site.render_serving
 	uv run python -m tools.site.render_catalog
 	uv run python -m tools.site.render_bring
+
+# Prints every source URL the facts stamp covers (Sources tables, serving data,
+# and extra_urls in data/facts-check.yaml). The stamp itself is checked by
+# tools/tests/test_proposal.py inside `make test`. The network re-check is run by
+# hand before a release: uv run python -m tools.site.facts --recheck --report <path>
+facts:
+	uv run python -m tools.site.facts --urls
 
 # NO_MKDOCS_2_WARNING silences the Material end-of-life banner in logs.
 docs:

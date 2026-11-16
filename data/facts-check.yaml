@@ -1,0 +1,11 @@
+# Facts stamp. Written by `uv run python -m tools.site.facts --write` after the
+# source re-check; tools/tests/test_proposal.py fails when sources_digest no
+# longer matches the Sources tables, serving-data URLs, and extra_urls.
+checked: ""
+sources_digest: "84cc492b08c0eea8722136d70849e68068b2302167870dab18873d0c3491389e"
+url_count: 188
+card_revisions: {}
+extra_urls:
+  - https://www.gsma.com/newsroom/press-release/gsma-launches-open-telco-ai-to-accelerate-development-of-telco%E2%80%91grade-ai/
+  - https://huggingface.co/GSMA
+  - https://github.com/open-experiments/agent-school/blob/30458bda61cdc1ea939ce7d1fe6b8d425ed2bbad/docs/RoadMap.md
