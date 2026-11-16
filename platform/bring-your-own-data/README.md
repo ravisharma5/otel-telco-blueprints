@@ -3,7 +3,7 @@ id: "PB-11"
 type: "platform"
 title: "Bring your own data and policies"
 readiness_question: "Data and policies: what must you bring, and where does each one go?"
-doc_status: draft
+doc_status: done
 layers: ["data-knowledge", "agent-runtime", "mcp-gateway", "safety-governance", "adaptation"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 placement_tier: ["regional", "core"]
@@ -13,6 +13,7 @@ top_decisions:
   - "Give every item one owner and one PB-02 gate"
   - "Retrain only what a measured gap or a source change calls for"
 agent_school: [301, 401, 402, 403]
+clarity_reviewed: "2026-11-16"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -66,7 +67,7 @@ flowchart LR
   EG --> SV["Serving"]
 ```
 
-Harness here means the agent runtime harness in the [architecture overview](../../architecture/index.md): skills and capability manifests, the MCP tool gateway, retrieval, the decision gate, and the action layer; it is not agent-school's harness.
+Harness here means the agent runtime harness in the [architecture overview](../../architecture/index.md), not agent-school's harness. It covers skills and capability manifests, the MCP tool gateway, retrieval, the decision gate, and the action layer.
 
 One item, from your systems to serving:
 
@@ -183,7 +184,7 @@ Gate names in the domain tables are parameters and ladder stages in [PB-02 Evalu
 
 ### Worked example: alarm and root-cause triage
 
-A fibre cut on a transport ring raises link-down alarms on two routers and cell-unavailable alarms on the RAN sites behind them, and opens incident `inc-6610`. The operator brings these items for `byo-triage-agent`, configuring before training.
+A fibre cut on a transport ring raises link-down alarms on two routers and cell-unavailable alarms on the RAN sites behind them, and opens incident `inc-6610`. The operator brings these items for `byo-triage-agent`, and configures everything it can before it trains anything.
 
 | Mechanism | Domains | What the operator brings | Configure or train |
 |---|---|---|---|
@@ -235,7 +236,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | `embedding` | OTel-Embedding models, pinned by revision | Indexes your corpora; a new embedding model forces a full re-index |
 | `reranker` | OTel-Reranker-0.6B or OTel-Reranker-4B, pinned by revision | Ranks passages from your corpora; check its scores at intake |
 | `safety` | OTel-LLM-8.3B-Safety or OTel-LLM-12B-Safety, pinned by revision | Abstains when your corpus lacks the evidence |
-| `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Labels action requests; your policy sets the ceiling that applies |
+| `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Labels each action request; your policy ceiling caps the outcome |
 | `classification` | OTel-LLM-8.3B-Classification, pinned by revision | Its head predicts eight classes from a synthetic dataset, so retrain it on your taxonomy |
 
 ## Sources and acceptance
