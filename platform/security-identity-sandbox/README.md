@@ -14,7 +14,7 @@ top_decisions:
   - "Layer the sandbox"
   - "Keep secrets at the boundary"
 agent_school: [102, 303, 304]
-clarity_reviewed: "2026-11-11"
+clarity_reviewed: "2026-11-15"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -238,8 +238,8 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): signed, pinned slot images and the far-edge options
 - [PB-09 Quality operations and observability](../quality-operations/README.md): injection alerts become SOC cases
 - [PB-02 Evaluation and acceptance](../evaluation-acceptance/README.md): the judge runs on site when the site is offline
-- [Placement tiers](../../architecture/placement.md): air-gapped and in-country sites
-- [Decision gate](../../architecture/decision-gate.md): where every write is labelled before an approver sees it
+- The [placement tiers](../../architecture/placement.md) page covers air-gapped and in-country sites, and the [Decision gate](../../architecture/decision-gate.md) labels every write before an approver sees it
 - [PB-01 Intake and model selection](../intake-model-selection/README.md): intake checks image signatures and licences
 - [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): compliance maps identity, access control, and the air gap to regulatory duties
+- Use cases: [the recipes that use PB-08](../../catalog/index.md#pb-08-security-identity-and-sandbox)
 - Agent-school: courses 102, 303, and 304 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

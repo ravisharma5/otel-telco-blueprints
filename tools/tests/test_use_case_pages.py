@@ -1403,16 +1403,16 @@ USED_BY = "Used by and next steps"
 USED_BY_MAX = 12
 USE_CASES_BULLET = re.compile(r"^- Use cases:(.*)$", re.M)
 CATALOG_LINK = re.compile(r"\[([^\]]+)\]\(\.\./\.\./catalog/([a-z0-9-]+/[a-z0-9-]+)/README\.md\)")
+OVERVIEW = REPO_ROOT / "catalog/index.md"
+OVERVIEW_LINK = re.compile(r"\[([^\]]+)\]\(\.\./\.\./catalog/index\.md#([a-z0-9-]+)\)")
+ANY_LINK = re.compile(r"\[[^\]]*\]\([^)]+\)")
 
 
-def flagship_dependants() -> dict[str, set[str]]:
-    """Platform id -> "<domain>/<slug>" of every flagship that lists it, read at run time."""
+def use_case_dependants() -> dict[str, set[str]]:
+    """Platform id -> "<domain>/<slug>" of every use case that lists it, read at run time."""
     out: dict[str, set[str]] = {}
     for path in use_case_pages():
-        fm = front_matter(path) or {}
-        if fm.get("flagship") is not True:
-            continue
-        for pb in fm.get("platform_blueprints") or []:
+        for pb in (front_matter(path) or {}).get("platform_blueprints") or []:
             out.setdefault(pb, set()).add(page_key(path))
     return out
 
@@ -1425,35 +1425,44 @@ def used_by_bullets(path: Path) -> list[str]:
     return re.findall(r"^- .*$", section_text(path, USED_BY), re.M)
 
 
+def overview_anchors() -> set[str]:
+    from tools.bplint.slug import heading_slugs
+
+    text = OVERVIEW.read_text(encoding="utf-8")
+    return heading_slugs(m.group(1) for m in re.finditer(r"^#{1,6} (.+)$", text, re.M))
+
+
+def overview_anchor(path: Path) -> str:
+    from tools.bplint.slug import github_slug
+
+    fm = front_matter(path) or {}
+    return github_slug(f"{fm['id']} {fm['title']}")
+
+
 @pytest.mark.parametrize("path", platform_pages(), ids=_id)
 def test_platform_back_links_to_use_cases(path):
-    want = flagship_dependants().get(_id_of(path), set())
-    bullets = used_by_bullets(path)
-    assert len(bullets) <= USED_BY_MAX, len(bullets)
-    found = USE_CASES_BULLET.findall(section_text(path, USED_BY))
-    if not want:
-        assert found == [], "no flagship lists this page, so it needs no Use cases bullet"
-        return
-    if not found:
-        assert len(bullets) == USED_BY_MAX, (
-            "flagships list this page and its Used by section has room: add a Use cases bullet"
-        )
+    """One Use cases bullet with one link: the page's own section of the Recipes overview."""
+    section = section_text(path, USED_BY)
+    assert len(used_by_bullets(path)) <= USED_BY_MAX, len(used_by_bullets(path))
+    assert not CATALOG_LINK.search(section), "link recipes through the overview, not inline"
+    found = USE_CASES_BULLET.findall(section)
+    if not use_case_dependants().get(_id_of(path)):
+        assert found == [], "no use case lists this page, so it needs no Use cases bullet"
         return
     assert len(found) == 1, found
-    linked = [key for _label, key in CATALOG_LINK.findall(found[0])]
-    assert len(linked) == len(set(linked)), linked
-    assert set(linked) == want
+    assert len(ANY_LINK.findall(found[0])) == 1, found[0]
+    m = OVERVIEW_LINK.search(found[0])
+    assert m, found[0]
+    assert m.group(2) == overview_anchor(path), (m.group(2), overview_anchor(path))
+    assert m.group(2) in overview_anchors(), m.group(2)
 
 
 @pytest.mark.parametrize("path", platform_pages(), ids=_id)
 def test_platform_back_link_labels(path):
-    ids = {page_key(p): (front_matter(p) or {}).get("id") for p in use_case_pages()}
     for line in USE_CASES_BULLET.findall(section_text(path, USED_BY)):
-        links = CATALOG_LINK.findall(line)
-        assert links, line
-        for label, key in links:
-            assert key in ids, key
-            assert label.startswith(f"{ids[key]} "), (label, ids[key])
+        m = OVERVIEW_LINK.search(line)
+        assert m, line
+        assert m.group(1) == f"the recipes that use {_id_of(path)}", m.group(1)
 
 
 def test_sync_lora_rank_placeholder_matches():

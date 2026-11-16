@@ -500,13 +500,34 @@ def test_nav_order():
         "platform/intake-model-selection/README.md",
         "platform/compliance-operating-model/README.md",
     ]
-    assert _nav_children("Recipes") == [
-        "catalog/index.md",
-        "catalog/standards-knowledge/grounded-knowledge-assistant/README.md",
-        "catalog/agentic-operations/closed-loop-incident-handling/README.md",
-        "catalog/network-operations/alarm-triage-adaptation/README.md",
-        "catalog/business-assurance/camara-care-diagnostics/README.md",
-    ]
+    recipes = next(item for item in CONFIG["nav"] if next(iter(item)) == "Recipes")["Recipes"]
+    assert recipes[0] == {"Overview": "catalog/index.md"}
+    assert [(next(iter(g)), list(_paths(next(iter(g.values()))))) for g in recipes[1:]] == (
+        _recipe_groups()
+    )
+
+
+def _paths(children):
+    return (next(iter(child.values())) for child in children)
+
+
+def _recipe_groups():
+    """(domain label, page paths sorted by id) per domain that has pages, in schema order."""
+    import json
+
+    from tools.site.export_explorer import DOMAIN_LABELS
+
+    schema = json.loads((REPO_ROOT / "schemas/use-case.schema.json").read_text(encoding="utf-8"))
+    pages = []
+    for path in sorted((REPO_ROOT / "catalog").glob("*/*/README.md")):
+        fm = yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+        pages.append((fm["domain"], fm["id"], path.relative_to(REPO_ROOT).as_posix()))
+    groups = []
+    for domain in schema["properties"]["domain"]["enum"]:
+        rows = sorted((uc, rel) for d, uc, rel in pages if d == domain)
+        if rows and domain != "demo":
+            groups.append((DOMAIN_LABELS[domain], [rel for _uc, rel in rows]))
+    return groups
 
 
 def test_start_here_labels():

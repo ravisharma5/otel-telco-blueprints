@@ -1,11 +1,16 @@
 ---
 title: "Recipes"
-doc_status: draft
+doc_status: done
+clarity_reviewed: "2026-11-15"
 ---
 
 # Recipes
 
-Each recipe maps an operator use case to OTel model slots and the platform blueprints it depends on. A full recipe adds a worked example and deploy steps. A catalog entry fits on one page and lists what you must add. The Use cases page shows the same use cases as cards.
+Pick a recipe by domain, or by a platform blueprint it uses. Each recipe maps an operator use case to OTel model slots and the platform blueprints it depends on.
+
+A full recipe adds a worked example and deploy steps. A catalog entry fits on one page and lists what you must add before production. *Also covers* names the applications a recipe already handles, so they get no page of their own.
+
+The Use cases page shows the same use cases as cards.
 
 <!-- generated:catalog-by-domain start -->
 
@@ -37,7 +42,7 @@ Each recipe maps an operator use case to OTel model slots and the platform bluep
 
 ## By platform blueprint
 
-Each platform blueprint lists the recipes that use it.
+Find the recipes that use each platform blueprint.
 
 <!-- generated:catalog-by-platform start -->
 

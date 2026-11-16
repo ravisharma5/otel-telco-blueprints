@@ -13,7 +13,7 @@ top_decisions:
   - "Map each rule to the control that already produces its evidence"
   - "Measure value against the shadow-stage baseline"
 agent_school: [301, 401]
-clarity_reviewed: "2026-11-12"
+clarity_reviewed: "2026-11-15"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -317,8 +317,8 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-04 Serving, routing, and placement](../serving-routing-placement/README.md): in-country serving and fallbacks
 - [PB-05 Integration](../integration/README.md): the corpus register, per-tool authorization, and CAMARA purposes
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): the stage register the rollout follows
-- [PB-07 Action layer](../action-layer/README.md): the approval step and the audit record
+- [PB-07 Action layer](../action-layer/README.md) and [Decision gate](../../architecture/decision-gate.md): the approval step, the audit record, and the labels that show human oversight
 - [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): identity, access control, and the air gap
 - [PB-09 Quality operations and observability](../quality-operations/README.md): traces and the incident process
-- [Decision gate](../../architecture/decision-gate.md): the labels that show human oversight
+- Use cases: [the recipes that use PB-10](../../catalog/index.md#pb-10-compliance-sovereignty-and-operating-model)
 - Agent-school: 301 adds an approval gate and 401 builds governance from a capability catalog, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
