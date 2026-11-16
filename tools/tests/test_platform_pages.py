@@ -539,6 +539,21 @@ def test_project_documentation_rows_are_not_blog_posts(path):
             assert not BLOG_URL.search(row[source]), row[source]
 
 
+# The documented exception (framework/definitions.md, Claim basis): technical
+# articles on developers.redhat.com are Red Hat guidance, not blog posts, though
+# their URLs carry a date. They are never filed under another basis.
+RH_DEVELOPER_ARTICLE = re.compile(r"\]\(https://developers\.redhat\.com/articles/")
+
+
+@PAGES
+def test_red_hat_developer_articles_are_red_hat_guidance(path):
+    table = tables(sections(body(path)).get("Sources and acceptance", []))[0]
+    basis, source = table[0].index("Basis"), table[0].index("Source")
+    for row in table[1:]:
+        if RH_DEVELOPER_ARTICLE.search(row[source]):
+            assert row[basis].strip().lower() == "red hat guidance", row
+
+
 def test_gating_gate_rules():
     text = body(GATING)
     assert "policy ceiling" in text

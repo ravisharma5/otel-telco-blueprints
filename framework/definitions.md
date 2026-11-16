@@ -24,7 +24,7 @@ Blueprints are recipes. They draw on telecom network expertise, industry use cas
 |---|---|---|---|
 | model card | Numbers and behavior the model card reports, and the licence or usage terms a model's publisher sets for it | "The model card reports ..." | The model card URL, or the publisher's licence or terms page |
 | research | Papers, benchmarks, and upstream issue reports | "Research shows ..." and name the paper or issue | The paper, benchmark, or issue URL |
-| Red Hat guidance | Red Hat documentation, recommendations, and articles | "Red Hat recommends ..." | The doc or article URL |
+| Red Hat guidance | Red Hat documentation, recommendations, and articles. Technical articles on developers.redhat.com count as Red Hat guidance, not blog posts, even though their URLs carry a date | "Red Hat recommends ..." | The doc or article URL |
 | industry use case | Operator and GSMA material | "Operators use ..." | The source URL or a repo file |
 | project documentation | Upstream open source project docs (vLLM, llm-d, KServe), and standards bodies' published specifications, whitepapers, and conformance programs (TM Forum, CAMARA, 3GPP, IETF RFCs), and laws and regulations that official bodies publish (EUR-Lex). Blog posts and news items aren't project documentation | Name the project or standard: "The vLLM docs state that" or "3GPP TS 23.288 defines" | The project doc, specification, or whitepaper URL |
 
@@ -43,7 +43,7 @@ The canonical columns, in order:
 | Basis | One of: model card, research, Red Hat guidance, industry use case, project documentation (any letter case) |
 | Source | A link to an `http` or `https` URL, or to a file in this repo. Never the page itself |
 
-The linter checks the header (VT002), the Basis value (VT007), and the Source link (VT004). A repo-file link must point to a file that exists inside the repo.
+The linter checks the header (VT002), the Basis value (VT007), and the Source link (VT004). A repo-file link must point to a file that exists inside the repo. The tests check that no project documentation row links a blog post or news item, and that every developers.redhat.com article row has the Red Hat guidance basis.
 
 Worked example:
 
