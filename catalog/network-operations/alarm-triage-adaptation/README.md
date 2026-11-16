@@ -12,7 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Runs triage on RAN and transport alarms and recommends fixes for approval. Starts with retrieval and skills only, and earns a LoRA adapter only when evaluation shows a measured gap. Depends on the acceptance gates and a model registry that binds each adapter to its base revision."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
 agent_school: [101, 401, 402, 403]
-clarity_reviewed: "2026-11-13"
+clarity_reviewed: "2026-11-15"
 card:
   goal: "Triage alarms more accurately"
   summary: "Finds the likely cause in RAN and transport alarms and proposes fixes for approval. It fine-tunes the model only when evaluation shows a gap."
@@ -111,7 +111,18 @@ Train only when every row holds. The parameters belong to [PB-03](../../../platf
 
 ### Classification head and Decision slot
 
-The Classification card's head predicts eight drive-test throughput classes from the synthetic TeleLogs dataset, not alarm causes. Retrain the Classification head on your own alarm taxonomy, as a full fine-tune of a small head, and gate it on the Classification per-class recall floor with a temporal holdout and on the Classification other-or-abstain recall floor. The Decision card publishes quantized weights only, so the model owner confirms an adaptation path with the card before training the Decision slot.
+The Classification card's head predicts eight root-cause classes from the synthetic TeleLogs drive-test dataset, not your alarm causes. Retrain the Classification head on your own alarm taxonomy, as a full fine-tune of a small head, and gate it on the Classification per-class recall floor with a temporal holdout and on the Classification other-or-abstain recall floor. The Decision card publishes quantized weights only, so the model owner confirms an adaptation path with the card before training the Decision slot.
+
+### Slots and checkpoints
+
+| Slot | Checkpoint | Role | Placement |
+|---|---|---|---|
+| `classification` | OTel-LLM-8.3B-Classification with its head retrained on your alarm taxonomy, pinned by revision | Labels the likely cause; its head is retrained at the core | Regional and core |
+| `llm` | OTel-2.0-LLM-31B-IT, pinned by revision | The triage agent; the core also runs it for data generation and evaluation | Regional and core |
+| `safety` | OTel-LLM-12B-Safety or OTel-LLM-8.3B-Safety, pinned by revision | Checks the evidence behind a finding | Regional |
+| `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Gives the gate label | Regional |
+| `embedding` | OTel-Embedding-600M, 4B, or 8B, pinned by revision | Turns runbooks and reports into vectors | Regional |
+| `reranker` | OTel-Reranker-0.6B or OTel-Reranker-4B, pinned by revision | Puts the best passages first | Regional |
 
 ### Worked example: gNodeB alarm cluster after a site power event
 
@@ -123,7 +134,7 @@ The agent then proposes restarting the NG interface in `req-5520-1`. Fixes are a
 
 ## What you need
 
-- [ ] Models: the six slots, chosen from the family in [PB-01](../../../platform/intake-model-selection/README.md), each pinned by revision with its licence chain recorded
+- [ ] Models: the six slots in the slots table, chosen from the family in [PB-01](../../../platform/intake-model-selection/README.md), each pinned by revision with its licence chain recorded
 - [ ] Platform blueprints: the pages for [PB-02](../../../platform/evaluation-acceptance/README.md), [PB-03](../../../platform/adaptation/README.md), [PB-04](../../../platform/serving-routing-placement/README.md), [PB-05](../../../platform/integration/README.md), [PB-06](../../../platform/safety-autonomy-gating/README.md), [PB-07](../../../platform/action-layer/README.md), and [PB-10](../../../platform/compliance-operating-model/README.md)
 - [ ] Components: one product for each role in the components table
 - [ ] Data: corpora with usage rights, your alarm taxonomy, and replayed tapes with SME labels
@@ -131,7 +142,7 @@ The agent then proposes restarting the NG interface in `req-5520-1`. Fixes are a
 - [ ] Adapters: loaded at start with `--lora-modules`, pinned by digest, with runtime loading blocked by policy
 - [ ] Adapter storage: internal object storage, because the inference service rejects OCI URIs for adapters ([KServe issue 6094](https://github.com/kserve/kserve/issues/6094))
 - [ ] Adapter rank: `--max-lora-rank` set to the highest trained rank
-- [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
+- [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
 - [ ] Placement: the regional site runs the large LLM, Classification, Safety, Decision, Embedding, and Reranker for triage. The core runs the large LLM and Classification for data generation, training, and evaluation.
 
 | Component role | Red Hat product used |

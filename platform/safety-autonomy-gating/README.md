@@ -14,7 +14,7 @@ top_decisions:
   - "Set a stage per use case and action class"
   - "Promote a stage only on evidence"
 agent_school: [201, 301, 304]
-clarity_reviewed: "2026-11-11"
+clarity_reviewed: "2026-11-15"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -184,7 +184,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | Drop a use case back a stage | Approver | Risk owner | Platform team | Security |
 | Change a policy ceiling | Operations engineer | Risk owner | Change board and SME | Business owner |
 | Change guardrail rails | Security | Platform team | Business owner | Risk owner |
-| Tune Safety slot abstention | Platform team | Model owner | SME | Business owner |
+| Tune Safety slot abstention | Platform team | Risk owner | SME | Business owner |
 
 ## Risks and limitations
 

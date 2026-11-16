@@ -533,7 +533,8 @@ def test_sync_flag_blocks_read_from_serving_page():
 
 
 def test_sync_decision_engine_cell_present():
-    assert decision_engine_prerequisite() == "vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm"
+    # The Decision card (revision 7ff608e3) names tested versions only, with no "or later".
+    assert decision_engine_prerequisite() == "vLLM 0.26 or 0.30 on CUDA or ROCm"
 
 
 def test_sync_gate_rule_sentences_present():
@@ -756,6 +757,30 @@ ACTION_HEADER = ["Action", "Gate outcome (LOOK/NOTIFY/REVIEW/ACT/STOP)", "Approv
 MERMAID_NODE = re.compile(r'[A-Za-z0-9_]+\s*(\[|\{)"([^"]+)"[\]\}]')
 
 
+SLOT_CELL = re.compile(r"^`([a-z]+)`")
+FLAGSHIP_PAGES = [p for p in use_case_pages() if (front_matter(p) or {}).get("flagship") is True]
+
+
+@pytest.mark.parametrize("path", FLAGSHIP_PAGES, ids=_id)
+def test_shared_slots_table(path):
+    """Each flagship names a released checkpoint for every slot it uses, pinned by revision."""
+    table = table_with_header(path, "How it works", SLOTS_HEADER)
+    assert len(table) > 1, path
+    col = table[0].index("Checkpoint")
+    slots = set()
+    for row in table[1:]:
+        assert row[col].endswith(", pinned by revision"), row
+        m = SLOT_CELL.match(row[0])
+        assert m, row[0]
+        slots.add(m.group(1))
+    assert slots == set((front_matter(path) or {}).get("otel_slots", [])), slots
+    assert not re.search(r"OTel-2\.5|2\.5-", "\n".join(" | ".join(r) for r in table))
+
+
+def test_shared_four_flagships():
+    assert len(FLAGSHIP_PAGES) == 4, FLAGSHIP_PAGES
+
+
 def _knowledge_nodes() -> list[tuple[str, str]]:
     """(shape opener, text) for each Mermaid node on the knowledge page."""
     return [(m.group(1), m.group(2)) for m in MERMAID_NODE.finditer(mermaid_fences(body(KNOWLEDGE))[0])]
@@ -896,8 +921,11 @@ def test_closed_loop_gate_and_workflow():
 def test_closed_loop_swap_procedure():
     steps = _swap_steps()
     joined = " ".join(steps)
-    for term in ("replayed incidents", "registry", "Non-inferiority margin", "canary", "pinned 2.0 revision"):
+    for term in ("replayed incidents", "registry", "Non-inferiority margin", "canary", "pinned prior revision"):
         assert term in joined, term
+    assert "pinned 2.0 revision" not in joined
+    pin = _ordered_steps(section_text(CLOSED_LOOP, "Deploy and verify"))[0]
+    assert "2.0 for the LLM and Decision slots" in pin, pin
     stripped = re.sub(r"\b2\.[05]\b|PB-\d{2}|TMF\d{3}|Level \d", "", joined)
     assert not re.search(r"\d", stripped), stripped
 
@@ -1002,6 +1030,8 @@ def test_adaptation_ladder_classification_head():
     sentences = _sentences(body(TRIAGE))
     assert any("Classification" in s and "taxonomy" in s for s in sentences)
     assert any("drive-test" in s for s in sentences)
+    assert "eight root-cause classes from the synthetic TeleLogs drive-test dataset" in flat(body(TRIAGE))
+    assert "throughput classes" not in body(TRIAGE)
     text = body(TRIAGE)
     assert "Classification per-class recall floor" in text
     assert "Classification other-or-abstain recall floor" in text

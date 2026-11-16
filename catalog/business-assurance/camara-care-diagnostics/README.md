@@ -12,7 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Suggests answers to a care agent from CAMARA device diagnostics, with the customer's consent checked before any tool call. Recommends only; the care agent decides. Depends on the operator's consent service and the MCP gateway."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [303, 304]
-clarity_reviewed: "2026-11-13"
+clarity_reviewed: "2026-11-15"
 card:
   goal: "Help care agents diagnose customer issues"
   summary: "Suggests answers to care agents on no-service calls, using device status read through CAMARA APIs with the customer's consent."
@@ -110,6 +110,17 @@ CAMARA's Identity and Consent Management working group has [an open issue](https
 
 Traces hold metadata only; span content capture runs only as an opt-in that the data protection officer approves, as [PB-09](../../../platform/quality-operations/README.md) sets out. The roaming country is location-related data, so map it to the ePrivacy rows in the [PB-10 privacy map](../../../platform/compliance-operating-model/README.md#privacy-map-for-gdpr-and-eprivacy). Your legal team owns the conclusions.
 
+### Slots and checkpoints
+
+| Slot | Checkpoint | Role | Placement |
+|---|---|---|---|
+| `embedding` | OTel-Embedding-600M, 4B, or 8B, pinned by revision | Turns care articles and questions into vectors | Regional |
+| `reranker` | OTel-Reranker-0.6B or OTel-Reranker-4B, pinned by revision | Puts the best passages first | Regional |
+| `safety` | OTel-LLM-12B-Safety or OTel-LLM-8.3B-Safety, pinned by revision | Abstains when the evidence is missing | Regional |
+| `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Picks the LLM size, and gives the gate label | Regional |
+| `llm`, small | A 1B to 14B OTel LLM, pinned by revision | Drafts the suggestion for routine cases | Regional |
+| `llm`, large | OTel-2.0-LLM-31B-IT, pinned by revision | Drafts the suggestion for harder cases | Core |
+
 ### Worked example: no mobile data while roaming
 
 A customer abroad reports no mobile data, and the care agent opens `case-8841` for subscriber `+44 7700 900123`. The customer's app ran Number Verification on the device, and the copilot `care-copilot` receives `true`.
@@ -120,14 +131,14 @@ The care agent asks for a case note. The copilot sends `req-8841-1` as a `notify
 
 ## What you need
 
-- [ ] Models: the five slots, chosen from the family in [PB-01](../../../platform/intake-model-selection/README.md), each pinned by revision with its licence chain recorded
+- [ ] Models: the five slots in the slots table, chosen from the family in [PB-01](../../../platform/intake-model-selection/README.md), each pinned by revision with its licence chain recorded
 - [ ] Platform blueprints: the pages for [PB-02](../../../platform/evaluation-acceptance/README.md), [PB-04](../../../platform/serving-routing-placement/README.md), [PB-05](../../../platform/integration/README.md), [PB-06](../../../platform/safety-autonomy-gating/README.md), [PB-07](../../../platform/action-layer/README.md), [PB-08](../../../platform/security-identity-sandbox/README.md), [PB-09](../../../platform/quality-operations/README.md), and [PB-10](../../../platform/compliance-operating-model/README.md)
 - [ ] Components: one product for each role in the components table
 - [ ] Integrations: the Device Roaming Status, Device Reachability Status, and Connected Network Type APIs behind the MCP Gateway, the TMF621 API for network tickets, and your care case system
 - [ ] Number Verification: run in the customer's app, which passes only the result to the case
 - [ ] Tokens: three-legged tokens only, and per-tool authorization that denies a call unless a role allows it
 - [ ] Data: a care knowledge base with usage rights recorded in the [PB-05 corpus register](../../../platform/integration/README.md#knowledge-sources-and-usage-rights)
-- [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
+- [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
 - [ ] Placement: the regional site runs Embedding, Reranker, Safety, Decision, and the small LLM. The core runs the large LLM for harder cases.
 - [ ] Commitments: no credits, refunds, or service-level statements in a suggestion without a deterministic policy lookup
 - [ ] Stage register: every action class starts at the shadow stage
@@ -187,7 +198,7 @@ This page gives no default values. Each owner sets the value with SME review and
 | Activity | Responsible | Accountable | Consulted | Informed |
 |---|---|---|---|---|
 | Approve a REVIEW request | Approver | Business owner | SME | Operations engineer |
-| Tune Safety slot abstention | Platform team | Model owner | SME | Business owner |
+| Tune Safety slot abstention | Platform team | Risk owner | SME | Business owner |
 | Approve content capture | Platform team | Data protection officer | Security | Risk owner |
 | Run the DPIA | Data protection officer | Business owner | Legal team | Risk owner |
 | Classify the use case under the EU AI Act | Risk owner | Legal team | Business owner and data protection officer | Security |

@@ -551,6 +551,13 @@ def test_gating_promotion_parameters():
     assert len(table) - 1 >= 3
 
 
+def test_gating_safety_abstention_raci():
+    """The risk owner sets the abstain-recall floor, so the risk owner is accountable for abstention."""
+    table = table_with_header(GATING, "Operating model", ["Activity", "Responsible", "Accountable"])
+    row = next(r for r in table[1:] if r[0] == "Tune Safety slot abstention")
+    assert row[2] == "Risk owner", row
+
+
 def test_gating_no_deprecated_guardrails():
     text = body(GATING)
     assert not re.search(r"\b(FMS|OGX)\b", text)

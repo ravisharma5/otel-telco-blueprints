@@ -11,7 +11,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Answers standards and runbook questions with citations, or abstains and lists what it searched. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10"]
 agent_school: [103, 201, 203, 402]
-clarity_reviewed: "2026-11-13"
+clarity_reviewed: "2026-11-15"
 card:
   goal: "Answer engineers' questions faster"
   summary: "Answers standards and runbook questions from your own documents with citations, or says it can't answer and shows what it searched."
@@ -106,7 +106,7 @@ A second engineer asks about the same timers in a vendor's new software release.
 - [ ] Corpora: each source, such as 3GPP and IETF specifications, TM Forum documents, vendor manuals, and runbooks, has a filled usage-rights entry in the corpus register before indexing, as [PB-05](../../../platform/integration/README.md#knowledge-sources-and-usage-rights) requires
 - [ ] Reranker check: compare the Reranker slot's `/rerank` scores with `sentence-transformers` scores on held-out pairs before it serves retrieval, because the OTel rerankers are Qwen3 fine-tunes with a one-label head, not Qwen3-Reranker
 - [ ] Embedding revision: a change of embedding model forces a full re-index of every vector store built with it, so record the embedding revision with the index
-- [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states; call `/v1/chat/completions` with log probabilities
+- [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states; call `/v1/chat/completions` with log probabilities
 - [ ] Placement: retrieval, Safety, Decision, and the small LLM at the regional site; the large LLM at the core, as the [placement tiers](../../../architecture/placement.md) page sets out
 - [ ] Data: a golden set of operator questions with SME-checked answers and labelled passages, plus items with the evidence removed, as [PB-02](../../../platform/evaluation-acceptance/README.md) describes
 
@@ -163,7 +163,7 @@ This page gives no default values. Each owner sets the value with SME review and
 | Add a corpus to the register | Business owner | Risk owner | Legal team and data protection officer | Platform team |
 | Build and label golden sets, trajectory scenarios, and the gate set | SME | Business owner | Model owner | Risk owner |
 | Set Decision routing thresholds | Model owner | Business owner | Platform team | Risk owner |
-| Tune Safety slot abstention | Platform team | Model owner | SME | Business owner |
+| Tune Safety slot abstention | Platform team | Risk owner | SME | Business owner |
 
 ## Sources
 

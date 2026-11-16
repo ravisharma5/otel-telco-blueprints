@@ -15,7 +15,7 @@ top_decisions:
   - "Keep the front door, content routing, and replica scheduling separate"
   - "Pick a serving option for each tier"
 agent_school: [104, 203]
-clarity_reviewed: "2026-11-14"
+clarity_reviewed: "2026-11-15"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -119,7 +119,7 @@ These failures are silent: the endpoint answers, but the output or the build is 
 | NVIDIA Ampere | No FP8 W8A8; use W8A16 or W4A16 instead | [vLLM quantization](https://docs.vllm.ai/en/stable/features/quantization/) |
 | Decision slot (Gemma 4 MoE) on ROCm with the Red Hat AI Inference build of vLLM 0.24 | Add `--moe-backend triton` | [Red Hat AI Inference release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes) |
 | Gemma 4 with image input on H100 or H200 with the Red Hat AI Inference build of vLLM 0.24 | Add `--attention-backend TRITON_ATTN`; text-only serving avoids the issue | [Red Hat AI Inference release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes) |
-| Decision slot engine | vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm | [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Decision slot engine | vLLM 0.26 or 0.30 on CUDA or ROCm | [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | Decision MoE kernels | Results are not bit-deterministic; expect small run-to-run variation on low-margin cases and keep thresholds clear of it | [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | Any 31B deployment | Ask the model to identify itself after deploy; it should answer as OTel 2.0, because HTTP 200 alone does not show the deployment is correct | [31B model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT) |
 
@@ -280,7 +280,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Slot | Candidate checkpoints | Notes |
 |---|---|---|
 | `llm` | OTel-2.0-LLM-31B-IT for explanations, and a 1B to 14B OTel LLM as the small LLM, pinned by revision | Serve the 31B text-only with the `gemma4` tool parser. Use an FP8 build at regional sites after it passes your acceptance suite |
-| `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | The card targets vLLM 0.26 (CUDA) or 0.30 (ROCm). The current Red Hat AI Inference release ships vLLM 0.24, so run the Decision slot under KServe on an engine at 0.26 or later, such as a Red Hat AI Inference fast release. Call `/v1/chat/completions` with log probabilities; the card's `/v1/systemone` endpoint needs a nightly build |
+| `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | The card names vLLM 0.26 or 0.30 on CUDA or ROCm. The current Red Hat AI Inference release ships vLLM 0.24, so run the Decision slot under KServe on one of the card's versions, and test any other version on your acceptance suite first. Call `/v1/chat/completions` with log probabilities; the card's `/v1/systemone` endpoint needs a nightly build |
 | `classification` | OTel-LLM-8.3B-Classification, pinned by revision | Serve with the pooling runner and `--convert classify` |
 | `safety` | OTel-LLM-12B-Safety or OTel-LLM-8.3B-Safety, pinned by revision | Generative; size at about 2 bytes per parameter in bf16 |
 | `embedding` | OTel-Embedding models from 22M to 8B, pinned by revision | Models up to 335M run on CPU. Changing the model forces a full re-index of every vector store built with it |

@@ -323,8 +323,9 @@ def slot_cell_role(slot_cell, checkpoint_cell):
 def placement_from_slots_table(table):
     out = {tier: set() for tier in TIERS}
     for row in table[1:]:
-        tier = TIER_WORDS[row[3].strip().lower()]
-        out[tier].add(slot_cell_role(row[0], row[1]))
+        # One tier, or several joined by "and" (for example "Regional and core").
+        for word in re.split(r",\s*|\s+and\s+", row[3].strip().lower()):
+            out[TIER_WORDS[word]].add(slot_cell_role(row[0], row[1]))
     return out
 
 

@@ -12,7 +12,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Handles router incidents from alarm to ticket with read-only tools, and sends every write through the Decision gate. Acts within policy only for low-risk classes, once that stage is earned. Depends on the Decision gate and the automation workflow."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [101, 301, 302, 403]
-clarity_reviewed: "2026-11-13"
+clarity_reviewed: "2026-11-15"
 card:
   goal: "Resolve incidents with less manual work"
   summary: "An agent investigates router alarms with read-only tools and opens tickets. Every fix passes a gate, and low-risk fixes skip approval only after earning it."
@@ -103,7 +103,7 @@ Risk classes follow the [decision gate schema](https://github.com/ravisharma5/ot
 
 | Slot | Checkpoint | Role | Placement |
 |---|---|---|---|
-| `llm` | OTel-2.0-LLM-31B-IT, pinned by revision; OTel 2.5 replaces it only through the swap in Deploy and verify | The agent: reads, reasons, and writes action requests | Core |
+| `llm` | OTel-2.0-LLM-31B-IT, pinned by revision | The agent: reads, reasons, and writes action requests | Core |
 | `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Gives the gate label in action orchestration | Regional |
 | `safety` | OTel-LLM-12B-Safety or OTel-LLM-8.3B-Safety, pinned by revision | Checks that the evidence supports a finding before the agent proposes a change | Regional |
 | `classification` | OTel-LLM-8.3B-Classification with its head retrained on your alarm taxonomy, pinned by revision | Labels the likely cause, served as a read tool | Regional |
@@ -124,7 +124,7 @@ Next the agent proposes a BGP soft reset in `req-3107-2`, a `write_low` request.
 - [ ] Integrations: the TMF642, TMF621, TMF628, and TMF639 APIs and read-only device tools, each behind the MCP Gateway
 - [ ] Write path: `submit_action_request` is the agent's only write tool, and only the job templates hold write credentials
 - [ ] Gate endpoint: let REST API steps reach the in-cluster gate endpoint, and require a token there, because the Decision model card's recipe starts a server with no authentication
-- [ ] Decision engine: vLLM 0.26 or later on CUDA, or 0.30 or later on ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
+- [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states
 - [ ] Playbooks: each with a verification job and a rollback job, tested on a stateful mock
 - [ ] Agent identity: a workload identity bound to the agent's tool roles, as PB-08 sets out
 - [ ] Data: replayed incidents on stateful mocks, and a gate set weighted toward non-ACT cases
@@ -222,12 +222,12 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 Apply these settings in order. No class rises past its stage until the gates pass.
 
-1. Pin the 2.0 checkpoint for each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
+1. Pin the current checkpoint for each slot (2.0 for the LLM and Decision slots) through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and licence chain in the model registry.
 2. Deploy the slots with the flags from What you need, and expose the gate endpoint inside the cluster behind a token.
 3. Have each owner load the policy ceilings, the approver role per action class, and the Label-mass floor, with every class at the shadow stage in the stage register ([PB-06](../../../platform/safety-autonomy-gating/README.md)).
-4. Baseline: run the PB-02 ladder on the pinned 2.0 checkpoints: intake and smoke, public sanity, operator offline acceptance on replayed incidents with stateful mocks and trajectory checks, and safety and red team. Record the pass or fail on each registry version.
+4. Baseline: run the PB-02 ladder on the pinned checkpoints: intake and smoke, public sanity, operator offline acceptance on replayed incidents with stateful mocks and trajectory checks, and safety and red team. Record pass or fail on each registry version.
 5. Swap: when OTel 2.5 ships, take it through intake. The regression trigger for a new checkpoint version or base family re-runs the full ladder in paired runs on identical items against the Non-inferiority margin, and you retrain any adapter on the new base.
-6. Promote or roll back: run the passing version in shadow beside people, then as a weighted canary, capped at REVIEW, for the Canary window. Any zero-tolerance event or missed gate rolls back to the pinned 2.0 revision, and a ceiling rises only through the stage register.
+6. Promote or roll back: run the passing version in shadow beside people, then as a weighted canary, capped at REVIEW, for the Canary window. Any zero-tolerance event or missed gate rolls back to the pinned prior revision, and a ceiling rises only through the stage register.
 
 | Check | PB-02 gate or parameter | Owner |
 |---|---|---|
