@@ -41,7 +41,7 @@ Page budget: 1800 prose words (about 4 pages at 450 words per page). Tables don'
 
 ### Use-case blueprint
 
-Page budget: 1350 prose words for a flagship (about 3 pages), 450 prose words for a catalog entry (about 1 page).
+Page budget: 1350 prose words for a recipe (about 3 pages), 550 prose words for an entry (about 1 page). Front-matter `depth` picks the budget.
 
 | # | Section | Budget |
 |---|---|---|

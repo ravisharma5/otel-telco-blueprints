@@ -407,3 +407,97 @@ def test_catalog_entry_stubs_only_optional_sections():
         if title in required:
             assert not is_stub, f"{title} must be filled in a catalog entry"
     assert stubbed == ["How it works", "Deploy and verify"]
+
+
+# ---------- catalog-entry template and the entry budget ----------
+
+ENTRY_TEMPLATE = TEMPLATES / "use-case-entry.md"
+ENTRY_MAX = FIXTURES / "budget/entry-max/README.md"
+STYLE_GUIDE = REPO_ROOT / "framework/style-guide.md"
+GATING_PAGE = REPO_ROOT / "platform/safety-autonomy-gating/README.md"
+NO_COURSE_SENTENCE = "None: no agent-school course covers this use case yet"
+MUST_ADD_HEADER = ["Gap", "What you add", "Source"]
+MAX_SLOTS = {"embedding", "reranker", "safety", "decision", "llm", "classification"}
+PAGE_WORDS = BUDGETS["types"]["use-case"]["page_words"]
+# Telecom job titles stay out of templates; pages use generic roles.
+JOB_TITLE = re.compile(
+    r"noc-shift-lead|\bNOC lead|\bshift lead|operator risk owner|operator SME"
+    r"|\bplatform engineers?\b|\bplatform owners?\b|\bautomation teams?\b"
+    r"|\brisk and compliance leads?\b|\bnamed approver\b|\bsecurity architects?\b"
+    r"|\bNOC engineers?\b",
+    re.I,
+)
+
+
+def raw_section(body: str, title: str) -> str:
+    m = re.search(rf"^## {re.escape(title)}[ \t]*$", body, re.M)
+    assert m, f"no ## {title}"
+    nxt = re.search(r"^## ", body[m.end() :], re.M)
+    return body[m.end() : m.end() + nxt.start()] if nxt else body[m.end() :]
+
+
+def raw_front_matter(path: pathlib.Path) -> str:
+    return path.read_text().split("---\n", 2)[1]
+
+
+def visible(text: str) -> str:
+    """Text with HTML comments removed."""
+    return re.sub(r"<!--.*?-->", "", text, flags=re.S)
+
+
+def gate_rule_sentences() -> list[str]:
+    """First two sentences under "### Gate rules" on the gating page."""
+    text = GATING_PAGE.read_text()
+    m = re.search(r"^### Gate rules[ \t]*$", text, re.M)
+    rest = text[m.end() :]
+    nxt = re.search(r"^#{2,3} ", rest, re.M)
+    block = re.sub(r"\s+", " ", rest[: nxt.start()] if nxt else rest).strip()
+    return re.split(r"(?<=[.!?])\s+", block)[:2]
+
+
+def must_add_rows(body: str) -> tuple[list[str], list[list[str]]] | None:
+    need = raw_section(body, "What you need")
+    m = re.search(r"^### What you must add[ \t]*$", need, re.M)
+    if not m:
+        return None
+    found = tables(tokens(need[m.end() :]))
+    return found[0] if found else None
+
+
+def test_entry_budget_fixture_is_maximal():
+    fm, body = split_doc(ENTRY_MAX)
+    assert fm["depth"] == "entry" and fm["flagship"] is False
+    assert set(fm["otel_slots"]) == MAX_SLOTS and len(fm["otel_slots"]) == 6
+    assert fm["autonomy_ceiling"] == "recommend-with-approval" and fm["tmf_an_level_target"] == 2
+    need = raw_section(body, "What you need")
+    assert len(re.findall(r"^- \[ \] ", need, re.M)) == 12
+    assert re.search(r"^- \[ \] Decision engine: ", need, re.M)
+    assert "```text" in need and "# Decision (card recipe)" in need
+    assert len(re.findall(r"^- ", raw_section(body, "Limitations"), re.M)) == 6
+    head, rows = must_add_rows(body)
+    assert head == MUST_ADD_HEADER and len(rows) >= 5
+    problem = [ln for ln in raw_section(body, "Problem and value").splitlines() if ln.strip()]
+    assert len(problem) == next(s["lines"] for s in BUDGETS["types"]["use-case"]["sections"] if s["title"] == "Problem and value")
+    gov = raw_section(body, "Governance")
+    actions = next(t for t in tables(tokens(gov)) if t[0] == USE_CASE_ACTION_HEADER)
+    outcomes = " ".join(r[1] for r in actions[1])
+    assert "NOTIFY" in outcomes and "REVIEW" in outcomes
+    flat_gov = re.sub(r"\s+", " ", gov)
+    for sentence in gate_rule_sentences():
+        assert sentence in flat_gov, sentence
+
+
+def test_entry_budget_fits_maximal_entry():
+    from tools.tests.conftest import run_bplint
+
+    assert run_bplint(ENTRY_MAX) == (0, [])
+    _, body = split_doc(ENTRY_MAX)
+    assert prose_words(body) <= PAGE_WORDS["entry"]
+
+
+def test_style_guide_entry_budget_matches_budgets():
+    text = STYLE_GUIDE.read_text()
+    recipe = re.search(r"(\d+) prose words for a recipe", text)
+    entry = re.search(r"(\d+) prose words for an entry", text)
+    assert recipe and int(recipe.group(1)) == PAGE_WORDS["recipe"]
+    assert entry and int(entry.group(1)) == PAGE_WORDS["entry"]
