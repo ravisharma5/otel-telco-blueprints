@@ -2,7 +2,7 @@
 id: "UC-OPS-07"
 type: "use-case"
 title: "MOP validation"
-doc_status: draft
+doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "recipe"
@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Checks each method of procedure (MOP) against inventory, vendor documents, and runbooks, dry-runs it through tools, and recommends approval or rejection to the change approver. Never executes a MOP. Depends on your own MOP-based evaluation against emulated network devices."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [301, 401]
+clarity_reviewed: "2026-11-16"
 card:
   goal: "change"
   summary: "Reviews each change's MOP against inventory, documents, and a dry run, then recommends approval or rejection to the change approver."
@@ -80,7 +81,7 @@ flowchart TD
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. Every action class starts at the shadow stage, and a confirmed false ACT drops the use case and its action class back one stage, as [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy) sets out.
 
-The validation report is NOTIFY from the assist stage up, and a notification job posts it to the change request. The recommendation carries the MOP as its proposed step, so it is `write_high` and never gets an outcome higher than REVIEW. The agent never executes the MOP: execution stays an approved job in the [action layer](../../../platform/action-layer/README.md), which runs only after the change approver signs off. Where devices support it, that job uses a NETCONF confirmed commit, which reverts unless a confirming commit follows.
+The validation report is NOTIFY from the assist stage up, and a notification job posts it to the change request. The recommendation's proposed step is the change itself, so it is `write_high` and never gets an outcome higher than REVIEW. The agent never executes the MOP: execution stays an approved job in the [action layer](../../../platform/action-layer/README.md), which runs only after the change approver signs off. Where devices support it, that job uses a NETCONF confirmed commit, which reverts unless a confirming commit follows.
 
 ### Slots and checkpoints
 
@@ -96,7 +97,7 @@ The validation report is NOTIFY from the assist stage up, and a notification job
 
 Change request `chg-7731` asks to upgrade the software on edge router `edge-rtr-09`, and its MOP is `mop-7731-v2`. The change system starts `mop-review-agent`.
 
-The inventory shows the router's current software image and the services that run through it. The vendor upgrade guide in retrieval lists a pre-check on free storage and a rollback to the previous image. The Ansible check mode tool runs the upgrade playbook cleanly. The MOP has the storage pre-check, but no step restores the previous image if the post-upgrade checks fail. Safety finds the evidence sufficient.
+The inventory shows the router's current software image and the services that run through it. The vendor upgrade guide in retrieval lists a pre-check on free storage and a rollback to the previous image. The Ansible check mode tool runs the upgrade playbook with no errors. The MOP has the storage pre-check, but no step restores the previous image if the post-upgrade checks fail. Safety finds the evidence sufficient.
 
 The agent sends the validation report, the gate returns NOTIFY, and a notification job posts the missing rollback step to `chg-7731`, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table shows. The agent then sends its recommendation to reject `mop-7731-v2` until it adds a rollback step. The change is `write_high`, so even if the label reads ACT, the outcome is REVIEW. The change approver rejects the MOP, and nothing runs. The author adds the rollback step, and the agent reviews the new version.
 
@@ -105,7 +106,7 @@ The agent sends the validation report, the gate returns NOTIFY, and a notificati
 - [ ] Models: the slots in the slots table, chosen from the family in [PB-01](../../../platform/intake-model-selection/README.md), each pinned by revision with its licence chain recorded
 - [ ] Platform blueprints: the pages for [PB-02](../../../platform/evaluation-acceptance/README.md), [PB-04](../../../platform/serving-routing-placement/README.md), [PB-05](../../../platform/integration/README.md), [PB-06](../../../platform/safety-autonomy-gating/README.md), [PB-07](../../../platform/action-layer/README.md), [PB-08](../../../platform/security-identity-sandbox/README.md), [PB-09](../../../platform/quality-operations/README.md), and [PB-10](../../../platform/compliance-operating-model/README.md)
 - [ ] Components: one product for each role in the components table
-- [ ] MOP evaluation first: the [31B model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) says no benchmark has checked the model's step-by-step procedures, and that any such use "requires dedicated MOP-based evaluation" against emulated network operating system (NOS) instances in a digital twin "before deployment." Run that evaluation on your own MOPs and emulated devices before the shadow stage
+- [ ] MOP evaluation first: the [31B model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) says no benchmark has checked the model's step-by-step procedures on network devices, and that using it on MOPs "requires dedicated MOP-based evaluation" against emulated network operating system (NOS) instances in a digital twin "before deployment." Run that evaluation on your own MOPs and emulated devices before the shadow stage
 - [ ] Read tools: read-only access to change requests, resource inventory, and service inventory, each behind the MCP Gateway, which denies a call unless a role allows it
 - [ ] Dry-run tools: the NETCONF candidate datastore and validate, Ansible check mode, and a digital twin or emulated lab, none of which can commit a change
 - [ ] Corpora: vendor documents, runbooks, and past MOPs with their post-change reports, each with a usage-rights entry ([PB-05](../../../platform/integration/README.md#knowledge-sources-and-usage-rights))
@@ -182,7 +183,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 | # | Claim | Basis | Source |
 |---|---|---|---|
-| 1 | No benchmark has checked the 31B's step-by-step procedures on real or emulated network devices, and any such use requires dedicated MOP-based evaluation, for example against emulated NOS instances in a digital twin, before deployment | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) |
+| 1 | No benchmark has checked the 31B's step-by-step procedures on real or emulated network devices, and using it on MOPs requires dedicated MOP-based evaluation, for example against emulated NOS instances in a digital twin, before deployment | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) |
 | 2 | The 31B training leaves out vendor command references and NOS documentation, and change-approval records such as MOP approval and closure records | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | 3 | The 31B targets English-language use, and all its quality claims are text-only | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |
 | 4 | The Decision model reads decisions from label probabilities and uses them for confidence thresholds and routing, on vLLM 0.26 or 0.30 | model card | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
@@ -199,7 +200,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 Apply these settings in order. Every action class starts at the shadow stage, and no recommendation ever gets an outcome higher than REVIEW.
 
 1. Pin each slot through intake ([PB-01](../../../platform/intake-model-selection/README.md)), and record each revision and its licence chain in the model registry.
-2. Run the MOP-based evaluation on your own MOPs against emulated devices, for example with a network emulation harness such as inspect-kathara.
+2. Run the MOP-based evaluation on your own MOPs against emulated devices, for example in a container-based network emulator like GSMA's inspect-kathara.
 3. Connect change requests and inventory as read tools and the dry-run tools with no commit rights, and mark every recommendation as `write_high`.
 4. Register the corpora, then deploy Embedding and Reranker with the flags from What you need and run the reranker score check.
 5. Deploy Safety and Decision at the regional site, then the 31B at the core with the tool-calling flags.
