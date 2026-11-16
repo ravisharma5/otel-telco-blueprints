@@ -2,7 +2,7 @@
 id: "UC-OPS-05"
 type: "use-case"
 title: "RAN energy saving"
-doc_status: draft
+doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "recipe"
@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Plans energy-saving windows for capacity booster cells hours ahead and simulates each one before asking to act. Acts within policy only on booster cells, once that stage is earned; coverage cells always need approval. Depends on your traffic forecast, a simulation or digital twin, and the Decision gate."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [302]
+clarity_reviewed: "2026-11-16"
 card:
   goal: "sla-energy"
   summary: "Plans energy-saving windows for capacity booster cells hours ahead, simulates each first, and acts only on low-risk cells after earning it."
@@ -44,7 +45,7 @@ placement:
 
 ## Problem and value
 
-Network energy use doesn't fall in step with traffic, so cells burn power through quiet nights that few users need.
+Network energy use doesn't fall in step with traffic, so cells stay fully powered through quiet nights when few users need them.
 This recipe plans energy-saving windows for capacity booster cells hours ahead, tests each one in a simulation or digital twin, and sends it through the Decision gate, so every switch-off leaves evidence, a gate decision, and an audit record.
 The KPI is energy used per traffic volume with service KPIs held; any saving is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures.
 
@@ -75,9 +76,9 @@ flowchart TD
 1. A scheduled run starts the planning agent hours before a low-traffic period. Through the MCP Gateway it reads per-cell traffic forecasts built from performance counters (TS 28.552) and the cell inventory. The gateway denies each call unless a role allows it, the deny-unless-allowed rule in [PB-05](../../../platform/integration/README.md#per-tool-authorization).
 2. The agent proposes windows only for capacity booster cells that candidate cells overlay, the scenario TS 28.310 describes. O-RAN calls the same feature cell and carrier shutdown.
 3. The agent submits each window to a simulation or digital-twin job, which it may only submit and poll, as course 302 teaches. The job reports the expected energy saving and the service KPIs on the candidate cells.
-4. A window goes on only when its simulated saving reaches the Minimum simulated energy saving and every service KPI stays inside the Service KPI guard band. Code runs this check, not the prompt.
+4. A window moves on only when its simulated saving reaches the Minimum simulated energy saving and every service KPI stays inside the Service KPI guard band. Code runs this check, not the prompt.
 5. Safety checks that the simulation result supports the window. When it doesn't, the agent drops the window and records why.
-6. The agent sends each window that survives, and the energy report, as action requests, and the Decision slot answers a fixed label question at the [decision gate](../../../architecture/decision-gate.md).
+6. The agent sends each window that passes, and the energy report, as action requests, and the Decision slot answers a fixed label question at the [decision gate](../../../architecture/decision-gate.md).
 7. During the window, a verification job watches service KPIs on the candidate cells. If a service KPI leaves the Service KPI guard band, the [action layer](../../../platform/action-layer/README.md) rolls back the window by reactivating the cell.
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. Every action class starts at the shadow stage, and a confirmed false ACT drops the use case and its action class back one stage, as [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy) sets out.
@@ -101,7 +102,7 @@ The forecast for a rural cluster shows traffic on booster cell `nrcell-rural-b3`
 
 The simulation shows the candidate cell absorbing the traffic with every service KPI inside the Service KPI guard band, and a saving that clears the Minimum simulated energy saving. Safety finds the result supports the window, and the agent sends request `es-req-0412`, a `write_low` request.
 
-This class earned the act stage after its Canary window, so the gate returns ACT within the Ceiling for low-risk writes, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table shows. A job template puts `nrcell-rural-b3` into energy saving, and the verification job watches the candidate cell. At 03:40 its service KPIs drift toward the edge of the guard band, then cross it, so the rollback job reactivates the cell and the workflow records the rollback. The approver reviews the case to decide whether the label was a false ACT.
+This class earned the act stage after its Canary window, and the ACT probability clears the Minimum ACT probability for the act stage, so the gate returns ACT within the Ceiling for low-risk writes, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table shows. A job template puts `nrcell-rural-b3` into energy saving, and the verification job watches the candidate cell. At 03:40 a service KPI on the candidate cell leaves the guard band, so the rollback job reactivates `nrcell-rural-b3` and the workflow records the rollback. The approver then checks whether the label was a false ACT; a confirmed false ACT drops the class back one stage.
 
 ## What you need
 
