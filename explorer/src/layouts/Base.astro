@@ -4,11 +4,17 @@ import { frontmatter as copy } from '../content/copy.md';
 
 interface Props {
   title: string;
+  // A nav path for the page itself, or a page kind that lives under a nav section.
   current?: string;
 }
 
+
 const { title, current = '' } = Astro.props;
 const base = import.meta.env.BASE_URL;
+// Use-case pages sit in the Use cases section: its link is the current section, not the page.
+const SECTION_OF: Record<string, string> = { 'use-case': '' };
+const ariaCurrent = (path: string) =>
+  path === current ? 'page' : SECTION_OF[current] === path ? 'true' : undefined;
 ---
 <!doctype html>
 <html lang="en">
@@ -39,7 +45,7 @@ const base = import.meta.env.BASE_URL;
               <li>
                 <a
                   href={base + item.path}
-                  aria-current={item.path === current ? 'page' : undefined}
+                  aria-current={ariaCurrent(item.path)}
                 >{item.label}</a>
               </li>
             ))}

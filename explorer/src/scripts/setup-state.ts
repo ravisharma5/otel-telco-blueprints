@@ -100,6 +100,8 @@ function applyToggles(): void {
 
 function initToggles(): void {
   for (const toggle of Array.from(document.querySelectorAll<HTMLButtonElement>('.options-toggle'))) {
+    // Shipped hidden: without scripts it would do nothing.
+    toggle.hidden = false;
     toggle.addEventListener('click', () => {
       showAll = !showAll;
       applyToggles();

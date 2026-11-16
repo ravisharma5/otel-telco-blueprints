@@ -263,7 +263,6 @@ use_case:
   # Not-applicable reasons keyed by reason id (data/serving/options.yaml rules).
   reasons:
     core-only: Core only. Your setup is a regional site.
-    regional-only: Regional only. Your setup is a core pool.
     not-amd-paths: Not in llm-d's documented paths for AMD GPUs.
     batch-only: Only matters when batch work shares the GPUs.
     not-needed-at-core: "Not needed at core: these GPUs fit the full-precision models."

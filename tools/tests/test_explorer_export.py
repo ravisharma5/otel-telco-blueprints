@@ -719,19 +719,6 @@ def test_published_only_and_unique_slugs(data):
         assert (REPO_ROOT / "catalog" / uc["domain"] / uc["slug"] / "README.md").is_file()
 
 
-def test_unpublished_page_skipped(tmp_path):
-    shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
-    shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
-    _copy_serving_page(tmp_path)
-    page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
-    text = page.read_text(encoding="utf-8")
-    start = text.index("\ncard:")
-    end = text.index("\nplacement:")
-    page.write_text(text[:start] + text[end:], encoding="utf-8")
-    ids = [uc["id"] for uc in ex.build_explorer_data(tmp_path)["use_cases"]]
-    assert "UC-KNOW-01" not in ids and ids
-
-
 def test_filters_only_present_values(data):
     used_tiers = {t for uc in data["use_cases"] for t in TIERS if placed(uc["id"], t)}
     assert data["filters"]["tiers"] == [t for t in TIERS if t in used_tiers]
@@ -757,3 +744,47 @@ def test_cli_writes_json(tmp_path, data):
         check=True,
     )
     assert json.loads(out.read_text(encoding="utf-8")) == data
+
+
+@pytest.mark.parametrize("key", ["card", "placement"])
+def test_exporter_raises_without_card_or_placement(tmp_path, key):
+    """A use-case page the explorer cannot show stops the export instead of dropping out."""
+    shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
+    shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
+    page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
+    _, fm_text, rest = page.read_text(encoding="utf-8").split("---\n", 2)
+    fm = yaml.safe_load(fm_text)
+    del fm[key]
+    page.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n" + rest, encoding="utf-8")
+    with pytest.raises(SystemExit) as exc:
+        ex.build_explorer_data(tmp_path)
+    msg = str(exc.value)
+    assert "grounded-knowledge-assistant/README.md" in msg and key in msg, msg
+
+
+def test_exporter_docstring_matches_skip_rule():
+    assert "nothing is skipped silently" not in (ex.__doc__ or "")
+
+
+LINK = re.compile(r"https://github\.com/[^\s'\"]+")
+
+
+def test_options_links_pinned():
+    """Related links point at a commit, so the target cannot change under the page."""
+    text = (REPO_ROOT / "data/serving/options.yaml").read_text(encoding="utf-8")
+    links = LINK.findall(text)
+    assert links
+    floating = [u for u in links if re.search(r"/(blob|tree)/(main|master)/", u)]
+    assert floating == [], floating
+    for url in links:
+        if "/blob/" in url or "/tree/" in url:
+            assert re.search(r"/(blob|tree)/[0-9a-f]{40}/", url), url
+
+
+def test_fill_matches_own_keys_only():
+    """A {constructor} placeholder must not render a prototype function."""
+    src = (REPO_ROOT / "explorer/src/lib/data.ts").read_text(encoding="utf-8")
+    body = src.split("export function fill", 1)[1].split("\n}\n", 1)[0]
+    assert "Object.hasOwn(values, name)" in body, body
+    assert " in values" not in body, body

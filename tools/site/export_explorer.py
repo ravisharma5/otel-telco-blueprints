@@ -14,7 +14,8 @@ the fits band, swap the heaviest slot on it that has an operator-made FP8 build
 and pack again. Core setups use the published builds and show no fit bar.
 
 Any missing or inconsistent input stops the run with one line that names the
-file and the key; nothing is skipped silently.
+file and the key. A use-case page without `card` or `placement` stops the run
+too; only pages of another type, and pages in the demo domain, are left out.
 
 Usage:
     python -m tools.site.export_explorer [--out PATH]
@@ -546,8 +547,11 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
     if doc.fm_error:
         raise SystemExit(f"{rel}: front matter line {doc.fm_error[0]}: {doc.fm_error[1]}")
     fm = doc.front_matter or {}
-    if fm.get("type") != "use-case" or not fm.get("card") or not fm.get("placement"):
-        return None  # only published use cases with card and placement are exported
+    if fm.get("type") != "use-case":
+        return None  # only use-case pages belong in the explorer
+    for key in ("card", "placement"):
+        if not fm.get(key):
+            raise SystemExit(f"{rel}: use-case front matter has no {key}; the explorer cannot show this page")
     for key in REQUIRED_FM:
         _need(fm, key, rel)
     domain, slug = path.parent.parent.name, path.parent.name

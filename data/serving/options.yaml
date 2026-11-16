@@ -27,8 +27,8 @@ options:
       - Scoring is approximate by default; precise scoring needs the model's tokenizer files mirrored to the router, which takes extra work at a disconnected site.
     sources:
       - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes
-      - https://github.com/llm-d/llm-d/tree/main/guides/optimized-baseline
-      - https://github.com/llm-d/llm-d/tree/main/guides/precise-prefix-cache-routing
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/optimized-baseline
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/precise-prefix-cache-routing
     applies_when:
       - rule: tier
         allowed: [core]
@@ -59,7 +59,7 @@ options:
       - Only matters when batch work shares the pool; it orders requests and adds no capacity.
     sources:
       - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes
-      - https://github.com/llm-d/llm-d/tree/main/guides/flow-control
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/flow-control
     applies_when:
       - rule: tier
         allowed: [core]
@@ -90,7 +90,7 @@ options:
       - The new revision's pods need time to load weights and warm up before they take traffic.
     sources:
       - https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/new-features-and-enhancements_relnotes
-      - https://github.com/llm-d/llm-d/tree/main/guides/rollouts
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/rollouts
     applies_when:
       - rule: tier
         allowed: [core]
@@ -123,8 +123,8 @@ options:
       - Built for long or resumed contexts on the large LLM; measure before using it on the Decision slot, and leave it off the pooling slots.
     sources:
       - https://docs.vllm.ai/en/latest/features/kv_offloading_usage/
-      - https://github.com/llm-d/llm-d/blob/main/docs/architecture/kv-management/kv-offloader.md
-      - https://github.com/llm-d/llm-d/tree/main/guides/tiered-prefix-cache
+      - https://github.com/llm-d/llm-d/blob/565373b741e90bffa27930b4669c6e1f222f6225/docs/architecture/kv-management/kv-offloader.md
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/tiered-prefix-cache
     applies_when: []
     where_it_helps:
       - use_case: UC-AGOPS-01
@@ -170,7 +170,7 @@ options:
         reason: Ticket fields repeat device names and alarm text from the investigation.
     related:
       - title: Gemma 4 26B-A4B MTP recipe (base model)
-        url: https://github.com/openshift-psap/inference-playbooks/blob/main/models/gemma-4/recipes/h200-x8-mtp-single-gpu-8k1k/recipe.yaml
+        url: https://github.com/openshift-psap/inference-playbooks/blob/65cb30fd1d29553e7c587ca40eb8c243bda30b29/models/gemma-4/recipes/h200-x8-mtp-single-gpu-8k1k/recipe.yaml
         source: inference-playbooks
     excluded_slots: [decision]
 
@@ -186,7 +186,7 @@ options:
       - Core only; needs several GPUs and a fast network between them.
       - Red Hat's llm-d paths for AMD GPUs do not include it.
     sources:
-      - https://github.com/llm-d/llm-d/tree/main/guides/pd-disaggregation
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/pd-disaggregation
       - https://access.redhat.com/articles/7136620
     applies_when:
       - rule: tier
@@ -214,7 +214,7 @@ options:
       - Core only; needs a Prometheus monitoring stack.
       - A new replica takes time to load weights, so keep a minimum that covers the first minutes of a surge.
     sources:
-      - https://github.com/llm-d/llm-d/tree/main/guides/workload-autoscaling
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/workload-autoscaling
     applies_when:
       - rule: tier
         allowed: [core]
@@ -283,7 +283,7 @@ options:
       - Core only.
       - Static, digest-pinned adapters only; never runtime adapter loading.
     sources:
-      - https://github.com/llm-d/llm-d/tree/main/guides/multi-model-routing
+      - https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/multi-model-routing
       - https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk
     applies_when:
       - rule: tier
@@ -323,7 +323,7 @@ options:
         reason: Multi-turn care conversations keep more turns in memory per GPU.
     related:
       - title: Gemma 4 26B-A4B single-GPU recipe with FP8 KV cache
-        url: https://github.com/openshift-psap/inference-playbooks/blob/main/models/gemma-4/recipes/h200-x1-tp1-guidellm-8k1k/recipe.yaml
+        url: https://github.com/openshift-psap/inference-playbooks/blob/65cb30fd1d29553e7c587ca40eb8c243bda30b29/models/gemma-4/recipes/h200-x1-tp1-guidellm-8k1k/recipe.yaml
         source: inference-playbooks
     excluded_slots: [decision]
 

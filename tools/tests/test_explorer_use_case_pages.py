@@ -742,3 +742,23 @@ def test_script_safety(explorer_dist, data):
         text = js.read_text(encoding="utf-8")
         for banned in UNSAFE_DOM:
             assert banned not in text, f"{js.name}: {banned}"
+
+
+@pytest.mark.site_output
+def test_toggle_hidden_and_section_nav_current(explorer_dist, data, copy):
+    """Without scripts the options toggle does nothing, so it ships hidden. A use-case page
+    sits in the Use cases section, so its nav link is the current section, not the page."""
+    use_cases = next(i for i in copy["nav"]["items"] if i["path"] == "")
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        toggles = tree.root.find_all(lambda n: n.has_class("options-toggle"))
+        assert toggles, uc["slug"]
+        assert all("hidden" in t.attrs for t in toggles), uc["slug"]
+        links = tree.root.find_all(lambda n: n.tag == "a" and n.attrs.get("href") == BASE + use_cases["path"])
+        nav = [a for a in links if a.text().strip() == use_cases["label"]]
+        assert nav, uc["slug"]
+        assert all(a.attrs.get("aria-current") == "true" for a in nav), uc["slug"]
+    home = _Tree()
+    home.feed((explorer_dist / "index.html").read_text(encoding="utf-8"))
+    links = home.root.find_all(lambda n: n.tag == "a" and n.attrs.get("aria-current"))
+    assert [(a.text().strip(), a.attrs["aria-current"]) for a in links] == [(use_cases["label"], "page")]

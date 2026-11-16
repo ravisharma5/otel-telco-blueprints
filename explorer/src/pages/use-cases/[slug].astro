@@ -56,7 +56,7 @@ const ordered = (options: Option[]) => [
 ];
 const batchSentence = copy.use_case.setup.batch_sentence as Record<string, string>;
 ---
-<Base title={fill(copy.use_case.page_title, { title: useCase.title, site: copy.site.name })} current="">
+<Base title={fill(copy.use_case.page_title, { title: useCase.title, site: copy.site.name })} current="use-case">
   <div class="use-case-page">
     <Rail useCase={useCase} />
     <div class="main-column">
@@ -118,6 +118,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
             <button
               type="button"
               class="ghost options-toggle"
+              hidden
               aria-pressed="false"
               aria-controls={`options-${i}`}
               data-label-all={fill(copy.buttons.show_all_options, { count: state.options.length })}
@@ -186,7 +187,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
   }
   .summary-card h3 { margin-top: 0; }
   .outcome { margin: 0 0 var(--space-md); font-weight: var(--weight-bold); }
-  .state-block[hidden], .options-part[hidden], .quantized-check[hidden] { display: none; }
+  .state-block[hidden], .options-part[hidden], .quantized-check[hidden], .options-toggle[hidden] { display: none; }
   .table-scroll { overflow-x: auto; }
   .options-toggle { margin-bottom: var(--space-md); }
   .option-grid {

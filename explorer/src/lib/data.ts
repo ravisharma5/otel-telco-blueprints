@@ -180,7 +180,7 @@ export function statesOf(uc: UseCase): { key: string; setup: Setup; batch: strin
 /** Fill {name} placeholders in a copy template. */
 export function fill(template: string, values: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (match, name) =>
-    name in values ? String(values[name]) : match,
+    Object.hasOwn(values, name) ? String(values[name]) : match,
   );
 }
 

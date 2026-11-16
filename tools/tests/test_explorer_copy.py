@@ -141,24 +141,61 @@ def test_home_copy_sections():
     assert missing == []
 
 
+# `const s = copy.use_case.setup;` (optionally `as Type`) names an alias for a copy path.
+COPY_ALIAS = re.compile(r"\bconst\s+([A-Za-z_]\w*)\s*=\s*copy((?:\.[A-Za-z_][\w]*)+)\s*(?:as\s[^;\n]+)?;")
+
+
+def _alias_refs(text):
+    """(alias, full copy path) for each `alias.key...` use of a copy alias in one file."""
+    out = []
+    for alias, base in COPY_ALIAS.findall(text):
+        use = re.compile(rf"(?<![\w.$]){re.escape(alias)}((?:\.[A-Za-z_][\w]*|\[['\"][\w-]+['\"]\])+)")
+        for match in use.finditer(text):
+            out.append((alias, base + match.group(1)))
+    return out
+
+
+def _resolve(data, ref):
+    """True when every key in ref resolves; stops at a method or index on a string or list."""
+    node = data
+    for key in _ref_path(ref):
+        if not isinstance(node, dict):
+            return True
+        if key not in node:
+            return False
+        node = node[key]
+    return True
+
+
 def test_copy_keys_used():
-    # Every copy.<path> referenced by an explorer template resolves in copy.md.
+    # Every copy.<path> referenced by an explorer template resolves in copy.md,
+    # including paths reached through an alias such as `const s = copy.use_case.setup`.
     data = _copy()
-    refs = 0
+    refs = aliased = 0
     bad = []
     for astro in EXPLORER_SRC.rglob("*.astro"):
-        for match in COPY_REF.finditer(astro.read_text(encoding="utf-8")):
-            node = data
-            for key in _ref_path(match.group(1)):
-                if not isinstance(node, dict):
-                    break  # a method or index on a string or list
-                if key not in node:
-                    bad.append(f"{astro.name}: copy{match.group(1)}")
-                    break
-                node = node[key]
+        text = astro.read_text(encoding="utf-8")
+        for match in COPY_REF.finditer(text):
             refs += 1
+            if not _resolve(data, match.group(1)):
+                bad.append(f"{astro.name}: copy{match.group(1)}")
+        for alias, ref in _alias_refs(text):
+            aliased += 1
+            if not _resolve(data, ref):
+                bad.append(f"{astro.name}: {alias} -> copy{ref}")
     assert refs, "no copy references found"
+    assert aliased, "no aliased copy references found"
     assert bad == []
+
+
+def test_alias_resolution_bites():
+    text = "const s = copy.use_case.setup;\nconst x = s.no_such_key;"
+    assert any(not _resolve(_copy(), ref) for _, ref in _alias_refs(text))
+
+
+def test_unused_regional_only_copy_removed():
+    # No serving rule uses the regional-only reason, so its copy line is gone.
+    assert "regional-only" not in COPY_PATH.read_text(encoding="utf-8")
 
 
 def test_no_home_prose_in_astro_files():
