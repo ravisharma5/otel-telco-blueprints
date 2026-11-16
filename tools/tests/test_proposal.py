@@ -27,7 +27,7 @@ GSMA_PRESS = (
 
 def _copy_inputs(tmp_path):
     """Copy only what the digest reads into a temp repo root."""
-    for rel in ("platform", "catalog", "data", "tools/bplint/budgets.yaml"):
+    for rel in ("platform", "catalog", "data", "architecture", "proposal", "tools/bplint/budgets.yaml"):
         src = REPO_ROOT / rel
         dst = tmp_path / rel
         if src.is_dir():
@@ -68,6 +68,51 @@ def test_digest_ignores_fixtures_and_demo(tmp_path):
         encoding="utf-8",
     )
     assert facts.sources_digest(root) == before
+
+
+PROSE_URL = re.compile(r"\]\((https?://[^)\s]+)\)")
+GENERATED = re.compile(r"<!-- generated:([a-z-]+) start -->.*?<!-- generated:\1 end -->", re.S)
+
+
+def _published_prose_urls():
+    """Linked URLs on the architecture pages and in the proposal's own prose (not its generated blocks)."""
+    found = set()
+    for path in sorted((REPO_ROOT / "architecture").glob("*.md")) + [REPO_ROOT / "proposal/index.md"]:
+        text = GENERATED.sub("", path.read_text(encoding="utf-8"))
+        found |= {u.split("#", 1)[0] for u in PROSE_URL.findall(text)}
+    return found
+
+
+def test_urls_cover_what_the_proposal_publishes():
+    urls = set(facts.all_urls(REPO_ROOT))
+    published = _published_prose_urls()
+    assert any("docs.redhat.com" in u and "microshift" in u for u in published)
+    assert published <= urls, sorted(published - urls)
+
+
+def test_digest_changes_with_an_architecture_claim(tmp_path):
+    root = _copy_inputs(tmp_path)
+    before = facts.sources_digest(root)
+    page = root / "architecture/placement.md"
+    text = page.read_text(encoding="utf-8")
+    marker = "MicroShift runs one AI model per deployment"
+    assert marker in text
+    page.write_text(text.replace(marker, "MicroShift runs two AI models per deployment"), encoding="utf-8")
+    assert facts.sources_digest(root) != before
+
+
+def test_digest_ignores_the_proposal_stamp_block(tmp_path):
+    root = _copy_inputs(tmp_path)
+    before = facts.sources_digest(root)
+    page = root / "proposal/index.md"
+    text = page.read_text(encoding="utf-8")
+    assert FACTS["checked"] in _block("facts-stamp")
+    page.write_text(text.replace(FACTS["checked"], "2026-01-01"), encoding="utf-8")
+    assert facts.sources_digest(root) == before
+    marker = "GSMA publishes the programme's datasets"
+    assert marker in text
+    page.write_text(text.replace(marker, "GSMA hosts the programme's datasets"), encoding="utf-8")
+    assert facts.sources_digest(root) != before
 
 
 def test_all_urls_unique_sorted():

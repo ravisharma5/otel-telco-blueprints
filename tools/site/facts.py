@@ -7,7 +7,11 @@ The digest is a SHA-256 over sorted lines, one per input:
   "<relpath> | <cells joined by ' | '>"; the Sources section title per page type
   comes from tools/bplint/budgets.yaml (sources_section);
 - every source URL in data/serving/*.yaml, as "data/serving/<file> | <url>";
-- every extra URL in data/facts-check.yaml, as "data/facts-check.yaml | <url>".
+- every extra URL in data/facts-check.yaml, as "data/facts-check.yaml | <url>";
+- every line that holds a URL in the pages the proposal publishes outside the
+  Sources tables (architecture/*.md, and proposal/index.md outside its
+  generated blocks), as "<relpath> | <line>", so editing such a claim or its
+  link makes the stamp stale.
 
 It uses content only, never git dates, because CI clones are shallow.
 tools/tests/test_proposal.py fails when the stored digest differs from the
@@ -59,6 +63,10 @@ FACTS_FILE = "data/facts-check.yaml"
 BUDGETS_FILE = "tools/bplint/budgets.yaml"
 SERVING_GLOB = "data/serving/*.yaml"
 PAGE_GLOBS = ("platform/*/README.md", "catalog/*/*/README.md")
+# Published pages whose claims cite URLs in prose or tables rather than a Sources
+# table. The proposal's generated blocks are skipped: they repeat the blueprints.
+PROSE_GLOBS = ("architecture/*.md", "proposal/index.md")
+GENERATED_BLOCK_RE = re.compile(r"^<!-- generated:([a-z-]+) start -->$.*?^<!-- generated:\1 end -->$", re.M | re.S)
 URL_RE = re.compile(r"https?://[^\s\"'<>)\]|]+")
 CARD_RE = re.compile(r"^https://huggingface\.co/([A-Za-z0-9_.-]+/(OTel-[A-Za-z0-9_.-]+))$")
 HF_API = "https://huggingface.co/api/models/"
@@ -79,7 +87,7 @@ FACTS_HEADER = (
     "# Facts stamp. Written by `uv run python -m tools.site.facts --write --checked <date>\n"
     "# --recheck-report <report>` after the source re-check; tools/tests/test_proposal.py\n"
     "# fails when sources_digest no longer matches the Sources tables, serving-data URLs,\n"
-    "# and extra_urls.\n"
+    "# extra_urls, and the URL lines of the architecture pages and the proposal.\n"
 )
 
 
@@ -98,6 +106,26 @@ def _pages(root: Path) -> list[Path]:
     for pattern in PAGE_GLOBS:
         found.update(root.glob(pattern))
     return sorted(found)
+
+
+def _prose_files(root: Path) -> list[Path]:
+    found: set[Path] = set()
+    for pattern in PROSE_GLOBS:
+        found.update(root.glob(pattern))
+    return sorted(found)
+
+
+def _prose_url_lines(root: Path) -> list[tuple[str, str, list[str]]]:
+    """(relpath, line, urls) for every line holding a URL in the prose files."""
+    out = []
+    for path in _prose_files(root):
+        rel = path.relative_to(root).as_posix()
+        text = GENERATED_BLOCK_RE.sub("", path.read_text(encoding="utf-8"))
+        for line in text.splitlines():
+            urls = URL_RE.findall(line)
+            if urls:
+                out.append((rel, line.strip(), urls))
+    return out
 
 
 def _source_rows(root: Path) -> list[tuple[str, list[str], list[str]]]:
@@ -146,6 +174,7 @@ def _digest_lines(root: Path) -> list[str]:
     lines = [f"{rel} | {' | '.join(cells)}" for rel, cells, _ in _source_rows(root)]
     lines += [f"{rel} | {url}" for rel, url in _serving_urls(root)]
     lines += [f"{FACTS_FILE} | {url}" for url in _load_facts(root).get("extra_urls") or []]
+    lines += [f"{rel} | {line}" for rel, line, _ in _prose_url_lines(root)]
     return sorted(lines)
 
 
@@ -165,6 +194,7 @@ def all_urls(repo_root: Path = ROOT) -> list[str]:
     urls = {h for _, _, hrefs in _source_rows(root) for h in hrefs}
     urls |= {u for _, u in _serving_urls(root)}
     urls |= set(_load_facts(root).get("extra_urls") or [])
+    urls |= {u for _, _, found in _prose_url_lines(root) for u in found}
     return sorted({_normalise(u) for u in urls if u.startswith(("https://", "http://"))})
 
 
@@ -176,7 +206,7 @@ def card_repos(urls: list[str]) -> list[str]:
 def linked_card_repos(repo_root: Path = ROOT) -> list[str]:
     """OTel model card repo ids linked anywhere on the pages or in serving data."""
     root = Path(repo_root)
-    files = _pages(root) + sorted(root.glob(SERVING_GLOB))
+    files = _pages(root) + sorted(root.glob(SERVING_GLOB)) + _prose_files(root)
     urls = {
         _normalise(u)
         for path in files
