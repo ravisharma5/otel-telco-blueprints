@@ -8,6 +8,17 @@ export interface Stage {
   label: string;
 }
 
+export interface Depth {
+  id: 'recipe' | 'entry';
+  label: string;
+}
+
+/** A goal tile: a goal id from data/explorer/goals.yaml with at least one use case. */
+export interface Goal {
+  id: string;
+  count: number;
+}
+
 export interface Card {
   goal: string;
   summary: string;
@@ -128,6 +139,8 @@ export interface UseCase {
   recipe_url: string;
   doc_status: 'done' | 'review' | 'draft';
   stage: Stage;
+  goal: string;
+  depth: Depth;
   card: Card;
   counts: Counts;
   slot_names: string[];
@@ -141,6 +154,7 @@ export interface Filters {
   domains: { id: string; label: string }[];
   stages: Stage[];
   tiers: string[];
+  depths: Depth['id'][];
 }
 
 export interface FitBands {
@@ -155,6 +169,7 @@ export interface Default {
 
 export const useCases = data.use_cases as unknown as UseCase[];
 export const filters = data.filters as Filters;
+export const goals = data.goals as Goal[];
 export const defaults = data.default as Default;
 export const setups = data.setups as Setup[];
 /** Fit band edges from data/serving/setups.yaml; ticks and footnote read these. */

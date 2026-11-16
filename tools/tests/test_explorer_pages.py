@@ -256,6 +256,14 @@ ARCHITECT_LINKS = [
     ("All recipes", "recipes/"),
 ]
 REPLACEABLE = "Any component can be replaced."
+GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
+DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
+HOME_SIZE_LIMIT_KB = 60
+
+
+def _copy():
+    text = COPY_PATH.read_text(encoding="utf-8")
+    return yaml.safe_load(re.match(r"^---\n(.*?)\n---\n", text, re.S).group(1))
 
 
 class _Node:
@@ -407,20 +415,46 @@ def test_home_bands_in_order(explorer_dist):
 
 @pytest.mark.site_output
 def test_goal_tiles(explorer_dist):
+    """One tile per goal with at least one use case; each filters the gallery."""
     data = _data()
+    goals = _copy()["home"]["goals"]
     tiles = _tiles(_home(explorer_dist))
-    assert len(tiles) == len(data["use_cases"])
-    by_href = {t.attrs["href"]: t for t in tiles}
-    for uc in data["use_cases"]:
-        href = f"{BASE}use-cases/{uc['slug']}/"
-        assert href in by_href, f"no goal tile for {uc['slug']}"
-        text = by_href[href].text()
-        assert uc["card"]["goal"] in text
-        assert uc["card"]["audience"] in text
-        assert uc["stage"]["label"] in text
-    slugs = {uc["slug"] for uc in data["use_cases"]}
-    for href in by_href:
-        assert re.fullmatch(rf"{re.escape(BASE)}use-cases/([a-z0-9-]+)/", href).group(1) in slugs
+    assert [t.attrs.get("data-goal-id") for t in tiles] == [g["id"] for g in data["goals"]]
+    assert data["goals"] and all(g["count"] > 0 for g in data["goals"])
+    for tile, goal in zip(tiles, data["goals"]):
+        assert tile.attrs["href"] == f"?goal={goal['id']}#gallery"
+        copy = goals["tiles"][goal["id"]]
+        text = tile.text()
+        assert copy["headings"]["title"] in text
+        assert copy["notes"]["body"] in text
+        word = goals["counts"]["one" if goal["count"] == 1 else "other"]
+        assert f"{goal['count']} {word}" in text
+        assert "use-cases/" not in tile.attrs["href"]
+    # Goals with no exported use case render no tile.
+    ids = yaml.safe_load(GOALS_FILE.read_text(encoding="utf-8"))["goals"]
+    used = {uc["goal"] for uc in data["use_cases"]}
+    assert {t.attrs["data-goal-id"] for t in tiles} == {g for g in ids if g in used}
+
+
+@pytest.mark.site_output
+def test_gallery_has_an_anchor_for_goal_links(explorer_dist):
+    tree = _home(explorer_dist)
+    assert len(tree.root.find_all(lambda n: n.attrs.get("id") == "gallery")) == 1
+
+
+@pytest.mark.site_output
+def test_goal_chip_ships_hidden(explorer_dist):
+    tree = _home(explorer_dist)
+    chips = tree.root.find_all(lambda n: "data-goal-chip" in n.attrs)
+    assert len(chips) == 1 and "hidden" in chips[0].attrs
+    assert chips[0].tag == "button" and "data-group" not in chips[0].attrs
+    assert chips[0].attrs.get("data-template") == _copy()["home"]["gallery"]["filters"]["goal_chip"]
+
+
+@pytest.mark.site_output
+def test_home_page_size(explorer_dist):
+    kb = (explorer_dist / "index.html").stat().st_size / 1024
+    assert kb <= HOME_SIZE_LIMIT_KB, f"home page is {kb:.1f} KB, over {HOME_SIZE_LIMIT_KB} KB"
 
 
 @pytest.mark.site_output
@@ -444,6 +478,10 @@ def test_gallery_cards(explorer_dist):
         assert card.attrs["data-domain"] == uc["domain"]
         assert card.attrs["data-stage"] == uc["stage"]["id"]
         assert card.attrs["data-tiers"].split() == _used_tiers(data, uc)
+        assert card.attrs["data-goal"] == uc["goal"]
+        assert card.attrs["data-depth"] == uc["depth"]["id"]
+        chips = [n.text() for n in card.find_all(lambda n: n.has_class("depth-chip"))]
+        assert chips == [DEPTH_LABELS[uc["depth"]["id"]]]
 
 
 def test_counts_line_singular():
@@ -465,7 +503,11 @@ def test_filter_chips_present_values_only(explorer_dist):
     assert by_group["domain"] == [(d["id"], d["label"]) for d in f["domains"]]
     assert by_group["stage"] == [(s["id"], s["label"]) for s in f["stages"]]
     assert by_group["tiers"] == [(t, TIER_LABELS[t]) for t in f["tiers"]]
-    assert set(by_group) == {"domain", "stage", "tiers"}
+    expected_groups = {"domain", "stage", "tiers"}
+    if len(f["depths"]) >= 2:
+        expected_groups.add("depth")
+        assert by_group["depth"] == [(d, DEPTH_LABELS[d]) for d in f["depths"]]
+    assert set(by_group) == expected_groups
     # A chip only for a value at least one published use case has.
     used = {
         "domain": {uc["domain"] for uc in data["use_cases"]},
@@ -477,7 +519,7 @@ def test_filter_chips_present_values_only(explorer_dist):
     if "far-edge" not in f["tiers"]:
         assert "Far edge" not in [c.text() for c in chips]
     groups = tree.root.find_all(lambda n: n.attrs.get("role") == "group")
-    assert len(groups) == 3
+    assert len(groups) == len(expected_groups)
     labels = []
     for group in groups:
         label_id = group.attrs.get("aria-labelledby")
@@ -485,7 +527,7 @@ def test_filter_chips_present_values_only(explorer_dist):
         label = tree.root.find_all(lambda n, i=label_id: n.attrs.get("id") == i)
         assert len(label) == 1 and not label[0].has_class("visually-hidden")
         labels.append(label[0].text())
-    assert labels == ["Domain", "How far it goes", "Where it runs"]
+    assert labels == ["Domain", "How far it goes", "Where it runs", "Recipe depth"][: len(expected_groups)]
 
 
 @pytest.mark.site_output
@@ -527,11 +569,29 @@ def test_no_coming_soon_and_no_innerhtml(explorer_dist):
         assert "innerHTML" not in js.read_text(encoding="utf-8"), js.name
 
 
-def test_filter_script_reads_no_url_input():
-    # The filter script toggles hidden and aria-pressed and writes textContent only.
+def test_filter_script_reads_only_the_goal_parameter():
+    """The home script reads one URL parameter, goal, and uses it only after it
+    matches a goal id rendered on the page. It writes textContent, never HTML."""
     for astro in (EXPLORER / "src").rglob("*.astro"):
         text = astro.read_text(encoding="utf-8")
         assert "innerHTML" not in text, astro.name
-        if "data-filter-bar" in text:
-            for banned in ("location", "URLSearchParams", "localStorage", "sessionStorage", "document.cookie"):
-                assert banned not in text, f"{astro.name} uses {banned}"
+        for banned in ("localStorage", "sessionStorage", "document.cookie", "location.href ="):
+            assert banned not in text, f"{astro.name} uses {banned}"
+    home = (EXPLORER / "src/pages/index.astro").read_text(encoding="utf-8")
+    script = home.split("<script>", 1)[1].split("</script>", 1)[0]
+    assert re.findall(r"params\.get\('([\w-]+)'\)", script) == ["goal"]
+    assert "data-goal-id" in script, "goal ids must come from the rendered tiles"
+    assert re.search(r"allowed\.has\(", script), "the goal value needs an allowlist check"
+    assert "history.replaceState" in script and "pushState" not in script
+    assert ".textContent =" in script
+
+
+@pytest.mark.site_output
+def test_built_script_handles_goal_safely(explorer_dist):
+    tree = _home(explorer_dist)
+    script = "".join(tree.scripts)
+    for node in tree.root.find_all(lambda n: n.tag == "script" and "src" in n.attrs):
+        script += (explorer_dist / node.attrs["src"][len(BASE):]).read_text(encoding="utf-8")
+    assert "goal" in script and "data-goal-id" in script
+    for unsafe in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write"):
+        assert unsafe not in script

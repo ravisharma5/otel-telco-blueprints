@@ -1,0 +1,25 @@
+---
+// Static recipe depth chip: "Full recipe" or "Catalog entry". Monochrome, like a tag,
+// so it never competes with the stage chip's color. Labels live in copy.md.
+import { frontmatter as copy } from '../content/copy.md';
+import type { Depth } from '../lib/data';
+
+interface Props {
+  depth: Depth;
+}
+
+const { depth } = Astro.props;
+const labels = copy.depth as Record<Depth['id'], string>;
+---
+<span class={`depth-chip depth-${depth.id}`}>{labels[depth.id]}</span>
+
+<style>
+  .depth-chip {
+    display: inline-flex; align-items: center;
+    padding: var(--space-xs) var(--space-control-x);
+    background: var(--color-surface-2); color: var(--color-text);
+    border: 1px solid var(--color-border); border-radius: var(--radius-full);
+    font-size: var(--text-label); font-weight: var(--weight-bold);
+    line-height: var(--leading-label);
+  }
+</style>

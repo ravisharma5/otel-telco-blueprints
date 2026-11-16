@@ -1,6 +1,7 @@
 ---
 // Gallery card: one list item carrying the filter data attributes, wrapping one link.
 import StageChip from './StageChip.astro';
+import DepthChip from './DepthChip.astro';
 import { frontmatter as copy } from '../content/copy.md';
 import { usedTiers, useCasePath, type UseCase } from '../lib/data';
 
@@ -24,12 +25,14 @@ const status = copy.home.gallery.status[useCase.doc_status];
   data-domain={useCase.domain}
   data-stage={useCase.stage.id}
   data-tiers={usedTiers(useCase).join(' ')}
+  data-goal={useCase.goal}
+  data-depth={useCase.depth.id}
 >
   <a class="card" href={useCasePath(useCase)}>
     <span class="eyebrow">{useCase.domain_label}</span>
     <h3>{useCase.title}</h3>
     <span class="summary">{useCase.card.summary}</span>
-    <span class="stage"><StageChip stage={useCase.stage} /></span>
+    <span class="chips"><StageChip stage={useCase.stage} /><DepthChip depth={useCase.depth} /></span>
     <ul class="tags">
       {useCase.slot_names.map((name) => <li class="tag">{name}</li>)}
     </ul>
@@ -64,6 +67,7 @@ const status = copy.home.gallery.status[useCase.doc_status];
   .eyebrow { font-weight: var(--weight-bold); }
   h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
   .summary { color: var(--color-text-muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
   .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
   .tag {
     padding: var(--space-xs) var(--space-sm);

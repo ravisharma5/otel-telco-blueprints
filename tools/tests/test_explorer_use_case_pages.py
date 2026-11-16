@@ -667,6 +667,25 @@ def test_no_readiness_questions(explorer_dist, data, copy):
 
 
 @pytest.mark.site_output
+def test_no_readiness_question_text_on_any_page(explorer_dist):
+    """The ten questions stay in the recipes: no built page reproduces one."""
+    questions = _readiness_questions()
+    for html in explorer_dist.rglob("*.html"):
+        text = html.read_text(encoding="utf-8")
+        for question in questions:
+            assert question not in text, f"{html.relative_to(explorer_dist)}: {question}"
+
+
+@pytest.mark.site_output
+def test_depth_chip_in_header(explorer_dist, data, copy):
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        why = tree.root.find_all(lambda n: n.attrs.get("id") == "why")[0]
+        chips = [n.text() for n in why.find_all(lambda n: n.has_class("depth-chip"))]
+        assert chips == [copy["depth"][uc["depth"]["id"]]] == [uc["depth"]["label"]], uc["slug"]
+
+
+@pytest.mark.site_output
 def test_no_overlay_and_clean_recipe_links(explorer_dist, data):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)

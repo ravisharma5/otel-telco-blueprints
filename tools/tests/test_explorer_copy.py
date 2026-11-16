@@ -193,6 +193,31 @@ def test_alias_resolution_bites():
     assert any(not _resolve(_copy(), ref) for _, ref in _alias_refs(text))
 
 
+GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
+
+
+def test_goal_tile_copy():
+    """Every goal id has a tile title (8 words) and note (25 words); no extra tiles."""
+    ids = yaml.safe_load(GOALS_FILE.read_text(encoding="utf-8"))["goals"]
+    tiles = _copy()["home"]["goals"]["tiles"]
+    assert list(tiles) == ids
+    for goal in ids:
+        title = tiles[goal]["headings"]["title"]
+        body = tiles[goal]["notes"]["body"]
+        assert 0 < _words(title) <= 8, goal
+        assert 0 < _words(body) <= 25, goal
+    counts = _copy()["home"]["goals"]["counts"]
+    assert counts["one"] and counts["other"]
+
+
+def test_depth_copy_matches_the_exporter():
+    from tools.site.export_explorer import DEPTH_LABELS
+
+    assert _copy()["depth"] == DEPTH_LABELS
+    assert "{goal}" in _copy()["home"]["gallery"]["filters"]["goal_chip"]
+    assert _copy()["home"]["gallery"]["filters"]["headings"]["depth"]
+
+
 def test_unused_regional_only_copy_removed():
     # No serving rule uses the regional-only reason, so its copy line is gone.
     assert "regional-only" not in COPY_PATH.read_text(encoding="utf-8")

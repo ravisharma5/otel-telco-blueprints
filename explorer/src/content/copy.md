@@ -31,6 +31,10 @@ notes:
   # The default setup is named by use_case.setup.no_js_setup, filled from setups.yaml.
   no_js: Turn on JavaScript to change the setup.
   no_js_link: It may not match the setup in a shared link.
+# Recipe depth chip on gallery cards and use-case pages, keyed by front matter depth.
+depth:
+  recipe: Full recipe
+  entry: Catalog entry
 footer:
   notes:
     licence: Docs CC BY 4.0 · Code Apache-2.0
@@ -60,6 +64,47 @@ home:
   goals:
     headings:
       title: What do you want to improve?
+    # One tile per id in data/explorer/goals.yaml, in that order. A goal with no
+    # use case yet shows no tile. Each tile filters the gallery to its use cases.
+    counts:
+      one: use case
+      other: use cases
+    tiles:
+      answer:
+        headings:
+          title: Answer questions from standards and runbooks
+        notes:
+          body: Get cited answers from standards, vendor documents, and your runbooks, or a clear note when no source answers.
+      incidents:
+        headings:
+          title: Resolve incidents faster
+        notes:
+          body: Triage alarms, find root causes, and draft fixes that a person approves before anything changes on the network.
+      sla-energy:
+        headings:
+          title: Assure SLAs and save energy
+        notes:
+          body: Spot service-level risks early and tune sites to use less energy, with each change checked against your policy.
+      change:
+        headings:
+          title: Change the network safely
+        notes:
+          body: Plan, check, and roll out configuration changes with the approval steps and the rollback plan each change needs.
+      secure:
+        headings:
+          title: Secure the network
+        notes:
+          body: Find threats and weak points sooner, and keep a person in charge of every response that touches the network.
+      software:
+        headings:
+          title: Speed up network software
+        notes:
+          body: Help engineers write, review, and test network code and configuration faster, with checks before anything ships.
+      customers:
+        headings:
+          title: Help customers and protect revenue
+        notes:
+          body: Help care agents diagnose customer issues and catch revenue leaks, using network data you already hold.
   gallery:
     headings:
       title: All use cases
@@ -75,6 +120,9 @@ home:
         domain: Domain
         stage: How far it goes
         tiers: Where it runs
+        depth: Recipe depth
+      # Shown on the pressed goal chip; {goal} is the title of the goal tile picked.
+      goal_chip: "Goal: {goal}"
       tiers:
         far-edge: Far edge
         regional: Regional site

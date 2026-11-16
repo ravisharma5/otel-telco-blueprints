@@ -1,11 +1,14 @@
 ---
 // Filter bar for the gallery. It ships with `hidden`; the page script removes it,
 // so without JavaScript the bar never shows and every card stays visible.
-// Chips render only for values the exporter found on a published use case.
+// Chips render only for values the exporter found on a published use case; the
+// Recipe depth group renders once two depths exist. The goal chip ships hidden and
+// shows only when a goal tile (or a ?goal= link with a rendered goal id) is picked.
 import { frontmatter as copy } from '../content/copy.md';
 import { filters, useCases } from '../lib/data';
 
 const labels = copy.home.gallery.filters;
+const depthLabels = copy.depth as Record<string, string>;
 const groups = [
   {
     id: 'domain',
@@ -22,6 +25,11 @@ const groups = [
     label: labels.headings.tiers,
     chips: filters.tiers.map((t) => ({ value: t, label: labels.tiers[t as keyof typeof labels.tiers] })),
   },
+  {
+    id: 'depth',
+    label: labels.headings.depth,
+    chips: filters.depths.length >= 2 ? filters.depths.map((d) => ({ value: d, label: depthLabels[d] })) : [],
+  },
 ].filter((group) => group.chips.length > 0);
 const total = useCases.length;
 const template = copy.home.gallery.result_count;
@@ -29,6 +37,14 @@ const initial = template.replace('{n}', String(total)).replace('{total}', String
 ---
 <div class="filter-bar" data-filter-bar hidden>
   <div class="groups" role="region" aria-label={labels.label}>
+    <button
+      type="button"
+      class="chip goal-chip"
+      aria-pressed="true"
+      data-goal-chip
+      data-template={labels.goal_chip}
+      hidden
+    ></button>
     {groups.map((group) => (
       <div class="group" role="group" aria-labelledby={`filter-${group.id}`}>
         <span class="group-label" id={`filter-${group.id}`}>{group.label}</span>
@@ -51,7 +67,8 @@ const initial = template.replace('{n}', String(total)).replace('{total}', String
 </div>
 
 <style>
-  .filter-bar[hidden], .ghost[hidden] { display: none; }
+  .filter-bar[hidden], .ghost[hidden], .goal-chip[hidden] { display: none; }
+  .goal-chip { align-self: flex-end; }
   .groups {
     display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-lg);
     padding: var(--space-md) 0;

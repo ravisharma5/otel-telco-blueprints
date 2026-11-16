@@ -10,6 +10,7 @@ import Thresholds from '../../components/Thresholds.astro';
 import OptionCard from '../../components/OptionCard.astro';
 import NeedsCards from '../../components/NeedsCards.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
+import DepthChip from '../../components/DepthChip.astro';
 import { frontmatter as copy } from '../../content/copy.md';
 import {
   defaults,
@@ -63,6 +64,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
       <section id="why" class="page-section" aria-labelledby="why-title">
         <p class="eyebrow">{useCase.domain_label}</p>
         <h1 id="why-title" tabindex="-1">{useCase.title}</h1>
+        <p class="header-chips"><DepthChip depth={useCase.depth} /></p>
         <p class="lede">{useCase.card.summary}</p>
         <div class="summary-grid">
           <div class="summary-card">
@@ -178,6 +180,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
     line-height: var(--leading-heading); letter-spacing: var(--tracking-tight);
   }
   h3 { margin: var(--space-xl) 0 var(--space-md); font-size: var(--text-body); line-height: var(--leading-body); }
+  .header-chips { margin: 0 0 var(--space-md); }
   .lede { max-width: var(--prose-max); margin: 0 0 var(--space-lg); color: var(--color-text-muted); }
   .sub { margin: 0 0 var(--space-md); color: var(--color-text-muted); max-width: var(--prose-max); }
   .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }

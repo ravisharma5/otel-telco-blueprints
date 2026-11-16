@@ -1,19 +1,24 @@
 ---
-// One goal tile per published use case. The whole tile is a single link.
-import StageChip from './StageChip.astro';
-import { useCasePath, type UseCase } from '../lib/data';
+// One goal tile per goal that has at least one use case. The whole tile is a
+// single link to ?goal=<id>#gallery: with JavaScript the gallery filters to the
+// goal; without it the link lands on the full gallery.
+import { frontmatter as copy } from '../content/copy.md';
+import type { Goal } from '../lib/data';
 
 interface Props {
-  useCase: UseCase;
+  goal: Goal;
 }
 
-const { useCase } = Astro.props;
+const { goal } = Astro.props;
+const goals = copy.home.goals;
+const tile = goals.tiles[goal.id as keyof typeof goals.tiles];
+const count = `${goal.count} ${goal.count === 1 ? goals.counts.one : goals.counts.other}`;
 ---
-<a class="goal-tile" href={useCasePath(useCase)}>
+<a class="goal-tile" href={`?goal=${goal.id}#gallery`} data-goal-id={goal.id}>
   <span class="body">
-    <h3>{useCase.card.goal}</h3>
-    <span class="audience">{useCase.card.audience}</span>
-    <StageChip stage={useCase.stage} />
+    <h3 data-goal-title>{tile.headings.title}</h3>
+    <span class="note">{tile.notes.body}</span>
+    <span class="count">{count}</span>
   </span>
   <span class="arrow" aria-hidden="true">→</span>
 </a>
@@ -35,10 +40,11 @@ const { useCase } = Astro.props;
   .goal-tile:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
   .body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-sm); flex: 1; }
   h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
-  .audience {
+  .note, .count {
     color: var(--color-text-muted);
     font-size: var(--text-label); line-height: var(--leading-label);
   }
+  .count { font-weight: var(--weight-bold); }
   .arrow { font-size: var(--text-heading); transition: transform var(--motion-fast) ease; }
   .goal-tile:hover .arrow { transform: translateX(4px); }
   @media (prefers-reduced-motion: reduce) {
