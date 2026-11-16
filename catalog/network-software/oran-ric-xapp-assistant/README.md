@@ -146,7 +146,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 4 | In a RAG pipeline the 31B is the generation stage only; purpose-built embedding and reranker models do retrieval | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#not-a-retrieval-or-reranking-model) |
 | 5 | ORANBench asks multiple-choice questions on O-RAN specifications | research | [GSMA Open Telco benchmarks](https://huggingface.co/datasets/GSMA/ot-full) |
 | 6 | O-RAN specifications are available to the public through the O-RAN download portal | project documentation | [O-RAN specifications](https://www.o-ran.org/specifications) |
-| 7 | The O-RAN Software Community near-real-time RIC supports xApps and terminates the RAN interface, with xApp frameworks for Python, Go, C++, and Rust | project documentation | [O-RAN SC near-real-time RIC](https://wiki.o-ran-sc.org/display/RICP) |
+| 7 | The O-RAN Software Community near-real-time RIC supports xApps and terminates the RAN interface, with xApp frameworks for Python, Go, C++, and Rust | project documentation | [O-RAN SC near-real-time RIC](https://lf-o-ran-sc.atlassian.net/wiki/spaces/RICP) |
 | 8 | FlexRIC is an open source RAN intelligent controller with a RAN-side agent, under the Apache 2.0 licence | project documentation | [FlexRIC repository](https://gitlab.eurecom.fr/mosaic5g/flexric) |
 
 ## Deploy and verify
