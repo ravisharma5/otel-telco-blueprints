@@ -106,8 +106,8 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
-| Specification sets with release and version | RAN; 5G core CNFs; Transport and IP | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
-| Change-request archives | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Specification sets with release and version | RAN; 5G core CNFs; Transport and IP | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team; Transport and IP: Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Change-request archives | RAN; 5G core CNFs | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 | Routing threshold and summary-only ceiling | RAN; 5G core CNFs; Transport and IP | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
 
 <!-- generated:what-you-bring end -->

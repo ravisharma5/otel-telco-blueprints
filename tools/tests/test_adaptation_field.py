@@ -6,8 +6,8 @@ operator brings. These tests tie that field to what the page says: a page
 with the Classification slot retrains its head; only the alarm triage recipe
 may train a LoRA adapter, and only after a measured gap; a page that names MCP
 tools needs skills and tool contracts. The generator (tools/site/render_bring)
-reads owners and anchors from the PB-11 matrix, so the page table cannot
-disagree with PB-11.
+reads owners and anchors from the PB-11 matrix; the tests read PB-11 on their
+own and check the Owner cell against every listed domain.
 """
 
 from __future__ import annotations
@@ -159,6 +159,63 @@ def test_bring_summary():
     assert EXPERTISE_ORDER.index("golden-set") < EXPERTISE_ORDER.index("tool-contracts")
 
 
+def _pb11_owners(domains: list[str], mechanism: str) -> dict[str, str]:
+    """{domain name: Owner cell}, read straight from each '### Domain:' table on PB-11, not via the generator."""
+    text = PB11.read_text(encoding="utf-8")
+    out = {}
+    for d in domains:
+        name = DOMAIN_NAMES[d]
+        sec = re.search(rf"^### Domain: {re.escape(name)}[ \t]*$(.*?)(?=^#{{1,3}} |\Z)", text, re.M | re.S)
+        assert sec, name
+        rows = [[c.strip() for c in ln.strip().strip("|").split("|")] for ln in sec.group(1).splitlines() if ln.startswith("|")]
+        col = rows[0].index("Owner")
+        row = next(r for r in rows if r[0] == MECHANISM_NAMES[mechanism])
+        out[name] = row[col]
+    return out
+
+
+def _owner_claims(cell: str, domains: list[str]) -> dict[str, str]:
+    """What an Owner cell claims for each listed domain.
+
+    A bare owner claims that owner for every listed domain. Otherwise the cell
+    must be "Domain: owner" entries joined by "; ", one per listed domain.
+    """
+    names = [DOMAIN_NAMES[d] for d in domains]
+    parts = [p.strip() for p in cell.split("; ")]
+    if not any(p.startswith(f"{n}: ") for p in parts for n in names):
+        return {n: cell for n in names}
+    claims = {}
+    for p in parts:
+        name, _, owner = p.partition(": ")
+        assert name in names and name not in claims, (cell, name)
+        claims[name] = owner
+    return claims
+
+
+def test_owner_cell_names_every_domain_owner():
+    """An item spanning domains with different PB-11 owners shows each domain's owner."""
+    mx = matrix(PB11)
+    fm = {
+        "adaptation": {
+            "rung": "retrieval",
+            "expertise": ["golden-set", "corpus"],
+            "bring": [
+                {"item": "Mixed corpus", "domains": ["ran", "core-cnf", "customer-care"], "mechanism": "rag-corpus"},
+                {"item": "Care corpus last", "domains": ["oss-bss", "customer-care"], "mechanism": "rag-corpus"},
+                {"item": "Same owner", "domains": ["ran", "transport-ip"], "mechanism": "rag-corpus"},
+            ],
+        }
+    }
+    out = block(fm, mx)
+    for item in fm["adaptation"]["bring"]:
+        row = next(ln for ln in out.splitlines() if ln.startswith(f"| {item['item']} |"))
+        owner = [c.strip() for c in row.strip().strip("|").split("|")][3]
+        assert _owner_claims(owner, item["domains"]) == _pb11_owners(item["domains"], item["mechanism"]), row
+    assert "data protection officer review" in next(ln for ln in out.splitlines() if "Care corpus last" in ln)
+    same = next(ln for ln in out.splitlines() if ln.startswith("| Same owner |"))
+    assert "| Operations engineer |" in same
+
+
 def test_render_bring_block_shape():
     mx = matrix(PB11)
     out = block(FIXTURE_FM, mx)
@@ -169,7 +226,8 @@ def test_render_bring_block_shape():
     assert "#domain-transport-and-ip" in out and "#domain-5g-core-cnfs" in out
     for item in FIXTURE_FM["adaptation"]["bring"]:
         row = next(ln for ln in out.splitlines() if ln.startswith(f"| {item['item']} |"))
-        assert f"| {mx[(item['domains'][0], item['mechanism'])]['owner']} |" in row, row
+        cells = [c.strip() for c in row.strip().strip("|").split("|")]
+        assert _owner_claims(cells[3], item["domains"]) == _pb11_owners(item["domains"], item["mechanism"]), row
     assert "LoRA" not in out
     f3 = {"adaptation": dict(FIXTURE_FM["adaptation"], rung="lora-if-gap")}
     assert "only if a measured gap remains" in block(f3, mx)
@@ -272,7 +330,7 @@ def test_bring_owner_and_link_match_matrix(path):
     for row, item in zip(item_rows, items):
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
         assert cells[0] == item["item"]
-        assert cells[3] == mx[(item["domains"][0], item["mechanism"])]["owner"], row
+        assert _owner_claims(cells[3], item["domains"]) == _pb11_owners(item["domains"], item["mechanism"]), row
         anchors = MATRIX_LINK.findall(cells[4])
         assert anchors == [mx[(d, item["mechanism"])]["anchor"] for d in item["domains"]], row
         assert all(a in slugs for a in anchors)

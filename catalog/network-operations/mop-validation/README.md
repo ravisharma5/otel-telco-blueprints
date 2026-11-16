@@ -162,7 +162,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
-| Vendor documents, runbooks, and past MOPs | Transport and IP; RAN; 5G core CNFs | RAG corpus | Operations engineer | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Vendor documents, runbooks, and past MOPs | Transport and IP; RAN; 5G core CNFs | RAG corpus | Transport and IP: Operations engineer; RAN: Operations engineer; 5G core CNFs: Platform team | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 | Change request and inventory read tools | OSS and BSS | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
 | Dry-run tools that cannot commit a change | Transport and IP | MCP tool contract | Platform team | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
 | MOP review skill and capability manifests | Transport and IP | Skill or capability manifest | SME | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |

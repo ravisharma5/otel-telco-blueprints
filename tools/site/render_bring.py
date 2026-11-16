@@ -14,6 +14,8 @@ The block has two tables, built from the page's `adaptation` field:
 
 Owner and matrix-row anchor come from the PB-11 domain tables
 (platform/bring-your-own-data/README.md), so a page cannot disagree with PB-11.
+When an item spans domains whose PB-11 owners differ, the Owner cell names the
+owner of each domain.
 Only the text between the markers is replaced. A missing or duplicated marker
 stops the run.
 
@@ -206,6 +208,18 @@ def bring_summary(fm: dict) -> str:
     return f"{RUNG_LABELS[ad['rung']]}. You bring: {labels}"
 
 
+def owner_cell(domains: list[str], mech: str, mx: dict[tuple[str, str], dict[str, str]]) -> str:
+    """The PB-11 owner for every listed domain.
+
+    One owner when every domain shares it; otherwise "Domain: owner" per domain,
+    in the order the domains are listed, so no domain's owner is dropped.
+    """
+    owners = [mx[(d, mech)]["owner"] for d in domains]
+    if len(set(owners)) == 1:
+        return owners[0]
+    return "; ".join(f"{DOMAIN_NAMES[d]}: {o}" for d, o in zip(domains, owners))
+
+
 def block(fm: dict, mx: dict[tuple[str, str], dict[str, str]] | None = None, where: str = "front matter") -> str:
     """The generated block body: a blank line, the summary table, a blank line, the item table."""
     mx = mx if mx is not None else matrix()
@@ -236,7 +250,7 @@ def block(fm: dict, mx: dict[tuple[str, str], dict[str, str]] | None = None, whe
         for d in domains:
             if d not in DOMAIN_NAMES:
                 _fail(f"{where}: bring item {item.get('item')!r} has unknown domain {d!r}")
-        owner = mx[(domains[0], mech)]["owner"]
+        owner = owner_cell(domains, mech, mx)
         # Semicolons, not commas: domain names hold "and", which reads as a list.
         links = "; ".join(f"[{DOMAIN_NAMES[d]}]({PB11_LINK}#{mx[(d, mech)]['anchor']})" for d in domains)
         cells = (item["item"], "; ".join(DOMAIN_NAMES[d] for d in domains), MECHANISM_NAMES[mech], owner, links)

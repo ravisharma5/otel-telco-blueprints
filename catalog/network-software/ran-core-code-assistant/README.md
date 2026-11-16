@@ -102,9 +102,9 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
-| Your RAN and core repositories | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
-| Specifications your code implements | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
-| Internal design documents | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Your RAN and core repositories | RAN; 5G core CNFs | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Specifications your code implements | RAN; 5G core CNFs | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Internal design documents | RAN; 5G core CNFs | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 
 <!-- generated:what-you-bring end -->
 

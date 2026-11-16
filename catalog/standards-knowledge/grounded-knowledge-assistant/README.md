@@ -155,9 +155,9 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
-| 3GPP and IETF specifications | 5G core CNFs; RAN; Transport and IP | RAG corpus | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| 3GPP and IETF specifications | 5G core CNFs; RAN; Transport and IP | RAG corpus | 5G core CNFs: Platform team; RAN: Operations engineer; Transport and IP: Operations engineer | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
 | TM Forum documents | OSS and BSS | RAG corpus | Business owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
-| Vendor manuals and runbooks | RAN; 5G core CNFs; Transport and IP | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Vendor manuals and runbooks | RAN; 5G core CNFs; Transport and IP | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team; Transport and IP: Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
 | Routing threshold and answer-only ceiling | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
 
 <!-- generated:what-you-bring end -->

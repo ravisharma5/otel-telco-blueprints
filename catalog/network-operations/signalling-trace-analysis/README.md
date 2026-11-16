@@ -108,7 +108,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
 | Failure taxonomy and engineer-labelled traces | 5G core CNFs; RAN | Classification labels | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
-| 3GPP procedure specifications and runbooks | 5G core CNFs; RAN | RAG corpus | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| 3GPP procedure specifications and runbooks | 5G core CNFs; RAN | RAG corpus | 5G core CNFs: Platform team; RAN: Operations engineer | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 | NAS, NGAP, and S1AP parser tool contracts | 5G core CNFs; RAN | MCP tool contract | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 | Trace analysis skill and capability manifests | 5G core CNFs | Skill or capability manifest | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 

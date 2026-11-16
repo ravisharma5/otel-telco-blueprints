@@ -103,7 +103,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
-| Mobility procedure specifications with usage rights | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Mobility procedure specifications with usage rights | RAN; 5G core CNFs | RAG corpus | RAN: Operations engineer; 5G core CNFs: Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 | Event rebuild tools over radio and core traces | RAN; 5G core CNFs | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 | Mobility analysis skill and capability manifests | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 
