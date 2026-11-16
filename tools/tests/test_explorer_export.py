@@ -332,13 +332,17 @@ def test_fp8_swap_only_when_needed(data):
                             )
 
 
-def test_regional_96_needs_no_swap_without_the_large_llm(data):
-    """Data sanity check: a 96 GB GPU holds every regional map that leaves the 31B at the core."""
+def test_regional_96_fits_without_the_large_llm(data):
+    """Data sanity check: a 96 GB GPU holds every regional map that leaves the 31B at the core.
+
+    A map with four or more mid-size slots (Classification beside Safety and Decision)
+    may need an FP8 build to reach the fits band; only the 31B may stay out of it.
+    """
     checked = 0
     for uc, setup, batch, state in regional_states(data):
         if setup["id"] == "regional-96" and "llm-large" not in placed(uc["id"], "regional"):
             checked += 1
-            assert not any(v["operator_made"] for v in state["variants"]), uc["id"]
+            assert not any(v["operator_made"] and v["role"] == "llm-large" for v in state["variants"]), uc["id"]
             assert all(f["band"] == "fits" for f in state["fit"]), uc["id"]
     assert checked
 

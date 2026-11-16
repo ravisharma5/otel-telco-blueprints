@@ -277,6 +277,12 @@ options:
       - use_case: UC-SW-02
         roles: [safety]
         reason: An FP8 build of Safety makes room for it beside retrieval and the Decision slot that labels each review.
+      - use_case: UC-OPS-02
+        roles: [classification, safety]
+        reason: FP8 builds of Classification and Safety leave room for Embedding and Reranker on the same regional GPU, next to the trace store.
+      - use_case: UC-OPS-04
+        roles: [classification, safety, llm-small]
+        reason: FP8 builds of Classification, Safety, and the small LLM make room for them beside the Decision slot on a regional GPU.
     related: []
     excluded_slots: [decision]
 

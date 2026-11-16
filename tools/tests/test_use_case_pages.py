@@ -94,6 +94,8 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-software/ran-core-code-assistant": "UC-SW-01",
     "network-software/network-automation-review": "UC-SW-02",
     "network-software/oran-ric-xapp-assistant": "UC-SW-03",
+    "network-operations/signalling-trace-analysis": "UC-OPS-02",
+    "network-operations/ran-rf-health-checks": "UC-OPS-04",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -138,6 +140,38 @@ ENTRY_SPECS: dict[str, dict] = {
         "tmf": None,
         "agent_school": [],
         "goal": "software",
+    },
+    "network-operations/signalling-trace-analysis": {
+        "id": "UC-OPS-02",
+        "slots": {"embedding", "reranker", "safety", "classification", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [201],
+        "goal": "incidents",
+    },
+    "network-operations/ran-rf-health-checks": {
+        "id": "UC-OPS-04",
+        "slots": {"classification", "llm", "safety", "decision"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [101],
+        "goal": "sla-energy",
+    },
+    "network-operations/transport-ip-diagnostics": {
+        "id": "UC-OPS-08",
+        "slots": {"embedding", "reranker", "safety", "decision", "llm"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [301],
+        "goal": "incidents",
+    },
+    "network-operations/cross-domain-oss-correlation": {
+        "id": "UC-OPS-09",
+        "slots": {"classification", "embedding", "reranker", "safety", "decision", "llm"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [301, 402],
+        "goal": "incidents",
     },
 }
 
