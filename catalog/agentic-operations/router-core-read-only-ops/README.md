@@ -2,7 +2,7 @@
 id: "UC-AGOPS-02"
 type: "use-case"
 title: "Read-only router and 5G core operations"
-doc_status: draft
+doc_status: done
 domain: "agentic-operations"
 flagship: false
 depth: "entry"
@@ -11,6 +11,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers operations questions about routers and the 5G core by calling read-only tools and citing what each tool returned. Informs only and holds no write tools. Depends on read-only tool manifests and the deny-unless-allowed rule at the tool gateway."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09"]
+clarity_reviewed: "2026-11-16"
 agent_school: [101, 401]
 card:
   goal: "incidents"
