@@ -19,6 +19,13 @@ BRAND = REPO_ROOT / "site-src/brand"
 TOKENS_PATH = BRAND / "tokens.css"
 FONTS = BRAND / "fonts"
 FONT_FILES = ("RedHatDisplay-VF.woff2", "RedHatText-VF.woff2", "RedHatMono-VF.woff2")
+# Pinned here as well as in PROVENANCE.txt, so editing the provenance file alone
+# cannot make a changed font pass. Change both only after re-verifying upstream.
+FONT_SHA256 = {
+    "RedHatDisplay-VF.woff2": "69dca56dda2a2b067dee3e910323c97e54b8544f90f3d1c2192b5a37c0eb1ec3",
+    "RedHatText-VF.woff2": "1a5c9a8a88447c5b171ae99dab5daa4c1d49e3502db0fdc0da65d59fc5603feb",
+    "RedHatMono-VF.woff2": "54145e1e268b1c5359966336a6b6b12a5dfa046e493d3b4f2dc620c5edd12b62",
+}
 FONT_COMMIT = "6bb1048a6402b0076ea04f42951ec66263cd1437"
 FONT_REPO = "RedHatOfficial/RedHatFont"
 
@@ -178,10 +185,12 @@ def test_fonts_vendored():
     provenance = (FONTS / "PROVENANCE.txt").read_text(encoding="utf-8")
     assert FONT_REPO in provenance
     assert FONT_COMMIT in provenance
+    assert set(FONT_SHA256) == set(FONT_FILES)
     for name in FONT_FILES:
         path = FONTS / name
         assert path.is_file(), name
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        assert digest == FONT_SHA256[name], f"{name}: SHA-256 {digest} differs from the pinned value"
         line = next((ln for ln in provenance.splitlines() if ln.startswith(name)), "")
         assert digest in line, f"{name}: SHA-256 {digest} not recorded in PROVENANCE.txt"
     assert "SIL OPEN FONT LICENSE" in (FONTS / "OFL.txt").read_text(encoding="utf-8").upper()
