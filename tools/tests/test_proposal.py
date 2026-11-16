@@ -328,3 +328,25 @@ def test_proposal_no_planning_ids():
     for pattern in PLANNING_ID_PATTERNS:
         assert not re.search(pattern, text), pattern
     assert not re.search(r"\bPhase \d", text, re.I)
+
+
+def _without_urls(text: str) -> str:
+    return re.sub(r"\(https?://[^)]*\)|https?://\S+", "", text)
+
+
+def test_proposal_positioning():
+    text = _proposal_text()
+    assert GSMA_PRESS in text
+    assert "https://huggingface.co/GSMA" in text
+    assert "endorse" not in text.lower()
+    assert text.count("Engage Red Hat for supported products.") == 1
+
+
+def test_proposal_framing():
+    text = _without_urls(_proposal_text())
+    assert not re.search(r"\b(GA|TP|DP)\b", text)
+    assert not re.search(r"Technology Preview|Developer Preview|Generally Available", text, re.I)
+    for word in ("unverified", "validated", "production-ready", "pricing", "subscription fee", "contract price"):
+        assert word not in text.lower(), word
+    # Tool contracts are technical; commercial terms never appear.
+    assert not re.search(r"\b(price|prices|commercial terms|licen[cs]e fee|SLA credit)\b", text, re.I)

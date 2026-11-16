@@ -1,6 +1,6 @@
 # Docs site. Build: `make site` (strict). Preview: `make serve`.
-# Pages come from site-src/ plus framework/, architecture/, platform/ and
-# catalog/ (added in place by tools/site/hooks.py, which publishes catalog/ under
+# Pages come from site-src/ plus framework/, architecture/, platform/,
+# proposal/, and catalog/ (added in place by tools/site/hooks.py, which publishes catalog/ under
 # recipes/). Every page needs a nav line. The explorer owns the home page.
 site_name: OTel Telco Production Blueprints
 site_url: https://ravisharma5.github.io/otel-telco-blueprints/
@@ -146,3 +146,4 @@ nav:
       - Glossary: framework/glossary.md
       - Style guide: framework/style-guide.md
       - Review checklist: framework/review-checklist.md
+  - Proposal: proposal/index.md

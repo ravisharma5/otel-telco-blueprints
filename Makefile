@@ -9,7 +9,7 @@
 # The Google Vale style is vendored at .vale/styles/Google (see PROVENANCE.txt);
 # no target downloads styles.
 # explorer/src/content holds every explorer UI string (copy.md), so Vale lints it.
-DOC_DIRS := README.md site-src framework architecture platform catalog templates explorer/src/content
+DOC_DIRS := README.md site-src framework architecture platform catalog proposal templates explorer/src/content
 VALE ?= vale
 
 .PHONY: setup lint lint-structure lint-prose test test-vale test-site render facts docs site preview serve explorer explorer-data explorer-deps ci hooks
@@ -34,13 +34,15 @@ test-vale:
 
 # Rewrites the generated blocks: the serving page from data/serving/*.yaml, the
 # Recipes overview (catalog/index.md) from use-case front matter, and the What you
-# bring block on every use-case page from its adaptation field and the PB-11 matrix.
-# tools/tests/test_serving_data.py, test_catalog_overview.py, and
-# test_adaptation_field.py fail on drift.
+# bring block on every use-case page from its adaptation field and the PB-11 matrix,
+# and the proposal (proposal/index.md) from the blueprints.
+# tools/tests/test_serving_data.py, test_catalog_overview.py,
+# test_adaptation_field.py, and test_proposal.py fail on drift.
 render:
 	uv run python -m tools.site.render_serving
 	uv run python -m tools.site.render_catalog
 	uv run python -m tools.site.render_bring
+	uv run python -m tools.site.build_proposal
 
 # Prints every source URL the facts stamp covers (Sources tables, serving data,
 # and extra_urls in data/facts-check.yaml). The stamp itself is checked by

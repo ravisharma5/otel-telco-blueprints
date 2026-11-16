@@ -23,7 +23,7 @@ from tools.bplint.slug import github_slug
 from tools.tests.conftest import REPO_ROOT
 
 CONFIG_PATH = REPO_ROOT / "mkdocs.yml"
-SITE_DIRS = ["site-src", "tools/site", "framework", "templates", "architecture", "platform", "catalog"]
+SITE_DIRS = ["site-src", "tools/site", "framework", "templates", "architecture", "platform", "catalog", "proposal"]
 
 
 class _TagTolerantLoader(yaml.SafeLoader):
@@ -143,8 +143,8 @@ def test_routes():
 
 def test_nav_sections():
     titles = [next(iter(item)) for item in CONFIG["nav"]]
-    # Same five items as the explorer header; the contributor page sits in the footer.
-    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework"]
+    # Same six items as the explorer header; the contributor page sits in the footer.
+    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework", "Proposal"]
     assert "/templates.md" in CONFIG["not_in_nav"]
     assert "Start here" not in titles
     assert "Catalog" not in titles
@@ -183,7 +183,7 @@ def test_no_tooling_pages_detects_widened_allowlist(site_copy):
     # Mutation check: widen the hook allowlist to tools/; the leak check must notice.
     hook = site_copy / "tools/site/hooks.py"
     text = hook.read_text(encoding="utf-8")
-    widened = text.replace('"catalog"]', '"catalog", "tools"]')
+    widened = text.replace('"proposal"]', '"proposal", "tools"]')
     assert widened != text
     hook.write_text(widened, encoding="utf-8")
     _plant_leaks(site_copy)
@@ -602,7 +602,7 @@ def test_palette_follows_system():
 
 def test_nav_matches_explorer_header():
     titles = [next(iter(item)) for item in CONFIG["nav"]]
-    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework"]
+    assert titles == ["Use cases", "Recipes", "Platform", "Architecture", "Framework", "Proposal"]
     from urllib.parse import urlsplit
 
     root_path = urlsplit(CONFIG["site_url"]).path

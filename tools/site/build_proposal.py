@@ -4,7 +4,7 @@ The proposal (proposal/index.md) holds seven generated blocks between marker lin
 
     <!-- generated:facts-stamp start -->          "Facts checked as of <date>."
     <!-- generated:readiness-questions start -->  the ten questions (framework/index.md)
-    <!-- generated:architecture start -->         architecture pages and their questions
+    <!-- generated:architecture start -->         architecture pages and the question each answers
     <!-- generated:platform start -->             platform pages: id, title, one-liner
     <!-- generated:catalog start -->              use cases by domain: id, title, depth, summary
     <!-- generated:flagships start -->            flagship recipes: outcome and measures
@@ -128,12 +128,12 @@ def architecture(arch_dir: Path | None = None) -> str:
     found = sorted(p.stem for p in arch_dir.glob("*.md"))
     if sorted(ARCHITECTURE_ORDER) != found:
         _fail(f"architecture pages {found} do not match ARCHITECTURE_ORDER")
-    items = []
+    rows = []
     for stem in ARCHITECTURE_ORDER:
         _rel, doc = _doc(arch_dir / f"{stem}.md")
         fm = doc.front_matter or {}
-        items.append(f"- [{fm['title']}](../architecture/{stem}.md): {fm['question']}")
-    return "\n".join(items)
+        rows.append([f"[{fm['title']}](../architecture/{stem}.md)", fm["question"]])
+    return "\n".join(_table(("Page", "Question it answers"), rows))
 
 
 def platform_pages(platform_dir: Path | None = None) -> list[dict]:

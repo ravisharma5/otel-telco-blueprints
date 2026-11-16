@@ -19,6 +19,8 @@ nav:
       path: architecture/
     - label: Framework
       path: framework/
+    - label: Proposal
+      path: proposal/
 buttons:
   menu: Menu
   github: GitHub

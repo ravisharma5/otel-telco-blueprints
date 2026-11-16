@@ -1,6 +1,7 @@
 ---
 title: "Proposal"
-doc_status: draft
+doc_status: done
+clarity_reviewed: "2026-11-16"
 ---
 
 # Proposal: running OTel models in production
@@ -13,17 +14,25 @@ Facts checked as of 2026-11-16.
 
 ## At a glance
 
-Placeholder.
+- **What it is:** blueprints for running the OTel model family in production for telecom use cases.
+- **Who it's for:** GSMA members and telecom operators.
+- **What's in it:** ten readiness questions, a reference architecture, eleven platform blueprints, and a catalog of use-case recipes.
+- **Open source:** the blueprints use Red Hat products to show how the solution works, and you can replace any component.
 
 ## The problem
 
-Placeholder.
+GSMA reports that general-purpose models still fall short on telecom tasks, and that operators often deploy models that can't reach the accuracy, safety, or efficiency they need ([GSMA press release, March 2, 2026](https://www.gsma.com/newsroom/press-release/gsma-launches-open-telco-ai-to-accelerate-development-of-telco%E2%80%91grade-ai/)).
+A benchmark score shows what a model can do on a task. It doesn't show what it takes to run that model safely on a live network.
 
 ## Where this fits
 
-Placeholder.
+GSMA's Open Telco AI programme provides open models, data, compute, and benchmarks that show what models can do on telecom tasks ([press release](https://www.gsma.com/newsroom/press-release/gsma-launches-open-telco-ai-to-accelerate-development-of-telco%E2%80%91grade-ai/)).
+These blueprints cover what it takes to run those models in production: the platform, the integrations, the safety gates, the evidence, and the operating model.
+GSMA publishes the programme's datasets and leaderboard on [Hugging Face](https://huggingface.co/GSMA).
 
 ## The ten readiness questions
+
+A use case is ready for production when each question has a checkable answer.
 
 <!-- generated:readiness-questions start -->
 
@@ -44,17 +53,23 @@ Placeholder.
 
 ## Reference architecture
 
+These pages show how the six OTel model slots fit together and where each one runs.
+
 <!-- generated:architecture start -->
 
-- [Architecture overview](../architecture/index.md): How do the six OTel model slots map onto Red Hat products, and how do requests flow?
-- [Decision gate](../architecture/decision-gate.md): How does an agent's proposed change become an executed, blocked, or human-approved action?
-- [Adaptation ladder](../architecture/adaptation-ladder.md): How far should an operator customise an OTel model, and when should they go further?
-- [Placement tiers](../architecture/placement.md): Which OTel slots run at the far edge, regional sites, and the core, and what latency can each tier support?
-- [Crosswalk to the agent blueprint table](../architecture/crosswalk.md): How does this design line up with the 13-component agent blueprint table that agent-school uses?
+| Page | Question it answers |
+|---|---|
+| [Architecture overview](../architecture/index.md) | How do the six OTel model slots map onto Red Hat products, and how do requests flow? |
+| [Decision gate](../architecture/decision-gate.md) | How does an agent's proposed change become an executed, blocked, or human-approved action? |
+| [Adaptation ladder](../architecture/adaptation-ladder.md) | How far should an operator customise an OTel model, and when should they go further? |
+| [Placement tiers](../architecture/placement.md) | Which OTel slots run at the far edge, regional sites, and the core, and what latency can each tier support? |
+| [Crosswalk to the agent blueprint table](../architecture/crosswalk.md) | How does this design line up with the 13-component agent blueprint table that agent-school uses? |
 
 <!-- generated:architecture end -->
 
 ## Platform blueprints
+
+Platform blueprints answer the readiness questions once, so every use case can reuse the answers.
 
 <!-- generated:platform start -->
 
@@ -75,6 +90,8 @@ Placeholder.
 <!-- generated:platform end -->
 
 ## Use-case catalog
+
+A full recipe adds a worked example and deploy steps. A catalog entry fits on one page.
 
 <!-- generated:catalog start -->
 
@@ -154,12 +171,18 @@ Placeholder.
 
 <!-- generated:flagships end -->
 
+Reference implementations are planned for these four recipes first.
+
 ## The explorer
 
-Placeholder.
+The [use-case explorer](https://ravisharma5.github.io/otel-telco-blueprints/) shows every use case as a card.
+Pick a goal, open a use case, and choose your hardware setup to see which models fit, where they run, and what you bring.
 
 ## Sources and evidence summary
 
+Each use case links a source for every key claim. This table counts those sources and doesn't grade them.
+
+<!-- vale Google.Colons = NO -->
 <!-- generated:evidence-summary start -->
 
 Counted from each page's Sources table on 2026-11-16. Each number is how many Sources rows on the page have that Basis.
@@ -194,7 +217,11 @@ Counted from each page's Sources table on 2026-11-16. Each number is how many So
 | [UC-SW-03](../catalog/network-software/oran-ric-xapp-assistant/README.md) O-RAN RIC xApp assistant | Catalog entry | 4 | 1 | 0 | 0 | 3 | LLM groundedness floor; LLM citation-correctness floor; Embedding and Reranker recall-at-k floor; Safety abstain-recall floor | No model change: retrieval only. You bring: A golden set your experts label, Your domain corpus |
 
 <!-- generated:evidence-summary end -->
+<!-- vale Google.Colons = YES -->
 
 ## What's next and how to engage
 
-Placeholder.
+- **Reference implementations:** deployable, evaluated builds of the four flagship recipes, once a cluster is available.
+- **Your data and policies:** start with [Bring your own data and policies](../platform/bring-your-own-data/README.md). It lists what to bring for each network domain, who owns it, and which gate checks it.
+- **Contribute:** propose a use case or a fix in the [repository](https://github.com/ravisharma5/otel-telco-blueprints).
+- **Supported products:** the blueprints make no support claims. Engage Red Hat for supported products.

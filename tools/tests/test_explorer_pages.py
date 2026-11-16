@@ -29,8 +29,8 @@ COPY_PATH = EXPLORER / "src/content/copy.md"
 NODE_VERSION = "26.13.1"
 ASTRO_VERSION = "7.4.11"
 BASE = "/otel-telco-blueprints/"
-NAV = ["Use cases", "Recipes", "Platform", "Architecture", "Framework"]
-NAV_PATHS = ["", "recipes/", "platform/", "architecture/", "framework/"]
+NAV = ["Use cases", "Recipes", "Platform", "Architecture", "Framework", "Proposal"]
+NAV_PATHS = ["", "recipes/", "platform/", "architecture/", "framework/", "proposal/"]
 # Native packages the build loads on Linux x64 CI. Each must ship as an optional,
 # platform-specific dependency in the lockfile, so npm ci needs no install script.
 LINUX_X64_BINARIES = {

@@ -16,6 +16,7 @@ doc_globs:
   - "framework/*.md"
   - "architecture/*.md"
   - "catalog/index.md"
+  - "proposal/*.md"
 exclude_globs:
   - "templates/**"
   - "tools/tests/fixtures/**"

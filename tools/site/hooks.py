@@ -36,7 +36,7 @@ from pathlib import Path
 from mkdocs.structure.files import File
 
 ROOT = Path(__file__).resolve().parents[2]
-INCLUDE = ["framework", "architecture", "platform", "catalog"]
+INCLUDE = ["framework", "architecture", "platform", "catalog", "proposal"]
 SUFFIXES = {".md", ".svg", ".png", ".jpg", ".jpeg"}
 BANNERS = {"draft": "Draft: content may change", "review": "In review"}
 # Doc types that get a banner; every other type is left untouched.
