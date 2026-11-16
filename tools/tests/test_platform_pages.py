@@ -43,6 +43,7 @@ EXPECTED_PLATFORM_PAGES: dict[str, str] = {
     "security-identity-sandbox": "PB-08",
     "intake-model-selection": "PB-01",
     "compliance-operating-model": "PB-10",
+    "bring-your-own-data": "PB-11",
 }
 
 PB_ID = re.compile(r"^PB-[0-9]{2}$")

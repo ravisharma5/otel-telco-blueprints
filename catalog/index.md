@@ -321,4 +321,8 @@ These recipes use [the Compliance, sovereignty, and operating model page](../pla
 - [UC-OPS-06 Slice SLA assurance](network-operations/slice-sla-assurance/README.md)
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 
+### PB-11 Bring your own data and policies
+
+No recipe uses [the Bring your own data and policies page](../platform/bring-your-own-data/README.md) yet.
+
 <!-- generated:catalog-by-platform end -->

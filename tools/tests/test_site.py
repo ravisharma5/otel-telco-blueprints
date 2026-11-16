@@ -495,6 +495,7 @@ def test_nav_order():
         "platform/action-layer/README.md",
         "platform/evaluation-acceptance/README.md",
         "platform/adaptation/README.md",
+        "platform/bring-your-own-data/README.md",
         "platform/quality-operations/README.md",
         "platform/security-identity-sandbox/README.md",
         "platform/intake-model-selection/README.md",

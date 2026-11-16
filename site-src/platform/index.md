@@ -21,3 +21,4 @@ Platform blueprints cover the shared capabilities every use case depends on. The
 | [PB-08](security-identity-sandbox/README.md) | Security, identity, and sandbox | Adapt, operate, and comply |
 | [PB-09](quality-operations/README.md) | Quality operations and observability | Adapt, operate, and comply |
 | [PB-10](compliance-operating-model/README.md) | Compliance, sovereignty, and operating model | Adapt, operate, and comply |
+| [PB-11](bring-your-own-data/README.md) | Bring your own data and policies | Adapt, operate, and comply |

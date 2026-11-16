@@ -4,7 +4,7 @@ title: "Readiness questions"
 question: "What must an operator answer before running OTel models in production?"
 doc_status: done
 clarity_reviewed: "2026-11-11"
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
 
@@ -18,7 +18,7 @@ otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classificati
 | Answer | Ten questions, from model intake to operating model. A use case is ready for production when each one has a checkable answer |
 | Audience | Architects, business owners, risk owners, and legal teams |
 | OTel slots | All six: LLM, Embedding, Reranker, Safety, Decision, Classification |
-| Platform blueprints | PB-01 to PB-10 |
+| Platform blueprints | PB-01 to PB-11 |
 
 ## The question
 
@@ -39,9 +39,9 @@ A use case is ready for production when all ten criteria hold for that use case.
 |---|---|---|---|
 | 1 | Intake: which checkpoints may you run, and where do they come from? | Every checkpoint in use is pinned to a revision hash, has a recorded licence chain, and is served from your own registry as a signed image | [PB-01](../platform/intake-model-selection/README.md) |
 | 2 | Evaluation: how do you know a model is good enough for this use case? | Each slot has acceptance thresholds measured on your data and tool contracts, signed off by a named owner, and re-run on every model, prompt, tool, or adapter change | [PB-02](../platform/evaluation-acceptance/README.md) |
-| 3 | Adaptation: how do you fit the model to your network? | You climb from retrieval to skills, LoRA, and OSFT only when an evaluation gap calls for it, and every adapter is bound to one base revision and re-evaluated after a base upgrade | [PB-03](../platform/adaptation/README.md) |
+| 3 | Adaptation: how do you fit the model to your network? | You climb from retrieval to skills, LoRA, and OSFT only when an evaluation gap calls for it, and every adapter is bound to one base revision and re-evaluated after a base upgrade | [PB-03](../platform/adaptation/README.md), [PB-11](../platform/bring-your-own-data/README.md) |
 | 4 | Serving and placement: where and how does each slot run? | Each slot has a sized deployment on a hardware class, a placement tier, a latency target, and a fallback for when it is down | [PB-04](../platform/serving-routing-placement/README.md) |
-| 5 | Integration: how do agents reach your network and business systems? | Agents reach systems only through standards-based tools (TM Forum, CAMARA, 3GPP) behind one gateway. Tools are read-only by default and have versioned contracts and conformance tests | [PB-05](../platform/integration/README.md) |
+| 5 | Integration: how do agents reach your network and business systems? | Agents reach systems only through standards-based tools (TM Forum, CAMARA, 3GPP) behind one gateway. Tools are read-only by default and have versioned contracts and conformance tests | [PB-05](../platform/integration/README.md), [PB-11](../platform/bring-your-own-data/README.md) |
 | 6 | Autonomy gating: what may the agent do without a human? | Each action class has a declared autonomy level, a gate outside the model decides each step, an approver handles REVIEW, and every change is verified and can roll back | [PB-06](../platform/safety-autonomy-gating/README.md), [PB-07](../platform/action-layer/README.md) |
 | 7 | Security: how do you stop misuse of agents and tools? | Each agent has its own short-lived identity, the gateway authorizes every tool call, secrets never reach the model context, untrusted content is screened for prompt injection, and the stack runs air-gapped when required | [PB-08](../platform/security-identity-sandbox/README.md) |
 | 8 | Quality operations: how do you notice when quality drops? | Every episode is traced end to end with OpenTelemetry, drift signals such as abstention rate, gate labels, and human overrides have thresholds and owners, and AI incidents follow your NOC and SOC process | [PB-09](../platform/quality-operations/README.md) |
@@ -68,7 +68,7 @@ Autonomy gating takes two blueprints. PB-06 sets the gate described on the [deci
 
 ## Used by
 
-- PB-01 to PB-10: each platform blueprint answers one or two of these questions
+- PB-01 to PB-11: each platform blueprint answers one or two of these questions
 - [Architecture overview](../architecture/index.md): the six OTel slots mapped onto Red Hat products
 - [Decision gate](../architecture/decision-gate.md): the gate that answers autonomy gating
 - [Adaptation ladder](../architecture/adaptation-ladder.md): the climb that answers adaptation

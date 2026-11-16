@@ -329,7 +329,7 @@ def test_reference_pages_helper_reads_config():
 # ---------- readiness questions (framework landing page) ----------
 
 READINESS = REPO_ROOT / "framework/index.md"
-PB_IDS = [f"PB-{i:02d}" for i in range(1, 11)]
+PB_IDS = [f"PB-{i:02d}" for i in range(1, 12)]
 READINESS_DOMAINS = [
     "intake",
     "evaluation",
@@ -389,6 +389,7 @@ def test_readiness_answered_by():
         assert any(pb in cell for cell in answered), pb
     assert "PB-06" in answered[5] and "PB-07" in answered[5]
     assert "PB-10" in answered[8] and "PB-10" in answered[9]
+    assert "PB-11" in answered[2] and "PB-11" in answered[4]
 
 
 def test_readiness_every_row_links_a_platform_page():

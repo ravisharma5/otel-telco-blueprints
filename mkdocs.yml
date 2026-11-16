@@ -129,6 +129,7 @@ nav:
       - Action layer: platform/action-layer/README.md
       - Evaluation and acceptance: platform/evaluation-acceptance/README.md
       - Adaptation: platform/adaptation/README.md
+      - Bring your own data and policies: platform/bring-your-own-data/README.md
       - Quality operations and observability: platform/quality-operations/README.md
       - Security, identity, and sandbox: platform/security-identity-sandbox/README.md
       - Intake and model selection: platform/intake-model-selection/README.md

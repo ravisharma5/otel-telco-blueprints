@@ -215,5 +215,6 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-07 Action layer](../action-layer/README.md): the action layer completes the write path that starts at the action request
 - [PB-08 Security, identity, and sandbox](../security-identity-sandbox/README.md): covers workload identity and secrets in depth
 - [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): compliance covers customer consent and data residency for CAMARA calls and corpora
+- [PB-11 Bring your own data and policies](../bring-your-own-data/README.md): the tool contracts and corpora each network domain brings
 - Use cases: [the recipes that use PB-05](../../catalog/index.md#pb-05-integration)
 - Agent-school: 301 adds an approval gate, 302 covers governed MCP gateways, 303 covers identity-based tool authorization, and 401 generates gateway policies from a capability catalog, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
