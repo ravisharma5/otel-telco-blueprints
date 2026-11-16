@@ -1,5 +1,7 @@
 ---
 // Gallery card: one list item carrying the filter data attributes, wrapping one link.
+// Styles are global, namespaced under .card-item: scoped styles would stamp a
+// scoping attribute on every element of every card and bloat the home page.
 import StageChip from './StageChip.astro';
 import DepthChip from './DepthChip.astro';
 import { frontmatter as copy } from '../content/copy.md';
@@ -35,7 +37,7 @@ const status = copy.home.gallery.status[useCase.doc_status];
     <span class="summary">{useCase.card.summary}</span>
     <span class="chips"><StageChip stage={useCase.stage} /><DepthChip depth={useCase.depth} /></span>
     <ul class="tags">
-      {useCase.slot_names.map((name) => <li class="tag">{name}</li>)}
+      {useCase.slot_names.map((name) => <li>{name}</li>)}
     </ul>
     <span class="footer">
       <span class="counts">{counts}</span>
@@ -45,9 +47,9 @@ const status = copy.home.gallery.status[useCase.doc_status];
   </a>
 </li>
 
-<style>
+<style is:global>
   .card-item { display: flex; }
-  .card {
+  .card-item .card {
     display: flex; flex-direction: column; gap: var(--space-sm); flex: 1;
     padding: var(--space-lg);
     background: var(--color-surface); color: var(--color-text);
@@ -56,40 +58,40 @@ const status = copy.home.gallery.status[useCase.doc_status];
     transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease,
       transform var(--motion-fast) ease;
   }
-  .card:hover {
+  .card-item .card:hover {
     color: var(--color-text); border-color: var(--color-text);
     box-shadow: var(--shadow-md); transform: translateY(-2px);
   }
-  .card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-  .eyebrow, .counts, .status {
+  .card-item .card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .card-item .eyebrow, .card-item .counts, .card-item .status {
     color: var(--color-text-muted);
     font-size: var(--text-label); line-height: var(--leading-label);
   }
-  .eyebrow { font-weight: var(--weight-bold); }
-  h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
-  .summary { color: var(--color-text-muted); }
-  .chips { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
-  .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
-  .tag {
+  .card-item .eyebrow { font-weight: var(--weight-bold); }
+  .card-item h3 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+  .card-item .summary { color: var(--color-text-muted); }
+  .card-item .chips { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  .card-item .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
+  .card-item .tags li {
     padding: var(--space-xs) var(--space-sm);
     background: var(--color-surface-2); color: var(--color-text);
     border-radius: var(--radius-sm);
     font-size: var(--text-label); line-height: var(--leading-label);
   }
-  .footer {
+  .card-item .footer {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-sm);
     margin-top: auto; padding-top: var(--space-md);
     border-top: 1px solid var(--color-border);
   }
-  .view {
+  .card-item .view {
     color: var(--color-primary-text);
     font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
   }
   @media (prefers-reduced-motion: reduce) {
-    .card { transition: border-color var(--motion-fast) ease; }
-    .card:hover { transform: none; }
+    .card-item .card { transition: border-color var(--motion-fast) ease; }
+    .card-item .card:hover { transform: none; }
   }
   @media (max-width: 639px) {
-    .card { padding: var(--space-md); }
+    .card-item .card { padding: var(--space-md); }
   }
 </style>

@@ -1,6 +1,7 @@
 ---
 // Static recipe depth chip: "Full recipe" or "Catalog entry". Monochrome, like a tag,
 // so it never competes with the stage chip's color. Labels live in copy.md.
+// Styles are global and namespaced: the chip repeats on every gallery card.
 import { frontmatter as copy } from '../content/copy.md';
 import type { Depth } from '../lib/data';
 
@@ -13,7 +14,7 @@ const labels = copy.depth as Record<Depth['id'], string>;
 ---
 <span class={`depth-chip depth-${depth.id}`}>{labels[depth.id]}</span>
 
-<style>
+<style is:global>
   .depth-chip {
     display: inline-flex; align-items: center;
     padding: var(--space-xs) var(--space-control-x);

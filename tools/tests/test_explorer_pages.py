@@ -260,6 +260,13 @@ GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
 DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
 CHANGE_LABELS = {"none": "No model change", "retrain": "You retrain or adapt"}
 HOME_SIZE_LIMIT_KB = 60
+# Bytes of markup per gallery card (cards measured 1.0 to 1.13 KB with 26 use
+# cases). With the rest of the home page near 16.5 KB, HOME_SIZE_LIMIT_KB holds
+# at least CARD_CAPACITY cards even if every card hit the budget, so the next
+# catalog batches fit; heavier card or page markup fails here, long before
+# catalog growth alone reaches the size limit.
+CARD_BYTES_LIMIT = 1200
+CARD_CAPACITY = 34
 
 
 def _copy():
@@ -459,6 +466,18 @@ def test_home_page_size(explorer_dist):
 
 
 @pytest.mark.site_output
+def test_gallery_card_weight(explorer_dist):
+    html = (explorer_dist / "index.html").read_text(encoding="utf-8")
+    cards = re.findall(r'<li class="card-item".*?</a>\s*</li>', html, re.S)
+    assert len(cards) == len(_data()["use_cases"])
+    sizes = sorted(len(c.encode("utf-8")) for c in cards)
+    assert sizes[-1] <= CARD_BYTES_LIMIT, f"heaviest card is {sizes[-1]} bytes, over {CARD_BYTES_LIMIT}"
+    rest_kb = (len(html.encode("utf-8")) - sum(sizes)) / 1024
+    room = int((HOME_SIZE_LIMIT_KB - rest_kb) * 1024 // CARD_BYTES_LIMIT)
+    assert room >= CARD_CAPACITY, f"room for {room} cards at the card budget, under {CARD_CAPACITY}"
+
+
+@pytest.mark.site_output
 def test_gallery_cards(explorer_dist):
     data = _data()
     cards = _cards(_home(explorer_dist))
@@ -470,7 +489,9 @@ def test_gallery_cards(explorer_dist):
         text = card.text()
         for value in (uc["domain_label"], uc["title"], uc["card"]["summary"], uc["stage"]["label"]):
             assert value in text, f"{uc['slug']}: missing {value!r}"
-        tags = [n.text() for n in card.find_all(lambda n: n.has_class("tag"))]
+        tag_lists = card.find_all(lambda n: n.tag == "ul" and n.has_class("tags"))
+        assert len(tag_lists) == 1, uc["slug"]
+        tags = [c.text() for c in tag_lists[0].children if isinstance(c, _Node) and c.tag == "li"]
         assert tags == uc["slot_names"]
         assert _counts_line(uc["counts"]) in text
         assert RECIPE_STATUS[uc["doc_status"]] in text
