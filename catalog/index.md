@@ -52,7 +52,10 @@ The Use cases page shows the same use cases as cards.
 
 | Recipe | Topic | Depth | Also covers |
 |---|---|---|---|
+| [UC-BIZ-01](business-assurance/churn-risk-explanation/README.md) | Churn risk explanation | Catalog entry |  |
+| [UC-BIZ-02](business-assurance/revenue-assurance-triage/README.md) | Revenue assurance triage | Catalog entry |  |
 | [UC-CARE-01](business-assurance/camara-care-diagnostics/README.md) | CAMARA customer-care diagnostics | Full recipe | Customer care diagnostics |
+| [UC-CARE-02](business-assurance/broadband-digital-troubleshooting/README.md) | Broadband digital troubleshooting | Catalog entry |  |
 
 ## Security
 
@@ -76,7 +79,10 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
@@ -98,7 +104,10 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
@@ -132,7 +141,10 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
@@ -154,7 +166,10 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
@@ -175,7 +190,10 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
@@ -196,6 +214,7 @@ These recipes use [the Action layer page](../platform/action-layer/README.md):
 
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
@@ -235,7 +254,10 @@ These recipes use [the Quality operations and observability page](../platform/qu
 These recipes use [the Compliance, sovereignty, and operating model page](../platform/compliance-operating-model/README.md):
 
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)

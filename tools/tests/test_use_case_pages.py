@@ -102,6 +102,9 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "agentic-operations/policy-following-ops-agents": "UC-AGOPS-03",
     "security/security-triage": "UC-SEC-01",
     "security/signalling-attack-classification": "UC-SEC-02",
+    "business-assurance/broadband-digital-troubleshooting": "UC-CARE-02",
+    "business-assurance/churn-risk-explanation": "UC-BIZ-01",
+    "business-assurance/revenue-assurance-triage": "UC-BIZ-02",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -210,6 +213,46 @@ ENTRY_SPECS: dict[str, dict] = {
         "tmf": None,
         "agent_school": [],
         "goal": "secure",
+    },
+    "business-assurance/broadband-digital-troubleshooting": {
+        "id": "UC-CARE-02",
+        "slots": {"embedding", "reranker", "safety", "decision", "llm"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [],
+        "goal": "customers",
+    },
+    "business-assurance/churn-risk-explanation": {
+        "id": "UC-BIZ-01",
+        "slots": {"llm", "safety", "decision"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [202],
+        "goal": "customers",
+    },
+    "business-assurance/revenue-assurance-triage": {
+        "id": "UC-BIZ-02",
+        "slots": {"llm", "safety", "decision"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [202],
+        "goal": "customers",
+    },
+    "research/kpi-rca-reasoning": {
+        "id": "UC-RES-01",
+        "slots": {"classification", "llm", "safety", "decision"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [201],
+        "goal": "incidents",
+    },
+    "research/mobility-failure-analysis": {
+        "id": "UC-RES-02",
+        "slots": {"embedding", "reranker", "safety", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [],
+        "goal": "incidents",
     },
 }
 

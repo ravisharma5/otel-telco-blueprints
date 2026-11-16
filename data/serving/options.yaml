@@ -301,6 +301,15 @@ options:
       - use_case: UC-SEC-02
         roles: [classification, safety]
         reason: FP8 builds of Classification and Safety halve their weights and leave KV-cache room on the regional GPU near the signalling records.
+      - use_case: UC-CARE-02
+        roles: [safety, llm-small]
+        reason: FP8 builds of Safety and the small LLM make room for them beside retrieval and the Decision slot that labels each remote fix.
+      - use_case: UC-BIZ-01
+        roles: [safety, llm-small]
+        reason: FP8 builds of Safety and the small LLM make room for them beside the Decision slot that labels each retention offer.
+      - use_case: UC-BIZ-02
+        roles: [safety, llm-small]
+        reason: FP8 builds of Safety and the small LLM make room for them beside the Decision slot that labels each hold or escalation.
     related: []
     excluded_slots: [decision]
 
