@@ -1,9 +1,10 @@
-# Facts stamp. Written by `uv run python -m tools.site.facts --write` after the
-# source re-check; tools/tests/test_proposal.py fails when sources_digest no
-# longer matches the Sources tables, serving-data URLs, and extra_urls.
+# Facts stamp. Written by `uv run python -m tools.site.facts --write --checked <date>
+# --recheck-report <report>` after the source re-check; tools/tests/test_proposal.py
+# fails when sources_digest no longer matches the Sources tables, serving-data URLs,
+# extra_urls, and the URL lines of the architecture pages and the proposal.
 checked: "2026-11-16"
-sources_digest: "9dd076964ccc76ea9ad6122f12781fe481d0d4cd427e034db5fd1fabc28834ae"
-url_count: 189
+sources_digest: "67e0b8bf03c8cf4bdc559a6d78b966694fb4c9dc248bbc91c41757a0ee912f98"
+url_count: 194
 card_revisions:
   OTel-2.0-Decision-26B-A4B-4bit: "7ff608e3"
   OTel-2.0-LLM-31B-IT: "dd9a4c46"
