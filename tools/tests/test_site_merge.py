@@ -162,6 +162,39 @@ def test_check_links_clean(tmp_path):
     assert merge_site.check_links(tmp_path) == []
 
 
+def _pdf_link_site(tmp_path):
+    _write(
+        tmp_path / "proposal/index.html",
+        '<a href="otel-telco-blueprints-proposal.pdf">pdf</a><a href="other.pdf">x</a>',
+    )
+    return tmp_path
+
+
+def test_missing_pdf_optional_without_require_pdf(tmp_path, monkeypatch):
+    site = _pdf_link_site(tmp_path)
+    monkeypatch.delenv("REQUIRE_PDF", raising=False)
+    optional = merge_site.optional_targets(site)
+    assert optional == {merge_site.PROPOSAL_PDF}
+    broken = merge_site.check_links(site, optional)
+    # Only the proposal PDF is exempt; any other missing file still fails.
+    assert broken == ["proposal/index.html: other.pdf"]
+
+
+def test_missing_pdf_fails_with_require_pdf(tmp_path, monkeypatch):
+    site = _pdf_link_site(tmp_path)
+    monkeypatch.setenv("REQUIRE_PDF", "1")
+    assert merge_site.optional_targets(site) == frozenset()
+    broken = merge_site.check_links(site, merge_site.optional_targets(site))
+    assert "proposal/index.html: otel-telco-blueprints-proposal.pdf" in broken
+
+
+def test_built_pdf_never_optional(tmp_path, monkeypatch):
+    site = _pdf_link_site(tmp_path)
+    _write(site / merge_site.PROPOSAL_PDF, "%PDF-1.7")
+    monkeypatch.delenv("REQUIRE_PDF", raising=False)
+    assert merge_site.optional_targets(site) == frozenset()
+
+
 def test_no_planning_ids_in_merge_files():
     from tools.guards.patterns import PLANNING_ID_RE
 

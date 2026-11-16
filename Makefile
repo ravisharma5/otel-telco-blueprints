@@ -67,7 +67,10 @@ test-pdf:
 	REQUIRE_PDF=1 uv run pytest -q -m "pdf and not site_output"
 
 # One artifact for Pages: docs plus explorer, merged by tools/site/merge_site.py.
+# The proposal PDF is built into site/ after the docs build (which cleans site/)
+# and before the merge, so the link check sees it.
 site: docs explorer
+	uv run python -m tools.site.build_pdf --out site/proposal/otel-telco-blueprints-proposal.pdf
 	uv run python -m tools.site.merge_site
 
 # Serves the merged site at http://127.0.0.1:8000/otel-telco-blueprints/ (run make site first).

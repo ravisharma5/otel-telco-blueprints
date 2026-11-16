@@ -218,3 +218,18 @@ def test_cli_skips_without_weasyprint(monkeypatch, tmp_path, capsys):
     assert not out.exists()
     monkeypatch.setenv("REQUIRE_PDF", "1")
     assert build_pdf.main(["--out", str(out)]) == 1
+
+
+@pytest.mark.site_output
+@pytest.mark.pdf
+def test_proposal_pdf_in_site(site_dir):
+    pdf = site_dir / "proposal" / build_pdf.PDF_NAME
+    assert pdf.is_file(), "make site did not build the proposal PDF"
+    assert pdf.read_bytes()[:4] == b"%PDF"
+    page = (site_dir / "proposal/index.html").read_text(encoding="utf-8")
+    assert f'href="{build_pdf.PDF_NAME}"' in page
+
+
+def test_proposal_links_pdf_once():
+    lines = PROPOSAL.read_text(encoding="utf-8").splitlines()
+    assert sum(build_pdf.PDF_NAME in ln for ln in lines) == 1

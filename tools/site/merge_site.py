@@ -13,6 +13,10 @@ this step, which does three things in order:
 3. check_links: parse every HTML file in site/ and report any internal href or src
    (relative, or under the site base path) that resolves to no file.
 
+The proposal PDF (built by tools/site/build_pdf.py before this step) is the one
+optional target: when WeasyPrint cannot run locally the PDF is skipped, so a link to
+it is not reported, unless REQUIRE_PDF=1 (set in the Pages workflow).
+
 Usage:
     python -m tools.site.merge_site
 """
@@ -20,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import html
+import os
 import posixpath
 import re
 import shutil
@@ -38,6 +43,8 @@ OLD_PREFIX = "catalog/"
 NEW_PREFIX = "recipes/"
 # A legacy entry: catalog/ plus lowercase path segments, each ending in a slash.
 LEGACY_ENTRY = re.compile(r"^catalog/(?:[a-z0-9][a-z0-9-]*/)*$")
+# Built by tools/site/build_pdf.py; may be skipped locally when Pango is missing.
+PROPOSAL_PDF = "proposal/otel-telco-blueprints-proposal.pdf"
 SKIP_SCHEMES = ("http:", "https:", "mailto:", "tel:", "data:", "javascript:")
 
 REDIRECT = """<!doctype html>
@@ -179,17 +186,35 @@ def _resolve(site: Path, page: Path, ref: str) -> Path | None:
     return target
 
 
-def check_links(site: Path) -> list[str]:
-    """Return 'page: ref' for every internal href or src that resolves to no file."""
+def check_links(site: Path, optional: frozenset[str] = frozenset()) -> list[str]:
+    """Return 'page: ref' for every internal href or src that resolves to no file.
+
+    optional holds site-relative paths whose absence is not reported.
+    """
     broken = []
     for page in sorted(site.rglob("*.html")):
         parser = _Refs()
         parser.feed(page.read_text(encoding="utf-8", errors="replace"))
         for ref in parser.refs:
             target = _resolve(site, page, ref)
-            if target is not None and not target.is_file():
-                broken.append(f"{page.relative_to(site).as_posix()}: {ref}")
+            if target is None or target.is_file():
+                continue
+            try:
+                rel = target.relative_to(site).as_posix()
+            except ValueError:
+                rel = None
+            if rel in optional:
+                continue
+            broken.append(f"{page.relative_to(site).as_posix()}: {ref}")
     return broken
+
+
+def optional_targets(site: Path) -> frozenset[str]:
+    """The proposal PDF is optional only when it is missing and REQUIRE_PDF is not 1."""
+    if (site / PROPOSAL_PDF).is_file() or os.environ.get("REQUIRE_PDF") == "1":
+        return frozenset()
+    print(f"links: {PROPOSAL_PDF} not built (no Pango); its link is not checked")
+    return frozenset({PROPOSAL_PDF})
 
 
 # ---------- CLI ----------
@@ -207,7 +232,7 @@ def main() -> int:
         raise SystemExit("merge: site/ is missing; build the docs first")
     merge(DIST, SITE)
     write_redirects(SITE, read_legacy(LEGACY), _site_url())
-    broken = check_links(SITE)
+    broken = check_links(SITE, optional_targets(SITE))
     if broken:
         print(f"links: {len(broken)} internal link(s) resolve to no file:", file=sys.stderr)
         for item in broken:

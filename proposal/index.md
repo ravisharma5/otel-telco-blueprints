@@ -12,6 +12,8 @@ Facts checked as of 2026-11-16.
 
 <!-- generated:facts-stamp end -->
 
+Download the proposal as a PDF: <a href="otel-telco-blueprints-proposal.pdf">otel-telco-blueprints-proposal.pdf</a>
+
 ## At a glance
 
 - **What it is:** blueprints for running the OTel model family in production for telecom use cases.
