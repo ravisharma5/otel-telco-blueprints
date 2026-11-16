@@ -2,7 +2,7 @@
 id: "UC-OPS-04"
 type: "use-case"
 title: "RAN and RF health checks"
-doc_status: draft
+doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "entry"
@@ -12,6 +12,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains RAN and RF health findings that analytical tools compute, and recommends parameter changes to a human approver. Never changes a cell itself. Depends on your performance counters, your own analysis tools, and a retrained Classification head."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07"]
+clarity_reviewed: "2026-11-16"
 agent_school: [101]
 card:
   goal: "sla-energy"
@@ -46,7 +47,7 @@ placement:
 
 Cell performance counters and radio measurements show coverage, interference, and load problems before customers notice them.
 Engineers scan them by hand across thousands of cells, and slow degradation slips through.
-This entry has your analysis tools compute the numbers, labels the likely fault, and explains each finding; any parameter change goes to an approver.
+Your analysis tools compute the numbers, and this entry labels the likely fault, explains each finding, and sends any parameter change to an approver.
 The KPIs are time to spot a degrading cell and the share of proposals approvers accept.
 Any gain is a target, measured against a shadow-stage baseline.
 

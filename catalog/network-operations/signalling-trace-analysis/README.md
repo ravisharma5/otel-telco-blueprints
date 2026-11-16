@@ -2,7 +2,7 @@
 id: "UC-OPS-02"
 type: "use-case"
 title: "Signalling trace analysis"
-doc_status: draft
+doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "entry"
@@ -11,6 +11,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains failed procedures in 5G and LTE signalling traces and cites the decoded messages and 3GPP clauses. Informs only. Depends on parser tools that decode each message, labelled traces from your network, and a retrained Classification head."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09"]
+clarity_reviewed: "2026-11-16"
 agent_school: [201]
 card:
   goal: "incidents"
