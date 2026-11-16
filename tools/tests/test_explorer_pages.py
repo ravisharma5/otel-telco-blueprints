@@ -513,6 +513,7 @@ def test_filter_chips_present_values_only(explorer_dist):
         "domain": {uc["domain"] for uc in data["use_cases"]},
         "stage": {uc["stage"]["id"] for uc in data["use_cases"]},
         "tiers": {t for uc in data["use_cases"] for t in _used_tiers(data, uc)},
+        "depth": {uc["depth"]["id"] for uc in data["use_cases"]},
     }
     for group, values in by_group.items():
         assert {v for v, _ in values} <= used[group]

@@ -91,6 +91,9 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "business-assurance/camara-care-diagnostics": "UC-CARE-01",
     "standards-knowledge/spec-summarisation": "UC-KNOW-02",
     "standards-knowledge/oss-bss-architecture-guidance": "UC-KNOW-03",
+    "network-software/ran-core-code-assistant": "UC-SW-01",
+    "network-software/network-automation-review": "UC-SW-02",
+    "network-software/oran-ric-xapp-assistant": "UC-SW-03",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec

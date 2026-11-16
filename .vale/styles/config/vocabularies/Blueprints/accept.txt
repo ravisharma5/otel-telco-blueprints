@@ -53,5 +53,7 @@ pseudonymi[sz]ation
 EU AI Act
 Responsible AI
 PCIe
-OSS
-BSS
+xApps?
+ORANBench
+SRSRANBench
+Nephio

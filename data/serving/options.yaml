@@ -274,6 +274,9 @@ options:
       - use_case: UC-KNOW-03
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM leave room for Embedding and Reranker on the same regional GPU.
+      - use_case: UC-SW-02
+        roles: [safety]
+        reason: An FP8 build of Safety makes room for it beside retrieval and the Decision slot that labels each review.
     related: []
     excluded_slots: [decision]
 

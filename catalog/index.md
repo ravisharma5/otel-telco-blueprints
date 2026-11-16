@@ -22,6 +22,14 @@ The Use cases page shows the same use cases as cards.
 | [UC-KNOW-02](standards-knowledge/spec-summarisation/README.md) | Standards and change-request summaries | Catalog entry |  |
 | [UC-KNOW-03](standards-knowledge/oss-bss-architecture-guidance/README.md) | OSS and BSS architecture guidance | Catalog entry |  |
 
+## Network software
+
+| Recipe | Topic | Depth | Also covers |
+|---|---|---|---|
+| [UC-SW-01](network-software/ran-core-code-assistant/README.md) | RAN and core code assistant | Catalog entry |  |
+| [UC-SW-02](network-software/network-automation-review/README.md) | Network automation review | Catalog entry |  |
+| [UC-SW-03](network-software/oran-ric-xapp-assistant/README.md) | O-RAN RIC xApp assistant | Catalog entry |  |
+
 ## Network operations
 
 | Recipe | Topic | Depth | Also covers |
@@ -58,6 +66,9 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 ### PB-02 Evaluation and acceptance
 
@@ -69,12 +80,16 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 ### PB-03 Adaptation
 
 These recipes use [the Adaptation page](../platform/adaptation/README.md):
 
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 
 ### PB-04 Serving, routing, and placement
 
@@ -86,6 +101,9 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 ### PB-05 Integration
 
@@ -97,6 +115,9 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 ### PB-06 Safety and autonomy gating
 
@@ -108,6 +129,9 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 ### PB-07 Action layer
 
@@ -116,6 +140,7 @@ These recipes use [the Action layer page](../platform/action-layer/README.md):
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 
 ### PB-08 Security, identity, and sandbox
 
@@ -123,6 +148,7 @@ These recipes use [the Security, identity, and sandbox page](../platform/securit
 
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 
 ### PB-09 Quality operations and observability
 
