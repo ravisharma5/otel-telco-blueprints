@@ -2,7 +2,7 @@
 id: "UC-KNOW-03"
 type: "use-case"
 title: "OSS and BSS architecture guidance"
-doc_status: draft
+doc_status: done
 domain: "standards-knowledge"
 flagship: false
 depth: "entry"
@@ -11,6 +11,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers OSS and BSS architecture questions with citations to TM Forum material and your own designs, or abstains. Informs only and never changes the network. Depends on retrieval plus the Safety slot."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09"]
+clarity_reviewed: "2026-11-15"
 agent_school: [402]
 card:
   goal: "answer"
