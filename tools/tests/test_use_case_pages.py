@@ -107,6 +107,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "business-assurance/revenue-assurance-triage": "UC-BIZ-02",
     "research/kpi-rca-reasoning": "UC-RES-01",
     "research/mobility-failure-analysis": "UC-RES-02",
+    "network-operations/core-network-rca": "UC-OPS-03",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -1583,6 +1584,91 @@ def test_camara_example_distinct():
     text = body(CARE)
     for old in EARLIER_FLAGSHIP_IDS:
         assert old not in text, old
+
+
+# ---------- core network RCA ----------
+
+CORE_RCA = REPO_ROOT / "catalog/network-operations/core-network-rca/README.md"
+CORE_RCA_SLOTS = {"classification", "llm", "safety", "decision", "embedding", "reranker"}
+SIGNALLING_ANCHOR = (
+    "https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training"
+)
+
+
+def _core_rca_example() -> str:
+    how = section_text(CORE_RCA, "How it works")
+    heading = next(ln for ln in how.splitlines() if ln.startswith("### Worked example:"))
+    return _h3_text(how, heading[4:])
+
+
+def test_core_rca_front_matter():
+    fm = front_matter(CORE_RCA) or {}
+    assert fm.get("id") == "UC-OPS-03"
+    assert fm.get("depth") == "recipe"
+    assert fm.get("flagship") is False
+    assert set(fm.get("otel_slots") or []) == CORE_RCA_SLOTS
+    assert fm.get("autonomy_ceiling") == "recommend-with-approval"
+    assert fm.get("tmf_an_level_target") == 2
+    assert fm.get("agent_school") == [101, 201, 402]
+    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in range(1, 11)]
+    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
+
+
+def test_core_rca_gate_rows():
+    table = table_with_header(CORE_RCA, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    assert any(r[out].startswith("NOTIFY") and "assist stage" in r[out] for r in rows), rows
+    assert any(r[out].startswith("REVIEW") and "recommend stage" in r[out] for r in rows), rows
+    assert any(r[out] == "STOP" for r in rows), rows
+    assert not any(re.search(r"\bACT\b", r[out]) for r in rows), rows
+
+
+def test_core_rca_mermaid_capabilities():
+    fences = mermaid_fences(body(CORE_RCA))
+    assert len(fences) == 1
+    texts = [m.group(2) for m in MERMAID_NODE.finditer(fences[0])]
+    assert any("Classification" in t for t in texts), texts
+    assert any("Safety" in t for t in texts), texts
+    assert any(re.search(r"(?i)notification job", t) for t in texts), texts
+    assert PRODUCT_TERMS.findall(fences[0]) == []
+    assert LAYER_CODE.findall(fences[0]) == []
+
+
+def test_core_rca_signalling_prerequisite():
+    bullets = re.findall(r"^- .*$", section_text(CORE_RCA, "What you need"), re.M)
+    bullets += re.findall(r"^- .*$", section_text(CORE_RCA, "Limitations"), re.M)
+    assert any(SIGNALLING_ANCHOR in b for b in bullets), bullets
+
+
+def test_core_rca_example_ids():
+    example = _core_rca_example()
+    for ident in ("inc-8812", "core-rca-agent", "smf-2", "req-8812-1"):
+        assert ident in example, ident
+    text = body(CORE_RCA)
+    for old in REUSED_EXAMPLE_IDS + EARLIER_FLAGSHIP_IDS + ("case-8841",):
+        assert old not in text, old
+
+
+def test_core_rca_distinct_from_flagships():
+    problem = section_text(CORE_RCA, "Problem and value")
+    assert not re.search(r"(?i)\brouters?\b", problem), problem
+    assert re.search(r"\b(AMF|SMF|UPF|NRF|UDM)\b", problem), problem
+
+
+def test_core_rca_no_values_on_parameters():
+    names = {row[0] for t in param_tables(CORE_RCA) for row in t[1:]}
+    for name in (
+        "Classification per-class recall floor",
+        "Classification other-or-abstain recall floor",
+        "LLM groundedness floor",
+        "Safety abstain-recall floor",
+        "Decision false-ACT budget",
+        "Ceiling for notify requests",
+        "Ceiling for low-risk writes",
+        "Embedding and Reranker recall-at-k floor",
+    ):
+        assert name in names, name
 
 
 # ---------- platform back-links ----------

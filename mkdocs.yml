@@ -99,6 +99,7 @@ nav:
       - Network operations:
           - Adaptation ladder on alarm triage: catalog/network-operations/alarm-triage-adaptation/README.md
           - Signalling trace analysis: catalog/network-operations/signalling-trace-analysis/README.md
+          - Core network root-cause analysis: catalog/network-operations/core-network-rca/README.md
           - RAN and RF health checks: catalog/network-operations/ran-rf-health-checks/README.md
           - Transport and IP diagnostics: catalog/network-operations/transport-ip-diagnostics/README.md
           - Cross-domain OSS correlation: catalog/network-operations/cross-domain-oss-correlation/README.md
