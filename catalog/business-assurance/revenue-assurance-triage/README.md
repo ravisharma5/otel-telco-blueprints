@@ -24,9 +24,9 @@ clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
   goal: "customers"
-  summary: "Explains each case your own fraud or revenue assurance model flags, and proposes a hold or an escalation for an analyst to approve."
+  summary: "Explains each case your own fraud or revenue assurance model flags, and proposes a hold or an escalation for an approver to accept."
   outcome: "Analysts work flagged cases faster, with the billing evidence for each proposal in one place."
-  audience: "Revenue assurance and fraud analysts, approvers, and risk owners"
+  audience: "Revenue assurance teams, approvers, and risk owners"
   measures: ["Time to work a flagged case", "Proposals accepted by approvers"]
   risk: "A wrong hold blocks a genuine customer, so an approver signs off each one."
 placement:
@@ -45,7 +45,7 @@ placement:
 |---|---|
 | One-liner | Explains the cases your own fraud or revenue assurance model flags, and proposes a hold or an escalation for approval. Never scores a case itself. Depends on your detection model, called as a tool, and your billing records. |
 | Problem | Detection models flag more billing cases than analysts can explain by hand; the KPI is time to work a flagged case |
-| Audience | Revenue assurance and fraud analysts, approvers, and risk owners |
+| Audience | Revenue assurance teams, approvers, and risk owners |
 | OTel slots | `llm`: explains each case and drafts proposals; `safety`: abstain on weak evidence; `decision`: the gate label |
 | Autonomy ceiling | Recommend with approval |
 | Placement tier | Regional and core |

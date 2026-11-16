@@ -831,7 +831,7 @@ TELECOM_ROLE = re.compile(
     r"noc-shift-lead|\bNOC lead|\bshift lead|operator risk owner|operator SME"
     r"|\bplatform engineers?\b|\bplatform owners?\b|\bautomation teams?\b"
     r"|\brisk and compliance leads?\b|\bnamed approver\b|\bsecurity architects?\b"
-    r"|\bNOC engineers?\b",
+    r"|\bNOC engineers?\b|\bretention managers?\b|\bfraud analysts?\b",
     re.I,
 )
 
@@ -846,6 +846,8 @@ TELECOM_ROLE = re.compile(
         ("Platform teams and security architects", True),
         ("Architects, platform teams, business owners, and risk owners", False),
         ("an approver handles REVIEW", False),
+        ("drafts a retention offer for a retention manager to approve", True),
+        ("Revenue assurance and fraud analysts, approvers, and risk owners", True),
     ],
 )
 def test_generic_role_pattern_cases(text, hit):

@@ -110,7 +110,7 @@ A full recipe adds a worked example and deploy steps. A catalog entry fits on on
 | Use case | Title | Depth | Summary |
 |---|---|---|---|
 | [UC-SW-01](../catalog/network-software/ran-core-code-assistant/README.md) | RAN and core code assistant | Catalog entry | Answers questions about your RAN and core code, citing files and 3GPP clauses, or says what it searched without an answer. |
-| [UC-SW-02](../catalog/network-software/network-automation-review/README.md) | Network automation review | Catalog entry | Reviews proposed network automation changes against schema checks, dry runs, and your standards, then recommends approval to an engineer. |
+| [UC-SW-02](../catalog/network-software/network-automation-review/README.md) | Network automation review | Catalog entry | Reviews proposed network automation changes against schema checks, dry runs, and your standards, then recommends approval to the change approver. |
 | [UC-SW-03](../catalog/network-software/oran-ric-xapp-assistant/README.md) | O-RAN RIC xApp assistant | Catalog entry | Answers xApp development questions from O-RAN specifications and your RIC code, with citations, or says what it searched. |
 
 ### Network operations
@@ -120,7 +120,7 @@ A full recipe adds a worked example and deploy steps. A catalog entry fits on on
 | [UC-OPS-01](../catalog/network-operations/alarm-triage-adaptation/README.md) | Adaptation ladder on alarm and root-cause triage | Full recipe | Finds the likely cause in RAN and transport alarms and proposes fixes for approval. It fine-tunes the model only when evaluation shows a gap. |
 | [UC-OPS-02](../catalog/network-operations/signalling-trace-analysis/README.md) | Signalling trace analysis | Catalog entry | Explains why a registration, session, or handover failed in a signalling trace. Each finding cites a decoded message and a 3GPP clause. |
 | [UC-OPS-03](../catalog/network-operations/core-network-rca/README.md) | Core network root-cause analysis | Full recipe | Correlates 5G core logs, traces, counters, and alarms to rank likely causes, writes an RCA note, and proposes fixes for approval. |
-| [UC-OPS-04](../catalog/network-operations/ran-rf-health-checks/README.md) | RAN and RF health checks | Catalog entry | Explains cell health findings from your performance counters and radio measurements, and proposes parameter changes for an engineer to approve. |
+| [UC-OPS-04](../catalog/network-operations/ran-rf-health-checks/README.md) | RAN and RF health checks | Catalog entry | Explains cell health findings from your performance counters and radio measurements, and proposes parameter changes for an approver to accept. |
 | [UC-OPS-05](../catalog/network-operations/ran-energy-saving/README.md) | RAN energy saving | Full recipe | Plans energy-saving windows for capacity booster cells hours ahead, simulates each first, and acts only on low-risk cells after earning it. |
 | [UC-OPS-06](../catalog/network-operations/slice-sla-assurance/README.md) | Slice SLA assurance | Full recipe | Correlates slice KPIs and analytics with each slice's SLOs, warns the slice owner before a breach, and proposes slice changes for approval. |
 | [UC-OPS-07](../catalog/network-operations/mop-validation/README.md) | MOP validation | Full recipe | Reviews each change's MOP against inventory, documents, and a dry run, then recommends approval or rejection to the change approver. |
@@ -139,8 +139,8 @@ A full recipe adds a worked example and deploy steps. A catalog entry fits on on
 
 | Use case | Title | Depth | Summary |
 |---|---|---|---|
-| [UC-BIZ-01](../catalog/business-assurance/churn-risk-explanation/README.md) | Churn risk explanation | Catalog entry | Explains why your own churn model scores a customer as at risk, and drafts a retention offer for a retention manager to approve. |
-| [UC-BIZ-02](../catalog/business-assurance/revenue-assurance-triage/README.md) | Revenue assurance triage | Catalog entry | Explains each case your own fraud or revenue assurance model flags, and proposes a hold or an escalation for an analyst to approve. |
+| [UC-BIZ-01](../catalog/business-assurance/churn-risk-explanation/README.md) | Churn risk explanation | Catalog entry | Explains why your own churn model scores a customer as at risk, and drafts a retention offer for an approver to accept. |
+| [UC-BIZ-02](../catalog/business-assurance/revenue-assurance-triage/README.md) | Revenue assurance triage | Catalog entry | Explains each case your own fraud or revenue assurance model flags, and proposes a hold or an escalation for an approver to accept. |
 | [UC-CARE-01](../catalog/business-assurance/camara-care-diagnostics/README.md) | CAMARA customer-care diagnostics | Full recipe | Suggests answers to care agents on no-service calls, using device status read through CAMARA APIs with the customer's consent. |
 | [UC-CARE-02](../catalog/business-assurance/broadband-digital-troubleshooting/README.md) | Broadband digital troubleshooting | Catalog entry | Reads home gateway and Wi-Fi diagnostics with the customer's consent, and suggests the next troubleshooting step to the care agent. |
 

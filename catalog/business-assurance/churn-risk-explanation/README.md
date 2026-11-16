@@ -24,7 +24,7 @@ clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
   goal: "customers"
-  summary: "Explains why your own churn model scores a customer as at risk, and drafts a retention offer for a retention manager to approve."
+  summary: "Explains why your own churn model scores a customer as at risk, and drafts a retention offer for an approver to accept."
   outcome: "Retention teams see why a customer is at risk and act on the strongest cases first."
   audience: "Retention teams, the data protection officer, and risk owners"
   measures: ["Offers accepted by approvers", "Retention among reviewed customers"]

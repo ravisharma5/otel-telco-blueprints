@@ -446,3 +446,50 @@ def test_exported_tables_exporter_shape(path):
     params = one(gov, "parameters")
     who = EXPORTER_TABLE_HEADERS["parameters"].index("Who sets it")
     assert all(row[who].strip() for row in params[1:]), f"{path}: empty Who sets it cell"
+
+
+# ---------- generic roles in card text ----------
+
+# Who approves, in card text: "for an X to approve", "approval to the X", "an X signs off".
+APPROVAL_ACTOR = re.compile(
+    r"\b(?:a|an|the) ((?:[\w-]+ ){0,2}?[\w-]+) (?:to (?:approve|accept|sign off)|signs? off|approves?)\b"
+    r"|\bapproval (?:or rejection )?to (?:a|an|the) ((?:[\w-]+ ){0,2}?[\w-]+?)(?=[.,;]|$)",
+    re.I,
+)
+
+
+def approval_actors(text: str) -> list[str]:
+    return [(m.group(1) or m.group(2)).lower() for m in APPROVAL_ACTOR.finditer(text)]
+
+
+@pytest.mark.parametrize(
+    ("text", "actors"),
+    [
+        ("drafts a retention offer for a retention manager to approve.", ["retention manager"]),
+        ("proposes parameter changes for an engineer to approve.", ["engineer"]),
+        ("then recommends approval to an engineer.", ["engineer"]),
+        ("recommends approval or rejection to the change approver.", ["change approver"]),
+        ("so an approver signs off each one.", ["approver"]),
+    ],
+)
+def test_approval_actor_cases(text, actors):
+    assert approval_actors(text) == actors
+
+
+def _card_strings(card: dict) -> list[str]:
+    out = []
+    for value in card.values():
+        out.extend(value if isinstance(value, list) else [value])
+    return [v for v in out if isinstance(v, str)]
+
+
+@EXPORTED
+def test_card_text_uses_generic_roles(path):
+    """Card text reaches the explorer, so it follows the generic role names the pages use."""
+    from tools.tests.test_platform_pages import TELECOM_ROLE
+
+    card = (front_matter(path) or {}).get("card") or {}
+    for text in _card_strings(card):
+        assert TELECOM_ROLE.findall(text) == [], text
+        for actor in approval_actors(text):
+            assert actor.endswith("approver"), (actor, text)

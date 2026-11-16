@@ -25,7 +25,7 @@ clarity_reviewed: "2026-11-16"
 agent_school: [101]
 card:
   goal: "sla-energy"
-  summary: "Explains cell health findings from your performance counters and radio measurements, and proposes parameter changes for an engineer to approve."
+  summary: "Explains cell health findings from your performance counters and radio measurements, and proposes parameter changes for an approver to accept."
   outcome: "Engineers spot degrading cells sooner and get a cited reason with each proposed change."
   audience: "RAN optimisation engineers, change approvers, and risk owners"
   measures: ["Time to spot a degrading cell", "Proposals accepted by approvers"]

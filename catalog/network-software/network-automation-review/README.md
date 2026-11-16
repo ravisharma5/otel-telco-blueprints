@@ -23,7 +23,7 @@ clarity_reviewed: "2026-11-16"
 agent_school: [301]
 card:
   goal: "change"
-  summary: "Reviews proposed network automation changes against schema checks, dry runs, and your standards, then recommends approval to an engineer."
+  summary: "Reviews proposed network automation changes against schema checks, dry runs, and your standards, then recommends approval to the change approver."
   outcome: "Reviewers catch broken playbooks and configurations before rollout, and approve sound changes sooner."
   audience: "Network automation engineers, change approvers, and risk owners"
   measures: ["Defects caught before rollout", "Time to review a change"]
