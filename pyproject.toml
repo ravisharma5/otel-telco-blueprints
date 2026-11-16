@@ -12,12 +12,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.2.0"]
+dev = ["pytest==9.2.0", "pypdf==6.21.4"]
 site = [
     "mkdocs==1.6.1",
     "mkdocs-material==9.8.1",
     "pymdown-extensions==13.0",
 ]
+# Proposal PDF (tools/site/build_pdf.py). Needs system Pango: brew install pango
+# locally, pinned apt packages in .github/workflows/pages.yml.
+pdf = ["weasyprint==70.0"]
 
 [tool.uv]
 package = false
@@ -30,4 +33,5 @@ addopts = "-ra -m \"not site_output\""
 empty_parameter_set_mark = "skip"
 markers = [
     "site_output: reads built output (run make site or make explorer first)",
+    "pdf: builds the proposal PDF (needs Pango; skips unless installed, fails when REQUIRE_PDF=1)",
 ]

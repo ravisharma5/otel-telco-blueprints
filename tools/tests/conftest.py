@@ -80,3 +80,20 @@ def site_dir():
     if not SITE_DIR.is_dir():
         pytest.fail("site/ is missing: run make site first")
     return SITE_DIR
+
+
+def weasyprint_or_skip():
+    """Import WeasyPrint; skip when Pango is missing, or fail when REQUIRE_PDF=1."""
+    try:
+        import weasyprint  # noqa: F401  (loads Pango through cffi)
+    except (ImportError, OSError) as exc:
+        if os.environ.get("REQUIRE_PDF") == "1":
+            pytest.fail(f"WeasyPrint cannot load ({exc}) and REQUIRE_PDF=1")
+        pytest.skip("WeasyPrint or Pango not installed (set REQUIRE_PDF=1 to fail)")
+
+
+@pytest.fixture(autouse=True)
+def _pdf_gate(request):
+    """Every test marked pdf skips without Pango, unless REQUIRE_PDF=1."""
+    if request.node.get_closest_marker("pdf") is not None:
+        weasyprint_or_skip()

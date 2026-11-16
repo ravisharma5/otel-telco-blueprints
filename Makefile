@@ -12,7 +12,7 @@
 DOC_DIRS := README.md site-src framework architecture platform catalog proposal templates explorer/src/content
 VALE ?= vale
 
-.PHONY: setup lint lint-structure lint-prose test test-vale test-site render facts docs site preview serve explorer explorer-data explorer-deps ci hooks
+.PHONY: setup lint lint-structure lint-prose test test-vale test-site test-pdf render facts docs site preview serve explorer explorer-data explorer-deps proposal-pdf ci hooks
 
 # --locked fails instead of re-resolving when uv.lock is stale.
 setup:
@@ -54,6 +54,17 @@ facts:
 # NO_MKDOCS_2_WARNING silences the Material end-of-life banner in logs.
 docs:
 	NO_MKDOCS_2_WARNING=1 uv run mkdocs build --strict --clean
+
+# The proposal PDF, built offline by WeasyPrint from proposal/index.md (needs Pango:
+# brew install pango). Without Pango it prints a skip notice and exits 0, unless
+# REQUIRE_PDF=1. The Pages workflow installs pinned Pango and sets REQUIRE_PDF=1.
+proposal-pdf:
+	uv run python -m tools.site.build_pdf --out site/proposal/otel-telco-blueprints-proposal.pdf
+
+# PDF tests that need no built site; they fail instead of skipping without Pango.
+# Run before every push that touches the proposal or the print stylesheet.
+test-pdf:
+	REQUIRE_PDF=1 uv run pytest -q -m "pdf and not site_output"
 
 # One artifact for Pages: docs plus explorer, merged by tools/site/merge_site.py.
 site: docs explorer

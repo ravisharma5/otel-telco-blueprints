@@ -1,0 +1,173 @@
+/*
+ * Print stylesheet for the proposal PDF (tools/site/build_pdf.py).
+ * Fonts are the vendored Red Hat fonts in site-src/brand/fonts (OFL); no system
+ * fonts and nothing remote. Colours follow site-src/brand/tokens.css (light scheme).
+ * Tables use a fixed layout with word breaking in cells, so every column fits
+ * the text width; the wide Sources and evidence summary gets a landscape page.
+ * The @font-face rules carry no weight range: WeasyPrint 70 rejects ranges and
+ * picks the bold instance of each variable font through fontconfig.
+ */
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("../../site-src/brand/fonts/RedHatDisplay-VF.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Red Hat Text";
+  src: url("../../site-src/brand/fonts/RedHatText-VF.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Red Hat Mono";
+  src: url("../../site-src/brand/fonts/RedHatMono-VF.woff2") format("woff2");
+}
+
+@page {
+  size: A4;
+  margin: 20mm 18mm 22mm 18mm;
+  @bottom-left {
+    content: "OTel Telco Production Blueprints: proposal";
+    font-family: "Red Hat Text";
+    font-size: 8pt;
+    color: #6A6E73;
+  }
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font-family: "Red Hat Text";
+    font-size: 8pt;
+    color: #6A6E73;
+  }
+}
+
+@page portrait {
+  size: A4;
+}
+
+@page wide {
+  size: A4 landscape;
+  margin: 16mm 16mm 18mm 16mm;
+}
+
+body {
+  margin: 0;
+}
+
+html {
+  font-family: "Red Hat Text";
+  font-size: 10pt;
+  line-height: 1.45;
+  color: #151515;
+}
+
+h1, h2, h3 {
+  font-family: "Red Hat Display";
+  font-weight: 700;
+  line-height: 1.2;
+  break-after: avoid;
+}
+
+h1 {
+  font-size: 22pt;
+  margin: 0 0 4mm;
+  color: #151515;
+  border-bottom: 2pt solid #EE0000;
+  padding-bottom: 2mm;
+}
+
+h2 {
+  font-size: 15pt;
+  margin: 7mm 0 2.5mm;
+}
+
+h3 {
+  font-size: 12pt;
+  margin: 5mm 0 2mm;
+}
+
+p, ul, ol {
+  margin: 0 0 2.5mm;
+}
+
+ul, ol {
+  padding-left: 5mm;
+}
+
+li {
+  margin-bottom: 1mm;
+}
+
+a {
+  color: #BE0000;
+  text-decoration: none;
+}
+
+code {
+  font-family: "Red Hat Mono";
+  font-size: 0.9em;
+}
+
+/* Every section names its page, so the page after the landscape one is portrait again. */
+section {
+  page: portrait;
+}
+
+section.wide {
+  page: wide;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2mm 0 4mm;
+  font-size: 8.5pt;
+  line-height: 1.3;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  break-inside: avoid;
+}
+
+th, td {
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  /* The default hyphen (U+2010) is not in the Red Hat fonts; this avoids a fallback font. */
+  hyphenate-character: "-";
+  vertical-align: top;
+  text-align: left;
+  padding: 1.2mm 1.5mm;
+  border-bottom: 0.5pt solid #E0E0E0;
+}
+
+th {
+  font-weight: 700;
+  background: #F5F5F5;
+  border-bottom: 0.75pt solid #8A8D90;
+}
+
+/* Sources and evidence summary: nine columns on a landscape page. */
+table.evidence {
+  font-size: 7.5pt;
+}
+
+table.evidence th:nth-child(1) { width: 17%; }
+table.evidence th:nth-child(2) { width: 7%; }
+table.evidence th:nth-child(3),
+table.evidence th:nth-child(4),
+table.evidence th:nth-child(5),
+table.evidence th:nth-child(6),
+table.evidence th:nth-child(7) { width: 6.6%; }
+table.evidence th:nth-child(8) { width: 25%; }
+table.evidence th:nth-child(9) { width: 18%; }
+
+p.online {
+  margin-top: 8mm;
+  font-size: 8.5pt;
+  color: #6A6E73;
+}
