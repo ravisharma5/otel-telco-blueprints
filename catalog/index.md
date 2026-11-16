@@ -54,6 +54,13 @@ The Use cases page shows the same use cases as cards.
 |---|---|---|---|
 | [UC-CARE-01](business-assurance/camara-care-diagnostics/README.md) | CAMARA customer-care diagnostics | Full recipe | Customer care diagnostics |
 
+## Security
+
+| Recipe | Topic | Depth | Also covers |
+|---|---|---|---|
+| [UC-SEC-01](security/security-triage/README.md) | Security alert triage | Catalog entry |  |
+| [UC-SEC-02](security/signalling-attack-classification/README.md) | Signalling attack classification | Catalog entry |  |
+
 <!-- generated:catalog-by-domain end -->
 
 ## By platform blueprint
@@ -78,6 +85,8 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -98,6 +107,8 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -110,6 +121,8 @@ These recipes use [the Adaptation page](../platform/adaptation/README.md):
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 
 ### PB-04 Serving, routing, and placement
@@ -128,6 +141,8 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -148,6 +163,7 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -168,6 +184,8 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -193,6 +211,8 @@ These recipes use [the Security, identity, and sandbox page](../platform/securit
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 
 ### PB-09 Quality operations and observability
@@ -208,6 +228,7 @@ These recipes use [the Quality operations and observability page](../platform/qu
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 
 ### PB-10 Compliance, sovereignty, and operating model
 

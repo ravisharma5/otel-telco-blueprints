@@ -108,6 +108,9 @@ nav:
           - Policy-following operations agents: catalog/agentic-operations/policy-following-ops-agents/README.md
       - Business assurance:
           - CAMARA customer-care diagnostics: catalog/business-assurance/camara-care-diagnostics/README.md
+      - Security:
+          - Security alert triage: catalog/security/security-triage/README.md
+          - Signalling attack classification: catalog/security/signalling-attack-classification/README.md
   - Platform:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md

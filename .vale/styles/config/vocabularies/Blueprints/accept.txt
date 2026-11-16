@@ -57,3 +57,5 @@ xApps?
 ORANBench
 SRSRANBench
 Nephio
+Nudm
+[Tt]riages

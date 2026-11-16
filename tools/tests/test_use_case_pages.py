@@ -100,6 +100,8 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-operations/cross-domain-oss-correlation": "UC-OPS-09",
     "agentic-operations/router-core-read-only-ops": "UC-AGOPS-02",
     "agentic-operations/policy-following-ops-agents": "UC-AGOPS-03",
+    "security/security-triage": "UC-SEC-01",
+    "security/signalling-attack-classification": "UC-SEC-02",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec

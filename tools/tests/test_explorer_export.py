@@ -776,6 +776,14 @@ def test_goals_exported(data):
     assert sum(g["count"] for g in data["goals"]) == len(data["use_cases"])
 
 
+def test_every_goal_has_a_use_case(data):
+    """Every goal tile the home page offers has at least one use case behind it."""
+    goals = yaml.safe_load(GOALS_FILE.read_text(encoding="utf-8"))["goals"]
+    counts = {g["id"]: g["count"] for g in data["goals"]}
+    missing = [g for g in goals if counts.get(g, 0) < 1]
+    assert missing == [], f"goals with no use case: {missing}"
+
+
 def test_depth_exported(data):
     for uc in data["use_cases"]:
         fm = front_matter(REPO_ROOT / "catalog" / uc["domain"] / uc["slug"] / "README.md")
