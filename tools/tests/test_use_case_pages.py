@@ -109,6 +109,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "research/mobility-failure-analysis": "UC-RES-02",
     "network-operations/core-network-rca": "UC-OPS-03",
     "network-operations/ran-energy-saving": "UC-OPS-05",
+    "network-operations/slice-sla-assurance": "UC-OPS-06",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -272,6 +273,7 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
         "Service KPI guard band": "Risk owner",
         "Minimum simulated energy saving": "Business owner",
     },
+    "network-operations/slice-sla-assurance": {"SLO breach forecast horizon": "Business owner"},
 }
 
 # RACI activities a use case may name that no platform page defines
@@ -1789,6 +1791,121 @@ def test_energy_parameters_named_without_values():
         "Ceiling for low-risk writes",
         "Ceiling for high-risk writes",
         "Required approver role per action class",
+    ):
+        assert name in names, name
+
+
+# ---------- slice SLA assurance ----------
+
+SLICE = REPO_ROOT / "catalog/network-operations/slice-sla-assurance/README.md"
+SLICE_SLOTS = {"llm", "decision", "safety", "embedding", "reranker"}
+EXTRACTION_ANCHOR = (
+    "https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#autonomous-operational-task-completion-not-benchmarked"
+)
+SLICE_EARLIER_IDS = (
+    "case-8841",
+    "inc-8812",
+    "req-8812",
+    "smf-2",
+    "core-rca-agent",
+    "es-req-0412",
+    "nrcell-rural-b3",
+    "energy-planner-agent",
+)
+
+
+def _slice_example() -> str:
+    how = section_text(SLICE, "How it works")
+    heading = next(ln for ln in how.splitlines() if ln.startswith("### Worked example:"))
+    return _h3_text(how, heading[4:])
+
+
+def _slice_sources() -> list[list[str]]:
+    return table_with_header(SLICE, "Sources", ["#", "Claim", "Basis", "Source"])[1:]
+
+
+def test_slice_front_matter():
+    fm = front_matter(SLICE) or {}
+    assert fm.get("id") == "UC-OPS-06"
+    assert fm.get("depth") == "recipe"
+    assert fm.get("flagship") is False
+    assert set(fm.get("otel_slots") or []) == SLICE_SLOTS
+    assert fm.get("autonomy_ceiling") == "recommend-with-approval"
+    assert fm.get("tmf_an_level_target") == 2
+    assert fm.get("agent_school") == [301]
+    assert (fm.get("card") or {}).get("goal") == "sla-energy"
+    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in (1, 2, 4, 5, 6, 7, 8, 9, 10)]
+    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
+
+
+def test_slice_gate_rows():
+    """A breach warning is NOTIFY from assist; remediation is REVIEW from
+    recommend under the high-risk ceiling; nothing reaches ACT."""
+    table = table_with_header(SLICE, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    warning = [r for r in rows if "notify" in r[0] and "warning" in r[0].lower()]
+    assert len(warning) == 1, rows
+    assert warning[0][out].startswith("NOTIFY") and "assist stage" in warning[0][out], warning
+    remedy = [r for r in rows if "write_high" in r[0]]
+    assert len(remedy) == 1, rows
+    cell = remedy[0][out]
+    assert cell.startswith("REVIEW") and "recommend stage" in cell, cell
+    assert "Ceiling for high-risk writes" in cell, cell
+    assert any(r[out] == "STOP" for r in rows), rows
+    assert not any(re.search(r"\bACT\b", r[out]) for r in rows), rows
+
+
+def test_slice_inputs_sourced():
+    text = body(SLICE)
+    source_links = " ".join(r[3] for r in _slice_sources())
+    for name, link in (
+        ("TMF657", "https://github.com/tmforum-apis/TMF657_ServiceQualityManagement"),
+        ("NG.116", "https://www.gsma.com/newsroom/gsma_resources/ng-116-generic-network-slice-template-v8-0/"),
+        ("TS 28.541", "https://www.3gpp.org/DynaReport/28541.htm"),
+    ):
+        assert name in section_text(SLICE, "How it works"), name
+        assert link in text, link
+        assert link in source_links, link
+
+
+def test_slice_extraction_prerequisite():
+    bullets = re.findall(r"^- .*$", section_text(SLICE, "What you need"), re.M)
+    bullets += re.findall(r"^- .*$", section_text(SLICE, "Limitations"), re.M)
+    hits = [b for b in bullets if EXTRACTION_ANCHOR in b and re.search(r"(?i)SLA", b)]
+    assert hits, bullets
+
+
+def test_slice_example_ids():
+    example = _slice_example()
+    for ident in ("slice-fx-07", "sla-req-3304"):
+        assert ident in example, ident
+    assert re.search(r"(?i)S-NSSAI[^.]*fictitious|fictitious[^.]*S-NSSAI", example), example
+    text = body(SLICE)
+    for old in REUSED_EXAMPLE_IDS + EARLIER_FLAGSHIP_IDS + SLICE_EARLIER_IDS:
+        assert old not in text, old
+
+
+def test_slice_mermaid_capabilities():
+    fences = mermaid_fences(body(SLICE))
+    assert len(fences) == 1
+    texts = [m.group(2) for m in MERMAID_NODE.finditer(fences[0])]
+    assert any(re.search(r"(?i)forecast", t) for t in texts), texts
+    assert any(re.search(r"(?i)slice owner", t) for t in texts), texts
+    assert PRODUCT_TERMS.findall(fences[0]) == []
+    assert LAYER_CODE.findall(fences[0]) == []
+
+
+def test_slice_parameters_named_without_values():
+    names = {row[0] for t in param_tables(SLICE) for row in t[1:]}
+    for name in (
+        "SLO breach forecast horizon",
+        "LLM groundedness floor",
+        "Safety abstain-recall floor",
+        "Embedding and Reranker recall-at-k floor",
+        "Decision false-ACT budget",
+        "Ceiling for notify requests",
+        "Ceiling for high-risk writes",
     ):
         assert name in names, name
 
