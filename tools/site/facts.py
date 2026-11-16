@@ -341,7 +341,7 @@ def recheck(root: Path, report: Path, only: Path | None = None) -> int:
     repos = [] if only else linked_card_repos(root)
     baseline = {**CITED_REVISIONS, **(_load_facts(root).get("card_revisions") or {})}
     # Keyed by model name (the part after the owner), as in data/facts-check.yaml.
-    current = {r.split("/", 1)[1]: sha for r, sha in card_revisions(repos).items()} if repos else {}
+    current = {r.split("/", 1)[1]: sha for r, sha in card_revisions(repos).items()}
     changes = {
         repo: (baseline[repo], sha)
         for repo, sha in current.items()

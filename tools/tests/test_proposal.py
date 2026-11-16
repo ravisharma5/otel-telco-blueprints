@@ -81,7 +81,6 @@ def test_all_urls_unique_sorted():
 # ---- stamp ---------------------------------------------------------------
 
 
-@pytest.mark.skip(reason="temporary: the stamp is written after the source re-check")
 def test_facts_digest():
     assert facts.sources_digest(REPO_ROOT) == FACTS["sources_digest"], (
         "Sources changed after the fact re-check: re-run the re-check, then "

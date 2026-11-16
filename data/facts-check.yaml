@@ -1,10 +1,27 @@
 # Facts stamp. Written by `uv run python -m tools.site.facts --write` after the
 # source re-check; tools/tests/test_proposal.py fails when sources_digest no
 # longer matches the Sources tables, serving-data URLs, and extra_urls.
-checked: ""
-sources_digest: "84cc492b08c0eea8722136d70849e68068b2302167870dab18873d0c3491389e"
-url_count: 188
-card_revisions: {}
+checked: "2026-11-16"
+sources_digest: "9dd076964ccc76ea9ad6122f12781fe481d0d4cd427e034db5fd1fabc28834ae"
+url_count: 189
+card_revisions:
+  OTel-2.0-Decision-26B-A4B-4bit: "7ff608e3"
+  OTel-2.0-LLM-31B-IT: "dd9a4c46"
+  OTel-Embedding-22M: "139741b8"
+  OTel-Embedding-300M: "fdf9acb4"
+  OTel-Embedding-335M: "b895f23b"
+  OTel-Embedding-568M: "57740828"
+  OTel-Embedding-600M: "f7755f84"
+  OTel-Embedding-8B: "f8561da6"
+  OTel-LLM-12B-IT: "3dca4498"
+  OTel-LLM-12B-Safety: "47d4d617"
+  OTel-LLM-14B-IT: "83920aca"
+  OTel-LLM-24B-IT: "c983b3da"
+  OTel-LLM-4B-IT: "75cd3383"
+  OTel-LLM-8.3B-Classification: "fdf15b1e"
+  OTel-LLM-8.3B-Safety: "9c058df6"
+  OTel-Reranker-0.6B: "df2d1fb2"
+  OTel-Reranker-4B: "a0914624"
 extra_urls:
   - https://www.gsma.com/newsroom/press-release/gsma-launches-open-telco-ai-to-accelerate-development-of-telco%E2%80%91grade-ai/
   - https://huggingface.co/GSMA
