@@ -9,12 +9,17 @@ depth: "recipe"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "Traffic forecast and simulation read tools", domains: ["ran"], mechanism: "tool-contract"}
+    - {item: "Cell inventory read tool: boosters and coverage cells", domains: ["ran"], mechanism: "tool-contract"}
+    - {item: "Energy-saving planner skill and manifests", domains: ["ran"], mechanism: "skill-manifest"}
+    - {item: "Window ceilings, playbooks, and rollback jobs", domains: ["ran"], mechanism: "gate-policy"}
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3
 placement_tier: ["regional", "core"]
 one_liner: "Plans energy-saving windows for capacity booster cells hours ahead and simulates each one before asking to act. Acts within policy only on booster cells, once that stage is earned; coverage cells always need approval. Depends on your traffic forecast, a simulation or digital twin, and the Decision gate."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [302]
 clarity_reviewed: "2026-11-16"
 card:
@@ -145,6 +150,32 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Traffic forecast and simulation read tools | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Cell inventory read tool: boosters and coverage cells | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Energy-saving planner skill and manifests | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Window ceilings, playbooks, and rollback jobs | RAN | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+
+<!-- generated:what-you-bring end -->
+
+### What you must add
+
+| Gap | What you add | Source |
+|---|---|---|
+| Golden set | Replayed low-traffic nights with outcomes your SMEs confirmed, scored on the resulting service KPIs, because the card asks for outcome-based scoring before any non-supervised use | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#autonomous-operational-task-completion-not-benchmarked) |
+| Gate labels | A gate set of past cases labelled by your approvers, weighted toward non-ACT cases, because the Decision slot reads its decision from label probabilities and you set its thresholds on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Tool contracts | A pinned contract for the forecast, simulation, and cell inventory tools, with simulation jobs the agent may only submit and poll | [Agent-school 302 Energy Optimizer](https://github.com/open-experiments/agent-school/blob/30458bda61cdc1ea939ce7d1fe6b8d425ed2bbad/302-energy-optimizer/README.md) |
+| Language scope | Tests in every language your engineers read energy reports in, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |
 
 ## Governance
 

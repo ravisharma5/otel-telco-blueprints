@@ -9,12 +9,16 @@ depth: "entry"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "gate-labels"]
+  bring:
+    - {item: "Root-cause taxonomy and SME-confirmed degradations", domains: ["ran"], mechanism: "classification-labels"}
+    - {item: "KPI reasoning skill over your computed KPI data", domains: ["ran"], mechanism: "skill-manifest"}
+    - {item: "Parameter change ceilings and approver roles", domains: ["ran"], mechanism: "gate-policy"}
 otel_slots: ["classification", "llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Reasons from a detected KPI degradation to its likely root cause, and recommends parameter changes to a human approver. Never changes the network itself. Depends on your KPI data, a retrained Classification head, and your own evaluation set."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-06", "PB-07"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-06", "PB-07", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [201]
 card:
@@ -89,6 +93,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Root-cause taxonomy and SME-confirmed degradations | RAN | Classification labels | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| KPI reasoning skill over your computed KPI data | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Parameter change ceilings and approver roles | RAN | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

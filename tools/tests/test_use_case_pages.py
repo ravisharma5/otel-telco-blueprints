@@ -1619,7 +1619,7 @@ def test_core_rca_front_matter():
     assert fm.get("autonomy_ceiling") == "recommend-with-approval"
     assert fm.get("tmf_an_level_target") == 2
     assert fm.get("agent_school") == [101, 201, 402]
-    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in range(1, 11)]
+    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in range(1, 12)]
     assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
 
 
@@ -1836,7 +1836,7 @@ def test_slice_front_matter():
     assert fm.get("tmf_an_level_target") == 2
     assert fm.get("agent_school") == [301]
     assert (fm.get("card") or {}).get("goal") == "sla-energy"
-    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in (1, 2, 4, 5, 6, 7, 8, 9, 10)]
+    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in range(1, 12)]
     assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
 
 
@@ -1949,7 +1949,7 @@ def test_mop_front_matter():
     assert fm.get("tmf_an_level_target") == 2
     assert fm.get("agent_school") == [301, 401]
     assert (fm.get("card") or {}).get("goal") == "change"
-    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in (1, 2, 4, 5, 6, 7, 8, 9, 10)]
+    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in range(1, 12)]
     placement = fm.get("placement") or {}
     assert placement.get("far-edge", {}).get("runs") == []
     assert set(placement.get("regional", {}).get("runs") or []) == {"embedding", "reranker", "safety", "decision"}

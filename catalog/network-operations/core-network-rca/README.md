@@ -9,12 +9,18 @@ depth: "recipe"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Core fault taxonomy and SME-labelled incidents", domains: ["core-cnf"], mechanism: "classification-labels"}
+    - {item: "3GPP procedures, runbooks, and past RCA reports", domains: ["core-cnf"], mechanism: "rag-corpus"}
+    - {item: "Alarm, analytics, log, trace, and counter read tools", domains: ["core-cnf", "oss-bss"], mechanism: "tool-contract"}
+    - {item: "Core root-cause skill and capability manifests", domains: ["core-cnf"], mechanism: "skill-manifest"}
+    - {item: "Restart and failover ceilings with approver roles", domains: ["core-cnf"], mechanism: "gate-policy"}
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Finds the likely cause of a 5G core outage from network function logs, traces, and counters, and proposes a fix for approval. Never restarts or fails over a network function on its own. Depends on a Classification head retrained on your core fault taxonomy and on task evaluation with replayed incidents."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [101, 201, 402]
 clarity_reviewed: "2026-11-16"
 card:
@@ -146,6 +152,35 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Core fault taxonomy and SME-labelled incidents | 5G core CNFs | Classification labels | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| 3GPP procedures, runbooks, and past RCA reports | 5G core CNFs | RAG corpus | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Alarm, analytics, log, trace, and counter read tools | 5G core CNFs; OSS and BSS | MCP tool contract | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Core root-cause skill and capability manifests | 5G core CNFs | Skill or capability manifest | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Restart and failover ceilings with approver roles | 5G core CNFs | Gate and action-layer policy | Risk owner | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+
+<!-- generated:what-you-bring end -->
+
+### What you must add
+
+| Gap | What you add | Source |
+|---|---|---|
+| Fault taxonomy | Your core fault taxonomy and SME-labelled past incidents for the Classification head, because the shipped head covers eight synthetic drive-test classes | [OTel-LLM-8.3B-Classification model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Classification) |
+| Golden set | Replayed core incidents with root causes your SMEs confirmed, scored before the shadow stage, because the card reports no evaluation of closed-loop operational tasks | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#autonomous-operational-task-completion-not-benchmarked) |
+| Gate labels | A gate set of past cases labelled by your approvers, weighted toward non-ACT cases, because the Decision slot reads its decision from label probabilities and you set its thresholds on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Tool contracts | A pinned contract for each read tool: alarms as in TMF642, and counters as in TS 28.552 | [TMF642 Alarm Management repository](https://github.com/tmforum-apis/TMF642_AlarmManagement), [3GPP TS 28.552](https://www.3gpp.org/DynaReport/28552.htm) |
+| Domain corpus | 3GPP procedures, runbooks, and past RCA reports in retrieval, each with a usage-rights entry, because the card's training leaves out 5G core control-plane signalling | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
+| Language scope | Tests in every language your engineers write incidents in, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |
 
 ## Governance
 

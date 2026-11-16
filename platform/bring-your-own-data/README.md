@@ -302,4 +302,5 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 - [PB-06 Safety and autonomy gating](../safety-autonomy-gating/README.md): the stage register and ceilings
 - [PB-07 Action layer](../action-layer/README.md): playbooks with verification and rollback jobs
 - [PB-10 Compliance, sovereignty, and operating model](../compliance-operating-model/README.md): consent, residency, and lawful basis
+- Use cases: [the recipes that use PB-11](../../catalog/index.md#pb-11-bring-your-own-data-and-policies)
 - Agent-school: 301 adds an approval gate, 401 covers skills and manifests, 402 the knowledge service, and 403 the OTel domain models, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)

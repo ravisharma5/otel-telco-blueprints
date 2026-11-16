@@ -9,12 +9,17 @@ depth: "entry"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "Alert taxonomy and labelled alerts", domains: ["core-cnf", "transport-ip"], mechanism: "classification-labels"}
+    - {item: "Alert, RADIUS, and 5G authentication read tools", domains: ["core-cnf", "transport-ip"], mechanism: "tool-contract"}
+    - {item: "Security triage skill and capability manifests", domains: ["core-cnf"], mechanism: "skill-manifest"}
+    - {item: "Block, suspend, and isolate ceilings and approvers", domains: ["core-cnf", "transport-ip"], mechanism: "gate-policy"}
 otel_slots: ["classification", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Triages alerts from your security detectors, labels each one with your alert taxonomy, and proposes containment to a human approver. Never detects threats or contains them itself. Depends on independently checked detectors, labelled alerts from your network, and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -93,6 +98,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Alert taxonomy and labelled alerts | 5G core CNFs; Transport and IP | Classification labels | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Alert, RADIUS, and 5G authentication read tools | 5G core CNFs; Transport and IP | MCP tool contract | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Security triage skill and capability manifests | 5G core CNFs | Skill or capability manifest | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Block, suspend, and isolate ceilings and approvers | 5G core CNFs; Transport and IP | Gate and action-layer policy | Risk owner | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

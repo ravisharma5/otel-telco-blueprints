@@ -9,11 +9,16 @@ depth: "entry"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Failure taxonomy and engineer-labelled traces", domains: ["core-cnf", "ran"], mechanism: "classification-labels"}
+    - {item: "3GPP procedure specifications and runbooks", domains: ["core-cnf", "ran"], mechanism: "rag-corpus"}
+    - {item: "NAS, NGAP, and S1AP parser tool contracts", domains: ["core-cnf", "ran"], mechanism: "tool-contract"}
+    - {item: "Trace analysis skill and capability manifests", domains: ["core-cnf"], mechanism: "skill-manifest"}
 otel_slots: ["embedding", "reranker", "safety", "classification", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains failed procedures in 5G and LTE signalling traces and cites the decoded messages and 3GPP clauses. Informs only. Depends on parser tools that decode each message, labelled traces from your network, and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [201]
 card:
@@ -91,6 +96,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Failure taxonomy and engineer-labelled traces | 5G core CNFs; RAN | Classification labels | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| 3GPP procedure specifications and runbooks | 5G core CNFs; RAN | RAG corpus | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| NAS, NGAP, and S1AP parser tool contracts | 5G core CNFs; RAN | MCP tool contract | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Trace analysis skill and capability manifests | 5G core CNFs | Skill or capability manifest | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

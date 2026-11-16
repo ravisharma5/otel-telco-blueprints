@@ -51,7 +51,7 @@
       "description": "How far up the adaptation ladder the use case climbs (PB-03), the operator expertise it needs, and the items the operator brings. Owners and matrix rows come from PB-11. bplint AD001 checks the field against otel_slots.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["rung", "expertise"],
+      "required": ["rung", "expertise", "bring"],
       "properties": {
         "rung": {
           "description": "retrieval and skills change no model; head-retrain retrains the Classification head; lora-if-gap also trains a LoRA adapter, only if a measured gap remains after retrieval and skills.",

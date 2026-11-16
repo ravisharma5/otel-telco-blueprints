@@ -9,12 +9,18 @@ depth: "entry"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "RAN fault taxonomy and labelled past findings", domains: ["ran"], mechanism: "classification-labels"}
+    - {item: "Counter and cell configuration read tools", domains: ["ran"], mechanism: "tool-contract"}
+    - {item: "Your analysis tools that compute each KPI", domains: ["ran"], mechanism: "tool-contract"}
+    - {item: "Health-check skill and capability manifests", domains: ["ran"], mechanism: "skill-manifest"}
+    - {item: "Parameter change ceilings and approver roles", domains: ["ran"], mechanism: "gate-policy"}
 otel_slots: ["classification", "llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains RAN and RF health findings that analytical tools compute, and recommends parameter changes to a human approver. Never changes a cell itself. Depends on your performance counters, your own analysis tools, and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [101]
 card:
@@ -93,6 +99,24 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| RAN fault taxonomy and labelled past findings | RAN | Classification labels | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Counter and cell configuration read tools | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Your analysis tools that compute each KPI | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Health-check skill and capability manifests | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Parameter change ceilings and approver roles | RAN | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

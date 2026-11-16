@@ -66,7 +66,7 @@ EXPERTISE_LABELS = {
 }
 RUNG_PAGE_TEXT = {
     "retrieval": "No model change: retrieval over your corpus",
-    "skills": "No model change: retrieval, plus a skill per role and a capability manifest per tool",
+    "skills": "No model change: retrieval, a skill per role, and a capability manifest per tool",
     "head-retrain": "Retrain the Classification head on your taxonomy; no other model changes",
     "lora-if-gap": (
         "Retrain the Classification head on your taxonomy; train a LoRA adapter only if a measured gap "
@@ -227,8 +227,9 @@ def block(fm: dict, mx: dict[tuple[str, str], dict[str, str]] | None = None, whe
             if d not in DOMAIN_NAMES:
                 _fail(f"{where}: bring item {item.get('item')!r} has unknown domain {d!r}")
         owner = mx[(domains[0], mech)]["owner"]
-        links = ", ".join(f"[{DOMAIN_NAMES[d]}]({PB11_LINK}#{mx[(d, mech)]['anchor']})" for d in domains)
-        cells = (item["item"], ", ".join(DOMAIN_NAMES[d] for d in domains), MECHANISM_NAMES[mech], owner, links)
+        # Semicolons, not commas: domain names hold "and", which reads as a list.
+        links = "; ".join(f"[{DOMAIN_NAMES[d]}]({PB11_LINK}#{mx[(d, mech)]['anchor']})" for d in domains)
+        cells = (item["item"], "; ".join(DOMAIN_NAMES[d] for d in domains), MECHANISM_NAMES[mech], owner, links)
         lines.append("| " + " | ".join(_cell(c) for c in cells) + " |")
     return "\n".join(lines) + "\n\n"
 
@@ -273,15 +274,12 @@ def pages(catalog: Path = CATALOG) -> list[Path]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="exit 1 if a block drifts")
-    parser.add_argument("--allow-missing", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     mx = matrix()
     stale = []
     for path in pages():
         rel = path.relative_to(ROOT).as_posix()
         old = path.read_text(encoding="utf-8")
-        if args.allow_missing and not has_markers(old):
-            continue
         new = render(old, rel, mx)
         if new == old:
             continue

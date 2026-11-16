@@ -9,11 +9,15 @@ depth: "entry"
 adaptation:
   rung: "retrieval"
   expertise: ["golden-set", "corpus"]
+  bring:
+    - {item: "O-RAN E2AP and E2SM specifications", domains: ["vran-oran"], mechanism: "rag-corpus"}
+    - {item: "Your xApp code and RIC framework", domains: ["vran-oran"], mechanism: "rag-corpus"}
+    - {item: "Read-only ceiling: no writes to code or the RIC", domains: ["vran-oran"], mechanism: "gate-policy"}
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers xApp development questions with citations to O-RAN specifications and your RIC code, or abstains. Informs only and never changes code or the network. Depends on a specification and code index you build and evaluate."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-11"]
 clarity_reviewed: "2026-11-15"
 agent_school: []
 card:
@@ -86,6 +90,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval over your corpus | A golden set your experts label; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| O-RAN E2AP and E2SM specifications | vRAN and O-RAN | RAG corpus | Platform team | [vRAN and O-RAN](../../../platform/bring-your-own-data/README.md#domain-vran-and-o-ran) |
+| Your xApp code and RIC framework | vRAN and O-RAN | RAG corpus | Platform team | [vRAN and O-RAN](../../../platform/bring-your-own-data/README.md#domain-vran-and-o-ran) |
+| Read-only ceiling: no writes to code or the RIC | vRAN and O-RAN | Gate and action-layer policy | Risk owner | [vRAN and O-RAN](../../../platform/bring-your-own-data/README.md#domain-vran-and-o-ran) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

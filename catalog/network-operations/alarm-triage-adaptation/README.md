@@ -9,12 +9,19 @@ depth: "recipe"
 adaptation:
   rung: "lora-if-gap"
   expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Vendor manuals and runbooks with usage rights", domains: ["ran", "transport-ip"], mechanism: "rag-corpus"}
+    - {item: "Alarm taxonomy and SME-labelled replayed tapes", domains: ["ran", "transport-ip"], mechanism: "classification-labels"}
+    - {item: "Read-only alarm and device tool contracts", domains: ["ran", "transport-ip"], mechanism: "tool-contract"}
+    - {item: "Triage skill and capability manifests", domains: ["ran", "transport-ip"], mechanism: "skill-manifest"}
+    - {item: "Note and fix ceilings with approver roles", domains: ["ran", "transport-ip"], mechanism: "gate-policy"}
+    - {item: "Vocabulary and report examples, only after a gap", domains: ["ran", "transport-ip"], mechanism: "lora-data"}
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Runs triage on RAN and transport alarms and recommends fixes for approval. Starts with retrieval and skills only, and earns a LoRA adapter only when evaluation shows a measured gap. Depends on the acceptance gates and a model registry that binds each adapter to its base revision."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10", "PB-11"]
 agent_school: [101, 401, 402, 403]
 also_covers: ["NOC ticket triage"]
 clarity_reviewed: "2026-11-15"
@@ -179,6 +186,25 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 Load adapters only at start, pinned by digest. Never enable runtime adapter loading: block `VLLM_ALLOW_RUNTIME_LORA_UPDATING` by policy, as the [LoRA backdoor article](https://developers.redhat.com/articles/2026/09/02/lora-backdoor-threat-how-openshift-ai-mitigates-risk) recommends.
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; train a LoRA adapter only if a measured gap remains after retrieval and skills | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Vendor manuals and runbooks with usage rights | RAN; Transport and IP | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Alarm taxonomy and SME-labelled replayed tapes | RAN; Transport and IP | Classification labels | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Read-only alarm and device tool contracts | RAN; Transport and IP | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Triage skill and capability manifests | RAN; Transport and IP | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Note and fix ceilings with approver roles | RAN; Transport and IP | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Vocabulary and report examples, only after a gap | RAN; Transport and IP | LoRA training data | Model owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+
+<!-- generated:what-you-bring end -->
 
 ## Governance
 

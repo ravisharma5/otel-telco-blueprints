@@ -9,12 +9,17 @@ depth: "entry"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "Read tools for your churn model and customer records", domains: ["oss-bss", "customer-care"], mechanism: "tool-contract"}
+    - {item: "Retention explanation skill and tool manifests", domains: ["customer-care"], mechanism: "skill-manifest"}
+    - {item: "Retention offer ceilings and approver roles", domains: ["customer-care"], mechanism: "gate-policy"}
+    - {item: "Gate set of past retention cases your SMEs labelled", domains: ["customer-care"], mechanism: "gate-policy"}
 otel_slots: ["llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains the churn score your own model computes for a customer, and proposes retention offers for approval. Never scores churn itself. Depends on your churn model, called as a tool, and your customer records."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
@@ -87,6 +92,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Read tools for your churn model and customer records | OSS and BSS; Customer and care | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss); [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Retention explanation skill and tool manifests | Customer and care | Skill or capability manifest | SME | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Retention offer ceilings and approver roles | Customer and care | Gate and action-layer policy | Risk owner | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Gate set of past retention cases your SMEs labelled | Customer and care | Gate and action-layer policy | Risk owner | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

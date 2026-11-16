@@ -9,11 +9,15 @@ depth: "entry"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set"]
+  bring:
+    - {item: "Attack taxonomy and labelled attack traffic", domains: ["core-cnf"], mechanism: "classification-labels"}
+    - {item: "Decoded core signalling for training and tests", domains: ["core-cnf"], mechanism: "classification-labels"}
+    - {item: "Labelling skill scoped to the interfaces you watch", domains: ["core-cnf"], mechanism: "skill-manifest"}
 otel_slots: ["classification", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Labels suspect 5G core signalling that your detectors flag, such as unusual subscriber-data queries, and explains each label with the messages behind it. Informs only. Depends on labelled attack traffic from your network and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-06", "PB-08"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-06", "PB-08", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -86,6 +90,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Attack taxonomy and labelled attack traffic | 5G core CNFs | Classification labels | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Decoded core signalling for training and tests | 5G core CNFs | Classification labels | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Labelling skill scoped to the interfaces you watch | 5G core CNFs | Skill or capability manifest | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

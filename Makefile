@@ -40,7 +40,7 @@ test-vale:
 render:
 	uv run python -m tools.site.render_serving
 	uv run python -m tools.site.render_catalog
-	uv run python -m tools.site.render_bring --allow-missing
+	uv run python -m tools.site.render_bring
 
 # NO_MKDOCS_2_WARNING silences the Material end-of-life banner in logs.
 docs:

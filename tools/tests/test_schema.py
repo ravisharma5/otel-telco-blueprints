@@ -144,11 +144,12 @@ def _bring(**item):
         {"bring": _bring(owner="Risk owner")},
         {"bring": _bring(item="x" * 61)},
         {"bring": []},
+        {"bring": None},
         {"extra": True},
     ],
 )
 def test_use_case_bad_adaptation_fails(change):
-    ad = dict(USE_CASE["adaptation"], **change)
+    ad = {k: v for k, v in dict(USE_CASE["adaptation"], **change).items() if v is not None}
     paths = _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, adaptation=ad))
     assert any(p == "adaptation" or p.startswith("adaptation.") for p in paths), paths
 

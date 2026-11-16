@@ -9,11 +9,15 @@ depth: "entry"
 adaptation:
   rung: "retrieval"
   expertise: ["golden-set", "corpus"]
+  bring:
+    - {item: "TM Forum frameworks under your membership terms", domains: ["oss-bss"], mechanism: "rag-corpus"}
+    - {item: "TM Forum Open API specifications", domains: ["oss-bss"], mechanism: "rag-corpus"}
+    - {item: "Your architecture documents and integration designs", domains: ["oss-bss"], mechanism: "rag-corpus"}
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers OSS and BSS architecture questions with citations to TM Forum material and your own designs, or abstains. Informs only and never changes the network. Depends on retrieval plus the Safety slot."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-15"
 agent_school: [402]
 card:
@@ -87,6 +91,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval over your corpus | A golden set your experts label; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| TM Forum frameworks under your membership terms | OSS and BSS | RAG corpus | Business owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| TM Forum Open API specifications | OSS and BSS | RAG corpus | Business owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Your architecture documents and integration designs | OSS and BSS | RAG corpus | Business owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

@@ -9,12 +9,17 @@ depth: "entry"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "Read tools for your detection model and billing data", domains: ["oss-bss"], mechanism: "tool-contract"}
+    - {item: "Your leakage and fraud categories in the triage skill", domains: ["oss-bss"], mechanism: "skill-manifest"}
+    - {item: "Clear, hold, and escalate ceilings and approvers", domains: ["oss-bss"], mechanism: "gate-policy"}
+    - {item: "Gate set of past cases your analysts labelled", domains: ["oss-bss"], mechanism: "gate-policy"}
 otel_slots: ["llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains the cases your own fraud or revenue assurance model flags, and proposes a hold or an escalation for approval. Never scores a case itself. Depends on your detection model, called as a tool, and your billing records."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
@@ -90,6 +95,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Read tools for your detection model and billing data | OSS and BSS | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Your leakage and fraud categories in the triage skill | OSS and BSS | Skill or capability manifest | SME | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Clear, hold, and escalate ceilings and approvers | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Gate set of past cases your analysts labelled | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

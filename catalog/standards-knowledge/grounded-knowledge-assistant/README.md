@@ -9,11 +9,16 @@ depth: "recipe"
 adaptation:
   rung: "retrieval"
   expertise: ["golden-set", "gate-labels", "corpus"]
+  bring:
+    - {item: "3GPP and IETF specifications", domains: ["core-cnf", "ran", "transport-ip"], mechanism: "rag-corpus"}
+    - {item: "TM Forum documents", domains: ["oss-bss"], mechanism: "rag-corpus"}
+    - {item: "Vendor manuals and runbooks", domains: ["ran", "core-cnf", "transport-ip"], mechanism: "rag-corpus"}
+    - {item: "Routing threshold and answer-only ceiling", domains: ["oss-bss"], mechanism: "gate-policy"}
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers standards and runbook questions with citations, or abstains and lists what it searched. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10", "PB-11"]
 agent_school: [103, 201, 203, 402]
 also_covers: ["Telecom standards Q&A over documents you hold rights to", "Grounded RAG assistants"]
 clarity_reviewed: "2026-11-15"
@@ -139,6 +144,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval over your corpus | A golden set your experts label; Gate labels from your approvers; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| 3GPP and IETF specifications | 5G core CNFs; RAN; Transport and IP | RAG corpus | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| TM Forum documents | OSS and BSS | RAG corpus | Business owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Vendor manuals and runbooks | RAN; 5G core CNFs; Transport and IP | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Routing threshold and answer-only ceiling | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+
+<!-- generated:what-you-bring end -->
 
 ## Governance
 

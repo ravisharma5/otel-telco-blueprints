@@ -9,12 +9,18 @@ depth: "entry"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Cause taxonomy and labelled past incidents", domains: ["oss-bss"], mechanism: "classification-labels"}
+    - {item: "Past incidents and tickets from your OSS tools", domains: ["oss-bss"], mechanism: "rag-corpus"}
+    - {item: "Alarm, inventory, and performance read tools", domains: ["oss-bss"], mechanism: "tool-contract"}
+    - {item: "Correlation skill and capability manifests", domains: ["oss-bss"], mechanism: "skill-manifest"}
+    - {item: "Grouping ceilings and approver roles", domains: ["oss-bss"], mechanism: "gate-policy"}
 otel_slots: ["classification", "embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Correlates RAN, transport, and core alarms into one incident using topology and inventory, and recommends the grouping to a human approver. Never changes an OSS record itself. Depends on your alarm, inventory, and performance APIs and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-09"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [301, 402]
 card:
@@ -94,6 +100,24 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Cause taxonomy and labelled past incidents | OSS and BSS | Classification labels | SME | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Past incidents and tickets from your OSS tools | OSS and BSS | RAG corpus | Business owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Alarm, inventory, and performance read tools | OSS and BSS | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Correlation skill and capability manifests | OSS and BSS | Skill or capability manifest | SME | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Grouping ceilings and approver roles | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

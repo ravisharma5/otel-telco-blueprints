@@ -9,11 +9,15 @@ depth: "entry"
 adaptation:
   rung: "retrieval"
   expertise: ["golden-set", "gate-labels", "corpus"]
+  bring:
+    - {item: "Specification sets with release and version", domains: ["ran", "core-cnf", "transport-ip"], mechanism: "rag-corpus"}
+    - {item: "Change-request archives", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
+    - {item: "Routing threshold and summary-only ceiling", domains: ["ran", "core-cnf", "transport-ip"], mechanism: "gate-policy"}
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Summarises 3GPP specifications and change requests with a citation for each clause, or abstains. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-15"
 agent_school: [103, 402]
 card:
@@ -91,6 +95,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval over your corpus | A golden set your experts label; Gate labels from your approvers; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Specification sets with release and version | RAN; 5G core CNFs; Transport and IP | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Change-request archives | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Routing threshold and summary-only ceiling | RAN; 5G core CNFs; Transport and IP | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

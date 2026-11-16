@@ -9,12 +9,17 @@ depth: "entry"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Care articles with usage-rights entries", domains: ["customer-care"], mechanism: "rag-corpus"}
+    - {item: "Read-only gateway and Wi-Fi diagnostic tools", domains: ["customer-care"], mechanism: "tool-contract"}
+    - {item: "Care diagnostics skill and tool manifests", domains: ["customer-care"], mechanism: "skill-manifest"}
+    - {item: "Consent check and remote-fix ceilings", domains: ["customer-care"], mechanism: "gate-policy"}
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Helps a care agent troubleshoot a home broadband fault from gateway diagnostics and care articles, and proposes remote fixes for approval. Never talks to the customer. Depends on your device management platform and the customer's consent."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -93,6 +98,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Care articles with usage-rights entries | Customer and care | RAG corpus | Business owner, with data protection officer review | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Read-only gateway and Wi-Fi diagnostic tools | Customer and care | MCP tool contract | Platform team | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Care diagnostics skill and tool manifests | Customer and care | Skill or capability manifest | SME | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Consent check and remote-fix ceilings | Customer and care | Gate and action-layer policy | Risk owner | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

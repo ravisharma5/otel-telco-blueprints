@@ -9,11 +9,15 @@ depth: "entry"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Mobility procedure specifications with usage rights", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
+    - {item: "Event rebuild tools over radio and core traces", domains: ["ran", "core-cnf"], mechanism: "tool-contract"}
+    - {item: "Mobility analysis skill and capability manifests", domains: ["ran"], mechanism: "skill-manifest"}
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains a failed 5G handover or registration from rebuilt signalling and the 3GPP procedures, with citations. Informs only. Depends on your tools that rebuild each mobility event and your own failure cases."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -88,6 +92,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Mobility procedure specifications with usage rights | RAN; 5G core CNFs | RAG corpus | Operations engineer | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Event rebuild tools over radio and core traces | RAN; 5G core CNFs | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Mobility analysis skill and capability manifests | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

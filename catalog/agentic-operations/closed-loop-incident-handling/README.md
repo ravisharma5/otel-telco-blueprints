@@ -9,12 +9,18 @@ depth: "recipe"
 adaptation:
   rung: "head-retrain"
   expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "Alarm cause taxonomy and SME-labelled incidents", domains: ["ran", "transport-ip", "core-cnf"], mechanism: "classification-labels"}
+    - {item: "TM Forum alarm, ticket, and inventory tool contracts", domains: ["oss-bss"], mechanism: "tool-contract"}
+    - {item: "Read-only device tool contracts", domains: ["transport-ip", "ran"], mechanism: "tool-contract"}
+    - {item: "Triage skill and capability manifests", domains: ["oss-bss"], mechanism: "skill-manifest"}
+    - {item: "Action ceilings, approver roles, and playbooks", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "gate-policy"}
 otel_slots: ["llm", "decision", "safety", "classification"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3
 placement_tier: ["regional", "core"]
 one_liner: "Handles router incidents from alarm to ticket with read-only tools, and sends every write through the Decision gate. Acts within policy only for low-risk classes, once that stage is earned. Depends on the Decision gate and the automation workflow."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [101, 301, 302, 403]
 also_covers: ["Closed-loop incident handling"]
 clarity_reviewed: "2026-11-15"
@@ -160,6 +166,24 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Alarm cause taxonomy and SME-labelled incidents | RAN; Transport and IP; 5G core CNFs | Classification labels | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| TM Forum alarm, ticket, and inventory tool contracts | OSS and BSS | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Read-only device tool contracts | Transport and IP; RAN | MCP tool contract | Platform team | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Triage skill and capability manifests | OSS and BSS | Skill or capability manifest | SME | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Action ceilings, approver roles, and playbooks | Transport and IP; RAN; 5G core CNFs | Gate and action-layer policy | Risk owner | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+
+<!-- generated:what-you-bring end -->
 
 ## Governance
 

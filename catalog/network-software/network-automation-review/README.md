@@ -9,12 +9,16 @@ depth: "entry"
 adaptation:
   rung: "retrieval"
   expertise: ["golden-set", "gate-labels", "corpus"]
+  bring:
+    - {item: "Vendor command-line and NOS references", domains: ["transport-ip"], mechanism: "rag-corpus"}
+    - {item: "Change repository with past reviewed changes", domains: ["transport-ip"], mechanism: "rag-corpus"}
+    - {item: "Rollout ceilings and approver roles", domains: ["transport-ip"], mechanism: "gate-policy"}
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Reviews network automation changes and recommends approval to a human approver. Never applies a change itself. Depends on schema checks and dry runs outside the model and on the Safety and Decision slots."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
 clarity_reviewed: "2026-11-15"
 agent_school: [301]
 card:
@@ -93,6 +97,22 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval over your corpus | A golden set your experts label; Gate labels from your approvers; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Vendor command-line and NOS references | Transport and IP | RAG corpus | Operations engineer | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Change repository with past reviewed changes | Transport and IP | RAG corpus | Operations engineer | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Rollout ceilings and approver roles | Transport and IP | Gate and action-layer policy | Risk owner | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

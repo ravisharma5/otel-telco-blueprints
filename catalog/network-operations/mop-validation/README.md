@@ -9,12 +9,18 @@ depth: "recipe"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Vendor documents, runbooks, and past MOPs", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "rag-corpus"}
+    - {item: "Change request and inventory read tools", domains: ["oss-bss"], mechanism: "tool-contract"}
+    - {item: "Dry-run tools that cannot commit a change", domains: ["transport-ip"], mechanism: "tool-contract"}
+    - {item: "MOP review skill and capability manifests", domains: ["transport-ip"], mechanism: "skill-manifest"}
+    - {item: "Approval ceilings for high-risk changes", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "gate-policy"}
 otel_slots: ["llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Checks each method of procedure (MOP) against inventory, vendor documents, and runbooks, dry-runs it through tools, and recommends approval or rejection to the change approver. Never executes a MOP. Depends on your own MOP-based evaluation against emulated network devices."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [301, 401]
 clarity_reviewed: "2026-11-16"
 card:
@@ -145,6 +151,34 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Vendor documents, runbooks, and past MOPs | Transport and IP; RAN; 5G core CNFs | RAG corpus | Operations engineer | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Change request and inventory read tools | OSS and BSS | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Dry-run tools that cannot commit a change | Transport and IP | MCP tool contract | Platform team | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| MOP review skill and capability manifests | Transport and IP | Skill or capability manifest | SME | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Approval ceilings for high-risk changes | Transport and IP; RAN; 5G core CNFs | Gate and action-layer policy | Risk owner | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+
+<!-- generated:what-you-bring end -->
+
+### What you must add
+
+| Gap | What you add | Source |
+|---|---|---|
+| Golden set | Past MOPs with SME-labelled defects, scored in a digital twin or emulated lab, because the card asks for dedicated MOP-based evaluation before deployment | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) |
+| Gate labels | A gate set of past cases labelled by your approvers, weighted toward non-ACT cases, because the Decision slot reads its decision from label probabilities and you set its thresholds on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Tool contracts | A pinned contract for each read and dry-run tool, with change requests as in TMF655 and NETCONF validate for dry runs | [TMF655 Change Management repository](https://github.com/tmforum-apis/TMF655_ChangeManagement), [RFC 6241 validate capability](https://www.rfc-editor.org/rfc/rfc6241#section-8.6) |
+| Domain corpus | Vendor command references, NOS documents, runbooks, and past MOPs in retrieval, each with a usage-rights entry, because the card's training leaves out vendor command references and NOS documentation | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
+| Language scope | Tests in every language your MOPs are written in, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |
 
 ## Governance
 

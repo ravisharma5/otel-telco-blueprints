@@ -333,9 +333,13 @@ def test_classification_page_with_head_retrain_passes(tmp_path):
 
 
 def test_bring_rules_skip_when_bring_is_absent(tmp_path):
+    from tools.bplint.checks.frontmatter import _adaptation_messages
+
     ad = {"rung": "head-retrain", "expertise": ["taxonomy", "golden-set"]}
     fm = use_case_fm(otel_slots=CLASSIFY_SLOTS, placement=CLASSIFY_PLACEMENT, adaptation=ad)
-    assert lint(tmp_path, render(fm, use_case_sections())) == []
+    assert _adaptation_messages(fm) == []
+    findings = lint(tmp_path, render(fm, use_case_sections()))
+    assert codes(findings) == ["FM002"] and "bring" in findings[0].message  # the schema requires bring
 
 
 def test_classification_slot_with_skills_is_ad001(tmp_path):

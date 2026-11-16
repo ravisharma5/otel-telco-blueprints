@@ -9,11 +9,16 @@ depth: "entry"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "gNMI Get and Subscribe read tool contracts", domains: ["transport-ip"], mechanism: "tool-contract"}
+    - {item: "NWDAF analytics and UDR subscription read tools", domains: ["core-cnf"], mechanism: "tool-contract"}
+    - {item: "Read-only manifests for router and core tools", domains: ["transport-ip", "core-cnf"], mechanism: "skill-manifest"}
+    - {item: "Read-only ceilings and the routing threshold", domains: ["transport-ip", "core-cnf"], mechanism: "gate-policy"}
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers operations questions about routers and the 5G core by calling read-only tools and citing what each tool returned. Informs only and holds no write tools. Depends on read-only tool manifests and the deny-unless-allowed rule at the tool gateway."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [101, 401]
 card:
@@ -88,6 +93,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| gNMI Get and Subscribe read tool contracts | Transport and IP | MCP tool contract | Platform team | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| NWDAF analytics and UDR subscription read tools | 5G core CNFs | MCP tool contract | Platform team | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Read-only manifests for router and core tools | Transport and IP; 5G core CNFs | Skill or capability manifest | SME | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Read-only ceilings and the routing threshold | Transport and IP; 5G core CNFs | Gate and action-layer policy | Risk owner | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 

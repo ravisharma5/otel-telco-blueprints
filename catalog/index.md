@@ -149,15 +149,32 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 
 These recipes use [the Adaptation page](../platform/adaptation/README.md):
 
+- [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
+- [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
+- [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
+- [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
+- [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
+- [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
+- [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
+- [UC-OPS-06 Slice SLA assurance](network-operations/slice-sla-assurance/README.md)
+- [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
+- [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 ### PB-04 Serving, routing, and placement
 
@@ -323,6 +340,33 @@ These recipes use [the Compliance, sovereignty, and operating model page](../pla
 
 ### PB-11 Bring your own data and policies
 
-No recipe uses [the Bring your own data and policies page](../platform/bring-your-own-data/README.md) yet.
+These recipes use [the Bring your own data and policies page](../platform/bring-your-own-data/README.md):
+
+- [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
+- [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
+- [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
+- [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
+- [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
+- [UC-CARE-02 Broadband digital troubleshooting](business-assurance/broadband-digital-troubleshooting/README.md)
+- [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
+- [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
+- [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
+- [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
+- [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
+- [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
+- [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
+- [UC-OPS-06 Slice SLA assurance](network-operations/slice-sla-assurance/README.md)
+- [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
+- [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
+- [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
+- [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
+- [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
+- [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
 
 <!-- generated:catalog-by-platform end -->

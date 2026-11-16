@@ -9,12 +9,18 @@ depth: "recipe"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
+  bring:
+    - {item: "Care knowledge base with usage rights", domains: ["customer-care"], mechanism: "rag-corpus"}
+    - {item: "CAMARA device status API contracts", domains: ["customer-care"], mechanism: "tool-contract"}
+    - {item: "TMF621 ticket and care case system contracts", domains: ["oss-bss", "customer-care"], mechanism: "tool-contract"}
+    - {item: "Care diagnostics skill and capability manifests", domains: ["customer-care"], mechanism: "skill-manifest"}
+    - {item: "Consent, commitment, and ticket ceilings", domains: ["customer-care"], mechanism: "gate-policy"}
 otel_slots: ["llm", "safety", "embedding", "reranker", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Suggests answers to a care agent from CAMARA device diagnostics, with the customer's consent checked before any tool call. Recommends only; the care agent decides. Depends on the operator's consent service and the MCP gateway."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [303, 304]
 also_covers: ["Customer care diagnostics"]
 clarity_reviewed: "2026-11-15"
@@ -172,6 +178,24 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Care knowledge base with usage rights | Customer and care | RAG corpus | Business owner, with data protection officer review | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| CAMARA device status API contracts | Customer and care | MCP tool contract | Platform team | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| TMF621 ticket and care case system contracts | OSS and BSS; Customer and care | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss); [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Care diagnostics skill and capability manifests | Customer and care | Skill or capability manifest | SME | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+| Consent, commitment, and ticket ceilings | Customer and care | Gate and action-layer policy | Risk owner | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
+
+<!-- generated:what-you-bring end -->
 
 ## Governance
 

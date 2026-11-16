@@ -9,12 +9,17 @@ depth: "entry"
 adaptation:
   rung: "skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts"]
+  bring:
+    - {item: "Change policies as action classes with ceilings", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "gate-policy"}
+    - {item: "Change procedures as skills with manifests", domains: ["transport-ip"], mechanism: "skill-manifest"}
+    - {item: "Change-approval and closure record tools", domains: ["oss-bss"], mechanism: "tool-contract"}
+    - {item: "Gate set of past changes your approvers labelled", domains: ["oss-bss"], mechanism: "gate-policy"}
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Runs operations agents under written policies: each proposed change names its action class, and the decision gate holds it to that class's ceiling. Recommends with approval only. Depends on orchestration and change control that live outside the model."
-platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [301, 303, 401]
 card:
@@ -90,6 +95,23 @@ Key flags for each slot, copied from [PB-04](../../../platform/serving-routing-p
 ```
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
+
+### What you bring
+
+<!-- generated:what-you-bring start -->
+
+| Model change | Your expertise | How far to climb |
+|---|---|---|
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+
+| Item | Network component | Mechanism | Owner | Matrix row |
+|---|---|---|---|---|
+| Change policies as action classes with ceilings | Transport and IP; RAN; 5G core CNFs | Gate and action-layer policy | Risk owner | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip); [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
+| Change procedures as skills with manifests | Transport and IP | Skill or capability manifest | SME | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
+| Change-approval and closure record tools | OSS and BSS | MCP tool contract | Platform team | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+| Gate set of past changes your approvers labelled | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
+
+<!-- generated:what-you-bring end -->
 
 ### What you must add
 
