@@ -38,6 +38,7 @@ The Use cases page shows the same use cases as cards.
 | [UC-OPS-02](network-operations/signalling-trace-analysis/README.md) | Signalling trace analysis | Catalog entry |  |
 | [UC-OPS-03](network-operations/core-network-rca/README.md) | Core network root-cause analysis | Full recipe |  |
 | [UC-OPS-04](network-operations/ran-rf-health-checks/README.md) | RAN and RF health checks | Catalog entry |  |
+| [UC-OPS-05](network-operations/ran-energy-saving/README.md) | RAN energy saving | Full recipe |  |
 | [UC-OPS-08](network-operations/transport-ip-diagnostics/README.md) | Transport and IP diagnostics | Catalog entry |  |
 | [UC-OPS-09](network-operations/cross-domain-oss-correlation/README.md) | Cross-domain OSS correlation | Catalog entry |  |
 
@@ -98,6 +99,7 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
@@ -126,6 +128,7 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
@@ -168,6 +171,7 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
@@ -196,6 +200,7 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
@@ -222,6 +227,7 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
@@ -243,6 +249,7 @@ These recipes use [the Action layer page](../platform/action-layer/README.md):
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
@@ -257,6 +264,7 @@ These recipes use [the Security, identity, and sandbox page](../platform/securit
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
@@ -274,6 +282,7 @@ These recipes use [the Quality operations and observability page](../platform/qu
 - [UC-KNOW-03 OSS and BSS architecture guidance](standards-knowledge/oss-bss-architecture-guidance/README.md)
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 
@@ -290,5 +299,6 @@ These recipes use [the Compliance, sovereignty, and operating model page](../pla
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
 - [UC-OPS-03 Core network root-cause analysis](network-operations/core-network-rca/README.md)
+- [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 
 <!-- generated:catalog-by-platform end -->

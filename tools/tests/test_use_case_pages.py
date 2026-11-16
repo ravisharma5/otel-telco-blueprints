@@ -108,6 +108,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "research/kpi-rca-reasoning": "UC-RES-01",
     "research/mobility-failure-analysis": "UC-RES-02",
     "network-operations/core-network-rca": "UC-OPS-03",
+    "network-operations/ran-energy-saving": "UC-OPS-05",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -267,6 +268,10 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     "business-assurance/camara-care-diagnostics": {"Decision routing threshold": "Model owner"},
     "standards-knowledge/spec-summarisation": {"Decision routing threshold": "Model owner"},
     "agentic-operations/router-core-read-only-ops": {"Decision routing threshold": "Model owner"},
+    "network-operations/ran-energy-saving": {
+        "Service KPI guard band": "Risk owner",
+        "Minimum simulated energy saving": "Business owner",
+    },
 }
 
 # RACI activities a use case may name that no platform page defines
@@ -1667,6 +1672,123 @@ def test_core_rca_no_values_on_parameters():
         "Ceiling for notify requests",
         "Ceiling for low-risk writes",
         "Embedding and Reranker recall-at-k floor",
+    ):
+        assert name in names, name
+
+
+# ---------- RAN energy saving ----------
+
+ENERGY = REPO_ROOT / "catalog/network-operations/ran-energy-saving/README.md"
+ENERGY_SLOTS = {"llm", "decision", "safety"}
+ACTION_LAYER_LINK = "../../../platform/action-layer/README.md"
+ENERGY_EARLIER_IDS = ("case-8841", "inc-8812", "req-8812", "smf-2", "core-rca-agent")
+
+
+def _energy_example() -> str:
+    how = section_text(ENERGY, "How it works")
+    heading = next(ln for ln in how.splitlines() if ln.startswith("### Worked example:"))
+    return _h3_text(how, heading[4:])
+
+
+def _energy_sentences() -> list[str]:
+    return re.split(r"(?<=[.!?])\s+", flat(body(ENERGY)))
+
+
+def test_energy_front_matter():
+    fm = front_matter(ENERGY) or {}
+    assert fm.get("id") == "UC-OPS-05"
+    assert fm.get("depth") == "recipe"
+    assert fm.get("flagship") is False
+    assert set(fm.get("otel_slots") or []) == ENERGY_SLOTS
+    assert fm.get("autonomy_ceiling") == "act-within-policy"
+    assert fm.get("tmf_an_level_target") == 3
+    assert fm.get("agent_school") == [302]
+    assert (fm.get("card") or {}).get("goal") == "sla-energy"
+    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
+
+
+def test_energy_gate_classes():
+    """Booster windows may reach ACT only at the act stage, within the low-risk
+    ceiling, after the canary; coverage cells never pass REVIEW."""
+    table = table_with_header(ENERGY, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    booster = [r for r in rows if "write_low" in r[0] and "booster" in r[0].lower()]
+    assert len(booster) == 1, rows
+    cell = booster[0][out]
+    assert cell.startswith("REVIEW from the recommend stage up"), cell
+    for needed in ("ACT", "act stage", "Ceiling for low-risk writes", "Canary window"):
+        assert needed in cell, needed
+    coverage = [r for r in rows if "write_high" in r[0] and "coverage" in r[0].lower()]
+    assert len(coverage) == 1, rows
+    assert coverage[0][out].startswith("REVIEW only"), coverage[0][out]
+    assert not re.search(r"\bACT\b", coverage[0][out]), coverage[0][out]
+    report = [r for r in rows if "notify" in r[0] and "report" in r[0].lower()]
+    assert len(report) == 1 and report[0][out].startswith("NOTIFY"), rows
+    assert any(r[out] == "STOP" for r in rows), rows
+
+
+def test_energy_rollback():
+    hits = [
+        s
+        for s in _energy_sentences()
+        if re.search(r"(?i)roll(?:s|ing)? back|rollback", s)
+        and re.search(r"(?i)reactivat", s)
+        and re.search(r"(?i)service KPI", s)
+        and ACTION_LAYER_LINK in s
+    ]
+    assert hits, "name rollback by reactivating the cell on a service KPI breach, linking the action layer"
+
+
+def test_energy_simulate_first():
+    steps = re.findall(r"^\d+\. .*$", section_text(ENERGY, "How it works"), re.M)
+    sim = [i for i, s in enumerate(steps) if re.search(r"(?i)simulation|digital twin", s)]
+    request = [i for i, s in enumerate(steps) if re.search(r"(?i)action request", s)]
+    assert sim and request, steps
+    assert min(sim) < min(request), steps
+
+
+def test_energy_not_in_ric_loop():
+    hits = [
+        s
+        for s in _energy_sentences()
+        if "near-real-time RIC" in s and re.search(r"\b(never|not)\b", s) and re.search(r"\b(LLM|agent)\b", s)
+    ]
+    assert hits, "state that the LLM is not in the near-real-time RIC loop"
+
+
+def test_energy_example_ids():
+    example = _energy_example()
+    for ident in ("es-req-0412", "energy-planner-agent", "nrcell-rural-b3"):
+        assert ident in example, ident
+    text = body(ENERGY)
+    for old in REUSED_EXAMPLE_IDS + EARLIER_FLAGSHIP_IDS + ENERGY_EARLIER_IDS:
+        assert old not in text, old
+
+
+def test_energy_mermaid_capabilities():
+    fences = mermaid_fences(body(ENERGY))
+    assert len(fences) == 1
+    texts = [m.group(2) for m in MERMAID_NODE.finditer(fences[0])]
+    assert any(re.search(r"(?i)simulat|digital twin", t) for t in texts), texts
+    assert any(re.search(r"(?i)reactivate", t) for t in texts), texts
+    assert PRODUCT_TERMS.findall(fences[0]) == []
+    assert LAYER_CODE.findall(fences[0]) == []
+
+
+def test_energy_parameters_named_without_values():
+    names = {row[0] for t in param_tables(ENERGY) for row in t[1:]}
+    for name in (
+        "Service KPI guard band",
+        "Minimum simulated energy saving",
+        "Shadow agreement floor",
+        "Canary window",
+        "Minimum ACT probability for the act stage",
+        "Override rate ceiling",
+        "Decision false-ACT budget",
+        "Ceiling for low-risk writes",
+        "Ceiling for high-risk writes",
+        "Required approver role per action class",
     ):
         assert name in names, name
 

@@ -101,6 +101,7 @@ nav:
           - Signalling trace analysis: catalog/network-operations/signalling-trace-analysis/README.md
           - Core network root-cause analysis: catalog/network-operations/core-network-rca/README.md
           - RAN and RF health checks: catalog/network-operations/ran-rf-health-checks/README.md
+          - RAN energy saving: catalog/network-operations/ran-energy-saving/README.md
           - Transport and IP diagnostics: catalog/network-operations/transport-ip-diagnostics/README.md
           - Cross-domain OSS correlation: catalog/network-operations/cross-domain-oss-correlation/README.md
       - Agentic operations:
