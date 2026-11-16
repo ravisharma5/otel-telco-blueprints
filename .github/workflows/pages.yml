@@ -6,6 +6,11 @@
 # pages/id-token write only on the deploy job, every action pinned by commit SHA.
 # The explorer's Node dependencies install with npm ci only, scripts blocked, telemetry off.
 # The unit and built-output tests run before the upload, so a failing check never deploys.
+# The proposal PDF is built and required here only: Pango comes from apt packages
+# pinned to exact noble versions on a pinned ubuntu-24.04 runner, and REQUIRE_PDF=1
+# turns a missing Pango into a failure. If a pin stops resolving, this run fails and
+# nothing deploys, so the live site keeps its last good build; lint.yml skips the
+# PDF, so a stale pin never blocks lint on unrelated changes.
 name: pages
 on:
   push:
@@ -18,11 +23,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned image, so the pinned apt versions below exist.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       # Astro collects telemetry by default; keep it off in CI.
       ASTRO_TELEMETRY_DISABLED: "1"
+      # The proposal PDF tests and the site build fail instead of skipping without Pango.
+      REQUIRE_PDF: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -32,6 +40,15 @@ jobs:
           python-version: "3.12"
           # Same uv version that produced uv.lock.
           version: "0.9.28"
+      # WeasyPrint's system libraries, pinned to the noble versions (Release pocket).
+      - name: Install Pango for the proposal PDF
+        run: >-
+          sudo apt-get update &&
+          sudo apt-get install -y --no-install-recommends
+          libpango-1.0-0=1.52.1+ds-1build1
+          libpangoft2-1.0-0=1.52.1+ds-1build1
+          libharfbuzz0b=8.3.0-2build2
+          libharfbuzz-subset0=8.3.0-2build2
       # --locked fails instead of re-resolving when uv.lock is stale.
       - run: uv sync --all-extras --locked
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0

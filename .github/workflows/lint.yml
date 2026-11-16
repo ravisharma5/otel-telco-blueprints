@@ -1,5 +1,6 @@
 # Runs the same `make ci` as local development, so CI and local results match.
 # Security: pull_request only (never pull_request_target), read-only token, no secrets.
+# The proposal PDF is built and required in pages.yml only; no Pango here, so the PDF tests skip and a stale Pango pin cannot block lint.
 name: lint
 on:
   pull_request:

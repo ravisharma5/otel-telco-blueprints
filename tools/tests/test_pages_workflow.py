@@ -177,3 +177,32 @@ def test_workflows_checkout_without_credentials():
     assert checkouts
     for step in checkouts:
         assert (step.get("with") or {}).get("persist-credentials") is False, step
+
+
+# Pango for the proposal PDF: exact noble versions (packages.ubuntu.com / Launchpad).
+PANGO_PACKAGES = ("libpango-1.0-0", "libpangoft2-1.0-0", "libharfbuzz0b", "libharfbuzz-subset0")
+
+
+def test_pages_installs_pinned_pango():
+    build = WORKFLOW["jobs"]["build"]
+    assert build["runs-on"] == "ubuntu-24.04"
+    assert build["env"]["REQUIRE_PDF"] == "1"
+    steps = build["steps"]
+    apt = [i for i, s in enumerate(steps) if "apt-get install" in s.get("run", "")]
+    assert len(apt) == 1, "expected one apt-get install step"
+    run = steps[apt[0]]["run"]
+    assert "--no-install-recommends" in run
+    pins = re.findall(r"\b([a-z0-9][a-z0-9.+-]*)=([0-9][A-Za-z0-9.+~:-]*)", run)
+    assert sorted(name for name, _ in pins) == sorted(PANGO_PACKAGES)
+    # Nothing else is installed: every package word on the line is one of the pins.
+    words = run.split("install", 1)[1].split()
+    pkgs = [w for w in words if not w.startswith("-")]
+    assert len(pkgs) == len(PANGO_PACKAGES), pkgs
+    sync = [i for i, s in enumerate(steps) if "uv sync" in s.get("run", "")]
+    assert sync and apt[0] < sync[0], "Pango must be installed before uv sync"
+
+
+def test_pages_comment_states_pdf_choice():
+    header = WORKFLOW_PATH.read_text(encoding="utf-8").split("name: pages", 1)[0]
+    assert "proposal PDF" in header
+    assert "last good build" in header

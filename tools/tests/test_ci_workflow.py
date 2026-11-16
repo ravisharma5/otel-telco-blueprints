@@ -148,3 +148,12 @@ def test_workflows_checkout_without_credentials():
 
 def test_no_stale_pin_comment():
     assert "pin actions by commit sha" not in WORKFLOW_PATH.read_text(encoding="utf-8").lower()
+
+
+def test_lint_does_not_require_pdf():
+    text = WORKFLOW_PATH.read_text(encoding="utf-8")
+    assert "REQUIRE_PDF" not in text
+    assert "libpango" not in text
+    assert "apt-get" not in text
+    header = text.split("name: lint", 1)[0]
+    assert "proposal PDF" in header and "pages.yml" in header
