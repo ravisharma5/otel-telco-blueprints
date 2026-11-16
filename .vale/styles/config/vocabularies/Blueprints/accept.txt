@@ -60,3 +60,4 @@ Nephio
 Nudm
 [Tt]riages
 uplink
+MOPs

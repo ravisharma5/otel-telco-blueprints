@@ -103,6 +103,7 @@ nav:
           - RAN and RF health checks: catalog/network-operations/ran-rf-health-checks/README.md
           - RAN energy saving: catalog/network-operations/ran-energy-saving/README.md
           - Slice SLA assurance: catalog/network-operations/slice-sla-assurance/README.md
+          - MOP validation: catalog/network-operations/mop-validation/README.md
           - Transport and IP diagnostics: catalog/network-operations/transport-ip-diagnostics/README.md
           - Cross-domain OSS correlation: catalog/network-operations/cross-domain-oss-correlation/README.md
       - Agentic operations:

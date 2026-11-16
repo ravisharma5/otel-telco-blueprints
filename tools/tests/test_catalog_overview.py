@@ -195,3 +195,86 @@ def test_triage_language_scope():
     bullets = [ln for ln in lim.splitlines() if ln.startswith("- ")]
     assert len(bullets) <= 6, bullets
     assert any("English" in b and "French" in b and CARD_31B in b for b in bullets), bullets
+
+
+# Every item of the application list the catalog was built from, and every
+# agenda gap, maps to a landed page ("<domain>/<slug>") or to an also_covers
+# item on a flagship ("also_covers:<domain>/<slug>"). Generic names only.
+COVERAGE: dict[str, str] = {
+    # Standards and protocol knowledge
+    "telecom standards Q&A": "also_covers:standards-knowledge/grounded-knowledge-assistant",
+    "grounded RAG assistants": "also_covers:standards-knowledge/grounded-knowledge-assistant",
+    "spec summarisation": "standards-knowledge/spec-summarisation",
+    "OSS/BSS architecture guidance": "standards-knowledge/oss-bss-architecture-guidance",
+    # Network software and automation
+    "RAN and core code assistants": "network-software/ran-core-code-assistant",
+    "network automation": "network-software/network-automation-review",
+    "O-RAN RIC": "network-software/oran-ric-xapp-assistant",
+    # Network operations
+    "signalling trace analysis": "network-operations/signalling-trace-analysis",
+    "core network RCA": "network-operations/core-network-rca",
+    "RAN and RF health checks": "network-operations/ran-rf-health-checks",
+    "NOC ticket triage": "also_covers:network-operations/alarm-triage-adaptation",
+    "security triage": "security/security-triage",
+    # Agentic operations
+    "closed-loop incident handling": "also_covers:agentic-operations/closed-loop-incident-handling",
+    "customer care diagnostics": "also_covers:business-assurance/camara-care-diagnostics",
+    "router and 5G core operations": "agentic-operations/router-core-read-only-ops",
+    "policy-following operations agents": "agentic-operations/policy-following-ops-agents",
+    # Under development
+    "broadband digital troubleshooting": "business-assurance/broadband-digital-troubleshooting",
+    "network RCA reasoning": "research/kpi-rca-reasoning",
+    "5G mobility failure analysis": "research/mobility-failure-analysis",
+    "cybersecurity attack classification": "security/signalling-attack-classification",
+    # Agenda gaps
+    "churn": "business-assurance/churn-risk-explanation",
+    "revenue assurance": "business-assurance/revenue-assurance-triage",
+    "energy": "network-operations/ran-energy-saving",
+    "slice SLA": "network-operations/slice-sla-assurance",
+    "MOP validation": "network-operations/mop-validation",
+    "transport and IETF diagnostics": "network-operations/transport-ip-diagnostics",
+    "cross-domain OSS correlation": "network-operations/cross-domain-oss-correlation",
+}
+# The words each merged item must show in its flagship's also_covers list.
+ALSO_COVERS_WORDS = {
+    "telecom standards Q&A": "standards Q&A",
+    "grounded RAG assistants": "Grounded RAG assistants",
+    "NOC ticket triage": "NOC ticket triage",
+    "closed-loop incident handling": "Closed-loop incident handling",
+    "customer care diagnostics": "Customer care diagnostics",
+}
+
+
+def _pages_by_key() -> dict[str, dict]:
+    return {p.relative_to(REPO_ROOT / "catalog").parent.as_posix(): _fm(p) for p in use_case_pages()}
+
+
+def test_catalog_covers_application_list_and_gaps():
+    pages = _pages_by_key()
+    assert len(COVERAGE) == 27
+    for item, target in COVERAGE.items():
+        if target.startswith("also_covers:"):
+            key = target.split(":", 1)[1]
+            assert key in pages, (item, key)
+            fm = pages[key]
+            assert fm.get("flagship") is True, (item, key)
+            covers = fm.get("also_covers") or []
+            assert any(ALSO_COVERS_WORDS[item] in c for c in covers), (item, covers)
+        else:
+            assert target in pages, (item, target)
+            assert pages[target].get("flagship") is not True, (item, target)
+    merged = {t.split(":", 1)[1] for t in COVERAGE.values() if t.startswith("also_covers:")}
+    flagships = {k for k, fm in pages.items() if fm.get("flagship") is True}
+    assert merged == flagships
+
+
+def test_catalog_counts():
+    pages = list(_pages_by_key().values())
+    assert len(pages) == 26
+    recipes = [fm for fm in pages if fm.get("depth") == "recipe"]
+    entries = [fm for fm in pages if fm.get("depth") == "entry"]
+    assert len(recipes) == 8 and len(entries) == 18
+    assert sum(1 for fm in recipes if fm.get("flagship") is True) == 4
+    assert sum(1 for fm in recipes if fm.get("flagship") is False) == 4
+    for fm in pages:
+        assert fm.get("card") and fm.get("placement") and fm.get("depth"), fm.get("id")

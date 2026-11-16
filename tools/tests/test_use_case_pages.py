@@ -110,6 +110,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-operations/core-network-rca": "UC-OPS-03",
     "network-operations/ran-energy-saving": "UC-OPS-05",
     "network-operations/slice-sla-assurance": "UC-OPS-06",
+    "network-operations/mop-validation": "UC-OPS-07",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -274,6 +275,7 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
         "Minimum simulated energy saving": "Business owner",
     },
     "network-operations/slice-sla-assurance": {"SLO breach forecast horizon": "Business owner"},
+    "network-operations/mop-validation": {"MOP defect recall floor": "Risk owner"},
 }
 
 # RACI activities a use case may name that no platform page defines
@@ -1906,6 +1908,127 @@ def test_slice_parameters_named_without_values():
         "Decision false-ACT budget",
         "Ceiling for notify requests",
         "Ceiling for high-risk writes",
+    ):
+        assert name in names, name
+
+
+# ---------- MOP validation ----------
+
+MOP = REPO_ROOT / "catalog/network-operations/mop-validation/README.md"
+MOP_SLOTS = {"llm", "safety", "decision", "embedding", "reranker"}
+MOP_ANCHOR = (
+    "https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed"
+)
+RFC_6241 = "https://www.rfc-editor.org/rfc/rfc6241"
+ANSIBLE_CHECK_MODE = "https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_checkmode.html"
+MOP_EARLIER_IDS = SLICE_EARLIER_IDS + ("slice-fx-07", "sla-req-3304")
+
+
+def _mop_example() -> str:
+    how = section_text(MOP, "How it works")
+    heading = next(ln for ln in how.splitlines() if ln.startswith("### Worked example:"))
+    return _h3_text(how, heading[4:])
+
+
+def _mop_sources() -> list[list[str]]:
+    return table_with_header(MOP, "Sources", ["#", "Claim", "Basis", "Source"])[1:]
+
+
+def _mop_sentences() -> list[str]:
+    return re.split(r"(?<=[.!?])\s+", flat(body(MOP)))
+
+
+def test_mop_front_matter():
+    fm = front_matter(MOP) or {}
+    assert fm.get("id") == "UC-OPS-07"
+    assert fm.get("title") == "MOP validation"
+    assert fm.get("depth") == "recipe"
+    assert fm.get("flagship") is False
+    assert set(fm.get("otel_slots") or []) == MOP_SLOTS
+    assert fm.get("autonomy_ceiling") == "recommend-with-approval"
+    assert fm.get("tmf_an_level_target") == 2
+    assert fm.get("agent_school") == [301, 401]
+    assert (fm.get("card") or {}).get("goal") == "change"
+    assert fm.get("platform_blueprints") == [f"PB-{n:02d}" for n in (1, 2, 4, 5, 6, 7, 8, 9, 10)]
+    placement = fm.get("placement") or {}
+    assert placement.get("far-edge", {}).get("runs") == []
+    assert set(placement.get("regional", {}).get("runs") or []) == {"embedding", "reranker", "safety", "decision"}
+    assert placement.get("core", {}).get("runs") == ["llm-large"]
+
+
+def test_mop_never_executes():
+    """The agent never runs the MOP; execution stays an approved job; no row reaches ACT."""
+    hits = [
+        s
+        for s in _mop_sentences()
+        if re.search(r"(?i)never (?:executes|runs) (?:the|a) MOP", s) and ACTION_LAYER_LINK in s
+    ]
+    assert hits, "state that the agent never executes the MOP, linking the action layer"
+    table = table_with_header(MOP, "Governance", ACTION_HEADER)
+    out = table[0].index(ACTION_HEADER[1])
+    rows = table[1:]
+    report = [r for r in rows if "notify" in r[0] and "report" in r[0].lower()]
+    assert len(report) == 1, rows
+    assert report[0][out].startswith("NOTIFY") and "assist stage" in report[0][out], report
+    recommend = [r for r in rows if re.search(r"(?i)recommend", r[0])]
+    assert len(recommend) == 1, rows
+    assert recommend[0][out].startswith("REVIEW") and "recommend stage" in recommend[0][out], recommend
+    assert any(r[out] == "STOP" for r in rows), rows
+    assert not any(re.search(r"\bACT\b", r[out]) for r in rows), rows
+
+
+def test_mop_dry_run_tools():
+    """Dry runs go through tools: NETCONF candidate plus validate, and Ansible check mode, each sourced."""
+    steps = re.findall(r"^\d+\. .*$", section_text(MOP, "How it works"), re.M)
+    dry = [s for s in steps if re.search(r"(?i)dry run", s)]
+    assert dry, steps
+    text = " ".join(dry)
+    assert re.search(r"candidate", text) and re.search(r"validate|confirmed commit", text), text
+    assert "Ansible check mode" in text, text
+    assert re.search(r"(?i)tool", text), text
+    source_links = " ".join(r[3] for r in _mop_sources())
+    for link in (RFC_6241, ANSIBLE_CHECK_MODE):
+        assert link in text, link
+        assert link in source_links, link
+
+
+def test_mop_card_prerequisite():
+    bullets = re.findall(r"^- .*$", section_text(MOP, "What you need"), re.M)
+    bullets += re.findall(r"^- .*$", section_text(MOP, "Limitations"), re.M)
+    hits = [b for b in bullets if MOP_ANCHOR in b and "MOP" in b]
+    assert hits, bullets
+    claims = [r for r in _mop_sources() if MOP_ANCHOR in r[3]]
+    assert claims and re.search(r"(?i)emulated", claims[0][1]), claims
+
+
+def test_mop_example_ids():
+    example = _mop_example()
+    for ident in ("chg-7731", "mop-7731-v2", "mop-review-agent"):
+        assert ident in example, ident
+    assert re.search(r"(?i)rollback", example), example
+    text = body(MOP)
+    for old in REUSED_EXAMPLE_IDS + EARLIER_FLAGSHIP_IDS + MOP_EARLIER_IDS:
+        assert old not in text, old
+
+
+def test_mop_mermaid_capabilities():
+    fences = mermaid_fences(body(MOP))
+    assert len(fences) == 1
+    texts = [m.group(2) for m in MERMAID_NODE.finditer(fences[0])]
+    assert any(re.search(r"(?i)dry run", t) for t in texts), texts
+    assert any(re.search(r"(?i)validation report", t) for t in texts), texts
+    assert PRODUCT_TERMS.findall(fences[0]) == []
+    assert LAYER_CODE.findall(fences[0]) == []
+
+
+def test_mop_parameters_named_without_values():
+    names = {row[0] for t in param_tables(MOP) for row in t[1:]}
+    for name in (
+        "MOP defect recall floor",
+        "LLM groundedness floor",
+        "Non-inferiority margin",
+        "Ceiling for notify requests",
+        "Required approver role per action class",
     ):
         assert name in names, name
 
