@@ -114,6 +114,9 @@ nav:
       - Security:
           - Security alert triage: catalog/security/security-triage/README.md
           - Signalling attack classification: catalog/security/signalling-attack-classification/README.md
+      - Research:
+          - KPI root-cause reasoning: catalog/research/kpi-rca-reasoning/README.md
+          - 5G mobility failure analysis: catalog/research/mobility-failure-analysis/README.md
   - Platform:
       - Overview: platform/index.md
       - Serving, routing, and placement: platform/serving-routing-placement/README.md

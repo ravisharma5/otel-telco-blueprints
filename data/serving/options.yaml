@@ -310,6 +310,9 @@ options:
       - use_case: UC-BIZ-02
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM make room for them beside the Decision slot that labels each hold or escalation.
+      - use_case: UC-RES-01
+        roles: [classification, safety]
+        reason: FP8 builds of Classification and Safety make room for them beside the Decision slot that labels each parameter proposal.
     related: []
     excluded_slots: [decision]
 

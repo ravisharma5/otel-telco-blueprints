@@ -64,6 +64,13 @@ The Use cases page shows the same use cases as cards.
 | [UC-SEC-01](security/security-triage/README.md) | Security alert triage | Catalog entry |  |
 | [UC-SEC-02](security/signalling-attack-classification/README.md) | Signalling attack classification | Catalog entry |  |
 
+## Research
+
+| Recipe | Topic | Depth | Also covers |
+|---|---|---|---|
+| [UC-RES-01](research/kpi-rca-reasoning/README.md) | KPI root-cause reasoning | Catalog entry |  |
+| [UC-RES-02](research/mobility-failure-analysis/README.md) | 5G mobility failure analysis | Catalog entry |  |
+
 <!-- generated:catalog-by-domain end -->
 
 ## By platform blueprint
@@ -91,6 +98,8 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
@@ -116,6 +125,8 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
@@ -130,6 +141,7 @@ These recipes use [the Adaptation page](../platform/adaptation/README.md):
 - [UC-OPS-02 Signalling trace analysis](network-operations/signalling-trace-analysis/README.md)
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
@@ -153,6 +165,8 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
@@ -178,6 +192,7 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
@@ -202,6 +217,8 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
+- [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
@@ -220,6 +237,7 @@ These recipes use [the Action layer page](../platform/action-layer/README.md):
 - [UC-OPS-04 RAN and RF health checks](network-operations/ran-rf-health-checks/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 
 ### PB-08 Security, identity, and sandbox
