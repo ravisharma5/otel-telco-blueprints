@@ -2,7 +2,7 @@
 id: "UC-BIZ-02"
 type: "use-case"
 title: "Revenue assurance triage"
-doc_status: "draft"
+doc_status: done
 domain: "business-assurance"
 flagship: false
 depth: "entry"
@@ -12,6 +12,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains the cases your own fraud or revenue assurance model flags, and proposes a hold or an escalation for approval. Never scores a case itself. Depends on your detection model, called as a tool, and your billing records."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
+clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
   goal: "customers"

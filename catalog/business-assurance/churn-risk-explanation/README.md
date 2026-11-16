@@ -2,7 +2,7 @@
 id: "UC-BIZ-01"
 type: "use-case"
 title: "Churn risk explanation"
-doc_status: "draft"
+doc_status: done
 domain: "business-assurance"
 flagship: false
 depth: "entry"
@@ -12,6 +12,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains the churn score your own model computes for a customer, and proposes retention offers for approval. Never scores churn itself. Depends on your churn model, called as a tool, and your customer records."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-10"]
+clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
   goal: "customers"

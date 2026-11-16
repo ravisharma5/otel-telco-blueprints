@@ -2,7 +2,7 @@
 id: "UC-CARE-02"
 type: "use-case"
 title: "Broadband digital troubleshooting"
-doc_status: "draft"
+doc_status: done
 domain: "business-assurance"
 flagship: false
 depth: "entry"
@@ -12,6 +12,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Helps a care agent troubleshoot a home broadband fault from gateway diagnostics and care articles, and proposes remote fixes for approval. Never talks to the customer. Depends on your device management platform and the customer's consent."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-10"]
+clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
   goal: "customers"
@@ -46,7 +47,7 @@ placement:
 
 Wi-Fi interference, a failing gateway, and a line fault all reach the care desk as the same complaint about slow internet.
 Your device management platform can read gateway and Wi-Fi diagnostics, but care agents rarely have time to read them during a call.
-This entry reads them with the customer's consent, finds the matching care article, and suggests the next step to the care agent, who stays the one talking to the customer.
+This entry reads them with the customer's consent and finds the matching care article. It suggests the next step to the care agent, who stays the one talking to the customer.
 The KPIs are average handling time and first-contact resolution.
 Any gain is a target, measured against a shadow-stage baseline.
 
