@@ -118,7 +118,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Gap | What you add | Source |
 |---|---|---|
 | Fraud signal | Your own fraud or revenue assurance model, served and called as a tool, so the model scores and the LLM explains, as course 202 teaches | [Agent-school 202 Fraud Triage](https://github.com/open-experiments/agent-school/blob/30458bda61cdc1ea939ce7d1fe6b8d425ed2bbad/202-fraud-triage/README.md) |
-| Billing data | Billing, usage, and account records read through checked tools, because the card leaves operator records and BSS tooling out of training | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
+| Billing data | Billing, usage, and account records read through checked tools, because the card's training leaves out OSS/BSS workflow tooling | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | Hold and escalate | Every hold and escalation sent to an approver, because the card asks for human review in high-impact use | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#intended-use) |
 | Gate labels | A gate set of past cases labelled by your analysts, because the Decision label probabilities aren't calibrated for your workload | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | Language scope | Tests in every language your analysts read cases in, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |
@@ -154,7 +154,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 | # | Claim | Basis | Source |
 |---|---|---|---|
-| 1 | The 31B training leaves out operator customer and equipment configuration records and OSS/BSS tooling | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
+| 1 | The 31B training leaves out operator engineering artifacts, such as customer and equipment configuration records, and OSS/BSS workflow tooling | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | 2 | The tool-use training holds general examples only, and agentic use needs an external tool runtime with checked tool schemas and human review | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#tool-use-and-instruction-following) |
 | 3 | For high-impact operational use, deploy the 31B with retrieval, source attribution, validation checks, and human review | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#intended-use) |
 | 4 | The 31B targets English-language use, and all its quality claims are text-only | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |

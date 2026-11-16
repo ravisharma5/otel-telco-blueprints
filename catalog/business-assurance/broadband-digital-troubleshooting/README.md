@@ -120,7 +120,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Gap | What you add | Source |
 |---|---|---|
-| Device data | Gateway and Wi-Fi diagnostics from your device management platform, because the card leaves operator customer and equipment records out of training | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
+| Device data | Gateway and Wi-Fi configuration and diagnostics from your device management platform, because the card's training leaves out customer and equipment configuration records | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | Device tools | Read-only diagnostic tools with checked schemas over your TR-369 controller or current platform, because the card asks for an external tool runtime | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#tool-use-and-instruction-following) |
 | Consent | The customer's consent, or another lawful basis your data protection officer records, before each read, because TR-369 expects device data to reach only parties the user enabled | [TR-369 specification](https://usp.technology/specification/index.html) |
 | Care-agent scope | A care agent between every suggestion and the customer, with no customer-facing stage, because the card asks for human review in high-impact use | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#intended-use) |
@@ -157,7 +157,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 
 | # | Claim | Basis | Source |
 |---|---|---|---|
-| 1 | The 31B training leaves out operator customer and equipment configuration records and OSS/BSS tooling | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
+| 1 | The 31B training leaves out operator engineering artifacts, such as customer and equipment configuration records, and OSS/BSS workflow tooling | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | 2 | The tool-use training holds general examples only, and agentic use needs an external tool runtime with checked tool schemas and human review | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#tool-use-and-instruction-following) |
 | 3 | For high-impact operational use, deploy the 31B with retrieval, source attribution, validation checks, and human review | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#intended-use) |
 | 4 | The 31B targets English-language use, and all its quality claims are text-only | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |
