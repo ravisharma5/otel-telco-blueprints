@@ -2,7 +2,7 @@
 id: "UC-OPS-03"
 type: "use-case"
 title: "Core network root-cause analysis"
-doc_status: "draft"
+doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "recipe"
@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Finds the likely cause of a 5G core outage from network function logs, traces, and counters, and proposes a fix for approval. Never restarts or fails over a network function on its own. Depends on a Classification head retrained on your core fault taxonomy and on task evaluation with replayed incidents."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [101, 201, 402]
+clarity_reviewed: "2026-11-16"
 card:
   goal: "incidents"
   summary: "Correlates 5G core logs, traces, counters, and alarms to rank likely causes, writes an RCA note, and proposes fixes for approval."
@@ -44,8 +45,8 @@ placement:
 
 ## Problem and value
 
-An AMF, SMF, or UPF restart, an NRF or UDM that stops answering, or an impaired N2 or N3 interface can fail sessions across a region, and the cause hides in logs and signalling from several network functions.
-This recipe ranks likely causes, writes an RCA note to the incident, and proposes a fix for approval.
+When an AMF, SMF, or UPF restarts, an NRF or UDM stops answering, or an N2 or N3 interface degrades, sessions fail across a region, and the cause hides in the logs and signalling of several network functions.
+This recipe ranks likely causes, writes a root-cause analysis (RCA) note to the incident, and proposes a fix for approval.
 The KPI is mean time to identify; any gain is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures.
 
 ## How it works
@@ -99,7 +100,7 @@ PDU session establishment failures rise in one region, and a TMF642 alarm opens 
 
 Classification ranks an SMF fault first, ahead of a UPF fault, and Safety finds the heartbeat evidence sufficient. The agent sends the RCA note, the gate returns NOTIFY, and a notification job posts the note to the incident, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table shows.
 
-The agent then proposes restarting `smf-2` in `req-8812-1`. Fixes are at the recommend stage, so even if the label reads ACT, the outcome is REVIEW. The `approver` role signs off before the action layer runs the restart and its verification job.
+Another restart would not stop the heartbeat loss, so the agent proposes a failover from `smf-2` to its standby SMF set in `req-8812-1`. Fixes are at the recommend stage, so even if the label reads ACT, the outcome is REVIEW. The `approver` role signs off before the action layer runs the failover and its verification job.
 
 ## What you need
 
