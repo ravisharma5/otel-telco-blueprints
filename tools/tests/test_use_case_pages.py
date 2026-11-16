@@ -1,12 +1,23 @@
 """Use-case blueprint pages: shared checks and platform sync tests.
 
-Each shared check runs on every catalog/<domain>/<slug>/README.md. The sync
-tests read facts from the platform pages at run time (serving flags, the gate
-rule, the stage table, parameter names and owners, RACI rows) and compare each
-use-case page against them, so a recipe cannot drift from the platform page it
-copies. The "present" tests prove each source still parses today. The
-expected-pages guard fails if a listed page is lost or renamed. Catalog pages
-may set flagship to true or false; the front matter schema checks the field.
+Catalog pages come in two tiers, set by front-matter depth. A recipe is the
+full page: one Mermaid diagram, a worked example, deploy steps, and a
+verification table. An entry is one page: How it works and Deploy and verify
+are stubs, and What you need carries a "What you must add" table whose rows
+cite the Sources table, one of them the language scope from a model card.
+
+PAGES runs every content guard (roles, legal wording, Sources basis, the NOTIFY
+gate link, fictitious numbers, planning ids, parameters without values, the
+parameter and RACI sync) on both tiers. RECIPE_PAGES runs the structural
+recipe checks; ENTRY_PAGES runs the entry checks, and skips while no entry has
+landed (pyproject.toml sets empty_parameter_set_mark to skip). The entry checks
+also run today on the catalog-entry fixture through text helpers.
+
+The sync tests read facts from the platform pages at run time (serving flags,
+the gate rule, the stage table, parameter names and owners, RACI rows) and
+compare each use-case page against them, so a page cannot drift from the
+platform page it copies. The "present" tests prove each source still parses
+today. The expected-pages guard fails if a listed page is lost or renamed.
 """
 
 from __future__ import annotations
@@ -303,7 +314,102 @@ def flat(text: str) -> str:
     return re.sub(r"\s+", " ", text)
 
 
+def depth_of(path: Path) -> str | None:
+    """Front-matter depth: "recipe" or "entry"."""
+    return (front_matter(path) or {}).get("depth")
+
+
+ENTRY_FIXTURE = REPO_ROOT / "tools/tests/fixtures/valid/catalog-entry/README.md"
+NO_COURSE_SENTENCE = "None: no agent-school course covers this use case yet"
+ENTRY_STUBBED = ("How it works", "Deploy and verify")
+MUST_ADD_HEADER = ["Gap", "What you add", "Source"]
+MD_LINK = re.compile(r"\]\(([^)\s]+)\)")
+MODEL_CARD_URL = re.compile(r"^https://huggingface\.co/[\w.-]+/[\w.-]+(?:#[\w-]+)?$")
+
+
+def _raw_section(text: str, name: str) -> str | None:
+    """Raw markdown under "## <name>" in a page body, or None."""
+    m = re.search(rf"^## {re.escape(name)}[ \t]*$", text, re.M)
+    if not m:
+        return None
+    nxt = re.search(r"^## ", text[m.end() :], re.M)
+    return text[m.end() : m.end() + nxt.start()] if nxt else text[m.end() :]
+
+
+def entry_stub_problems(text: str) -> list[str]:
+    out = []
+    for name in ENTRY_STUBBED:
+        sec = _raw_section(text, name)
+        if sec is None or not sec.strip().startswith("_Stub:"):
+            out.append(f"{name} must start with '_Stub:' on an entry")
+    return out
+
+
+def entry_mermaid_problems(text: str) -> list[str]:
+    return ["an entry carries no Mermaid diagram"] if mermaid_fences(text) else []
+
+
+def must_add_table(text: str) -> list[list[str]] | None:
+    """The table under "### What you must add" in What you need, or None."""
+    need = _raw_section(text, "What you need") or ""
+    m = re.search(r"^### What you must add[ \t]*$", need, re.M)
+    if not m:
+        return None
+    found = tables(sections("## X\n" + need[m.end() :]).get("X", []))
+    return found[0] if found else None
+
+
+def sources_links(text: str) -> set[str]:
+    found = tables(sections(text).get("Sources", []))
+    if not found:
+        return set()
+    col = found[0][0].index("Source") if "Source" in found[0][0] else -1
+    return {link for row in found[0][1:] for link in MD_LINK.findall(row[col])}
+
+
+def must_add_problems(text: str) -> list[str]:
+    table = must_add_table(text)
+    if table is None:
+        return ["What you need has no 'What you must add' H3 with a table"]
+    if table[0] != MUST_ADD_HEADER:
+        return [f"What you must add header is {table[0]}, expected {MUST_ADD_HEADER}"]
+    out = []
+    if len(table) - 1 < 2:
+        out.append("What you must add needs at least 2 rows")
+    cited = sources_links(text)
+    for row in table[1:]:
+        links = MD_LINK.findall(row[2])
+        if not links:
+            out.append(f"What you must add row '{row[0]}' has no link in its Source cell")
+        for link in links:
+            if link not in cited:
+                out.append(f"What you must add row '{row[0]}' cites {link}, which is not in the Sources table")
+    return out
+
+
+def language_row_problems(text: str) -> list[str]:
+    table = must_add_table(text)
+    rows = [r for r in (table or [])[1:] if "language" in r[0].lower()]
+    if not rows:
+        return ["What you must add has no language scope row"]
+    if not any(MODEL_CARD_URL.match(link) for r in rows for link in MD_LINK.findall(r[2])):
+        return ["the language scope row must cite a huggingface.co model card"]
+    return []
+
+
+def entry_problems(text: str) -> list[str]:
+    """Every entry-only problem in a page body."""
+    return (
+        entry_stub_problems(text)
+        + entry_mermaid_problems(text)
+        + must_add_problems(text)
+        + language_row_problems(text)
+    )
+
+
 PAGES = pytest.mark.parametrize("path", use_case_pages(), ids=_id)
+RECIPE_PAGES = pytest.mark.parametrize("path", [p for p in use_case_pages() if depth_of(p) == "recipe"], ids=_id)
+ENTRY_PAGES = pytest.mark.parametrize("path", [p for p in use_case_pages() if depth_of(p) == "entry"], ids=_id)
 
 
 # ---------- shared checks ----------
@@ -337,7 +443,7 @@ def test_shared_front_matter(path):
     assert not PLANNING_ID_RE.search(str(fm.get("id", ""))), fm.get("id")
 
 
-@PAGES
+@RECIPE_PAGES
 def test_shared_one_mermaid_fence_in_how_it_works(path):
     assert len(mermaid_fences(body(path))) == 1
     assert len(mermaid_fences(section_text(path, "How it works"))) == 1
@@ -345,9 +451,9 @@ def test_shared_one_mermaid_fence_in_how_it_works(path):
 
 @PAGES
 def test_shared_mermaid_capability_names(path):
-    fence = mermaid_fences(body(path))[0]
-    assert PRODUCT_TERMS.findall(fence) == []
-    assert LAYER_CODE.findall(fence) == []
+    for fence in mermaid_fences(body(path)):
+        assert PRODUCT_TERMS.findall(fence) == []
+        assert LAYER_CODE.findall(fence) == []
 
 
 @PAGES
@@ -357,7 +463,7 @@ def test_shared_no_image_placeholder(path):
     assert "![" not in text
 
 
-@PAGES
+@RECIPE_PAGES
 def test_shared_worked_example(path):
     lines = section_text(path, "How it works").splitlines()
     assert any(ln.startswith("### Worked example:") for ln in lines)
@@ -487,7 +593,7 @@ def test_shared_runtime_adapter_rule(path):
             assert re.search(r"(?i)never|block", line), line
 
 
-@PAGES
+@RECIPE_PAGES
 def test_shared_deploy_steps_and_checks(path):
     assert len(_ordered_steps(section_text(path, "Deploy and verify"))) >= 3
     table = verification_table(path)
@@ -498,7 +604,7 @@ def test_shared_deploy_steps_and_checks(path):
         assert roles and all(r in ALLOWED_ROLES for r in roles), row
 
 
-@PAGES
+@RECIPE_PAGES
 def test_shared_deploy_verify_claims_no_results(path):
     assert "%" not in section_text(path, "Deploy and verify")
     for row in verification_table(path)[1:]:
@@ -516,9 +622,78 @@ def test_links_platform_blueprints_and_agent_school(path):
     linked = set(PLATFORM_LINK.findall(text))
     listed_slugs = {PB_SLUG[pb] for pb in listed}
     assert linked <= listed_slugs, sorted(linked - listed_slugs)
-    assert fm.get("agent_school"), "agent_school is empty"
-    assert ROADMAP_URL in section_text(path, "At a glance")
-    assert ROADMAP_URL in section_text(path, "Deploy and verify")
+    glance = section_text(path, "At a glance")
+    if not fm.get("agent_school"):
+        assert NO_COURSE_SENTENCE in glance, "agent_school is empty, so At a glance needs the no-course sentence"
+    assert ROADMAP_URL in glance
+    if depth_of(path) == "recipe":
+        assert ROADMAP_URL in section_text(path, "Deploy and verify")
+
+
+# ---------- entry-only checks ----------
+
+
+@ENTRY_PAGES
+def test_entry_stubbed_sections(path):
+    assert entry_stub_problems(body(path)) == []
+
+
+@ENTRY_PAGES
+def test_entry_no_mermaid(path):
+    assert entry_mermaid_problems(body(path)) == []
+
+
+@ENTRY_PAGES
+def test_entry_must_add_table(path):
+    assert must_add_problems(body(path)) == []
+
+
+@ENTRY_PAGES
+def test_entry_language_scope_row(path):
+    assert language_row_problems(body(path)) == []
+
+
+def test_entry_checks_pass_on_the_entry_fixture():
+    text = body(ENTRY_FIXTURE)
+    assert (front_matter(ENTRY_FIXTURE) or {}).get("depth") == "entry"
+    assert entry_problems(text) == []
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "problem"),
+    [
+        ("_Stub: fictional catalog entry; it has no worked example._", "1. A step.", "How it works"),
+        (
+            "_Stub: fictional catalog entry; it has no deploy steps._",
+            "Run the steps.",
+            "Deploy and verify",
+        ),
+        (
+            "_Stub: fictional catalog entry; it has no worked example._",
+            "_Stub: none._\n\n```mermaid\nflowchart TD\n  A[\"A\"] --> B[\"B\"]\n```",
+            "Mermaid",
+        ),
+        ("### What you must add", "### What else you need", "What you must add"),
+        ("| Gap | What you add | Source |", "| Gap | What you add | Link |", "What you must add"),
+        ("| [replay set](../../sources/replay.jsonl) |\n| Language", "| none |\n| Language", "no link"),
+        (
+            "| [replay set](../../sources/replay.jsonl) |\n| Language",
+            "| [other](https://example.invalid/x) |\n| Language",
+            "not in the Sources table",
+        ),
+        ("| Language scope |", "| Locale scope |", "language"),
+        (
+            "| [model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |\n\n## Governance",
+            "| [replay set](../../sources/replay.jsonl) |\n\n## Governance",
+            "model card",
+        ),
+    ],
+)
+def test_entry_checks_catch_broken_variants(old, new, problem):
+    text = body(ENTRY_FIXTURE)
+    assert old in text, old
+    problems = entry_problems(text.replace(old, new, 1))
+    assert any(problem in p for p in problems), problems
 
 
 # ---------- sync sources: each platform fact still parses ----------
@@ -737,7 +912,7 @@ def test_sync_gate_cell_rule_cases(cell, ok):
     assert gate_cell_ok(cell, platform_params()) is ok
 
 
-@PAGES
+@RECIPE_PAGES
 def test_sync_verification_checks_tie_to_gates(path):
     """Each check names one parameter (optionally with a ", ..." qualifier), or is
     one link to an evaluation page gate heading or acceptance ladder stage."""

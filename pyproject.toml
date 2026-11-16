@@ -26,6 +26,8 @@ package = false
 testpaths = ["tools/tests"]
 pythonpath = ["."]
 addopts = "-ra -m \"not site_output\""
+# An empty parametrization (ENTRY_PAGES before the first entry lands) skips.
+empty_parameter_set_mark = "skip"
 markers = [
     "site_output: reads built output (run make site or make explorer first)",
 ]

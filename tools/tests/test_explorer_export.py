@@ -20,7 +20,7 @@ import yaml
 from tools.bplint.markdown import parse_doc
 from tools.tests.conftest import REPO_ROOT
 from tools.tests.test_card_fields import EXPORTER_TABLE_HEADERS as CARD_TABLE_HEADERS
-from tools.tests.test_card_fields import flagship_pages, front_matter
+from tools.tests.test_card_fields import exported_pages, front_matter
 
 from tools.site import export_explorer as ex
 
@@ -60,7 +60,7 @@ def regional_states(data):
 
 
 def placed(uc_id, tier):
-    for path in flagship_pages():
+    for path in exported_pages():
         fm = front_matter(path)
         if fm["id"] == uc_id:
             return list(((fm.get("placement") or {}).get(tier) or {}).get("runs") or [])
@@ -155,12 +155,12 @@ def test_fp8_swap_never_grows_a_slot():
 # --- state matrix -----------------------------------------------------------
 
 
-def test_forty_states(data):
+def test_ten_states_per_use_case(data):
     states = list(all_states(data))
     setups = SETUPS["setups"]
-    assert len(data["use_cases"]) == len(flagship_pages())
-    assert len(states) == len(data["use_cases"]) * len(setups) * len(BATCH)
-    assert len(states) == 40
+    assert len(data["use_cases"]) == len(exported_pages())
+    assert len(setups) * len(BATCH) == 10
+    assert len(states) == len(exported_pages()) * len(setups) * len(BATCH)
     for uc in data["use_cases"]:
         assert list(uc["states"]) == [s["id"] for s in setups]
         for by_batch in uc["states"].values():
@@ -650,7 +650,7 @@ STAGES = {
 
 
 def test_counts_and_stage(data):
-    fms = {front_matter(p)["id"]: front_matter(p) for p in flagship_pages()}
+    fms = {front_matter(p)["id"]: front_matter(p) for p in exported_pages()}
     for uc in data["use_cases"]:
         fm = fms[uc["id"]]
         assert uc["counts"] == {
@@ -710,7 +710,7 @@ def test_missing_variant_fails(tmp_path):
 
 
 def test_published_only_and_unique_slugs(data):
-    ids = sorted(front_matter(p)["id"] for p in flagship_pages())
+    ids = sorted(front_matter(p)["id"] for p in exported_pages())
     assert sorted(uc["id"] for uc in data["use_cases"]) == ids
     slugs = [uc["slug"] for uc in data["use_cases"]]
     assert len(set(slugs)) == len(slugs)

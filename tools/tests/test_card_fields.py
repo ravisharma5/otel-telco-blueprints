@@ -289,12 +289,18 @@ VARIANTS = REPO_ROOT / "data/serving/slot-variants.yaml"
 SLOTS_HEADER = ["Slot", "Checkpoint", "Role", "Placement"]
 
 
-def flagship_pages():
+def exported_pages():
+    """Every listed use-case page, recipe or entry; the explorer exports them all."""
     return [REPO_ROOT / "catalog" / key / "README.md" for key in EXPECTED_USE_CASE_PAGES]
 
 
-FLAGSHIPS = pytest.mark.parametrize(
-    "path", flagship_pages(), ids=lambda p: "/".join(p.parent.parts[-2:])
+def flagships():
+    """Exported pages with flagship: true."""
+    return [p for p in exported_pages() if (front_matter(p) or {}).get("flagship") is True]
+
+
+EXPORTED = pytest.mark.parametrize(
+    "path", exported_pages(), ids=lambda p: "/".join(p.parent.parts[-2:])
 )
 
 
@@ -358,8 +364,8 @@ def section_tables(path, name):
     return tables(sections(body(path)).get(name, []))
 
 
-@FLAGSHIPS
-def test_flagships_carry_card_and_placement(path):
+@EXPORTED
+def test_exported_pages_carry_card_and_placement(path):
     fm = front_matter(path) or {}
     assert isinstance(fm.get("card"), dict), f"{path}: no card in front matter"
     placement = fm.get("placement")
@@ -367,7 +373,7 @@ def test_flagships_carry_card_and_placement(path):
     assert set(placement) == set(TIERS), f"{path}: placement must list all three tiers"
 
 
-@FLAGSHIPS
+@EXPORTED
 def test_placement_matches_page(path):
     fm_map = placement_from_front_matter(path)
     table = slots_table(path)
@@ -379,7 +385,7 @@ def test_placement_matches_page(path):
         assert fm_map == placement_from_bullet(bullet)
 
 
-@FLAGSHIPS
+@EXPORTED
 def test_placed_roles_have_variants(path):
     roles = {v["role"] for v in yaml.safe_load(VARIANTS.read_text(encoding="utf-8"))["variants"]}
     placed = set().union(*placement_from_front_matter(path).values())
@@ -388,7 +394,7 @@ def test_placed_roles_have_variants(path):
 
 
 def test_card_goals_and_summaries_unique():
-    cards = {p: (front_matter(p) or {}).get("card") or {} for p in flagship_pages()}
+    cards = {p: (front_matter(p) or {}).get("card") or {} for p in exported_pages()}
     goals = [c.get("goal") for c in cards.values()]
     summaries = [c.get("summary") for c in cards.values()]
     assert all(goals) and len(set(goals)) == len(goals)
@@ -397,8 +403,8 @@ def test_card_goals_and_summaries_unique():
         assert card["summary"].strip() != (front_matter(path) or {}).get("one_liner", "").strip()
 
 
-@FLAGSHIPS
-def test_flagship_tables_exporter_shape(path):
+@EXPORTED
+def test_exported_tables_exporter_shape(path):
     need = section_tables(path, "What you need")
     gov = section_tables(path, "Governance")
 
