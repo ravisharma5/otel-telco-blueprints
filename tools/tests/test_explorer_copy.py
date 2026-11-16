@@ -196,6 +196,38 @@ def test_alias_resolution_bites():
 GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
 
 
+# Phrases that promise a person approves every change before it happens.
+APPROVES_EVERY_CHANGE = re.compile(
+    r"(?i)approves? before anything changes"
+    r"|(?:person|human|engineer)\w*[^.]{0,40}approv\w*[^.]{0,30}before (?:anything|any change)"
+    r"|approv\w* (?:of )?(?:every|each|all) (?:change|action)s?"
+    r"|(?:every|each|all) (?:change|action)s?[^.]{0,40}(?:needs?|waits? for|requires?) (?:a person|approval|a human)"
+)
+
+
+def test_promise_detector_catches_the_old_wording():
+    assert APPROVES_EVERY_CHANGE.search("draft fixes that a person approves before anything changes on the network")
+    assert APPROVES_EVERY_CHANGE.search("every change needs a person's approval")
+    assert not APPROVES_EVERY_CHANGE.search("Changes run only within the policy you set, and higher-risk ones need a person's approval.")
+
+
+def test_goal_tile_never_overstates_approval():
+    """A tile whose use cases can act within policy must not promise approval for every change."""
+    from tools.tests.test_use_case_pages import use_case_pages
+    from tools.tests.test_reference_pages import front_matter
+
+    tiles = _copy()["home"]["goals"]["tiles"]
+    acting = {}
+    for path in use_case_pages():
+        fm = front_matter(path) or {}
+        if fm.get("autonomy_ceiling") == "act-within-policy":
+            acting.setdefault(fm["card"]["goal"], []).append(fm["id"])
+    assert acting, "expected at least one act-within-policy use case"
+    for goal, ids in acting.items():
+        body = tiles[goal]["notes"]["body"]
+        assert not APPROVES_EVERY_CHANGE.search(body), (goal, ids, body)
+
+
 def test_goal_tile_copy():
     """Every goal id has a tile title (8 words) and note (25 words); no extra tiles."""
     ids = yaml.safe_load(GOALS_FILE.read_text(encoding="utf-8"))["goals"]

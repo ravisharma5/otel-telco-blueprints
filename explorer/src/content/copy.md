@@ -99,7 +99,7 @@ home:
         headings:
           title: Resolve incidents faster
         notes:
-          body: Triage alarms, find root causes, and draft fixes that a person approves before anything changes on the network.
+          body: Triage alarms, find root causes, and draft fixes. Changes run only within the policy you set, and higher-risk ones need a person's approval.
       sla-energy:
         headings:
           title: Assure SLAs and save energy
