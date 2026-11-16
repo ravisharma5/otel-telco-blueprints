@@ -141,6 +141,8 @@ def _depth_findings(doc, fm) -> list[Finding]:
 
 
 _RETRAIN_RUNGS = {"head-retrain", "lora-if-gap"}
+# No-model-change rungs whose rendered text says the page retrieves; skills is the one without retrieval.
+_RETRIEVAL_RUNGS = {"retrieval", "retrieval-and-skills"}
 
 
 def _adaptation_messages(fm) -> list[str]:
@@ -173,6 +175,10 @@ def _adaptation_messages(fm) -> list[str]:
         out.append("a rag-corpus bring item needs the embedding slot, and the embedding slot needs one")
     if has_bring and ("tool-contract" in mechs) != ("tool-contracts" in expertise):
         out.append("expertise 'tool-contracts' and a tool-contract bring item must go together")
+    if rung in _RETRIEVAL_RUNGS and "embedding" not in slots:
+        out.append(f"rung '{rung}' names retrieval, so the embedding slot must be in otel_slots")
+    if rung == "skills" and "embedding" in slots:
+        out.append("rung 'skills' does no retrieval; with the embedding slot use 'retrieval-and-skills'")
     if "lora-data" in mechs and rung != "lora-if-gap":
         out.append(f"a lora-data bring item needs rung 'lora-if-gap', found '{rung}'")
     if "golden-set" not in expertise:

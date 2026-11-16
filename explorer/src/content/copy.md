@@ -42,7 +42,8 @@ depth:
 adaptation:
   rung:
     retrieval: "No model change: retrieval only"
-    skills: "No model change: retrieval and skills"
+    skills: "No model change: skills and tool contracts"
+    retrieval-and-skills: "No model change: retrieval and skills"
     head-retrain: Retrain the Classification head
     lora-if-gap: "Retrain the head; LoRA only if a gap remains"
   change:

@@ -7,7 +7,7 @@ domain: "business-assurance"
 flagship: false
 depth: "entry"
 adaptation:
-  rung: "skills"
+  rung: "retrieval-and-skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
   bring:
     - {item: "Care articles with usage-rights entries", domains: ["customer-care"], mechanism: "rag-corpus"}

@@ -123,7 +123,7 @@ def test_use_case_adaptation_is_required():
     assert not v.is_valid({k: x for k, x in USE_CASE.items() if k != "adaptation"})
 
 
-@pytest.mark.parametrize("rung", ["retrieval", "skills", "head-retrain", "lora-if-gap"])
+@pytest.mark.parametrize("rung", ["retrieval", "skills", "retrieval-and-skills", "head-retrain", "lora-if-gap"])
 def test_use_case_adaptation_rungs_pass(rung):
     ad = dict(USE_CASE["adaptation"], rung=rung)
     assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, adaptation=ad)) == []

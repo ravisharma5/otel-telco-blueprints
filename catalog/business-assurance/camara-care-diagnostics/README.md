@@ -7,7 +7,7 @@ domain: "business-assurance"
 flagship: true
 depth: "recipe"
 adaptation:
-  rung: "skills"
+  rung: "retrieval-and-skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
   bring:
     - {item: "Care knowledge base with usage rights", domains: ["customer-care"], mechanism: "rag-corpus"}

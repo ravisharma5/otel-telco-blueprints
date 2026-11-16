@@ -131,7 +131,7 @@ export interface Setup {
 }
 
 export interface Adaptation {
-  rung: 'retrieval' | 'skills' | 'head-retrain' | 'lora-if-gap';
+  rung: 'retrieval' | 'skills' | 'retrieval-and-skills' | 'head-retrain' | 'lora-if-gap';
   change: 'none' | 'retrain';
   rung_label: string;
   expertise: { id: string; label: string }[];

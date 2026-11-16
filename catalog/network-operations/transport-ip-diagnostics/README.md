@@ -7,7 +7,7 @@ domain: "network-operations"
 flagship: false
 depth: "entry"
 adaptation:
-  rung: "skills"
+  rung: "retrieval-and-skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
   bring:
     - {item: "IETF RFCs you run and vendor NOS guides", domains: ["transport-ip"], mechanism: "rag-corpus"}

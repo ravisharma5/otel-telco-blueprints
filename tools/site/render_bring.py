@@ -48,12 +48,21 @@ SKIPPED_DOMAINS = {"demo"}
 PB03_LINK = "../../../platform/adaptation/README.md"
 PB11_LINK = "../../../platform/bring-your-own-data/README.md"
 
-RUNG_ORDER = ["retrieval", "skills", "head-retrain", "lora-if-gap"]
+RUNG_ORDER = ["retrieval", "skills", "retrieval-and-skills", "head-retrain", "lora-if-gap"]
 CHANGE_ORDER = ["none", "retrain"]
-CHANGE_OF_RUNG = {"retrieval": "none", "skills": "none", "head-retrain": "retrain", "lora-if-gap": "retrain"}
+CHANGE_OF_RUNG = {
+    "retrieval": "none",
+    "skills": "none",
+    "retrieval-and-skills": "none",
+    "head-retrain": "retrain",
+    "lora-if-gap": "retrain",
+}
+# A rung that names retrieval needs the embedding slot; skills is the rung without
+# it (bplint AD001), so no label claims retrieval a page does not do.
 RUNG_LABELS = {
     "retrieval": "No model change: retrieval only",
-    "skills": "No model change: retrieval and skills",
+    "skills": "No model change: skills and tool contracts",
+    "retrieval-and-skills": "No model change: retrieval and skills",
     "head-retrain": "Retrain the Classification head",
     "lora-if-gap": "Retrain the head; LoRA only if a gap remains",
 }
@@ -68,7 +77,8 @@ EXPERTISE_LABELS = {
 }
 RUNG_PAGE_TEXT = {
     "retrieval": "No model change: retrieval over your corpus",
-    "skills": "No model change: retrieval, a skill per role, and a capability manifest per tool",
+    "skills": "No model change: a skill per role and a capability manifest per tool",
+    "retrieval-and-skills": "No model change: retrieval, a skill per role, and a capability manifest per tool",
     "head-retrain": "Retrain the Classification head on your taxonomy; no other model changes",
     "lora-if-gap": (
         "Retrain the Classification head on your taxonomy; train a LoRA adapter only if a measured gap "

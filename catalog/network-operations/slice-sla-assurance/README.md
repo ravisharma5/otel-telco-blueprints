@@ -7,7 +7,7 @@ domain: "network-operations"
 flagship: false
 depth: "recipe"
 adaptation:
-  rung: "skills"
+  rung: "retrieval-and-skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
   bring:
     - {item: "SLA documents, runbooks, and past breach reports", domains: ["oss-bss"], mechanism: "rag-corpus"}

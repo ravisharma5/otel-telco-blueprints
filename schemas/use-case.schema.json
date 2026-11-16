@@ -54,8 +54,8 @@
       "required": ["rung", "expertise", "bring"],
       "properties": {
         "rung": {
-          "description": "retrieval and skills change no model; head-retrain retrains the Classification head; lora-if-gap also trains a LoRA adapter, only if a measured gap remains after retrieval and skills.",
-          "enum": ["retrieval", "skills", "head-retrain", "lora-if-gap"]
+          "description": "retrieval, skills, and retrieval-and-skills change no model; a rung that names retrieval needs the embedding slot, and skills is the rung without it. head-retrain retrains the Classification head; lora-if-gap also trains a LoRA adapter, only if a measured gap remains after retrieval and skills.",
+          "enum": ["retrieval", "skills", "retrieval-and-skills", "head-retrain", "lora-if-gap"]
         },
         "expertise": {
           "type": "array",

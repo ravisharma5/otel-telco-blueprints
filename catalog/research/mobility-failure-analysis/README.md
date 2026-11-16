@@ -7,7 +7,7 @@ domain: "research"
 flagship: false
 depth: "entry"
 adaptation:
-  rung: "skills"
+  rung: "retrieval-and-skills"
   expertise: ["golden-set", "tool-contracts", "corpus"]
   bring:
     - {item: "Mobility procedure specifications with usage rights", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}

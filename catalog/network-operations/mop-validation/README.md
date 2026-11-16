@@ -7,7 +7,7 @@ domain: "network-operations"
 flagship: false
 depth: "recipe"
 adaptation:
-  rung: "skills"
+  rung: "retrieval-and-skills"
   expertise: ["golden-set", "gate-labels", "tool-contracts", "corpus"]
   bring:
     - {item: "Vendor documents, runbooks, and past MOPs", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "rag-corpus"}

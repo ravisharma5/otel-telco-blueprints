@@ -397,6 +397,29 @@ def test_rag_corpus_item_needs_embedding(tmp_path):
     assert "rag-corpus" in ad001(tmp_path, use_case_fm(adaptation=ad))
 
 
+EMBED_SLOTS = ["llm", "embedding"]
+EMBED_PLACEMENT = {"regional": {"runs": ["llm-small", "embedding"], "note": ""}}
+
+
+def embed_fm(rung):
+    ad = {
+        "rung": rung,
+        "expertise": ["golden-set", "tool-contracts", "corpus"],
+        "bring": UC_ADAPTATION["bring"] + [_item("rag-corpus")],
+    }
+    return use_case_fm(otel_slots=EMBED_SLOTS, placement=EMBED_PLACEMENT, adaptation=ad)
+
+
+def test_rung_names_retrieval_only_with_the_embedding_slot(tmp_path):
+    # skills alone does no retrieval, so it cannot sit on a page with the embedding slot
+    assert "retrieval" in ad001(tmp_path, embed_fm("skills"))
+    assert lint(tmp_path, render(embed_fm("retrieval-and-skills"), use_case_sections())) == []
+    assert lint(tmp_path, render(embed_fm("retrieval"), use_case_sections())) == []
+    # a rung that names retrieval needs the embedding slot
+    for rung in ("retrieval-and-skills", "retrieval"):
+        assert "retrieval" in ad001(tmp_path, use_case_fm(adaptation=dict(UC_ADAPTATION, rung=rung)))
+
+
 def test_tool_contracts_expertise_needs_a_tool_contract_item(tmp_path):
     ad = dict(UC_ADAPTATION, bring=[_item("skill-manifest")])
     assert "tool-contract" in ad001(tmp_path, use_case_fm(adaptation=ad))

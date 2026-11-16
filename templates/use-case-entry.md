@@ -7,7 +7,7 @@ domain: "network-operations"  # standards-knowledge | network-software | network
 flagship: false  # a catalog entry is never a flagship
 depth: "entry"  # entry = one page (Page budget: 550 prose words); How it works and Deploy and verify stay stubs
 adaptation:  # required; how far up the adaptation ladder (PB-03) and what the operator brings (PB-11); bplint AD001 checks it against otel_slots
-  rung: "skills"  # retrieval | skills (no model change) | head-retrain (Classification slot) | lora-if-gap (head retrain plus LoRA only if a measured gap remains)
+  rung: "skills"  # retrieval (needs embedding) | skills (no embedding) | retrieval-and-skills (needs embedding); these three change no model | head-retrain (Classification slot) | lora-if-gap (head retrain plus LoRA only if a measured gap remains)
   expertise: ["golden-set", "tool-contracts"]  # taxonomy (iff classification) | golden-set (always) | gate-labels (iff decision) | tool-contracts (iff a tool-contract item) | corpus (iff embedding)
   bring:  # 3 to 8 items; item: 60 characters or fewer; owner and matrix row come from PB-11
     - {item: "<Read-only tool contracts>", domains: ["transport-ip"], mechanism: "tool-contract"}  # domains: ran | vran-oran | core-cnf | vnf | transport-ip | oss-bss | customer-care

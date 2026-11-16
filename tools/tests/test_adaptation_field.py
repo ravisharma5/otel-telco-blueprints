@@ -41,7 +41,7 @@ RETRAIN_HEAD = re.compile(
 )
 # A model-card fact about the OTel rerankers, not an operator fine-tune.
 CARD_FACT = re.compile(r"(?i)one-label head|full fine-tune of qwen3")
-EXPECTED_COUNTS = {"retrieval": 6, "skills": 11, "head-retrain": 8, "lora-if-gap": 1}
+EXPECTED_COUNTS = {"retrieval": 6, "skills": 5, "retrieval-and-skills": 6, "head-retrain": 8, "lora-if-gap": 1}
 
 
 def _ad(path) -> dict:
@@ -90,7 +90,7 @@ def test_no_lora_below_the_rung(path):
 
 @PAGES
 def test_no_model_change_pages_name_no_retrain(path):
-    if _ad(path).get("rung") not in {"retrieval", "skills"}:
+    if _ad(path).get("rung") not in {"retrieval", "skills", "retrieval-and-skills"}:
         return
     for line in _no_url(path).splitlines():
         assert not re.search(r"(?i)retrain", line), line
@@ -117,6 +117,32 @@ def test_expertise_follows_slots(path):
     assert ("gate-labels" in exp) == ("decision" in slots)
     assert ("corpus" in exp) == ("embedding" in slots)
     assert "golden-set" in exp
+
+
+@PAGES
+def test_rung_text_names_retrieval_only_with_the_embedding_slot(path):
+    """The generated rung text, the proposal row, and the explorer label say retrieval only when the page retrieves."""
+    from tools.site.render_bring import RUNG_PAGE_TEXT
+
+    retrieves = "embedding" in _slots(path)
+    m = BLOCK.search(body(path))
+    assert m, "no generated block"
+    summary = next(ln for ln in m.group(1).splitlines() if ln.startswith("| ") and not ln.startswith("| Model change |"))
+    model_change = summary.strip().strip("|").split("|")[0]
+    rung = _ad(path).get("rung")
+    link = "../catalog/" + page_key(path) + "/README.md)"
+    proposal = (PB11.parents[2] / "proposal/index.md").read_text(encoding="utf-8")
+    row = next(ln for ln in proposal.splitlines() if ln.startswith("| [") and link in ln and "You bring:" in ln)
+    bring_cell = row.strip().strip("|").split("|")[-1].split(". You bring:")[0]
+    for text in (model_change, RUNG_LABELS[rung], bring_cell):
+        # "after retrieval and skills" is the LoRA rule on the ladder, not a claim that this page retrieves
+        claim = text.split("after retrieval")[0]
+        assert ("retrieval" in claim.lower()) == retrieves or rung in {"head-retrain", "lora-if-gap"}, (
+            rung,
+            sorted(_slots(path)),
+            text,
+        )
+    assert RUNG_PAGE_TEXT[rung].split(":")[0] in model_change
 
 
 def test_rung_counts():
