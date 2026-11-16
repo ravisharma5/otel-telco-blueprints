@@ -98,6 +98,8 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-operations/ran-rf-health-checks": "UC-OPS-04",
     "network-operations/transport-ip-diagnostics": "UC-OPS-08",
     "network-operations/cross-domain-oss-correlation": "UC-OPS-09",
+    "agentic-operations/router-core-read-only-ops": "UC-AGOPS-02",
+    "agentic-operations/policy-following-ops-agents": "UC-AGOPS-03",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -175,6 +177,38 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [301, 402],
         "goal": "incidents",
     },
+    "agentic-operations/router-core-read-only-ops": {
+        "id": "UC-AGOPS-02",
+        "slots": {"llm", "decision", "safety"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [101, 401],
+        "goal": "incidents",
+    },
+    "agentic-operations/policy-following-ops-agents": {
+        "id": "UC-AGOPS-03",
+        "slots": {"llm", "decision", "safety"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [301, 303, 401],
+        "goal": "change",
+    },
+    "security/security-triage": {
+        "id": "UC-SEC-01",
+        "slots": {"classification", "safety", "decision", "llm"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [],
+        "goal": "secure",
+    },
+    "security/signalling-attack-classification": {
+        "id": "UC-SEC-02",
+        "slots": {"classification", "safety", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [],
+        "goal": "secure",
+    },
 }
 
 # Parameters a use case may name that no platform page defines
@@ -184,6 +218,7 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     "standards-knowledge/grounded-knowledge-assistant": {"Decision routing threshold": "Model owner"},
     "business-assurance/camara-care-diagnostics": {"Decision routing threshold": "Model owner"},
     "standards-knowledge/spec-summarisation": {"Decision routing threshold": "Model owner"},
+    "agentic-operations/router-core-read-only-ops": {"Decision routing threshold": "Model owner"},
 }
 
 # RACI activities a use case may name that no platform page defines

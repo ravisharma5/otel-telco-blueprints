@@ -289,6 +289,12 @@ options:
       - use_case: UC-OPS-09
         roles: [classification, safety]
         reason: FP8 builds of Classification and Safety make room for retrieval and the Decision slot while correlation runs at the regional site.
+      - use_case: UC-AGOPS-03
+        roles: [safety]
+        reason: An FP8 build of Safety makes room for it beside the Decision slot that labels each change proposal.
+      - use_case: UC-AGOPS-02
+        roles: [safety, llm-small]
+        reason: FP8 builds of Safety and the small LLM make room for them beside the Decision slot that routes each question.
     related: []
     excluded_slots: [decision]
 

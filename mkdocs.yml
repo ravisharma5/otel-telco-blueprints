@@ -104,6 +104,8 @@ nav:
           - Cross-domain OSS correlation: catalog/network-operations/cross-domain-oss-correlation/README.md
       - Agentic operations:
           - Governed closed-loop incident handling: catalog/agentic-operations/closed-loop-incident-handling/README.md
+          - Read-only router and 5G core operations: catalog/agentic-operations/router-core-read-only-ops/README.md
+          - Policy-following operations agents: catalog/agentic-operations/policy-following-ops-agents/README.md
       - Business assurance:
           - CAMARA customer-care diagnostics: catalog/business-assurance/camara-care-diagnostics/README.md
   - Platform:
