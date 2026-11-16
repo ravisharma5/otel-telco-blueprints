@@ -14,11 +14,17 @@ tools/tests/test_proposal.py fails when the stored digest differs from the
 recomputed one, so any Sources change after the re-check fails CI until the
 re-check is redone and the stamp rewritten.
 
+The stamp only moves with evidence. --write needs --checked, and when the
+digest or the date changes it needs --recheck-report files whose recorded
+digest matches the new one: a full re-check, plus any failures-only re-runs,
+with no URL still failing and every changed card revision acknowledged with
+--card MODEL=SHA. --recheck exits 1 while any URL fails or a card changed.
+
 Usage:
     python -m tools.site.facts --urls                 # print every source URL
     python -m tools.site.facts --digest               # print the digest
     python -m tools.site.facts --check                # exit 1 if the stamp is stale
-    python -m tools.site.facts --write [--checked YYYY-MM-DD] [--card MODEL=SHA ...]
+    python -m tools.site.facts --write --checked YYYY-MM-DD --recheck-report PATH [...] [--card MODEL=SHA ...]
     python -m tools.site.facts --recheck --report PATH [--only PATH]
 
 --recheck opens the network: it fetches every URL (3 attempts with backoff on a
@@ -32,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import datetime
 import hashlib
 import json
 import re
@@ -69,9 +76,10 @@ CITED_REVISIONS = {
     "OTel-2.0-Decision-26B-A4B-4bit": "7ff608e3",
 }
 FACTS_HEADER = (
-    "# Facts stamp. Written by `uv run python -m tools.site.facts --write` after the\n"
-    "# source re-check; tools/tests/test_proposal.py fails when sources_digest no\n"
-    "# longer matches the Sources tables, serving-data URLs, and extra_urls.\n"
+    "# Facts stamp. Written by `uv run python -m tools.site.facts --write --checked <date>\n"
+    "# --recheck-report <report>` after the source re-check; tools/tests/test_proposal.py\n"
+    "# fails when sources_digest no longer matches the Sources tables, serving-data URLs,\n"
+    "# and extra_urls.\n"
 )
 
 
@@ -302,10 +310,93 @@ def triage_rows(results, card_changes) -> list[tuple[str, str, str]]:
 # ---- facts file ----------------------------------------------------------
 
 
-def write_facts(root: Path, checked: str | None = None, cards: dict | None = None) -> dict:
+class StampRefused(SystemExit):
+    """--write refused: the new stamp is not backed by a clean re-check."""
+
+    def __init__(self, msg: str):
+        super().__init__(f"facts: {msg}")
+
+
+@dataclass
+class Report:
+    digest: str | None
+    scope: str | None
+    checked: dict[str, bool]  # url -> passed
+    card_changes: dict[str, str]  # model name -> current short sha
+
+
+def read_report(path: Path) -> Report:
+    digest = scope = None
+    checked: dict[str, bool] = {}
+    cards: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines()[1:]:
+        parts = line.split("\t")
+        if parts[0] == "digest" and len(parts) >= 3:
+            digest, scope = parts[1], parts[2]
+        elif parts[0] == "checked" and len(parts) >= 3:
+            checked[parts[1]] = parts[2] == "ok"
+        elif parts[0] == "changed card revision" and len(parts) >= 3:
+            m = re.search(r"now (\S+)", parts[2])
+            if m:
+                cards[parts[1]] = m.group(1)
+    return Report(digest, scope, checked, cards)
+
+
+def _require_evidence(root: Path, digest: str, reports: list[Path], cards: dict) -> None:
+    """Refuse unless the reports show a clean re-check of the current sources."""
+    if not reports:
+        raise StampRefused(
+            "the digest or check date changes, so pass --recheck-report with the report of a "
+            "re-check run on the current sources (python -m tools.site.facts --recheck --report PATH)"
+        )
+    parsed = [(p, read_report(p)) for p in reports]
+    for path, rep in parsed:
+        if rep.digest != digest:
+            raise StampRefused(
+                f"{path} was written for digest {rep.digest}, not the current {digest}; re-run the re-check"
+            )
+    if not any(rep.scope == "all" for _, rep in parsed):
+        raise StampRefused("no full re-check report; --only re-runs cannot stand alone")
+    status: dict[str, bool] = {}
+    for _, rep in parsed:  # later reports (failures-only re-runs) override earlier ones
+        status.update(rep.checked)
+    missing = [u for u in all_urls(root) if u not in status]
+    if missing:
+        raise StampRefused(f"{len(missing)} URLs were not re-checked, e.g. {missing[0]}")
+    failing = sorted(u for u, ok in status.items() if not ok)
+    if failing:
+        raise StampRefused(f"{len(failing)} URLs still fail, e.g. {failing[0]}; fix or drop them, then re-check")
+    changed = {m: sha for _, rep in parsed for m, sha in rep.card_changes.items()}
+    unacked = sorted(m for m, sha in changed.items() if not str(cards.get(m, "")).startswith(sha[:8]))
+    if unacked:
+        raise StampRefused(
+            f"card revision changed for {', '.join(unacked)}; re-read the card and pass --card MODEL=SHA"
+        )
+
+
+def write_facts(
+    root: Path,
+    checked: str,
+    cards: dict | None = None,
+    reports: list[Path] | None = None,
+    today: datetime.date | None = None,
+) -> dict:
+    """Rewrite the stamp. Refuses (StampRefused) unless a clean re-check backs it."""
     data = _load_facts(root)
-    data["checked"] = checked if checked is not None else data.get("checked", "")
-    data["sources_digest"] = sources_digest(root)
+    try:
+        when = datetime.date.fromisoformat(checked or "")
+    except ValueError:
+        raise StampRefused(f"--checked must be a date YYYY-MM-DD, got {checked!r}") from None
+    if when > (today or datetime.date.today()):
+        raise StampRefused(f"--checked {checked} is in the future")
+    stored_checked = str(data.get("checked") or "")
+    if stored_checked and when < datetime.date.fromisoformat(stored_checked):
+        raise StampRefused(f"--checked {checked} is older than the stored check date {stored_checked}")
+    digest = sources_digest(root)
+    if digest != data.get("sources_digest") or checked != stored_checked or cards:
+        _require_evidence(root, digest, list(reports or []), cards or {})
+    data["checked"] = checked
+    data["sources_digest"] = digest
     data["url_count"] = len(all_urls(root))
     merged = dict(data.get("card_revisions") or {})
     merged.update(cards or {})
@@ -335,13 +426,19 @@ def _read_report_urls(path: Path) -> list[str]:
     return urls
 
 
-def recheck(root: Path, report: Path, only: Path | None = None) -> int:
+def recheck(root: Path, report: Path, only: Path | None = None, fetch=None, fetch_json=None) -> int:
+    """Re-check every URL (or a previous report's failures) and write the report.
+
+    The report records the digest it was run against, its scope, and every URL
+    with its result, so --write can tie the stamp to it. Returns 1 while any
+    URL still fails or a card revision changed, else 0.
+    """
     urls = _read_report_urls(only) if only else all_urls(root)
-    results = check_urls(urls, workers=8)
+    results = check_urls(urls, workers=8, fetch=fetch)
     repos = [] if only else linked_card_repos(root)
     baseline = {**CITED_REVISIONS, **(_load_facts(root).get("card_revisions") or {})}
     # Keyed by model name (the part after the owner), as in data/facts-check.yaml.
-    current = {r.split("/", 1)[1]: sha for r, sha in card_revisions(repos).items()}
+    current = {r.split("/", 1)[1]: sha for r, sha in card_revisions(repos, fetch_json=fetch_json).items()}
     changes = {
         repo: (baseline[repo], sha)
         for repo, sha in current.items()
@@ -351,6 +448,8 @@ def recheck(root: Path, report: Path, only: Path | None = None) -> int:
     report.parent.mkdir(parents=True, exist_ok=True)
     out = ["kind\turl\tdetail"] + ["\t".join(r) for r in rows]
     out += [f"card\t{repo}\t{sha}" for repo, sha in sorted(current.items())]
+    out += [f"checked\t{r.url}\t{'ok' if r.ok else 'fail'}" for r in results]
+    out.append(f"digest\t{sources_digest(root)}\t{'only' if only else 'all'}")
     report.write_text("\n".join(out) + "\n", encoding="utf-8")
     passed = sum(r.ok for r in results)
     retried = sum(r.attempts > 1 for r in results)
@@ -359,7 +458,7 @@ def recheck(root: Path, report: Path, only: Path | None = None) -> int:
         f"still failing {len(results) - passed}; cross-host {sum(r.host_changed for r in results)}; "
         f"cards {len(current)}; changed cards {len(changes)}; report {report}"
     )
-    return 0
+    return 1 if len(results) - passed > 0 or changes else 0
 
 
 def main(argv=None) -> int:
@@ -372,7 +471,14 @@ def main(argv=None) -> int:
     mode.add_argument("--recheck", action="store_true", help="network re-check (not in CI)")
     ap.add_argument("--report", type=Path, help="TSV triage report path (with --recheck)")
     ap.add_argument("--only", type=Path, help="re-check only the URLs in a previous report")
-    ap.add_argument("--checked", help="check date YYYY-MM-DD (with --write)")
+    ap.add_argument("--checked", help="check date YYYY-MM-DD (required with --write)")
+    ap.add_argument(
+        "--recheck-report",
+        type=Path,
+        action="append",
+        default=[],
+        help="report from --recheck run on the current sources (with --write; repeat for --only re-runs, in order)",
+    )
     ap.add_argument("--card", action="append", default=[], help="MODEL=SHA (with --write)")
     args = ap.parse_args(argv)
 
@@ -384,12 +490,14 @@ def main(argv=None) -> int:
         stored = _load_facts(ROOT).get("sources_digest")
         now = sources_digest(ROOT)
         if stored != now:
-            print(f"facts: stale stamp (stored {stored}, now {now}); redo the re-check")
+            print(f"facts: stale stamp (stored {stored}, now {now}); redo the re-check, then --write with its report")
             return 1
         print(f"facts: stamp current ({now})")
     elif args.write:
+        if not args.checked:
+            ap.error("--write needs --checked YYYY-MM-DD, the date the sources were re-opened")
         cards = dict(c.split("=", 1) for c in args.card)
-        data = write_facts(ROOT, args.checked, cards)
+        data = write_facts(ROOT, args.checked, cards, args.recheck_report)
         print(f"facts: wrote {FACTS_FILE} ({data['url_count']} URLs, {data['sources_digest']})")
     else:
         if not args.report:
