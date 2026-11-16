@@ -13,7 +13,7 @@ one_liner: "Answers fictional widget questions and only informs. Needs an LLM sl
 platform_blueprints: ["PB-99"]
 agent_school: []
 card:
-  goal: "Answer fictional widget questions faster"
+  goal: "answer"
   summary: "Answers fictional widget questions from one demo corpus and takes no action."
   outcome: "Fictional engineers stop looking up widget facts by hand."
   audience: "Fictional demo engineers and their business owner"

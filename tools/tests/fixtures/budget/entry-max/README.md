@@ -14,7 +14,7 @@ one_liner: "Triages fictional widget faults and recommends fixes for approval. D
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07"]
 agent_school: [301, 401]
 card:
-  goal: "Find widget fault causes sooner"
+  goal: "incidents"
   summary: "Labels the likely cause of each fictional widget fault and proposes a fix that an approver accepts or rejects."
   outcome: "Fictional engineers find the cause of a widget fault sooner and fix it with approval."
   audience: "Fictional operations engineers, approvers, and risk owners"

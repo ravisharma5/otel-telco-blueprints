@@ -93,7 +93,7 @@
       "additionalProperties": false,
       "required": ["goal", "summary", "outcome", "audience", "measures", "risk"],
       "properties": {
-        "goal": { "description": "8 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,7}\\s*$" },
+        "goal": { "description": "One goal id from data/explorer/goals.yaml; the explorer home page groups use cases by it.", "enum": ["answer", "incidents", "sla-energy", "change", "secure", "software", "customers"] },
         "summary": { "description": "25 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,24}\\s*$" },
         "outcome": { "description": "20 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,19}\\s*$" },
         "audience": { "description": "12 words or fewer.", "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,11}\\s*$" },

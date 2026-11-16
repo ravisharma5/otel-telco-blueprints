@@ -1,0 +1,12 @@
+# Goals the explorer home page offers, in display order. Each use case names
+# one of these ids in card.goal; the schema enum in schemas/use-case.schema.json
+# holds the same list. Tile titles and notes live in explorer/src/content/copy.md.
+# A goal no exported use case names is not shown.
+goals:
+  - answer
+  - incidents
+  - sla-energy
+  - change
+  - secure
+  - software
+  - customers

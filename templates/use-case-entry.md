@@ -17,7 +17,7 @@ clarity_reviewed: "2026-11-15"  # set after the humanizer pass; quoted ISO date
 source: ["<source-id>"]  # optional; where the use case came from
 also_covers: ["<merged application>"]  # optional; applications merged into this page, each 12 words or fewer; the Recipes overview lists them
 card:  # required; the summary card on the explorer home page, in plain words
-  goal: "<The goal, in 8 words or fewer>"  # will be one goal id from data/explorer/goals.yaml
+  goal: "incidents"  # one goal id from data/explorer/goals.yaml: answer | incidents | sla-energy | change | secure | software | customers
   summary: "<What it does, in 25 words or fewer>"
   outcome: "<What changes for the operator, in 20 words or fewer>"
   audience: "<Who it serves, in 12 words or fewer>"

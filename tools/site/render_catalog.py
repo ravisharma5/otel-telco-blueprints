@@ -26,14 +26,13 @@ from pathlib import Path
 import yaml
 
 from tools.bplint.slug import github_slug
-from tools.site.export_explorer import DOMAIN_LABELS, SKIPPED_DOMAINS
+from tools.site.export_explorer import DEPTH_LABELS, DOMAIN_LABELS, SKIPPED_DOMAINS
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "catalog"
 PLATFORM = ROOT / "platform"
 PAGE = CATALOG / "index.md"
 SCHEMA = ROOT / "schemas/use-case.schema.json"
-DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
 DOMAIN_COLUMNS = ("Recipe", "Topic", "Depth", "Also covers")
 NAMES = ("catalog-by-domain", "catalog-by-platform")
 

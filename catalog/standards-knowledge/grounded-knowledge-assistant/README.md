@@ -15,7 +15,7 @@ agent_school: [103, 201, 203, 402]
 also_covers: ["Telecom standards Q&A over documents you hold rights to", "Grounded RAG assistants"]
 clarity_reviewed: "2026-11-15"
 card:
-  goal: "Answer engineers' questions faster"
+  goal: "answer"
   summary: "Answers standards and runbook questions from your own documents with citations, or says it can't answer and shows what it searched."
   outcome: "Engineers get cited answers without searching 3GPP, IETF, TM Forum, and vendor documents by hand."
   audience: "Operations engineers and support staff who ask standards and runbook questions"

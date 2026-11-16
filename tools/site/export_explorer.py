@@ -13,6 +13,10 @@ largest first, and band each GPU by its share of memory. While a GPU is not in
 the fits band, swap the heaviest slot on it that has an operator-made FP8 build
 and pack again. Core setups use the published builds and show no fit bar.
 
+Each use case carries its goal (card.goal, one id from data/explorer/goals.yaml)
+and its recipe depth. The top-level goals list holds only goals that at least
+one use case names, in file order, so the home page never shows an empty goal.
+
 Any missing or inconsistent input stops the run with one line that names the
 file and the key. A use-case page without `card` or `placement` stops the run
 too; only pages of another type, and pages in the demo domain, are left out.
@@ -38,6 +42,7 @@ from tools.site.render_serving import _source_labels
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "explorer/src/generated/explorer.json"
 SERVING_PAGE = "platform/serving-routing-placement/README.md"
+GOALS_FILE = "data/explorer/goals.yaml"
 
 TIERS = ("far-edge", "regional", "core")
 BATCH_VALUES = ("yes", "no")
@@ -62,6 +67,9 @@ DOMAIN_LABELS = {
     "research": "Research",
 }
 SKIPPED_DOMAINS = ("demo",)
+
+# Recipe depth labels, shared with the Recipes overview (render_catalog imports them).
+DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
 
 STAGE_IDS = {
     "inform": "inform",
@@ -102,6 +110,7 @@ REQUIRED_FM = (
     "platform_blueprints",
     "placement_tier",
     "autonomy_ceiling",
+    "depth",
 )
 
 _MD = MarkdownIt("commonmark")
@@ -559,6 +568,11 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         raise SystemExit(f"{rel}: domain {fm['domain']} does not match its folder {domain}")
     if domain not in DOMAIN_LABELS:
         raise SystemExit(f"{rel}: domain {domain} has no explorer label")
+    goal = fm["card"].get("goal")
+    if goal not in data["goal_ids"]:
+        raise SystemExit(f"{rel}: card.goal {goal} is not a goal id in {GOALS_FILE}")
+    if fm["depth"] not in DEPTH_LABELS:
+        raise SystemExit(f"{rel}: depth {fm['depth']} has no label")
     if fm["autonomy_ceiling"] not in STAGE_IDS:
         raise SystemExit(f"{rel}: autonomy_ceiling {fm['autonomy_ceiling']} has no stage label")
     placement = fm["placement"]
@@ -595,6 +609,8 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         "recipe_url": f"recipes/{domain}/{slug}/",
         "doc_status": fm["doc_status"],
         "stage": {"id": stage_id, "label": STAGE_LABELS[stage_id]},
+        "goal": goal,
+        "depth": {"id": fm["depth"], "label": DEPTH_LABELS[fm["depth"]]},
         "card": fm["card"],
         "counts": {
             "slots": len(fm["otel_slots"]),
@@ -610,6 +626,18 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
 
 
 # --- top level --------------------------------------------------------------
+
+
+def _goal_ids(repo_root: Path) -> list[str]:
+    path = repo_root / GOALS_FILE
+    if not path.is_file():
+        raise SystemExit(f"{GOALS_FILE}: file not found")
+    goals = (load_yaml(path) or {}).get("goals")
+    if not goals or not all(isinstance(g, str) for g in goals):
+        raise SystemExit(f"{GOALS_FILE}: missing key goals (a list of ids)")
+    if len(set(goals)) != len(goals):
+        raise SystemExit(f"{GOALS_FILE}: goal ids must be unique")
+    return goals
 
 
 def _serving_data(repo_root: Path) -> dict:
@@ -648,6 +676,7 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
     """Everything the explorer renders, as one JSON-ready dict."""
     repo_root = Path(repo_root)
     data = _serving_data(repo_root)
+    data["goal_ids"] = _goal_ids(repo_root)
     use_cases = []
     for path in sorted((repo_root / "catalog").glob("*/*/README.md")):
         if path.parent.parent.name in SKIPPED_DOMAINS:
@@ -663,6 +692,8 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
             raise SystemExit(f"catalog: use-case {key} values must be unique")
     domains = {u["domain"] for u in use_cases}
     stages = {u["stage"]["id"] for u in use_cases}
+    depths = {u["depth"]["id"] for u in use_cases}
+    goal_counts = {g: sum(1 for u in use_cases if u["goal"] == g) for g in data["goal_ids"]}
     tiers = {c["tier"] for u in use_cases for s in u["states"].values() for c in s["yes"]["tiers"] if c["used"]}
     return {
         "setups": [
@@ -679,10 +710,12 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
         ],
         "default": data["setups_doc"]["default"],
         "fit_bands": data["bands"],
+        "goals": [{"id": g, "count": n} for g, n in goal_counts.items() if n > 0],
         "filters": {
             "domains": [{"id": d, "label": DOMAIN_LABELS[d]} for d in DOMAIN_LABELS if d in domains],
             "stages": [{"id": s, "label": STAGE_LABELS[s]} for s in STAGE_LABELS if s in stages],
             "tiers": [t for t in TIERS if t in tiers],
+            "depths": [d for d in DEPTH_LABELS if d in depths],
         },
         "use_cases": use_cases,
     }

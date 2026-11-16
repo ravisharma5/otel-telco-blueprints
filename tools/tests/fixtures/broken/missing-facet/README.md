@@ -12,7 +12,7 @@ one_liner: "Drafts fictional triage labels with human approval. Needs a tool-cal
 platform_blueprints: ["PB-99"]
 agent_school: [301]
 card:
-  goal: "Cut time to first fictional triage"
+  goal: "incidents"
   summary: "Drafts a fictional triage label for each widget alarm, and an engineer approves it."
   outcome: "Fictional engineers spend less time sorting widget alarms by hand."
   audience: "Fictional demo engineers and their business owner"

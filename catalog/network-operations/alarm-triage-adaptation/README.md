@@ -16,7 +16,7 @@ agent_school: [101, 401, 402, 403]
 also_covers: ["NOC ticket triage"]
 clarity_reviewed: "2026-11-15"
 card:
-  goal: "Triage alarms more accurately"
+  goal: "incidents"
   summary: "Finds the likely cause in RAN and transport alarms and proposes fixes for approval. It fine-tunes the model only when evaluation shows a gap."
   outcome: "Engineers find the one cause in an alarm storm sooner, with causes labelled in your own taxonomy."
   audience: "Model owners, operations engineers, approvers, and risk owners who run alarm triage"

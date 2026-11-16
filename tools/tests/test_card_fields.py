@@ -31,8 +31,11 @@ EXPORTER_TABLE_HEADERS = {
 
 VALIDATOR = load_validators(REPO_ROOT / "schemas")["use-case"]
 
+GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
+GOAL_IDS = ["answer", "incidents", "sla-energy", "change", "secure", "software", "customers"]
+
 CARD = {
-    "goal": "Cut time to first triage",
+    "goal": "incidents",
     "summary": "Drafts a triage label for each alarm and an engineer approves it.",
     "outcome": "Engineers spend less time sorting alarms by hand.",
     "audience": "NOC engineers and their business owner",
@@ -40,7 +43,7 @@ CARD = {
     "risk": "A wrong label slows the fix until an engineer catches it.",
 }
 
-LIMITS = {"goal": 8, "summary": 25, "outcome": 20, "audience": 12, "risk": 15, "measures": 6}
+LIMITS = {"summary": 25, "outcome": 20, "audience": 12, "risk": 15, "measures": 6}
 
 
 def words(n):
@@ -102,6 +105,31 @@ def test_card_requires_all_fields(field):
     card = {k: v for k, v in CARD.items() if k != field}
     errs = errors_under(use_case_fm(card=card), "card")
     assert [e.validator for e in errs] == ["required"]
+
+
+def test_goal_enum_matches_file():
+    goals = yaml.safe_load(GOALS_FILE.read_text(encoding="utf-8"))["goals"]
+    schema = VALIDATOR.schema["properties"]["card"]["properties"]["goal"]
+    assert schema["enum"] == goals == GOAL_IDS
+
+
+@pytest.mark.parametrize("goal", ["nope", "Cut time to first triage", ""])
+def test_goal_outside_the_enum_fails(goal):
+    errs = errors_under(use_case_fm(card=dict(CARD, goal=goal)), "card")
+    assert [e.validator for e in errs] == ["enum"]
+
+
+FLAGSHIP_GOALS = {
+    "UC-KNOW-01": "answer",
+    "UC-AGOPS-01": "incidents",
+    "UC-OPS-01": "incidents",
+    "UC-CARE-01": "customers",
+}
+
+
+def test_flagship_goals():
+    got = {(front_matter(p) or {})["id"]: (front_matter(p) or {})["card"]["goal"] for p in flagships()}
+    assert got == FLAGSHIP_GOALS
 
 
 def test_card_rejects_unknown_keys():
@@ -393,11 +421,10 @@ def test_placed_roles_have_variants(path):
     assert placed <= roles, f"{path}: no variant for {sorted(placed - roles)}"
 
 
-def test_card_goals_and_summaries_unique():
+def test_card_summaries_unique():
+    """Goals are shared ids (several use cases serve one goal); summaries stay unique."""
     cards = {p: (front_matter(p) or {}).get("card") or {} for p in exported_pages()}
-    goals = [c.get("goal") for c in cards.values()]
     summaries = [c.get("summary") for c in cards.values()]
-    assert all(goals) and len(set(goals)) == len(goals)
     assert all(summaries) and len(set(summaries)) == len(summaries)
     for path, card in cards.items():
         assert card["summary"].strip() != (front_matter(path) or {}).get("one_liner", "").strip()

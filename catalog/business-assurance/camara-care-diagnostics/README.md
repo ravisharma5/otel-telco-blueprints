@@ -16,7 +16,7 @@ agent_school: [303, 304]
 also_covers: ["Customer care diagnostics"]
 clarity_reviewed: "2026-11-15"
 card:
-  goal: "Help care agents diagnose customer issues"
+  goal: "customers"
   summary: "Suggests answers to care agents on no-service calls, using device status read through CAMARA APIs with the customer's consent."
   outcome: "Care agents see a device's roaming, reachability, and network type, so they resolve more calls on first contact."
   audience: "Care agents, care operations, the data protection officer, and the risk owner"

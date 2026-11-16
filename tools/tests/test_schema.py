@@ -57,7 +57,7 @@ USE_CASE = {
     "agent_school": [301],
     "depth": "entry",
     "card": {
-        "goal": "Cut time to first triage",
+        "goal": "incidents",
         "summary": "Drafts a triage label for each alarm and an engineer approves it.",
         "outcome": "Engineers spend less time sorting alarms by hand.",
         "audience": "NOC engineers and their business owner",

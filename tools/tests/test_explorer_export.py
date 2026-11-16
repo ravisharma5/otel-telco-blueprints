@@ -20,6 +20,7 @@ import yaml
 from tools.bplint.markdown import parse_doc
 from tools.tests.conftest import REPO_ROOT
 from tools.tests.test_card_fields import EXPORTER_TABLE_HEADERS as CARD_TABLE_HEADERS
+from tools.tests.test_card_fields import GOAL_IDS
 from tools.tests.test_card_fields import exported_pages, front_matter
 
 from tools.site import export_explorer as ex
@@ -734,6 +735,50 @@ def test_top_level(data):
     for out, src in zip(data["setups"], SETUPS["setups"]):
         assert out["label"] == src["label"] and out["tier"] == src["tier"]
         assert out["ampere_note"] == src["ampere_note"]
+
+
+GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
+DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
+
+
+def test_goals_file():
+    doc = yaml.safe_load(GOALS_FILE.read_text(encoding="utf-8"))
+    assert list(doc) == ["goals"]
+    assert doc["goals"] == GOAL_IDS
+    assert len(set(doc["goals"])) == len(doc["goals"])
+
+
+def test_unknown_goal_fails(tmp_path):
+    shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
+    shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
+    page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
+    text = page.read_text(encoding="utf-8")
+    assert 'goal: "answer"' in text
+    page.write_text(text.replace('goal: "answer"', 'goal: "nope"', 1), encoding="utf-8")
+    with pytest.raises(SystemExit) as exc:
+        ex.build_explorer_data(tmp_path)
+    msg = str(exc.value)
+    assert "grounded-knowledge-assistant/README.md" in msg and "nope" in msg, msg
+
+
+def test_goals_exported(data):
+    counts = {}
+    for uc in data["use_cases"]:
+        assert uc["goal"] == front_matter(REPO_ROOT / "catalog" / uc["domain"] / uc["slug"] / "README.md")["card"]["goal"]
+        counts[uc["goal"]] = counts.get(uc["goal"], 0) + 1
+    assert data["goals"] == [{"id": g, "count": counts[g]} for g in GOAL_IDS if counts.get(g)]
+    assert all(g["count"] > 0 for g in data["goals"])
+    assert sum(g["count"] for g in data["goals"]) == len(data["use_cases"])
+
+
+def test_depth_exported(data):
+    for uc in data["use_cases"]:
+        fm = front_matter(REPO_ROOT / "catalog" / uc["domain"] / uc["slug"] / "README.md")
+        assert uc["depth"] == {"id": fm["depth"], "label": DEPTH_LABELS[fm["depth"]]}
+    present = {uc["depth"]["id"] for uc in data["use_cases"]}
+    assert data["filters"]["depths"] == [d for d in ("recipe", "entry") if d in present]
+    assert ex.DEPTH_LABELS == DEPTH_LABELS
 
 
 def test_cli_writes_json(tmp_path, data):

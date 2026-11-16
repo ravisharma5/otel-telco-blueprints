@@ -47,7 +47,7 @@ def glance_table(labels, values=None):
 AS001_SENTENCE = "None: no agent-school course covers this use case yet"
 COURSES_FILE = REPO_ROOT / "tools/bplint/agent-school-courses.yaml"
 UC_CARD = {
-    "goal": "Cut time to first triage",
+    "goal": "incidents",
     "summary": "Drafts a triage label for each alarm and an engineer approves it.",
     "outcome": "Engineers spend less time sorting alarms by hand.",
     "audience": "Engineers and their business owner",
