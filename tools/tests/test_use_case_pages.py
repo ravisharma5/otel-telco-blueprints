@@ -96,6 +96,8 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-software/oran-ric-xapp-assistant": "UC-SW-03",
     "network-operations/signalling-trace-analysis": "UC-OPS-02",
     "network-operations/ran-rf-health-checks": "UC-OPS-04",
+    "network-operations/transport-ip-diagnostics": "UC-OPS-08",
+    "network-operations/cross-domain-oss-correlation": "UC-OPS-09",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec

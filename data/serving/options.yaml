@@ -283,6 +283,12 @@ options:
       - use_case: UC-OPS-04
         roles: [classification, safety, llm-small]
         reason: FP8 builds of Classification, Safety, and the small LLM make room for them beside the Decision slot on a regional GPU.
+      - use_case: UC-OPS-08
+        roles: [safety]
+        reason: An FP8 build of Safety makes room for it beside retrieval and the Decision slot that labels each fix proposal.
+      - use_case: UC-OPS-09
+        roles: [classification, safety]
+        reason: FP8 builds of Classification and Safety make room for retrieval and the Decision slot while correlation runs at the regional site.
     related: []
     excluded_slots: [decision]
 
