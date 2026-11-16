@@ -2,7 +2,7 @@
 id: "UC-OPS-06"
 type: "use-case"
 title: "Slice SLA assurance"
-doc_status: draft
+doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "recipe"
@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Forecasts network slice SLO breaches from slice KPIs and analytics, warns the slice owner before the breach, and proposes a slice resource change for approval. Never changes a slice on its own. Depends on structured SLOs, your forecasting tool, and evaluation of SLA extraction on your own documents."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [301]
+clarity_reviewed: "2026-11-16"
 card:
   goal: "sla-energy"
   summary: "Correlates slice KPIs and analytics with each slice's SLOs, warns the slice owner before a breach, and proposes slice changes for approval."
@@ -44,7 +45,7 @@ placement:
 
 ## Problem and value
 
-An enterprise slice carries service level objectives (SLOs) agreed with its customer, but its KPIs drift toward a breach with no warning, and engineers find out when the customer complains.
+An enterprise slice carries service level objectives (SLOs) from the service level agreement (SLA) with its customer. Its KPIs can drift toward a breach with no warning, and engineers may first hear of it from the customer.
 This recipe matches each slice's KPIs and analytics to its SLOs, forecasts likely breaches, warns the slice owner, and proposes a slice resource change for approval.
 The KPIs are SLO breach minutes and time to detect; any gain is a target, measured against the shadow-stage baseline with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures.
 
@@ -99,7 +100,7 @@ Enterprise factory slice `slice-fx-07` carries a TMF657 objective on uplink late
 
 The per-slice measurements show uplink latency rising toward its objective, and NWDAF analytics show load building on the user plane function that serves the slice. The forecasting tool projects a breach inside the SLO breach forecast horizon, and Safety finds the evidence sufficient. The agent sends the breach warning, the gate returns NOTIFY, and a notification job warns the slice owner, as the [decision gate](../../../architecture/decision-gate.md#policy-table) policy table shows.
 
-The agent then proposes, in `sla-req-3304`, a service order that moves the slice to a second user plane function. The change is `write_high`, so even if the label reads ACT, the outcome is REVIEW. The `approver` role signs off before the action layer runs the order and its verification job.
+The agent then proposes, in `sla-req-3304`, a service order that adds a second user plane function to the slice. The change is `write_high`, so even if the label reads ACT, the outcome is REVIEW. The `approver` role signs off before the action layer runs the order. Its verification job rolls the change back if uplink latency does not recover.
 
 ## What you need
 
