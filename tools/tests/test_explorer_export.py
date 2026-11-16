@@ -793,6 +793,31 @@ def test_depth_exported(data):
     assert ex.DEPTH_LABELS == DEPTH_LABELS
 
 
+def test_adaptation_exported(data):
+    from tools.site.render_bring import (
+        CHANGE_LABELS,
+        CHANGE_OF_RUNG,
+        CHANGE_ORDER,
+        EXPERTISE_LABELS,
+        EXPERTISE_ORDER,
+        RUNG_LABELS,
+    )
+
+    for uc in data["use_cases"]:
+        fm = front_matter(REPO_ROOT / "catalog" / uc["domain"] / uc["slug"] / "README.md")
+        ad = fm["adaptation"]
+        expertise = [e for e in EXPERTISE_ORDER if e in ad["expertise"]]
+        assert uc["adaptation"] == {
+            "rung": ad["rung"],
+            "change": CHANGE_OF_RUNG[ad["rung"]],
+            "rung_label": RUNG_LABELS[ad["rung"]],
+            "expertise": [{"id": e, "label": EXPERTISE_LABELS[e]} for e in expertise],
+        }, uc["slug"]
+    present = {uc["adaptation"]["change"] for uc in data["use_cases"]}
+    assert data["filters"]["changes"] == [c for c in CHANGE_ORDER if c in present]
+    assert set(CHANGE_LABELS) == set(CHANGE_ORDER) == {"none", "retrain"}
+
+
 def test_cli_writes_json(tmp_path, data):
     out = tmp_path / "x.json"
     subprocess.run(

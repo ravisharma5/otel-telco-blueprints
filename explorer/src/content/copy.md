@@ -35,6 +35,23 @@ notes:
 depth:
   recipe: Full recipe
   entry: Catalog entry
+# What each use case asks you to bring, keyed by the adaptation field in front
+# matter. Must match the labels in tools/site/render_bring.py (a test checks).
+adaptation:
+  rung:
+    retrieval: "No model change: retrieval only"
+    skills: "No model change: retrieval and skills"
+    head-retrain: Retrain the Classification head
+    lora-if-gap: "Retrain the head; LoRA only if a gap remains"
+  change:
+    none: No model change
+    retrain: You retrain or adapt
+  expertise:
+    taxonomy: Your fault or alert taxonomy
+    golden-set: A golden set your experts label
+    gate-labels: Gate labels from your approvers
+    tool-contracts: A contract for each tool
+    corpus: Your domain corpus
 footer:
   notes:
     licence: Docs CC BY 4.0 · Code Apache-2.0
@@ -121,6 +138,7 @@ home:
         stage: How far it goes
         tiers: Where it runs
         depth: Recipe depth
+        change: Model change
       # Shown on the pressed goal chip; {goal} is the title of the goal tile picked.
       goal_chip: "Goal: {goal}"
       tiers:
@@ -225,8 +243,14 @@ use_case:
       risk: Risk
       sites: Sites
       takes: Takes
+      bring: You bring
     sites_join: " and "
     takes: "{slots} and {blueprints}"
+    # {rung} is the adaptation rung label; {expertise} joins the expertise labels with bring_join.
+    bring: "{rung}. {expertise}."
+    bring_join: "; "
+    bring_link: What to bring and where it goes
+    bring_path: platform/bring-your-own-data/
   stages:
     inform: Never changes the network. People read and decide.
     recommend: Suggests fixes. An approver signs off every change.

@@ -130,6 +130,13 @@ export interface Setup {
   vendor: string;
 }
 
+export interface Adaptation {
+  rung: 'retrieval' | 'skills' | 'head-retrain' | 'lora-if-gap';
+  change: 'none' | 'retrain';
+  rung_label: string;
+  expertise: { id: string; label: string }[];
+}
+
 export interface UseCase {
   id: string;
   slug: string;
@@ -141,6 +148,7 @@ export interface UseCase {
   stage: Stage;
   goal: string;
   depth: Depth;
+  adaptation: Adaptation;
   card: Card;
   counts: Counts;
   slot_names: string[];
@@ -155,6 +163,7 @@ export interface Filters {
   stages: Stage[];
   tiers: string[];
   depths: Depth['id'][];
+  changes: Adaptation['change'][];
 }
 
 export interface FitBands {

@@ -218,6 +218,21 @@ def test_depth_copy_matches_the_exporter():
     assert _copy()["home"]["gallery"]["filters"]["headings"]["depth"]
 
 
+def test_adaptation_copy_matches_the_exporter():
+    from tools.site.render_bring import CHANGE_LABELS, EXPERTISE_LABELS, RUNG_LABELS
+
+    copy = _copy()
+    assert copy["adaptation"]["rung"] == RUNG_LABELS
+    assert copy["adaptation"]["change"] == CHANGE_LABELS
+    assert copy["adaptation"]["expertise"] == EXPERTISE_LABELS
+    heading = copy["home"]["gallery"]["filters"]["headings"]["change"]
+    assert heading and len(heading.split()) <= LIMITS["headings"]
+    why = copy["use_case"]["why"]
+    assert why["rows"]["bring"]
+    assert "{rung}" in why["bring"] and "{expertise}" in why["bring"]
+    assert why["bring_link"] and why["bring_path"] == "platform/bring-your-own-data/"
+
+
 def test_unused_regional_only_copy_removed():
     # No serving rule uses the regional-only reason, so its copy line is gone.
     assert "regional-only" not in COPY_PATH.read_text(encoding="utf-8")

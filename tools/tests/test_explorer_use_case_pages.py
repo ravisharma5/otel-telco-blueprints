@@ -686,6 +686,24 @@ def test_depth_chip_in_header(explorer_dist, data, copy):
 
 
 @pytest.mark.site_output
+def test_you_bring_row(explorer_dist, data, copy):
+    why_copy = copy["use_case"]["why"]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        why = tree.root.find_all(lambda n: n.attrs.get("id") == "why")[0]
+        heads = why.find_all(lambda n: n.tag == "th" and n.text().strip() == why_copy["rows"]["bring"])
+        assert len(heads) == 1, uc["slug"]
+        row = heads[0].parent
+        text = _squash(row.text())
+        assert _squash(uc["adaptation"]["rung_label"]) in text, uc["slug"]
+        assert copy["adaptation"]["rung"][uc["adaptation"]["rung"]] == uc["adaptation"]["rung_label"]
+        for item in uc["adaptation"]["expertise"]:
+            assert _squash(item["label"]) in text, (uc["slug"], item["label"])
+        links = [a.attrs.get("href", "") for a in row.find_all(lambda n: n.tag == "a")]
+        assert links == [BASE + "platform/bring-your-own-data/"], (uc["slug"], links)
+
+
+@pytest.mark.site_output
 def test_no_overlay_and_clean_recipe_links(explorer_dist, data):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)

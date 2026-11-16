@@ -258,6 +258,7 @@ ARCHITECT_LINKS = [
 REPLACEABLE = "Any component can be replaced."
 GOALS_FILE = REPO_ROOT / "data/explorer/goals.yaml"
 DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
+CHANGE_LABELS = {"none": "No model change", "retrain": "You retrain or adapt"}
 HOME_SIZE_LIMIT_KB = 60
 
 
@@ -484,6 +485,16 @@ def test_gallery_cards(explorer_dist):
         assert chips == [DEPTH_LABELS[uc["depth"]["id"]]]
 
 
+@pytest.mark.site_output
+def test_cards_carry_change(explorer_dist):
+    data = _data()
+    cards = {c.attrs["data-card"]: c for c in _cards(_home(explorer_dist))}
+    assert set(cards) == {uc["slug"] for uc in data["use_cases"]}
+    for uc in data["use_cases"]:
+        assert cards[uc["slug"]].attrs["data-change"] == uc["adaptation"]["change"], uc["slug"]
+    assert {c.attrs["data-change"] for c in cards.values()} == {"none", "retrain"}
+
+
 def test_counts_line_singular():
     assert _counts_line({"slots": 1, "blueprints": 2, "tiers": 1}) == (
         "1 model slot · 2 platform blueprints · 1 site tier"
@@ -507,6 +518,9 @@ def test_filter_chips_present_values_only(explorer_dist):
     if len(f["depths"]) >= 2:
         expected_groups.add("depth")
         assert by_group["depth"] == [(d, DEPTH_LABELS[d]) for d in f["depths"]]
+    if len(f["changes"]) >= 2:
+        expected_groups.add("change")
+        assert by_group["change"] == [(c, CHANGE_LABELS[c]) for c in f["changes"]]
     assert set(by_group) == expected_groups
     # A chip only for a value at least one published use case has.
     used = {
@@ -514,6 +528,7 @@ def test_filter_chips_present_values_only(explorer_dist):
         "stage": {uc["stage"]["id"] for uc in data["use_cases"]},
         "tiers": {t for uc in data["use_cases"] for t in _used_tiers(data, uc)},
         "depth": {uc["depth"]["id"] for uc in data["use_cases"]},
+        "change": {uc["adaptation"]["change"] for uc in data["use_cases"]},
     }
     for group, values in by_group.items():
         assert {v for v, _ in values} <= used[group]
@@ -528,7 +543,10 @@ def test_filter_chips_present_values_only(explorer_dist):
         label = tree.root.find_all(lambda n, i=label_id: n.attrs.get("id") == i)
         assert len(label) == 1 and not label[0].has_class("visually-hidden")
         labels.append(label[0].text())
-    assert labels == ["Domain", "How far it goes", "Where it runs", "Recipe depth"][: len(expected_groups)]
+    order = ["Domain", "How far it goes", "Where it runs", "Recipe depth", "Model change"]
+    assert labels == [label for label in order if label in labels] and len(labels) == len(expected_groups)
+    if "change" in expected_groups:
+        assert labels[-1] == "Model change"
 
 
 @pytest.mark.site_output

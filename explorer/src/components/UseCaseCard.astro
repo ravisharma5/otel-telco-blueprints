@@ -27,6 +27,7 @@ const status = copy.home.gallery.status[useCase.doc_status];
   data-tiers={usedTiers(useCase).join(' ')}
   data-goal={useCase.goal}
   data-depth={useCase.depth.id}
+  data-change={useCase.adaptation.change}
 >
   <a class="card" href={useCasePath(useCase)}>
     <span class="eyebrow">{useCase.domain_label}</span>

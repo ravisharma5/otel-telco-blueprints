@@ -2,13 +2,14 @@
 // Filter bar for the gallery. It ships with `hidden`; the page script removes it,
 // so without JavaScript the bar never shows and every card stays visible.
 // Chips render only for values the exporter found on a published use case; the
-// Recipe depth group renders once two depths exist. The goal chip ships hidden and
+// Recipe depth and Model change groups render once two values exist. The goal chip ships hidden and
 // shows only when a goal tile (or a ?goal= link with a rendered goal id) is picked.
 import { frontmatter as copy } from '../content/copy.md';
 import { filters, useCases } from '../lib/data';
 
 const labels = copy.home.gallery.filters;
 const depthLabels = copy.depth as Record<string, string>;
+const changeLabels = copy.adaptation.change as Record<string, string>;
 const groups = [
   {
     id: 'domain',
@@ -29,6 +30,11 @@ const groups = [
     id: 'depth',
     label: labels.headings.depth,
     chips: filters.depths.length >= 2 ? filters.depths.map((d) => ({ value: d, label: depthLabels[d] })) : [],
+  },
+  {
+    id: 'change',
+    label: labels.headings.change,
+    chips: filters.changes.length >= 2 ? filters.changes.map((c) => ({ value: c, label: changeLabels[c] })) : [],
   },
 ].filter((group) => group.chips.length > 0);
 const total = useCases.length;

@@ -43,6 +43,10 @@ const plural = (key: 'slots' | 'blueprints') => {
   return `${n} ${n === 1 ? words[key].one : words[key].other}`;
 };
 const takes = fill(why.takes, { slots: plural('slots'), blueprints: plural('blueprints') });
+const bring = fill(why.bring, {
+  rung: useCase.adaptation.rung_label,
+  expertise: useCase.adaptation.expertise.map((e) => e.label).join(why.bring_join),
+});
 const sites = usedTiers(useCase)
   .map((tier) => tierLabels[tier as keyof typeof tierLabels])
   .join(why.sites_join);
@@ -87,6 +91,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
                 <tr><th scope="row">{why.rows.risk}</th><td>{useCase.card.risk}</td></tr>
                 <tr><th scope="row">{why.rows.sites}</th><td>{sites}</td></tr>
                 <tr><th scope="row">{why.rows.takes}</th><td>{takes}</td></tr>
+                <tr><th scope="row">{why.rows.bring}</th><td>{bring} <a href={import.meta.env.BASE_URL + why.bring_path}>{why.bring_link}</a></td></tr>
               </tbody>
             </table>
           </div>

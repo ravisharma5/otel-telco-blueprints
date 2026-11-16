@@ -37,6 +37,14 @@ from markdown_it import MarkdownIt
 
 from tools.bplint.loader import load_yaml
 from tools.bplint.markdown import parse_doc
+from tools.site.render_bring import (
+    CHANGE_LABELS,
+    CHANGE_OF_RUNG,
+    CHANGE_ORDER,
+    EXPERTISE_LABELS,
+    EXPERTISE_ORDER,
+    RUNG_LABELS,
+)
 from tools.site.render_serving import _source_labels
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -111,12 +119,32 @@ REQUIRED_FM = (
     "placement_tier",
     "autonomy_ceiling",
     "depth",
+    "adaptation",
 )
 
 _MD = MarkdownIt("commonmark")
 
 
 # --- pure functions ---------------------------------------------------------
+
+
+def _adaptation(ad, rel: str) -> dict:
+    """The explorer's view of a use case's adaptation field: rung, model change, and expertise labels."""
+    if not isinstance(ad, dict) or ad.get("rung") not in RUNG_LABELS:
+        raise SystemExit(f"{rel}: adaptation.rung {(ad or {}).get('rung')!r} has no label")
+    chosen = ad.get("expertise") or []
+    for e in chosen:
+        if e not in EXPERTISE_LABELS:
+            raise SystemExit(f"{rel}: adaptation.expertise {e!r} has no label")
+    change = CHANGE_OF_RUNG[ad["rung"]]
+    if change not in CHANGE_LABELS:
+        raise SystemExit(f"{rel}: model change {change!r} has no label")
+    return {
+        "rung": ad["rung"],
+        "change": change,
+        "rung_label": RUNG_LABELS[ad["rung"]],
+        "expertise": [{"id": e, "label": EXPERTISE_LABELS[e]} for e in EXPERTISE_ORDER if e in chosen],
+    }
 
 
 def band(pct: float, bands: dict) -> str:
@@ -575,6 +603,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         raise SystemExit(f"{rel}: depth {fm['depth']} has no label")
     if fm["autonomy_ceiling"] not in STAGE_IDS:
         raise SystemExit(f"{rel}: autonomy_ceiling {fm['autonomy_ceiling']} has no stage label")
+    adaptation = _adaptation(fm["adaptation"], rel)
     placement = fm["placement"]
     known_roles = set(_role_order(data["variants"]))
     for tier, entry in placement.items():
@@ -611,6 +640,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         "stage": {"id": stage_id, "label": STAGE_LABELS[stage_id]},
         "goal": goal,
         "depth": {"id": fm["depth"], "label": DEPTH_LABELS[fm["depth"]]},
+        "adaptation": adaptation,
         "card": fm["card"],
         "counts": {
             "slots": len(fm["otel_slots"]),
@@ -693,6 +723,7 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
     domains = {u["domain"] for u in use_cases}
     stages = {u["stage"]["id"] for u in use_cases}
     depths = {u["depth"]["id"] for u in use_cases}
+    changes = {u["adaptation"]["change"] for u in use_cases}
     goal_counts = {g: sum(1 for u in use_cases if u["goal"] == g) for g in data["goal_ids"]}
     tiers = {c["tier"] for u in use_cases for s in u["states"].values() for c in s["yes"]["tiers"] if c["used"]}
     return {
@@ -716,6 +747,7 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
             "stages": [{"id": s, "label": STAGE_LABELS[s]} for s in STAGE_LABELS if s in stages],
             "tiers": [t for t in TIERS if t in tiers],
             "depths": [d for d in DEPTH_LABELS if d in depths],
+            "changes": [c for c in CHANGE_ORDER if c in changes],
         },
         "use_cases": use_cases,
     }
