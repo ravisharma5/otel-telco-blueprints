@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Runs triage on RAN and transport alarms and recommends fixes for approval. Starts with retrieval and skills only, and earns a LoRA adapter only when evaluation shows a measured gap. Depends on the acceptance gates and a model registry that binds each adapter to its base revision."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10"]
 agent_school: [101, 401, 402, 403]
+also_covers: ["NOC ticket triage"]
 clarity_reviewed: "2026-11-15"
 card:
   goal: "Triage alarms more accurately"
@@ -254,8 +255,8 @@ Apply these settings in order. No fix ever gets an outcome higher than REVIEW.
 ## Limitations
 
 - It never applies a fix without approval; every fix goes to REVIEW.
-- It covers LoRA in detail; OSFT on a large corpus is in [PB-03](../../../platform/adaptation/README.md).
-- Adapters don't carry across base revisions, so each new base costs a retrain and a re-gate.
+- It covers LoRA in detail; OSFT on a large corpus is in [PB-03](../../../platform/adaptation/README.md). Adapters don't carry across base revisions, so each new base costs a retrain and a re-gate.
 - The Decision slot's adaptation path depends on the model owner's check against its card.
 - The Classification slot's shipped classes come from drive-test data, so it needs your taxonomy first.
+- OTel quality claims cover English only, as the [31B model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) states, so tickets in other languages, for example French, need their own evaluation before use.
 - The AI Act class is your legal team's call, recorded in the [classification record](../../../platform/compliance-operating-model/README.md).

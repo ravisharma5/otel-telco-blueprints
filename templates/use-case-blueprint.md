@@ -15,6 +15,7 @@ platform_blueprints: ["PB-04"]  # PB-<nn> ids this use case depends on
 agent_school: [301]  # agent-school course numbers (100-999)
 clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 source: ["<source-id>"]  # optional; where the use case came from
+also_covers: ["<merged application>"]  # optional; applications merged into this page, each 12 words or fewer; the Recipes overview lists them
 card:  # required; the summary card on the explorer home page, in plain words
   goal: "<The goal, in 8 words or fewer>"
   summary: "<What it does, in 25 words or fewer>"

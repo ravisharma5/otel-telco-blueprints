@@ -76,6 +76,12 @@
       "uniqueItems": true,
       "items": { "$ref": "common.schema.json#/$defs/agent_school_course" }
     },
+    "also_covers": {
+      "description": "Applications merged into this page instead of getting their own entry. Each item 12 words or fewer.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,11}\\s*$" }
+    },
     "clarity_reviewed": { "$ref": "common.schema.json#/$defs/date" },
     "source": {
       "type": "array",

@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Handles router incidents from alarm to ticket with read-only tools, and sends every write through the Decision gate. Acts within policy only for low-risk classes, once that stage is earned. Depends on the Decision gate and the automation workflow."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [101, 301, 302, 403]
+also_covers: ["Closed-loop incident handling"]
 clarity_reviewed: "2026-11-15"
 card:
   goal: "Resolve incidents with less manual work"

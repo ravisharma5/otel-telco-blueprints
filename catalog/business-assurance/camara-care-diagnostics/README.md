@@ -13,6 +13,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Suggests answers to a care agent from CAMARA device diagnostics, with the customer's consent checked before any tool call. Recommends only; the care agent decides. Depends on the operator's consent service and the MCP gateway."
 platform_blueprints: ["PB-01", "PB-02", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10"]
 agent_school: [303, 304]
+also_covers: ["Customer care diagnostics"]
 clarity_reviewed: "2026-11-15"
 card:
   goal: "Help care agents diagnose customer issues"

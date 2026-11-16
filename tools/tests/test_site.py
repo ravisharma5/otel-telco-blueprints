@@ -600,7 +600,7 @@ def test_material_css_uses_tokens():
 
 
 def test_recipes_overview_title():
-    text = (REPO_ROOT / "site-src/catalog/index.md").read_text(encoding="utf-8")
+    text = (REPO_ROOT / "catalog/index.md").read_text(encoding="utf-8")
     assert 'title: "Recipes"' in text
     assert "\n# Recipes\n" in text
     assert "Catalog" not in text

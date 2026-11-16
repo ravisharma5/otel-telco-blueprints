@@ -32,10 +32,12 @@ test:
 test-vale:
 	$(VALE) test .vale/styles/Blueprints
 
-# Rewrites the serving page blocks rendered from data/serving/*.yaml.
-# tools/tests/test_serving_data.py fails when the page drifts from the data.
+# Rewrites the generated blocks: the serving page from data/serving/*.yaml, and the
+# Recipes overview (catalog/index.md) from use-case front matter.
+# tools/tests/test_serving_data.py and test_catalog_overview.py fail on drift.
 render:
 	uv run python -m tools.site.render_serving
+	uv run python -m tools.site.render_catalog
 
 # NO_MKDOCS_2_WARNING silences the Material end-of-life banner in logs.
 docs:
