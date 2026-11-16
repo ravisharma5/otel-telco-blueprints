@@ -5,12 +5,24 @@ title: "Fictional widget triage (test fixture)"
 doc_status: "review"
 domain: "demo"
 flagship: true
+depth: "recipe"
 otel_slots: ["llm", "safety"]
 autonomy_ceiling: "act-alone"
 placement_tier: ["regional"]
 one_liner: "Drafts fictional triage labels with human approval. Needs a tool-calling LLM slot."
 platform_blueprints: ["PB-99"]
 agent_school: [301]
+card:
+  goal: "Cut time to first fictional triage"
+  summary: "Drafts a fictional triage label for each widget alarm, and an engineer approves it."
+  outcome: "Fictional engineers spend less time sorting widget alarms by hand."
+  audience: "Fictional demo engineers and their business owner"
+  measures: ["Time to first triage"]
+  risk: "A wrong fictional label slows the fix until an engineer catches it."
+placement:
+  regional:
+    runs: ["llm-small", "safety"]
+    note: ""
 ---
 
 > Fictional sample for linter tests. Not a real blueprint.

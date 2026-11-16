@@ -23,7 +23,7 @@ def _counts(sec) -> dict[str, int]:
 def _page_budget(tcfg, fm):
     pw = tcfg.get("page_words")
     if isinstance(pw, dict):
-        return pw.get("flagship" if fm.get("flagship") is True else "catalog")
+        return pw.get("recipe" if fm.get("depth") == "recipe" else "entry")
     return pw
 
 

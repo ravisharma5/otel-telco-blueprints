@@ -1,10 +1,24 @@
-"""FM001, FM002, RF001: front matter presence, type binding, and schema validity."""
+"""FM001, FM002, RF001: front matter presence, type binding, and schema validity.
+
+DP001: a flagship use case must be a recipe (depth: recipe).
+AS001: an empty agent_school list needs the no-course sentence in the
+At a glance Agent-school courses cell. AS002: every course number must be in
+the pinned list in tools/bplint/agent-school-courses.yaml (read locally, no
+network).
+"""
 
 from __future__ import annotations
 
+import functools
 import re
+from pathlib import Path
 
+from ..loader import load_yaml
 from ..report import Finding
+
+COURSES_FILE = Path(__file__).resolve().parents[1] / "agent-school-courses.yaml"
+NO_COURSE_SENTENCE = "None: no agent-school course covers this use case yet"
+COURSES_ROW = "Agent-school courses"
 
 _REQUIRED = re.compile(r"^'([^']+)' is a required property")
 _QUOTED = re.compile(r"'([^']+)'")
@@ -97,6 +111,58 @@ def _placement_messages(fm) -> list[str]:
     return out
 
 
+@functools.lru_cache(maxsize=1)
+def _courses() -> frozenset[int]:
+    data = load_yaml(COURSES_FILE) or {}
+    return frozenset(int(k) for k in (data.get("courses") or {}))
+
+
+def _courses_cell(doc) -> str | None:
+    sec = doc.section("At a glance")
+    if sec is None or not sec.tables:
+        return None
+    for row in sec.tables[0].rows:
+        if len(row.cells) >= 2 and row.cells[0].replace("**", "").strip() == COURSES_ROW:
+            return row.cells[1]
+    return None
+
+
+def _depth_findings(doc, fm) -> list[Finding]:
+    if fm.get("flagship") is True and fm.get("depth") != "recipe":
+        text = f"$.depth: a flagship use case must have depth 'recipe', found '{fm.get('depth')}'"
+        return [Finding(doc.path, _key_line(doc, "depth"), 1, "error", "DP001", text)]
+    return []
+
+
+def _course_findings(doc, fm) -> list[Finding]:
+    courses = fm.get("agent_school")
+    if not isinstance(courses, list):
+        return []
+    line = _key_line(doc, "agent_school")
+    if not courses:
+        cell = _courses_cell(doc)
+        if cell is None or NO_COURSE_SENTENCE not in cell:
+            text = (
+                f"$.agent_school: empty, so the At a glance '{COURSES_ROW}' cell must say "
+                f"'{NO_COURSE_SENTENCE}'"
+            )
+            return [Finding(doc.path, line, 1, "error", "AS001", text)]
+        return []
+    known = _courses()
+    return [
+        Finding(
+            doc.path,
+            line,
+            1,
+            "error",
+            "AS002",
+            f"$.agent_school: course {n} is not in the pinned agent-school course list ({COURSES_FILE.name})",
+        )
+        for n in courses
+        if n not in known
+    ]
+
+
 def check_type_binding(doc, ctx) -> list[Finding]:
     """FM002 when the page's `type` is not one its glob group accepts.
 
@@ -168,4 +234,7 @@ def check(doc, ctx) -> list[Finding]:
         out.extend(
             Finding(doc.path, line, 1, "error", "FM002", text) for text in _placement_messages(fm)
         )
+        out.extend(_depth_findings(doc, fm))
+    if not out:
+        out.extend(_course_findings(doc, fm))
     return out

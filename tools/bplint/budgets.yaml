@@ -62,9 +62,10 @@ types:
         bullets: 12         # related work: agent-school, NVIDIA/Databricks, LFN
 
   use-case:
+    # Keyed on front-matter depth: a recipe is the full page, an entry is one page.
     page_words:
-      flagship: 1350
-      catalog: 450
+      recipe: 1350
+      entry: 450
     sources_section: "Sources"
     at_a_glance_rows:
       - One-liner
@@ -74,9 +75,12 @@ types:
       - Autonomy ceiling
       - Placement tier
       - Agent-school courses
-    # Catalog (non-flagship) entries must fill these; others may be stubs.
-    catalog_required:
+    # Entries (depth: entry) must fill these and may stub only the rest
+    # (How it works, Deploy and verify). Recipes may stub nothing.
+    entry_required:
       - At a glance
+      - Problem and value
+      - What you need
       - Governance
       - Sources
       - Limitations

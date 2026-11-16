@@ -11,12 +11,15 @@
     "doc_status",
     "domain",
     "flagship",
+    "depth",
     "otel_slots",
     "autonomy_ceiling",
     "placement_tier",
     "one_liner",
     "platform_blueprints",
-    "agent_school"
+    "agent_school",
+    "card",
+    "placement"
   ],
   "properties": {
     "id": { "type": "string", "pattern": "^UC-[A-Z]+-[0-9]{2}$" },
@@ -38,6 +41,11 @@
       ]
     },
     "flagship": { "type": "boolean" },
+    "depth": {
+      "description": "recipe: a full page with a worked example and deploy steps. entry: a one-page catalog entry that stubs How it works and Deploy and verify. A flagship is always a recipe.",
+      "type": "string",
+      "enum": ["recipe", "entry"]
+    },
     "otel_slots": {
       "type": "array",
       "minItems": 1,
@@ -74,7 +82,7 @@
       "items": { "type": "string" }
     },
     "card": {
-      "description": "Director-facing summary for the explorer home page, written by the recipe author. Patterns enforce the word limits.",
+      "description": "Director-facing summary for the explorer home page, written by the page author. Required on every use-case page. Patterns enforce the word limits.",
       "type": "object",
       "additionalProperties": false,
       "required": ["goal", "summary", "outcome", "audience", "measures", "risk"],

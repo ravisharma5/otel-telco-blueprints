@@ -72,12 +72,12 @@ def _stub_findings(doc, ctx, btype, tcfg) -> list[Finding]:
     if not marker:
         return []
     fm = doc.front_matter
-    if btype == "use-case" and fm.get("flagship") is not True:
-        scope = set(tcfg.get("catalog_required") or [])
+    if btype == "use-case" and fm.get("depth") != "recipe":
+        scope = set(tcfg.get("entry_required") or [])
         why = "catalog entries must fill it"
     else:
         scope = None  # every section
-        why = "flagship and platform blueprints cannot stub sections"
+        why = "recipes and platform blueprints cannot stub sections"
     out = []
     for s in doc.sections:
         if s.level != 2 or not s.body_text.strip().startswith(marker):

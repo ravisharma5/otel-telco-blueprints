@@ -5,6 +5,7 @@ title: "CAMARA customer-care diagnostics"
 doc_status: done
 domain: "business-assurance"
 flagship: true
+depth: "recipe"
 otel_slots: ["llm", "safety", "embedding", "reranker", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

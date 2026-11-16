@@ -55,6 +55,16 @@ USE_CASE = {
     "one_liner": "Drafts triage labels with human approval. Needs a tool-calling LLM slot.",
     "platform_blueprints": ["PB-04"],
     "agent_school": [301],
+    "depth": "entry",
+    "card": {
+        "goal": "Cut time to first triage",
+        "summary": "Drafts a triage label for each alarm and an engineer approves it.",
+        "outcome": "Engineers spend less time sorting alarms by hand.",
+        "audience": "NOC engineers and their business owner",
+        "measures": ["Time to first triage"],
+        "risk": "A wrong label slows the fix until an engineer catches it.",
+    },
+    "placement": {"regional": {"runs": ["llm-small", "safety"], "note": ""}},
 }
 
 PLATFORM = {
@@ -86,6 +96,28 @@ def test_common_schema_has_no_readiness_levels():
 
 def test_valid_use_case_passes():
     assert _error_paths(_validator("use-case.schema.json"), USE_CASE) == []
+
+
+def test_use_case_depth_is_required():
+    v = _validator("use-case.schema.json")
+    bad = {k: x for k, x in USE_CASE.items() if k != "depth"}
+    assert not v.is_valid(bad)
+
+
+@pytest.mark.parametrize("depth", ["recipe", "entry"])
+def test_use_case_depth_values_pass(depth):
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, depth=depth)) == []
+
+
+def test_use_case_unknown_depth_fails():
+    assert "depth" in _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, depth="deep"))
+
+
+@pytest.mark.parametrize("field", ["card", "placement"])
+def test_use_case_card_and_placement_are_required(field):
+    v = _validator("use-case.schema.json")
+    bad = {k: x for k, x in USE_CASE.items() if k != field}
+    assert not v.is_valid(bad), field
 
 
 def test_use_case_bad_autonomy_ceiling_fails_on_path():

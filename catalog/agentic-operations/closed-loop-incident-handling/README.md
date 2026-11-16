@@ -5,6 +5,7 @@ title: "Governed closed-loop incident handling"
 doc_status: done
 domain: "agentic-operations"
 flagship: true
+depth: "recipe"
 otel_slots: ["llm", "decision", "safety", "classification"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3

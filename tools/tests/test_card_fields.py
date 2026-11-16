@@ -1,8 +1,8 @@
 """Card fields and the placement map in use-case front matter.
 
 The card is the director-facing summary the explorer shows on the home page.
-The placement map says which slot roles run at each tier. Both are optional
-in the schema; bplint explains word-limit failures and checks the placement
+The placement map says which slot roles run at each tier. Both are required
+on every use-case page; bplint explains word-limit failures and checks the placement
 map against otel_slots and placement_tier.
 """
 
@@ -254,17 +254,20 @@ def test_placement_finding_points_at_the_placement_line(tmp_path):
     assert [f.line for f in findings if f.code == "FM002"] == [expected]
 
 
-# ---- optional ---------------------------------------------------------------
+# ---- required ---------------------------------------------------------------
 
 
-def test_card_and_placement_optional(tmp_path):
-    fixture = FIXTURES / "valid/use-case/README.md"
-    text = fixture.read_text(encoding="utf-8")
-    assert "\ncard:" not in text and "\nplacement:" not in text
-    rc, findings = run_bplint(fixture)
-    assert (rc, findings) == (0, [])
+@pytest.mark.parametrize("key", ["card", "placement"])
+def test_card_and_placement_required(tmp_path, key):
+    for name in ("use-case", "catalog-entry"):
+        fixture = FIXTURES / "valid" / name / "README.md"
+        text = fixture.read_text(encoding="utf-8")
+        assert f"\n{key}:" in text, name
+        assert run_bplint(fixture) == (0, [])
     assert lint(tmp_path, render(use_case_fm(), use_case_sections())) == []
     assert schema_errors(use_case_fm()) == []
+    findings = lint(tmp_path, render(use_case_fm(**{key: None}), use_case_sections()))
+    assert [f.code for f in findings] == ["FM002"] and key in findings[0].message
 
 
 # ---- flagship pages -----------------------------------------------------------

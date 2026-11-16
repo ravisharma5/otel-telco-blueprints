@@ -5,6 +5,7 @@ title: "Grounded knowledge assistant"
 doc_status: done
 domain: "standards-knowledge"
 flagship: true
+depth: "recipe"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

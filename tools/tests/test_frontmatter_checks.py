@@ -12,7 +12,7 @@ import yaml
 
 from tools.bplint.cli import load_context, run_doc_checks
 from tools.bplint.markdown import parse_doc
-from tools.tests.conftest import FIXTURES, FIXED_TODAY
+from tools.tests.conftest import FIXTURES, FIXED_TODAY, REPO_ROOT
 
 SOURCES_HEADER = "| # | Claim | Basis | Source |\n|---|---|---|---|"
 SOURCES_ROW = "| 1 | Claim one | model card | [card](https://example.com/card) |"
@@ -44,6 +44,17 @@ def glance_table(labels, values=None):
     return "| Field | Value |\n|---|---|\n" + rows
 
 
+AS001_SENTENCE = "None: no agent-school course covers this use case yet"
+COURSES_FILE = REPO_ROOT / "tools/bplint/agent-school-courses.yaml"
+UC_CARD = {
+    "goal": "Cut time to first triage",
+    "summary": "Drafts a triage label for each alarm and an engineer approves it.",
+    "outcome": "Engineers spend less time sorting alarms by hand.",
+    "audience": "Engineers and their business owner",
+    "measures": ["Time to first triage"],
+    "risk": "A wrong label slows the fix until an engineer catches it.",
+}
+UC_PLACEMENT = {"regional": {"runs": ["llm-small"], "note": ""}}
 UC_ONE_LINER = "Drafts triage labels with human approval. Needs a tool-calling LLM slot."
 PB_ONE_LINER = "Gives each team a model endpoint. Depends on a gateway."
 UC_GLANCE_VALUES = {"One-liner": UC_ONE_LINER, "Autonomy ceiling": "Recommend with approval"}
@@ -64,7 +75,12 @@ def use_case_fm(**overrides):
         "one_liner": UC_ONE_LINER,
         "platform_blueprints": ["PB-04"],
         "agent_school": [301],
+        "depth": "entry",
+        "card": dict(UC_CARD),
+        "placement": {k: dict(v) for k, v in UC_PLACEMENT.items()},
     }
+    if overrides.get("flagship") is True and "depth" not in overrides:
+        fm["depth"] = "recipe"  # a flagship is always a recipe (DP001)
     for k, v in overrides.items():
         if v is None:
             fm.pop(k, None)
@@ -258,3 +274,70 @@ def test_unknown_type_is_fm002_and_skips_structure(tmp_path):
     secs.pop("Governance")
     findings = lint(tmp_path, render(use_case_fm(type="howto"), secs))
     assert codes(findings) == ["FM002"]
+
+
+# ---- DP001 ----------------------------------------------------------------
+
+
+def test_flagship_with_depth_entry_is_dp001(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(flagship=True, depth="entry"), use_case_sections()))
+    assert codes(findings) == ["DP001"]
+    assert "recipe" in findings[0].message
+
+
+def test_non_flagship_recipe_passes(tmp_path):
+    assert lint(tmp_path, render(use_case_fm(flagship=False, depth="recipe"), use_case_sections())) == []
+
+
+def test_missing_depth_is_fm002(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(depth=None), use_case_sections()))
+    assert "FM002" in codes(findings) and any("depth" in f.message for f in findings)
+
+
+# ---- AS001 / AS002 --------------------------------------------------------
+
+
+def _glance_with_courses(cell):
+    secs = use_case_sections()
+    secs["At a glance"] = glance_table(UC_AT_A_GLANCE, {**UC_GLANCE_VALUES, "Agent-school courses": cell})
+    return secs
+
+
+def test_empty_agent_school_without_sentence_is_as001(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(agent_school=[]), _glance_with_courses("None")))
+    assert codes(findings) == ["AS001"]
+    assert AS001_SENTENCE in findings[0].message
+
+
+def test_empty_agent_school_with_sentence_passes(tmp_path):
+    cell = f"{AS001_SENTENCE}; see the [agent-school roadmap](https://example.com/RoadMap.md)"
+    assert lint(tmp_path, render(use_case_fm(agent_school=[]), _glance_with_courses(cell))) == []
+
+
+def test_unknown_agent_school_course_is_as002(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(agent_school=[405]), use_case_sections()))
+    assert codes(findings) == ["AS002"]
+    assert "405" in findings[0].message
+
+
+def test_known_agent_school_course_passes(tmp_path):
+    assert lint(tmp_path, render(use_case_fm(agent_school=[401]), use_case_sections())) == []
+
+
+@pytest.mark.parametrize("alias", [404])
+def test_retired_agent_school_alias_is_as002(tmp_path, alias):
+    """Retired ballot aliases (401 to 404 with old meanings) only pass when the number is a real course."""
+    assert codes(lint(tmp_path, render(use_case_fm(agent_school=[alias]), use_case_sections()))) == ["AS002"]
+
+
+def test_unknown_agent_school_course_on_platform_is_as002(tmp_path):
+    findings = lint(tmp_path, render(platform_fm(agent_school=[999]), platform_sections()))
+    assert codes(findings) == ["AS002"]
+
+
+def test_courses_file_pinned():
+    data = yaml.safe_load(COURSES_FILE.read_text(encoding="utf-8"))
+    assert data["roadmap_commit"] == "30458bda61cdc1ea939ce7d1fe6b8d425ed2bbad"
+    assert str(data["checked"]) == "2026-11-15"
+    assert sorted(data["courses"]) == [101, 102, 103, 104, 201, 202, 203, 301, 302, 303, 304, 401, 402, 403]
+    assert all(isinstance(t, str) and t.strip() for t in data["courses"].values())

@@ -1,0 +1,24 @@
+# Agent-school course numbers that blueprint pages may cite (bplint AS002).
+# Pinned to one commit of the agent-school roadmap and README, so a renumbered
+# or retired course fails the lint instead of publishing a broken promise.
+# Retired ballot aliases are not listed; a number passes only when it names a
+# course below. Re-check against the roadmap before you change this file.
+repository: "https://github.com/open-experiments/agent-school"
+roadmap_path: "docs/RoadMap.md"  # course titles for 101, 201, 202, 301, and 302 come from README.md at the same commit
+roadmap_commit: "30458bda61cdc1ea939ce7d1fe6b8d425ed2bbad"
+checked: "2026-11-15"
+courses:
+  101: "NOC Assistant"
+  102: "NOC Assistant, Sandboxed"
+  103: "Telco-SME Assistant"
+  104: "NOC Assistant, Served"
+  201: "RCA Investigator"
+  202: "Fraud Triage"
+  203: "Routing Done Right"
+  301: "Closed-Loop NetOps"
+  302: "Energy Optimizer"
+  303: "Constrained & Identified"
+  304: "Agent SecOps"
+  401: "Skills and capabilities"
+  402: "Knowledge"
+  403: "Domain model track"

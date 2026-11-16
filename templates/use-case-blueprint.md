@@ -5,6 +5,7 @@ title: "<Use case in plain words>"
 doc_status: "draft"  # draft | review | done
 domain: "network-operations"  # standards-knowledge | network-software | network-operations | agentic-operations | business-assurance | security | research (demo is reserved for test fixtures)
 flagship: true  # false = catalog entry
+depth: "recipe"  # recipe = the full page (1350 prose words, no stubs); a flagship is always a recipe
 otel_slots: ["llm", "safety"]  # llm | embedding | reranker | safety | decision | classification
 autonomy_ceiling: "recommend-with-approval"  # inform | notify | recommend-with-approval | act-within-policy
 tmf_an_level_target: 3  # optional; 0-5; a target, never a claim
@@ -14,14 +15,14 @@ platform_blueprints: ["PB-04"]  # PB-<nn> ids this use case depends on
 agent_school: [301]  # agent-school course numbers (100-999)
 clarity_reviewed: "2026-11-07"  # set after the humanizer pass; quoted ISO date
 source: ["<source-id>"]  # optional; where the use case came from
-card:  # optional; the summary card on the explorer home page, in plain words
+card:  # required; the summary card on the explorer home page, in plain words
   goal: "<The goal, in 8 words or fewer>"
   summary: "<What it does, in 25 words or fewer>"
   outcome: "<What changes for the operator, in 20 words or fewer>"
   audience: "<Who it serves, in 12 words or fewer>"
   measures: ["<First measure, 6 words or fewer>"]  # one to three measures
   risk: "<The main risk, in 15 words or fewer>"
-placement:  # optional; one key per tier (far-edge | regional | core); runs lists roles: llm-small | llm-large | embedding | reranker | safety | decision | classification
+placement:  # required; one key per tier (far-edge | regional | core); runs lists roles: llm-small | llm-large | embedding | reranker | safety | decision | classification
   regional: {runs: ["llm-small", "safety"], note: ""}  # put every otel_slots entry on a tier; note: 15 words or fewer, required when runs is empty to say why
 ---
 

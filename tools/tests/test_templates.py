@@ -389,15 +389,15 @@ def test_fixture_within_page_word_budget(name):
     fm, body = split_doc(VALID / name / "README.md")
     budget = BUDGETS["types"][kind]["page_words"]
     if isinstance(budget, dict):
-        budget = budget["flagship" if fm["flagship"] else "catalog"]
+        budget = budget["recipe" if fm["depth"] == "recipe" else "entry"]
     assert prose_words(body) <= budget
 
 
 def test_catalog_entry_stubs_only_optional_sections():
     fm, body = split_doc(VALID / "catalog-entry" / "README.md")
-    assert fm["flagship"] is False
+    assert fm["flagship"] is False and fm["depth"] == "entry"
     marker = BUDGETS["stub_marker"]
-    required = BUDGETS["types"]["use-case"]["catalog_required"]
+    required = BUDGETS["types"]["use-case"]["entry_required"]
     stubbed = []
     for title, toks in sections(body):
         inl = [t for t in toks if t.type == "inline"]
@@ -406,4 +406,4 @@ def test_catalog_entry_stubs_only_optional_sections():
             stubbed.append(title)
         if title in required:
             assert not is_stub, f"{title} must be filled in a catalog entry"
-    assert len(stubbed) >= 3
+    assert stubbed == ["How it works", "Deploy and verify"]

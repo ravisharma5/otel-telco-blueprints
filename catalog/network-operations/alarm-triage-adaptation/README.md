@@ -5,6 +5,7 @@ title: "Adaptation ladder on alarm and root-cause triage"
 doc_status: done
 domain: "network-operations"
 flagship: true
+depth: "recipe"
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

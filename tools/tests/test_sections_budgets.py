@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
+
+import yaml
+
+from tools.tests.conftest import REPO_ROOT
 from tools.tests.test_frontmatter_checks import (
     PB_AT_A_GLANCE,
     PB_GLANCE_VALUES,
@@ -16,6 +21,11 @@ from tools.tests.test_frontmatter_checks import (
     use_case_fm,
     use_case_sections,
 )
+
+
+PAGE_WORDS = yaml.safe_load((REPO_ROOT / "tools/bplint/budgets.yaml").read_text())["types"]["use-case"][
+    "page_words"
+]
 
 
 def words(n):
@@ -58,17 +68,27 @@ def test_unexpected_section_is_sc001(tmp_path):
 # ---- SC002 ---------------------------------------------------------------
 
 
-def test_catalog_required_stub_is_sc002(tmp_path):
+@pytest.mark.parametrize("title", ["Problem and value", "What you need", "Governance", "Limitations"])
+def test_entry_required_stub_is_sc002(tmp_path, title):
     secs = use_case_sections()
-    secs["Governance"] = "_Stub: governance comes later._"
-    findings = [f for f in lint(tmp_path, render(use_case_fm(), secs)) if f.code == "SC002"]
-    assert len(findings) == 1 and "Governance" in findings[0].message
+    secs[title] = "_Stub: comes later._"
+    findings = [f for f in lint(tmp_path, render(use_case_fm(depth="entry"), secs)) if f.code == "SC002"]
+    assert len(findings) == 1 and title in findings[0].message
 
 
-def test_catalog_optional_stub_is_allowed(tmp_path):
+@pytest.mark.parametrize("title", ["How it works", "Deploy and verify"])
+def test_entry_optional_stub_is_allowed(tmp_path, title):
     secs = use_case_sections()
-    secs["How it works"] = "_Stub: steps come later._"
-    assert codes(lint(tmp_path, render(use_case_fm(), secs)), "SC002") == []
+    secs[title] = "_Stub: comes later._"
+    assert codes(lint(tmp_path, render(use_case_fm(depth="entry"), secs)), "SC002") == []
+
+
+@pytest.mark.parametrize("title", ["How it works", "Deploy and verify", "Problem and value"])
+def test_recipe_any_stub_is_sc002(tmp_path, title):
+    secs = use_case_sections()
+    secs[title] = "_Stub: comes later._"
+    findings = [f for f in lint(tmp_path, render(use_case_fm(depth="recipe"), secs)) if f.code == "SC002"]
+    assert len(findings) == 1 and "recipes and platform blueprints cannot stub sections" in findings[0].message
 
 
 def test_flagship_any_stub_is_sc002(tmp_path):
@@ -184,14 +204,22 @@ def test_unit_without_budget_is_unlimited(tmp_path):
     assert codes(lint(tmp_path, render(use_case_fm(), secs)), "BG001") == []
 
 
-def test_catalog_over_page_words_is_bg001(tmp_path):
+def test_entry_over_page_words_is_bg001(tmp_path):
     secs = use_case_sections()
-    secs["Problem and value"] = words(460)
+    secs["Problem and value"] = words(PAGE_WORDS["entry"] + 10)
     findings = [f for f in lint(tmp_path, render(use_case_fm(), secs)) if f.code == "BG001"]
     assert len(findings) == 1 and "page_words" in findings[0].message
 
 
-def test_flagship_thousand_words_is_within_budget(tmp_path):
+def test_recipe_under_page_words_is_within_budget(tmp_path):
     secs = use_case_sections()
-    secs["Problem and value"] = words(1000)
-    assert codes(lint(tmp_path, render(use_case_fm(flagship=True), secs)), "BG001") == []
+    secs["Problem and value"] = words(PAGE_WORDS["recipe"] - 100)
+    assert codes(lint(tmp_path, render(use_case_fm(depth="recipe"), secs)), "BG001") == []
+    assert codes(lint(tmp_path, render(use_case_fm(depth="entry"), secs)), "BG001") == ["BG001"]
+
+
+def test_recipe_over_page_words_is_bg001(tmp_path):
+    secs = use_case_sections()
+    secs["Problem and value"] = words(PAGE_WORDS["recipe"] + 10)
+    findings = [f for f in lint(tmp_path, render(use_case_fm(depth="recipe"), secs)) if f.code == "BG001"]
+    assert len(findings) == 1 and f"budget {PAGE_WORDS['recipe']}" in findings[0].message
