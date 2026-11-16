@@ -90,6 +90,8 @@ nav:
       - Overview: catalog/index.md
       - Standards and knowledge:
           - Grounded knowledge assistant: catalog/standards-knowledge/grounded-knowledge-assistant/README.md
+          - Standards and change-request summaries: catalog/standards-knowledge/spec-summarisation/README.md
+          - OSS and BSS architecture guidance: catalog/standards-knowledge/oss-bss-architecture-guidance/README.md
       - Network operations:
           - Adaptation ladder on alarm triage: catalog/network-operations/alarm-triage-adaptation/README.md
       - Agentic operations:

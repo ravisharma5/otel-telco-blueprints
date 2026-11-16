@@ -89,6 +89,53 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "agentic-operations/closed-loop-incident-handling": "UC-AGOPS-01",
     "network-operations/alarm-triage-adaptation": "UC-OPS-01",
     "business-assurance/camara-care-diagnostics": "UC-CARE-01",
+    "standards-knowledge/spec-summarisation": "UC-KNOW-02",
+    "standards-knowledge/oss-bss-architecture-guidance": "UC-KNOW-03",
+}
+
+# The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
+# test checks every listed page that exists, so a row can land before its page.
+ENTRY_SPECS: dict[str, dict] = {
+    "standards-knowledge/spec-summarisation": {
+        "id": "UC-KNOW-02",
+        "slots": {"embedding", "reranker", "safety", "decision", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [103, 402],
+        "goal": "answer",
+    },
+    "standards-knowledge/oss-bss-architecture-guidance": {
+        "id": "UC-KNOW-03",
+        "slots": {"embedding", "reranker", "safety", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [402],
+        "goal": "answer",
+    },
+    "network-software/ran-core-code-assistant": {
+        "id": "UC-SW-01",
+        "slots": {"embedding", "reranker", "safety", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [],
+        "goal": "software",
+    },
+    "network-software/network-automation-review": {
+        "id": "UC-SW-02",
+        "slots": {"embedding", "reranker", "safety", "decision", "llm"},
+        "ceiling": "recommend-with-approval",
+        "tmf": 2,
+        "agent_school": [301],
+        "goal": "change",
+    },
+    "network-software/oran-ric-xapp-assistant": {
+        "id": "UC-SW-03",
+        "slots": {"embedding", "reranker", "safety", "llm"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [],
+        "goal": "software",
+    },
 }
 
 # Parameters a use case may name that no platform page defines
@@ -97,6 +144,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
 USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     "standards-knowledge/grounded-knowledge-assistant": {"Decision routing threshold": "Model owner"},
     "business-assurance/camara-care-diagnostics": {"Decision routing threshold": "Model owner"},
+    "standards-knowledge/spec-summarisation": {"Decision routing threshold": "Model owner"},
 }
 
 # RACI activities a use case may name that no platform page defines
@@ -651,6 +699,25 @@ def test_entry_must_add_table(path):
 @ENTRY_PAGES
 def test_entry_language_scope_row(path):
     assert language_row_problems(body(path)) == []
+
+
+@pytest.mark.parametrize("key", sorted(ENTRY_SPECS))
+def test_entry_front_matter_matches_spec(key):
+    path = REPO_ROOT / "catalog" / key / "README.md"
+    if not path.is_file():
+        pytest.skip(f"{key} has not landed yet")
+    spec = ENTRY_SPECS[key]
+    fm = front_matter(path) or {}
+    assert fm.get("id") == spec["id"]
+    assert fm.get("depth") == "entry"
+    assert fm.get("flagship") is False
+    assert set(fm.get("otel_slots") or []) == spec["slots"]
+    assert fm.get("autonomy_ceiling") == spec["ceiling"]
+    assert fm.get("tmf_an_level_target") == spec["tmf"]
+    assert (fm.get("agent_school") or []) == spec["agent_school"]
+    assert (fm.get("card") or {}).get("goal") == spec["goal"]
+    assert fm.get("placement_tier") == ["regional", "core"]
+    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
 
 
 def test_entry_checks_pass_on_the_entry_fixture():

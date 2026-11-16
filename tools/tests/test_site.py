@@ -624,7 +624,8 @@ def test_recipes_overview_title():
     text = (REPO_ROOT / "catalog/index.md").read_text(encoding="utf-8")
     assert 'title: "Recipes"' in text
     assert "\n# Recipes\n" in text
-    assert "Catalog" not in text
+    # "Catalog entry" is the depth label the overview shares with the explorer.
+    assert "Catalog" not in text.replace("| Catalog entry |", "")
 
 
 def test_overview_links_pages():

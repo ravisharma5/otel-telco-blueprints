@@ -440,6 +440,20 @@ FLAGSHIP_PAGES = {
     "UC-OPS-01": "catalog/network-operations/alarm-triage-adaptation/README.md",
     "UC-CARE-01": "catalog/business-assurance/camara-care-diagnostics/README.md",
 }
+
+
+def use_case_page_paths() -> dict[str, str]:
+    """Use-case id -> repo path for every catalog page (flagships and entries).
+
+    A where_it_helps row may name any use case, because the explorer needs a
+    reason for every use case whose fit swaps in FP8 builds.
+    """
+    out = {}
+    for path in sorted((REPO_ROOT / "catalog").glob("*/*/README.md")):
+        fm = yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+        out[fm["id"]] = path.relative_to(REPO_ROOT).as_posix()
+    assert set(FLAGSHIP_PAGES.items()) <= set(out.items())
+    return out
 SOURCE_HOSTS = {
     "docs.vllm.ai",
     "github.com",
@@ -462,7 +476,7 @@ def options() -> list[dict]:
 
 def use_case_titles() -> dict[str, str]:
     out = {}
-    for uc, rel in FLAGSHIP_PAGES.items():
+    for uc, rel in use_case_page_paths().items():
         text = (REPO_ROOT / rel).read_text(encoding="utf-8")
         fm = yaml.safe_load(text.split("---", 2)[1])
         assert fm["id"] == uc, rel
@@ -566,7 +580,7 @@ def test_excluded_features_absent():
 
 def fit_row(o: dict, fit: dict, titles: dict[str, str]) -> list[str]:
     uc = fit["use_case"]
-    link = f"[{uc} {titles[uc]}](../../{FLAGSHIP_PAGES[uc]})"
+    link = f"[{uc} {titles[uc]}](../../{use_case_page_paths()[uc]})"
     return [o["name"], link, fit["reason"]]
 
 
@@ -574,7 +588,7 @@ def test_where_it_helps_rows():
     titles = use_case_titles()
     for o in options():
         for fit in o["where_it_helps"]:
-            assert fit["use_case"] in FLAGSHIP_PAGES, (o["id"], fit)
+            assert fit["use_case"] in titles, (o["id"], fit)
             assert fit["reason"].strip(), (o["id"], fit)
     table = table_with_header(SERVING, "Reference design", FIT_HEADER)
     assert table[0] == FIT_HEADER
