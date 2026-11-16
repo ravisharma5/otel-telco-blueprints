@@ -6,6 +6,13 @@ doc_status: "draft"  # draft | review | done
 domain: "network-operations"  # standards-knowledge | network-software | network-operations | agentic-operations | business-assurance | security | research (demo is reserved for test fixtures)
 flagship: true  # false = catalog entry
 depth: "recipe"  # recipe = the full page (1350 prose words, no stubs); a flagship is always a recipe
+adaptation:  # required; how far up the adaptation ladder (PB-03) and what the operator brings (PB-11); bplint AD001 checks it against otel_slots
+  rung: "skills"  # retrieval | skills (no model change) | head-retrain (Classification slot) | lora-if-gap (head retrain plus LoRA only if a measured gap remains)
+  expertise: ["golden-set", "tool-contracts"]  # taxonomy (iff classification) | golden-set (always) | gate-labels (iff decision) | tool-contracts (iff a tool-contract item) | corpus (iff embedding)
+  bring:  # 3 to 8 items; item: 60 characters or fewer; owner and matrix row come from PB-11
+    - {item: "<Read-only tool contracts>", domains: ["transport-ip"], mechanism: "tool-contract"}  # domains: ran | vran-oran | core-cnf | vnf | transport-ip | oss-bss | customer-care
+    - {item: "<Triage skill and capability manifests>", domains: ["transport-ip"], mechanism: "skill-manifest"}  # mechanism: rag-corpus | skill-manifest | tool-contract | gate-policy | classification-labels | lora-data
+    - {item: "<Approval ceilings for change actions>", domains: ["transport-ip"], mechanism: "gate-policy"}
 otel_slots: ["llm", "safety"]  # llm | embedding | reranker | safety | decision | classification
 autonomy_ceiling: "recommend-with-approval"  # inform | notify | recommend-with-approval | act-within-policy
 tmf_an_level_target: 3  # optional; 0-5; a target, never a claim

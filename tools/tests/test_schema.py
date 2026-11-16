@@ -65,6 +65,11 @@ USE_CASE = {
         "risk": "A wrong label slows the fix until an engineer catches it.",
     },
     "placement": {"regional": {"runs": ["llm-small", "safety"], "note": ""}},
+    "adaptation": {
+        "rung": "skills",
+        "expertise": ["golden-set", "tool-contracts"],
+        "bring": [{"item": "Read-only widget tools", "domains": ["oss-bss"], "mechanism": "tool-contract"}],
+    },
 }
 
 PLATFORM = {
@@ -111,6 +116,41 @@ def test_use_case_depth_values_pass(depth):
 
 def test_use_case_unknown_depth_fails():
     assert "depth" in _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, depth="deep"))
+
+
+def test_use_case_adaptation_is_required():
+    v = _validator("use-case.schema.json")
+    assert not v.is_valid({k: x for k, x in USE_CASE.items() if k != "adaptation"})
+
+
+@pytest.mark.parametrize("rung", ["retrieval", "skills", "head-retrain", "lora-if-gap"])
+def test_use_case_adaptation_rungs_pass(rung):
+    ad = dict(USE_CASE["adaptation"], rung=rung)
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, adaptation=ad)) == []
+
+
+def _bring(**item):
+    return [dict(USE_CASE["adaptation"]["bring"][0], **item)]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"rung": "lora"},
+        {"expertise": ["golden-set", "vibes"]},
+        {"expertise": []},
+        {"bring": _bring(domains=["satellite"])},
+        {"bring": _bring(mechanism="prompt")},
+        {"bring": _bring(owner="Risk owner")},
+        {"bring": _bring(item="x" * 61)},
+        {"bring": []},
+        {"extra": True},
+    ],
+)
+def test_use_case_bad_adaptation_fails(change):
+    ad = dict(USE_CASE["adaptation"], **change)
+    paths = _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, adaptation=ad))
+    assert any(p == "adaptation" or p.startswith("adaptation.") for p in paths), paths
 
 
 @pytest.mark.parametrize("field", ["card", "placement"])

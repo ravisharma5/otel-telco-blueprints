@@ -6,6 +6,9 @@ doc_status: done
 domain: "security"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts"]
 otel_slots: ["classification", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

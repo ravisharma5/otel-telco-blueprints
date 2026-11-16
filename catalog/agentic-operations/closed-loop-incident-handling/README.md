@@ -6,6 +6,9 @@ doc_status: done
 domain: "agentic-operations"
 flagship: true
 depth: "recipe"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts"]
 otel_slots: ["llm", "decision", "safety", "classification"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3

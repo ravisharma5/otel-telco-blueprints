@@ -6,6 +6,9 @@ doc_status: done
 domain: "business-assurance"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "skills"
+  expertise: ["golden-set", "gate-labels", "tool-contracts"]
 otel_slots: ["llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

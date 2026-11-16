@@ -12,6 +12,7 @@
     "domain",
     "flagship",
     "depth",
+    "adaptation",
     "otel_slots",
     "autonomy_ceiling",
     "placement_tier",
@@ -45,6 +46,45 @@
       "description": "recipe: a full page with a worked example and deploy steps. entry: a one-page catalog entry that stubs How it works and Deploy and verify. A flagship is always a recipe.",
       "type": "string",
       "enum": ["recipe", "entry"]
+    },
+    "adaptation": {
+      "description": "How far up the adaptation ladder the use case climbs (PB-03), the operator expertise it needs, and the items the operator brings. Owners and matrix rows come from PB-11. bplint AD001 checks the field against otel_slots.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rung", "expertise"],
+      "properties": {
+        "rung": {
+          "description": "retrieval and skills change no model; head-retrain retrains the Classification head; lora-if-gap also trains a LoRA adapter, only if a measured gap remains after retrieval and skills.",
+          "enum": ["retrieval", "skills", "head-retrain", "lora-if-gap"]
+        },
+        "expertise": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["taxonomy", "golden-set", "gate-labels", "tool-contracts", "corpus"] }
+        },
+        "bring": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["item", "domains", "mechanism"],
+            "properties": {
+              "item": { "type": "string", "minLength": 1, "maxLength": 60 },
+              "domains": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "enum": ["ran", "vran-oran", "core-cnf", "vnf", "transport-ip", "oss-bss", "customer-care"] }
+              },
+              "mechanism": {
+                "enum": ["rag-corpus", "skill-manifest", "tool-contract", "gate-policy", "classification-labels", "lora-data"]
+              }
+            }
+          }
+        }
+      }
     },
     "otel_slots": {
       "type": "array",

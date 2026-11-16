@@ -55,6 +55,12 @@ UC_CARD = {
     "risk": "A wrong label slows the fix until an engineer catches it.",
 }
 UC_PLACEMENT = {"regional": {"runs": ["llm-small"], "note": ""}}
+# Matches the default slots (llm only): skills, a golden set, and one tool contract.
+UC_ADAPTATION = {
+    "rung": "skills",
+    "expertise": ["golden-set", "tool-contracts"],
+    "bring": [{"item": "Read-only widget tools", "domains": ["oss-bss"], "mechanism": "tool-contract"}],
+}
 UC_ONE_LINER = "Drafts triage labels with human approval. Needs a tool-calling LLM slot."
 PB_ONE_LINER = "Gives each team a model endpoint. Depends on a gateway."
 UC_GLANCE_VALUES = {"One-liner": UC_ONE_LINER, "Autonomy ceiling": "Recommend with approval"}
@@ -78,6 +84,7 @@ def use_case_fm(**overrides):
         "depth": "entry",
         "card": dict(UC_CARD),
         "placement": {k: dict(v) for k, v in UC_PLACEMENT.items()},
+        "adaptation": {**UC_ADAPTATION, "bring": [dict(b) for b in UC_ADAPTATION["bring"]]},
     }
     if overrides.get("flagship") is True and "depth" not in overrides:
         fm["depth"] = "recipe"  # a flagship is always a recipe (DP001)
@@ -292,6 +299,112 @@ def test_non_flagship_recipe_passes(tmp_path):
 def test_missing_depth_is_fm002(tmp_path):
     findings = lint(tmp_path, render(use_case_fm(depth=None), use_case_sections()))
     assert "FM002" in codes(findings) and any("depth" in f.message for f in findings)
+
+
+# ---- AD001 ----------------------------------------------------------------
+
+CLASSIFY_SLOTS = ["classification", "llm"]
+CLASSIFY_PLACEMENT = {"regional": {"runs": ["classification", "llm-small"], "note": ""}}
+
+
+def _item(mechanism, domains=("oss-bss",), item="Widget item"):
+    return {"item": item, "domains": list(domains), "mechanism": mechanism}
+
+
+def classify_fm(**adaptation):
+    ad = {
+        "rung": "head-retrain",
+        "expertise": ["taxonomy", "golden-set"],
+        "bring": [_item("classification-labels"), _item("skill-manifest")],
+    }
+    ad.update(adaptation)
+    return use_case_fm(otel_slots=CLASSIFY_SLOTS, placement=CLASSIFY_PLACEMENT, adaptation=ad)
+
+
+def ad001(tmp_path, fm):
+    """The AD001 messages joined; every finding must be AD001."""
+    findings = lint(tmp_path, render(fm, use_case_sections()))
+    assert findings and set(codes(findings)) == {"AD001"}, [f"{f.code} {f.message}" for f in findings]
+    return " | ".join(f.message for f in findings)
+
+
+def test_classification_page_with_head_retrain_passes(tmp_path):
+    assert lint(tmp_path, render(classify_fm(), use_case_sections())) == []
+
+
+def test_bring_rules_skip_when_bring_is_absent(tmp_path):
+    ad = {"rung": "head-retrain", "expertise": ["taxonomy", "golden-set"]}
+    fm = use_case_fm(otel_slots=CLASSIFY_SLOTS, placement=CLASSIFY_PLACEMENT, adaptation=ad)
+    assert lint(tmp_path, render(fm, use_case_sections())) == []
+
+
+def test_classification_slot_with_skills_is_ad001(tmp_path):
+    assert "rung" in ad001(tmp_path, classify_fm(rung="skills"))
+
+
+def test_head_retrain_without_classification_is_ad001(tmp_path):
+    ad = dict(UC_ADAPTATION, rung="head-retrain")
+    assert "rung" in ad001(tmp_path, use_case_fm(adaptation=ad))
+
+
+def test_taxonomy_must_follow_classification(tmp_path):
+    assert "taxonomy" in ad001(tmp_path, classify_fm(expertise=["golden-set"]))
+    ad = dict(UC_ADAPTATION, expertise=["taxonomy", "golden-set", "tool-contracts"])
+    assert "taxonomy" in ad001(tmp_path, use_case_fm(adaptation=ad))
+
+
+def test_gate_labels_must_follow_decision(tmp_path):
+    ad = dict(UC_ADAPTATION, expertise=["golden-set", "gate-labels", "tool-contracts"])
+    assert "gate-labels" in ad001(tmp_path, use_case_fm(adaptation=ad))
+    fm = use_case_fm(
+        otel_slots=["llm", "decision"],
+        placement={"regional": {"runs": ["llm-small", "decision"], "note": ""}},
+    )
+    assert "gate-labels" in ad001(tmp_path, fm)
+
+
+def test_corpus_must_follow_embedding(tmp_path):
+    ad = dict(UC_ADAPTATION, expertise=["golden-set", "tool-contracts", "corpus"])
+    assert "corpus" in ad001(tmp_path, use_case_fm(adaptation=ad))
+    fm = use_case_fm(
+        otel_slots=["llm", "embedding"],
+        placement={"regional": {"runs": ["llm-small", "embedding"], "note": ""}},
+    )
+    assert "corpus" in ad001(tmp_path, fm)
+
+
+def test_golden_set_is_always_required(tmp_path):
+    ad = dict(UC_ADAPTATION, expertise=["tool-contracts"])
+    assert "golden-set" in ad001(tmp_path, use_case_fm(adaptation=ad))
+
+
+def test_classification_page_needs_a_labels_item(tmp_path):
+    msg = ad001(tmp_path, classify_fm(bring=[_item("skill-manifest")]))
+    assert "classification-labels" in msg
+
+
+def test_labels_item_needs_classification(tmp_path):
+    ad = dict(UC_ADAPTATION, bring=UC_ADAPTATION["bring"] + [_item("classification-labels")])
+    assert "classification-labels" in ad001(tmp_path, use_case_fm(adaptation=ad))
+
+
+def test_rag_corpus_item_needs_embedding(tmp_path):
+    ad = dict(UC_ADAPTATION, bring=UC_ADAPTATION["bring"] + [_item("rag-corpus")])
+    assert "rag-corpus" in ad001(tmp_path, use_case_fm(adaptation=ad))
+
+
+def test_tool_contracts_expertise_needs_a_tool_contract_item(tmp_path):
+    ad = dict(UC_ADAPTATION, bring=[_item("skill-manifest")])
+    assert "tool-contract" in ad001(tmp_path, use_case_fm(adaptation=ad))
+    ad = dict(UC_ADAPTATION, expertise=["golden-set"])
+    assert "tool-contract" in ad001(tmp_path, use_case_fm(adaptation=ad))
+
+
+def test_lora_data_only_with_lora_if_gap(tmp_path):
+    msg = ad001(tmp_path, classify_fm(bring=[_item("classification-labels"), _item("lora-data")]))
+    assert "lora-data" in msg
+    ok = classify_fm(rung="lora-if-gap", bring=[_item("classification-labels"), _item("lora-data")])
+    assert lint(tmp_path, render(ok, use_case_sections())) == []
 
 
 # ---- AS001 / AS002 --------------------------------------------------------

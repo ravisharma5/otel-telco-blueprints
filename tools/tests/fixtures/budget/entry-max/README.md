@@ -6,6 +6,13 @@ doc_status: "review"
 domain: "demo"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set", "gate-labels", "corpus"]
+  bring:
+    - {item: "Fictional widget fault taxonomy", domains: ["oss-bss"], mechanism: "classification-labels"}
+    - {item: "Fictional widget manuals", domains: ["oss-bss"], mechanism: "rag-corpus"}
+    - {item: "Fictional widget action ceilings", domains: ["oss-bss"], mechanism: "gate-policy"}
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm", "classification"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

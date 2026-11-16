@@ -6,6 +6,9 @@ doc_status: done
 domain: "network-software"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "retrieval"
+  expertise: ["golden-set", "corpus"]
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

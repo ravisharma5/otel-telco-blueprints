@@ -6,6 +6,9 @@ doc_status: done
 domain: "research"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "skills"
+  expertise: ["golden-set", "tool-contracts", "corpus"]
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

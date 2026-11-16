@@ -1,6 +1,12 @@
 """FM001, FM002, RF001: front matter presence, type binding, and schema validity.
 
 DP001: a flagship use case must be a recipe (depth: recipe).
+AD001: a use case's adaptation field must agree with its OTel slots: the
+Classification slot, a retraining rung, and a Classification labels item go
+together; taxonomy, gate labels, and corpus follow the Classification,
+Decision, and Embedding slots; tool contracts expertise and a tool contract
+item go together; LoRA training data only with the lora-if-gap rung; a golden
+set always.
 AS001: an empty agent_school list needs the no-course sentence in the
 At a glance Agent-school courses cell. AS002: every course number must be in
 the pinned list in tools/bplint/agent-school-courses.yaml (read locally, no
@@ -134,6 +140,54 @@ def _depth_findings(doc, fm) -> list[Finding]:
     return []
 
 
+_RETRAIN_RUNGS = {"head-retrain", "lora-if-gap"}
+
+
+def _adaptation_messages(fm) -> list[str]:
+    """AD001 rule failures, one message per rule. Runs after the schema passes."""
+    ad = fm.get("adaptation")
+    if not isinstance(ad, dict):
+        return []
+    slots = set(fm.get("otel_slots") or [])
+    rung = ad.get("rung")
+    expertise = set(ad.get("expertise") or [])
+    bring = ad.get("bring")
+    mechs = {b.get("mechanism") for b in bring or [] if isinstance(b, dict)}
+    has_bring = isinstance(bring, list)
+    out = []
+
+    classify = "classification" in slots
+    retrains = rung in _RETRAIN_RUNGS
+    labels_ok = not has_bring or (("classification-labels" in mechs) == classify)
+    if classify != retrains or not labels_ok:
+        out.append(
+            "the Classification slot, a retraining rung (head-retrain or lora-if-gap), and a "
+            f"classification-labels bring item must go together; found classification "
+            f"{'in' if classify else 'not in'} otel_slots and rung '{rung}'"
+            + ("" if labels_ok else ", and the classification-labels item does not match")
+        )
+    for exp, slot in (("taxonomy", "classification"), ("gate-labels", "decision"), ("corpus", "embedding")):
+        if (exp in expertise) != (slot in slots):
+            out.append(f"expertise '{exp}' must be listed if and only if '{slot}' is in otel_slots")
+    if has_bring and ("rag-corpus" in mechs) != ("embedding" in slots):
+        out.append("a rag-corpus bring item needs the embedding slot, and the embedding slot needs one")
+    if has_bring and ("tool-contract" in mechs) != ("tool-contracts" in expertise):
+        out.append("expertise 'tool-contracts' and a tool-contract bring item must go together")
+    if "lora-data" in mechs and rung != "lora-if-gap":
+        out.append(f"a lora-data bring item needs rung 'lora-if-gap', found '{rung}'")
+    if "golden-set" not in expertise:
+        out.append("expertise must include 'golden-set'")
+    return out
+
+
+def _adaptation_findings(doc, fm) -> list[Finding]:
+    line = _key_line(doc, "adaptation")
+    return [
+        Finding(doc.path, line, 1, "error", "AD001", f"$.adaptation: {text}")
+        for text in _adaptation_messages(fm)
+    ]
+
+
 def _course_findings(doc, fm) -> list[Finding]:
     courses = fm.get("agent_school")
     if not isinstance(courses, list):
@@ -235,6 +289,7 @@ def check(doc, ctx) -> list[Finding]:
             Finding(doc.path, line, 1, "error", "FM002", text) for text in _placement_messages(fm)
         )
         out.extend(_depth_findings(doc, fm))
+        out.extend(_adaptation_findings(doc, fm))
     if not out:
         out.extend(_course_findings(doc, fm))
     return out

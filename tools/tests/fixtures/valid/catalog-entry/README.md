@@ -6,6 +6,12 @@ doc_status: "review"
 domain: "demo"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "skills"
+  expertise: ["golden-set", "tool-contracts"]
+  bring:
+    - {item: "Fictional widget alarm tools", domains: ["oss-bss"], mechanism: "tool-contract"}
+    - {item: "Fictional triage procedure", domains: ["oss-bss"], mechanism: "skill-manifest"}
 otel_slots: ["llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["core"]

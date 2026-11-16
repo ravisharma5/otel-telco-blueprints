@@ -6,6 +6,9 @@ doc_status: done
 domain: "security"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set"]
 otel_slots: ["classification", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

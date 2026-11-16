@@ -6,6 +6,9 @@ doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set", "tool-contracts", "corpus"]
 otel_slots: ["embedding", "reranker", "safety", "classification", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

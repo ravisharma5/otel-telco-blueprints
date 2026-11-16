@@ -6,6 +6,9 @@ doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "recipe"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set", "gate-labels", "tool-contracts", "corpus"]
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

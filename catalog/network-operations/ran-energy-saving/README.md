@@ -6,6 +6,9 @@ doc_status: done
 domain: "network-operations"
 flagship: false
 depth: "recipe"
+adaptation:
+  rung: "skills"
+  expertise: ["golden-set", "gate-labels", "tool-contracts"]
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3

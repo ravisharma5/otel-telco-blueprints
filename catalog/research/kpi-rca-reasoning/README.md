@@ -6,6 +6,9 @@ doc_status: done
 domain: "research"
 flagship: false
 depth: "entry"
+adaptation:
+  rung: "head-retrain"
+  expertise: ["taxonomy", "golden-set", "gate-labels"]
 otel_slots: ["classification", "llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

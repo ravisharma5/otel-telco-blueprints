@@ -6,6 +6,9 @@ doc_status: done
 domain: "standards-knowledge"
 flagship: true
 depth: "recipe"
+adaptation:
+  rung: "retrieval"
+  expertise: ["golden-set", "gate-labels", "corpus"]
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
