@@ -159,7 +159,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; a golden set your experts label; gate labels from your approvers; a contract for each tool; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
@@ -177,7 +177,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 |---|---|---|
 | Fault taxonomy | Your core fault taxonomy and SME-labelled past incidents for the Classification head, because the shipped head covers eight synthetic drive-test classes | [OTel-LLM-8.3B-Classification model card](https://huggingface.co/farbodtavakkoli/OTel-LLM-8.3B-Classification) |
 | Golden set | Replayed core incidents with root causes your SMEs confirmed, scored before the shadow stage, because the card reports no evaluation of closed-loop operational tasks | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#autonomous-operational-task-completion-not-benchmarked) |
-| Gate labels | A gate set of past cases labelled by your approvers, weighted toward non-ACT cases, because the Decision slot reads its decision from label probabilities and you set its thresholds on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Gate labels | A gate set of past cases your approvers labelled, weighted toward non-ACT cases, because the Decision slot turns label probabilities into decisions through thresholds you set on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | Tool contracts | A pinned contract for each read tool: alarms as in TMF642, and counters as in TS 28.552 | [TMF642 Alarm Management repository](https://github.com/tmforum-apis/TMF642_AlarmManagement), [3GPP TS 28.552](https://www.3gpp.org/DynaReport/28552.htm) |
 | Domain corpus | 3GPP procedures, runbooks, and past RCA reports in retrieval, each with a usage-rights entry, because the card's training leaves out 5G core control-plane signalling | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | Language scope | Tests in every language your engineers write incidents in, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |

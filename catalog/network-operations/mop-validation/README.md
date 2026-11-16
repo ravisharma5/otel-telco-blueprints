@@ -158,7 +158,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; gate labels from your approvers; a contract for each tool; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
@@ -175,7 +175,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Gap | What you add | Source |
 |---|---|---|
 | Golden set | Past MOPs with SME-labelled defects, scored in a digital twin or emulated lab, because the card asks for dedicated MOP-based evaluation before deployment | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) |
-| Gate labels | A gate set of past cases labelled by your approvers, weighted toward non-ACT cases, because the Decision slot reads its decision from label probabilities and you set its thresholds on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Gate labels | A gate set of past cases your approvers labelled, weighted toward non-ACT cases, because the Decision slot turns label probabilities into decisions through thresholds you set on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | Tool contracts | A pinned contract for each read and dry-run tool, with change requests as in TMF655 and NETCONF validate for dry runs | [TMF655 Change Management repository](https://github.com/tmforum-apis/TMF655_ChangeManagement), [RFC 6241 validate capability](https://www.rfc-editor.org/rfc/rfc6241#section-8.6) |
 | Domain corpus | Vendor command references, NOS documents, runbooks, and past MOPs in retrieval, each with a usage-rights entry, because the card's training leaves out vendor command references and NOS documentation | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | Language scope | Tests in every language your MOPs are written in, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |

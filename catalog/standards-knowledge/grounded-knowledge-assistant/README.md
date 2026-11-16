@@ -21,7 +21,7 @@ one_liner: "Answers standards and runbook questions with citations, or abstains 
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10", "PB-11"]
 agent_school: [103, 201, 203, 402]
 also_covers: ["Telecom standards Q&A over documents you hold rights to", "Grounded RAG assistants"]
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-16"
 card:
   goal: "answer"
   summary: "Answers standards and runbook questions from your own documents with citations, or says it can't answer and shows what it searched."
@@ -151,7 +151,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| No model change: retrieval over your corpus | A golden set your experts label; Gate labels from your approvers; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| No model change: retrieval over your corpus | A golden set your experts label; gate labels from your approvers; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|

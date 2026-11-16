@@ -45,7 +45,10 @@ const plural = (key: 'slots' | 'blueprints') => {
 const takes = fill(why.takes, { slots: plural('slots'), blueprints: plural('blueprints') });
 const bring = fill(why.bring, {
   rung: useCase.adaptation.rung_label,
-  expertise: useCase.adaptation.expertise.map((e) => e.label).join(why.bring_join),
+  // Later labels start lowercase, because the list runs on as one sentence.
+  expertise: useCase.adaptation.expertise
+    .map((e, i) => (i === 0 ? e.label : e.label.charAt(0).toLowerCase() + e.label.slice(1)))
+    .join(why.bring_join),
 });
 const sites = usedTiers(useCase)
   .map((tier) => tierLabels[tier as keyof typeof tierLabels])

@@ -18,7 +18,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Summarises 3GPP specifications and change requests with a citation for each clause, or abstains. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10", "PB-11"]
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-16"
 agent_school: [103, 402]
 card:
   goal: "answer"
@@ -102,7 +102,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| No model change: retrieval over your corpus | A golden set your experts label; Gate labels from your approvers; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| No model change: retrieval over your corpus | A golden set your experts label; gate labels from your approvers; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|

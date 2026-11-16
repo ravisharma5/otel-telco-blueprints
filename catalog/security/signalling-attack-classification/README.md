@@ -97,7 +97,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; a golden set your experts label | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|

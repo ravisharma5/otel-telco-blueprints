@@ -158,7 +158,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; gate labels from your approvers; a contract for each tool; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
@@ -174,7 +174,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Gap | What you add | Source |
 |---|---|---|
 | Golden set | Replayed slice incidents and near misses with outcomes your SMEs confirmed, including SLA extraction checks, because the card lists SLA and QoS extraction as not benchmarked | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#autonomous-operational-task-completion-not-benchmarked) |
-| Gate labels | A gate set of past cases labelled by your approvers, weighted toward non-ACT cases, because the Decision slot reads its decision from label probabilities and you set its thresholds on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| Gate labels | A gate set of past cases your approvers labelled, weighted toward non-ACT cases, because the Decision slot turns label probabilities into decisions through thresholds you set on your own cases | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
 | Tool contracts | A pinned contract for each read tool, with SLOs read from TMF657 records and slice profiles | [TMF657 Service Quality Management repository](https://github.com/tmforum-apis/TMF657_ServiceQualityManagement), [3GPP network slice management](https://www.3gpp.org/technologies/slice-management) |
 | Domain corpus | The customer's SLA documents, runbooks, and past breach reports in retrieval, each with a usage-rights entry, because the card's training leaves out network-performance data | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#telecommunications-data-not-included-in-training) |
 | Language scope | Tests in every language your SLA documents and slice owners use, because the card's quality claims cover English text only | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#supported-language-and-modality) |

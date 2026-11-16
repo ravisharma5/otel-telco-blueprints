@@ -12,7 +12,7 @@ adaptation:
   bring:
     - {item: "RAN fault taxonomy and labelled past findings", domains: ["ran"], mechanism: "classification-labels"}
     - {item: "Counter and cell configuration read tools", domains: ["ran"], mechanism: "tool-contract"}
-    - {item: "Your analysis tools that compute each KPI", domains: ["ran"], mechanism: "tool-contract"}
+    - {item: "Contracts for your KPI analysis tools", domains: ["ran"], mechanism: "tool-contract"}
     - {item: "Health-check skill and capability manifests", domains: ["ran"], mechanism: "skill-manifest"}
     - {item: "Parameter change ceilings and approver roles", domains: ["ran"], mechanism: "gate-policy"}
 otel_slots: ["classification", "llm", "safety", "decision"]
@@ -106,13 +106,13 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; A golden set your experts label; Gate labels from your approvers; A contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| Retrain the Classification head on your taxonomy; no other model changes | Your fault or alert taxonomy; a golden set your experts label; gate labels from your approvers; a contract for each tool | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|
 | RAN fault taxonomy and labelled past findings | RAN | Classification labels | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 | Counter and cell configuration read tools | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
-| Your analysis tools that compute each KPI | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
+| Contracts for your KPI analysis tools | RAN | MCP tool contract | Platform team | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 | Health-check skill and capability manifests | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 | Parameter change ceilings and approver roles | RAN | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 

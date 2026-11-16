@@ -23,7 +23,7 @@ one_liner: "Suggests answers to a care agent from CAMARA device diagnostics, wit
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [303, 304]
 also_covers: ["Customer care diagnostics"]
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-16"
 card:
   goal: "customers"
   summary: "Suggests answers to care agents on no-service calls, using device status read through CAMARA APIs with the customer's consent."
@@ -185,7 +185,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; Gate labels from your approvers; A contract for each tool; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| No model change: retrieval, a skill per role, and a capability manifest per tool | A golden set your experts label; gate labels from your approvers; a contract for each tool; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|

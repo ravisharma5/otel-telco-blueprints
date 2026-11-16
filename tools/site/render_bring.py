@@ -189,6 +189,16 @@ def expertise_in_order(fm: dict) -> list[str]:
     return [e for e in EXPERTISE_ORDER if e in chosen]
 
 
+def _lower_first(text: str) -> str:
+    return text[:1].lower() + text[1:]
+
+
+def expertise_list(fm: dict) -> str:
+    """Expertise labels as one list cell: "Your fault or alert taxonomy; a golden set your experts label"."""
+    labels = [EXPERTISE_LABELS[e] for e in expertise_in_order(fm)]
+    return "; ".join([labels[0]] + [_lower_first(x) for x in labels[1:]]) if labels else ""
+
+
 def bring_summary(fm: dict) -> str:
     """One line: the short rung label, then the expertise labels in enum order."""
     ad = _adaptation(fm)
@@ -209,7 +219,7 @@ def block(fm: dict, mx: dict[tuple[str, str], dict[str, str]] | None = None, whe
             _cell(c)
             for c in (
                 RUNG_PAGE_TEXT[ad["rung"]],
-                "; ".join(EXPERTISE_LABELS[e] for e in expertise_in_order(fm)),
+                expertise_list(fm),
                 CLIMB_TEXT,
             )
         )

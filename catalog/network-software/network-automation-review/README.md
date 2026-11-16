@@ -19,7 +19,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Reviews network automation changes and recommends approval to a human approver. Never applies a change itself. Depends on schema checks and dry runs outside the model and on the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-16"
 agent_school: [301]
 card:
   goal: "change"
@@ -104,7 +104,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Model change | Your expertise | How far to climb |
 |---|---|---|
-| No model change: retrieval over your corpus | A golden set your experts label; Gate labels from your approvers; Your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
+| No model change: retrieval over your corpus | A golden set your experts label; gate labels from your approvers; your domain corpus | Configure first, and train only on a measured gap, as [PB-03 Adaptation](../../../platform/adaptation/README.md) sets out |
 
 | Item | Network component | Mechanism | Owner | Matrix row |
 |---|---|---|---|---|

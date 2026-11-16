@@ -698,7 +698,7 @@ def test_you_bring_row(explorer_dist, data, copy):
         assert _squash(uc["adaptation"]["rung_label"]) in text, uc["slug"]
         assert copy["adaptation"]["rung"][uc["adaptation"]["rung"]] == uc["adaptation"]["rung_label"]
         for item in uc["adaptation"]["expertise"]:
-            assert _squash(item["label"]) in text, (uc["slug"], item["label"])
+            assert _squash(item["label"]).lower() in text.lower(), (uc["slug"], item["label"])
         links = [a.attrs.get("href", "") for a in row.find_all(lambda n: n.tag == "a")]
         assert links == [BASE + "platform/bring-your-own-data/"], (uc["slug"], links)
 
