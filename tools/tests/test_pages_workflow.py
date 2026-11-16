@@ -169,3 +169,11 @@ def test_scripts_stay_blocked():
 def test_astro_telemetry_disabled():
     env = WORKFLOW["jobs"]["build"].get("env", {})
     assert env.get("ASTRO_TELEMETRY_DISABLED") == "1"
+
+
+def test_workflows_checkout_without_credentials():
+    """No checkout leaves the token in the workspace for later steps to read."""
+    checkouts = [st for st in _all_steps() if str(st.get("uses", "")).startswith("actions/checkout@")]
+    assert checkouts
+    for step in checkouts:
+        assert (step.get("with") or {}).get("persist-credentials") is False, step

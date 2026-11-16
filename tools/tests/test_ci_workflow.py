@@ -136,3 +136,15 @@ def test_makefile_ci_order():
     assert re.search(r"(?m)^test-site: site\n\tuv run pytest -q -m site_output$", MAKEFILE)
     doc_dirs = re.search(r"(?m)^DOC_DIRS := (.*)$", MAKEFILE).group(1).split()
     assert "explorer/src/content" in doc_dirs
+
+
+def test_workflows_checkout_without_credentials():
+    """No checkout leaves the token in the workspace for later steps to read."""
+    checkouts = [st for st in STEPS if str(st.get("uses", "")).startswith("actions/checkout@")]
+    assert checkouts
+    for step in checkouts:
+        assert (step.get("with") or {}).get("persist-credentials") is False, step
+
+
+def test_no_stale_pin_comment():
+    assert "pin actions by commit sha" not in WORKFLOW_PATH.read_text(encoding="utf-8").lower()
