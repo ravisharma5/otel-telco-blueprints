@@ -7,16 +7,24 @@ the live site (recipes/ for catalog pages, as tools/site/hooks.py publishes them
 apply tools/site/proposal-print.css with the vendored Red Hat fonts; write the PDF
 with WeasyPrint.
 
-Offline: RepoOnlyFetcher allows data: URLs and file: URLs inside the repository,
-and raises FatalURLFetchingError for anything else, so a remote image or stylesheet
-stops the build instead of being fetched.
+Offline: RepoOnlyFetcher allows data: URLs and absolute file: URLs inside the
+repository, and raises FatalURLFetchingError for anything else, so a remote image
+or stylesheet stops the build instead of being fetched.
+
+Fonts: the print CSS loads the vendored Red Hat fonts with @font-face through the
+same fetcher. WeasyPrint registers @font-face rules only when the stylesheet and the
+render share a FontConfiguration, so document() passes one to both.
 
 Reproducible: the creation and modification dates come from data/facts-check.yaml
-(dcterms.created and dcterms.modified meta, read by WeasyPrint), so two builds of
-the same source give the same bytes.
+(dcterms.created and dcterms.modified meta, read by WeasyPrint), and the embedded
+font instances get the same date through SOURCE_DATE_EPOCH, so two builds of the
+same source give the same bytes.
 
-WeasyPrint needs Pango (brew install pango; pinned apt packages in pages.yml). When
-it cannot load, the build prints a skip notice and exits 0, unless REQUIRE_PDF=1.
+Only the Pages workflow builds the PDF: the CLI builds it only when REQUIRE_PDF=1
+(set by pages.yml, make proposal-pdf, and make test-pdf) and otherwise prints a skip
+notice and exits 0, so lint never depends on Pango. With REQUIRE_PDF=1, a WeasyPrint
+or Pango that cannot load is an error (brew install pango; pinned apt packages in
+pages.yml).
 
 Usage:
     python -m tools.site.build_pdf [--out PATH] [--source PATH]
@@ -31,6 +39,7 @@ import os
 import posixpath
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -177,6 +186,11 @@ def _checked(facts_file: Path = FACTS_FILE) -> str:
     return m.group(1)
 
 
+def _epoch(day: str) -> int:
+    """Seconds since 1970-01-01 for midnight UTC on an ISO date."""
+    return int(datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp())
+
+
 def render_html(source: Path = SOURCE) -> str:
     """The proposal as one HTML document, ready for WeasyPrint."""
     md = MarkdownIt("commonmark", {"html": False}).enable("table")
@@ -221,52 +235,95 @@ def _fetcher_class():
     from weasyprint.urls import FatalURLFetchingError, URLFetcher
 
     class RepoOnlyFetcher(URLFetcher):
-        """Allows data: URLs and file: URLs inside the repository; nothing else."""
+        """Allows data: URLs and absolute file: URLs inside the repository; nothing else.
+
+        A file: URL must name an absolute local path (no host other than localhost)
+        that resolves inside the root. Relative forms such as file:etc/hosts, which
+        Python 3.12's urljoin produces for a path with too many ../ segments, are
+        refused instead of being resolved against the working directory.
+        """
 
         def __init__(self, root: Path, **kwargs):
             super().__init__(allowed_protocols=("file", "data"), **kwargs)
             self.root = root.resolve()
 
-        def fetch(self, url, headers=None):
+        def allows(self, url: str) -> bool:
             scheme = url.split(":", 1)[0].lower()
             if scheme == "data":
-                return super().fetch(url, headers)
-            if scheme == "file":
-                path = Path(unquote(urlsplit(url).path)).resolve()
-                if path.is_relative_to(self.root):
-                    return super().fetch(url, headers)
-            raise FatalURLFetchingError(f"pdf: refusing to fetch {url}")
+                return True
+            if scheme != "file":
+                return False
+            parts = urlsplit(url)
+            if parts.netloc not in ("", "localhost"):
+                return False
+            raw = unquote(parts.path)
+            if not raw.startswith("/"):
+                return False
+            return Path(raw).resolve().is_relative_to(self.root)
+
+        def fetch(self, url, headers=None):
+            if not self.allows(url):
+                raise FatalURLFetchingError(f"pdf: refusing to fetch {url}")
+            return super().fetch(url, headers)
 
     return RepoOnlyFetcher
 
 
 def document(source: Path = SOURCE, root: Path = ROOT):
-    """A WeasyPrint HTML object for the page, with the offline fetcher and print CSS."""
+    """A WeasyPrint HTML object for the page, with the offline fetcher and print CSS.
+
+    The print CSS is parsed with a FontConfiguration, and the same configuration is
+    passed to render() and write_pdf(): WeasyPrint registers @font-face rules only
+    then, so without it the vendored fonts are never loaded and Pango falls back to
+    whatever system fonts fontconfig finds.
+    """
     from weasyprint import CSS, HTML
+    from weasyprint.text.fonts import FontConfiguration
 
     fetcher = _fetcher_class()(root)
+    font_config = FontConfiguration()
     return _Doc(
         HTML(
             string=render_html(source),
             base_url=source.resolve().as_uri(),
             url_fetcher=fetcher,
         ),
-        CSS(filename=str(PRINT_CSS), url_fetcher=fetcher),
+        CSS(filename=str(PRINT_CSS), url_fetcher=fetcher, font_config=font_config),
+        font_config,
     )
 
 
 class _Doc:
     """HTML plus its stylesheet, so render() and write_pdf() always use both."""
 
-    def __init__(self, html_doc, css):
+    def __init__(self, html_doc, css, font_config):
         self.html = html_doc
         self.css = css
+        self.font_config = font_config
+
+    def _options(self):
+        return {
+            "stylesheets": [self.css],
+            "font_config": self.font_config,
+            "pdf_variant": "pdf/ua-1",
+        }
 
     def render(self):
-        return self.html.render(stylesheets=[self.css], pdf_variant="pdf/ua-1")
+        return self.html.render(**self._options())
 
     def write_pdf(self, target):
-        return self.html.write_pdf(target, stylesheets=[self.css], pdf_variant="pdf/ua-1")
+        # WeasyPrint turns each variable font into a static instance with fontTools,
+        # which stamps the font's head.modified with the current time unless
+        # SOURCE_DATE_EPOCH is set. Pin it to the facts stamp for this call only.
+        previous = os.environ.get("SOURCE_DATE_EPOCH")
+        os.environ["SOURCE_DATE_EPOCH"] = str(_epoch(_checked()))
+        try:
+            return self.html.write_pdf(target, **self._options())
+        finally:
+            if previous is None:
+                os.environ.pop("SOURCE_DATE_EPOCH", None)
+            else:
+                os.environ["SOURCE_DATE_EPOCH"] = previous
 
 
 def build(source: Path = SOURCE, out: Path = DEFAULT_OUT) -> Path:
@@ -296,13 +353,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--source", type=Path, default=SOURCE)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args(argv)
+    if os.environ.get("REQUIRE_PDF") != "1":
+        print("pdf: skipped, the PDF is built only with REQUIRE_PDF=1 (make proposal-pdf)")
+        return 0
     ok, why = weasyprint_available()
     if not ok:
-        if os.environ.get("REQUIRE_PDF") == "1":
-            print(f"pdf: WeasyPrint cannot load ({why}) and REQUIRE_PDF=1", file=sys.stderr)
-            return 1
-        print(f"pdf: skipped, WeasyPrint or Pango not installed ({why})")
-        return 0
+        print(f"pdf: WeasyPrint cannot load ({why}) and REQUIRE_PDF=1", file=sys.stderr)
+        return 1
     out = build(args.source, args.out)
     try:
         shown = out.resolve().relative_to(ROOT)

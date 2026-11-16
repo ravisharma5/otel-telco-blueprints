@@ -14,8 +14,8 @@ this step, which does three things in order:
    (relative, or under the site base path) that resolves to no file.
 
 The proposal PDF (built by tools/site/build_pdf.py before this step) is the one
-optional target: when WeasyPrint cannot run locally the PDF is skipped, so a link to
-it is not reported, unless REQUIRE_PDF=1 (set in the Pages workflow).
+optional target: it is built only with REQUIRE_PDF=1 (set in the Pages workflow), so
+without it a missing PDF's link is not reported.
 
 Usage:
     python -m tools.site.merge_site
@@ -213,7 +213,7 @@ def optional_targets(site: Path) -> frozenset[str]:
     """The proposal PDF is optional only when it is missing and REQUIRE_PDF is not 1."""
     if (site / PROPOSAL_PDF).is_file() or os.environ.get("REQUIRE_PDF") == "1":
         return frozenset()
-    print(f"links: {PROPOSAL_PDF} not built (no Pango); its link is not checked")
+    print(f"links: {PROPOSAL_PDF} not built (REQUIRE_PDF is not 1); its link is not checked")
     return frozenset({PROPOSAL_PDF})
 
 

@@ -82,18 +82,22 @@ def site_dir():
     return SITE_DIR
 
 
-def weasyprint_or_skip():
-    """Import WeasyPrint; skip when Pango is missing, or fail when REQUIRE_PDF=1."""
+def pdf_or_skip():
+    """Skip unless REQUIRE_PDF=1; with it, fail when WeasyPrint or Pango cannot load.
+
+    Only the Pages workflow (and make test-pdf) sets REQUIRE_PDF=1, so lint skips
+    the PDF even on a runner where WeasyPrint happens to import.
+    """
+    if os.environ.get("REQUIRE_PDF") != "1":
+        pytest.skip("PDF tests run only with REQUIRE_PDF=1 (make test-pdf, Pages workflow)")
     try:
         import weasyprint  # noqa: F401  (loads Pango through cffi)
     except (ImportError, OSError) as exc:
-        if os.environ.get("REQUIRE_PDF") == "1":
-            pytest.fail(f"WeasyPrint cannot load ({exc}) and REQUIRE_PDF=1")
-        pytest.skip("WeasyPrint or Pango not installed (set REQUIRE_PDF=1 to fail)")
+        pytest.fail(f"WeasyPrint cannot load ({exc}) and REQUIRE_PDF=1")
 
 
 @pytest.fixture(autouse=True)
 def _pdf_gate(request):
-    """Every test marked pdf skips without Pango, unless REQUIRE_PDF=1."""
+    """Every test marked pdf skips unless REQUIRE_PDF=1."""
     if request.node.get_closest_marker("pdf") is not None:
-        weasyprint_or_skip()
+        pdf_or_skip()

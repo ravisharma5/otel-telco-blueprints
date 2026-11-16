@@ -109,7 +109,9 @@ def test_old_home_is_explorer(site_dir):
 
 
 def test_internal_links_resolve(site_dir):
-    assert merge_site.check_links(site_dir) == []
+    # Same exemption as the merge step: the proposal PDF may be missing only when
+    # REQUIRE_PDF is not 1 (the Pages workflow sets it, so there it is checked).
+    assert merge_site.check_links(site_dir, merge_site.optional_targets(site_dir)) == []
 
 
 def test_build_paths_disjoint(explorer_dist):

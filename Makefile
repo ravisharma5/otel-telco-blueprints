@@ -56,13 +56,14 @@ docs:
 	NO_MKDOCS_2_WARNING=1 uv run mkdocs build --strict --clean
 
 # The proposal PDF, built offline by WeasyPrint from proposal/index.md (needs Pango:
-# brew install pango). Without Pango it prints a skip notice and exits 0, unless
-# REQUIRE_PDF=1. The Pages workflow installs pinned Pango and sets REQUIRE_PDF=1.
+# brew install pango). The builder runs only with REQUIRE_PDF=1, so make site and
+# make ci skip it unless it is set; the Pages workflow installs pinned Pango and sets it.
 proposal-pdf:
-	uv run python -m tools.site.build_pdf --out site/proposal/otel-telco-blueprints-proposal.pdf
+	REQUIRE_PDF=1 uv run python -m tools.site.build_pdf --out site/proposal/otel-telco-blueprints-proposal.pdf
 
-# PDF tests that need no built site; they fail instead of skipping without Pango.
-# Run before every push that touches the proposal or the print stylesheet.
+# PDF tests that need no built site. Every pdf test skips unless REQUIRE_PDF=1, and
+# fails with it when Pango is missing. Run before every push that touches the
+# proposal, the print stylesheet, or the vendored fonts.
 test-pdf:
 	REQUIRE_PDF=1 uv run pytest -q -m "pdf and not site_output"
 

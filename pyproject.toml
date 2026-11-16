@@ -33,5 +33,5 @@ addopts = "-ra -m \"not site_output\""
 empty_parameter_set_mark = "skip"
 markers = [
     "site_output: reads built output (run make site or make explorer first)",
-    "pdf: builds the proposal PDF (needs Pango; skips unless installed, fails when REQUIRE_PDF=1)",
+    "pdf: builds the proposal PDF (runs only with REQUIRE_PDF=1, then fails without Pango)",
 ]

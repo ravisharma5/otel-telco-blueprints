@@ -1,19 +1,23 @@
 """Proposal PDF (tools/site/build_pdf.py).
 
-Tests marked pdf build the PDF with WeasyPrint. They skip when Pango is missing,
-and fail instead when REQUIRE_PDF=1 (set in the Pages workflow and by make test-pdf).
+Tests marked pdf build the PDF with WeasyPrint. They run only when REQUIRE_PDF=1
+(set in the Pages workflow and by make test-pdf) and then fail if Pango is missing;
+otherwise they skip, so lint never builds the PDF.
 """
 
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import socket
+import subprocess
+import sys
 
 import pytest
 
 from tools.site import build_pdf
-from tools.tests.conftest import REPO_ROOT
+from tools.tests.conftest import REPO_ROOT, pdf_or_skip
 
 PROPOSAL = REPO_ROOT / "proposal/index.md"
 FACTS = REPO_ROOT / "data/facts-check.yaml"
@@ -41,11 +45,9 @@ def _squash(text: str) -> str:
 
 @pytest.fixture(scope="module")
 def built_pdf(tmp_path_factory):
+    # Module-scoped fixtures run before the autouse gate, so gate here too.
+    pdf_or_skip()
     out = tmp_path_factory.mktemp("pdf") / "proposal.pdf"
-    try:
-        import weasyprint  # noqa: F401
-    except (ImportError, OSError):
-        return None  # the autouse pdf gate skips or fails each test
     build_pdf.build(PROPOSAL, out)
     return out
 
@@ -58,6 +60,23 @@ def _reader(path):
 
 def _text(path) -> str:
     return "\n".join(page.extract_text() or "" for page in _reader(path).pages)
+
+
+def _font_names(path) -> set[str]:
+    names = set()
+    for page in _reader(path).pages:
+        fonts = page.get("/Resources", {}).get("/Font", {})
+        for ref in fonts.values():
+            names.add(str(ref.get_object()["/BaseFont"]))
+    return names
+
+
+def _assert_red_hat_only(names: set[str]) -> None:
+    assert names, "no fonts found"
+    # Subset prefix plus the family, for example /ABCDEF+Red-Hat-Text-Bold.
+    assert all(re.fullmatch(r"/[A-Z]{6}\+Red-Hat-[A-Za-z-]+", n) for n in names), names
+    families = {n.split("+", 1)[1] for n in names}
+    assert {"Red-Hat-Text", "Red-Hat-Display-Bold"} <= families, families
 
 
 # ---------- runs without Pango ----------
@@ -119,6 +138,8 @@ def test_pdf_builds_offline(tmp_path, monkeypatch):
     ],
 )
 def test_pdf_blocks_remote_resources(tmp_path, src):
+    # Python 3.12's urljoin turns the third case into file:etc/hosts; 3.14 gives
+    # file:///etc/hosts. Both must stop the build.
     from weasyprint.urls import FatalURLFetchingError
 
     page = tmp_path / "page.md"
@@ -126,6 +147,45 @@ def test_pdf_blocks_remote_resources(tmp_path, src):
     with pytest.raises(FatalURLFetchingError):
         build_pdf.build(page, tmp_path / "out.pdf")
     assert not (tmp_path / "out.pdf").exists()
+
+
+@pytest.mark.pdf
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:etc/hosts",
+        "file:///etc/hosts",
+        "file://localhost/etc/hosts",
+        "file://example.com" + str(REPO_ROOT / "README.md"),
+        "file:README.md",
+        (REPO_ROOT / "README.md").as_uri() + "/../../../../../../../../etc/hosts",
+        "https://example.com/font.woff2",
+        "ftp://example.com/x",
+    ],
+)
+def test_fetcher_rejects_outside_repo(url):
+    from weasyprint.urls import FatalURLFetchingError
+
+    fetcher = build_pdf._fetcher_class()(REPO_ROOT)
+    with pytest.raises(FatalURLFetchingError):
+        fetcher.fetch(url)
+
+
+@pytest.mark.pdf
+def test_fetcher_allows_vendored_fonts():
+    fetcher = build_pdf._fetcher_class()(REPO_ROOT)
+    css = PRINT_CSS.read_text(encoding="utf-8")
+    refs = re.findall(r'url\("([^"]+\.woff2)"\)', css)
+    assert len(refs) == 3, refs
+    for ref in refs:
+        path = (PRINT_CSS.parent / ref).resolve()
+        assert path.is_file(), ref
+        assert path.parent == REPO_ROOT / "site-src/brand/fonts", ref
+        response = fetcher.fetch(path.as_uri())
+        try:
+            assert response.read(4) == b"wOF2", ref
+        finally:
+            response.close()
 
 
 @pytest.mark.pdf
@@ -142,14 +202,42 @@ def test_pdf_contains_stamp_and_summary(built_pdf):
 
 @pytest.mark.pdf
 def test_pdf_fonts_vendored(built_pdf):
-    names = set()
-    for page in _reader(built_pdf).pages:
-        fonts = page.get("/Resources", {}).get("/Font", {})
-        for ref in fonts.values():
-            names.add(str(ref.get_object()["/BaseFont"]))
-    assert names, "no fonts found"
-    # Subset prefix plus the family, for example /ABCDEF+Red-Hat-Text-Bold.
-    assert all("RedHat" in n.replace("-", "") for n in names), names
+    _assert_red_hat_only(_font_names(built_pdf))
+
+
+@pytest.mark.pdf
+def test_pdf_fonts_without_system_fonts(tmp_path):
+    """Build with a fontconfig that knows no font directories at all.
+
+    The only fonts left are the vendored ones loaded by @font-face, so a machine
+    with Red Hat fonts installed system-wide cannot hide a broken @font-face.
+    """
+    cache = tmp_path / "fc-cache"
+    cache.mkdir()
+    conf = tmp_path / "fonts.conf"
+    conf.write_text(
+        '<?xml version="1.0"?>\n'
+        '<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">\n'
+        f"<fontconfig><cachedir>{cache}</cachedir></fontconfig>\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "isolated.pdf"
+    env = {
+        **os.environ,
+        "FONTCONFIG_FILE": str(conf),
+        "FONTCONFIG_PATH": str(tmp_path),
+        "REQUIRE_PDF": "1",
+    }
+    proc = subprocess.run(
+        [sys.executable, "-m", "tools.site.build_pdf", "--out", str(out)],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+    _assert_red_hat_only(_font_names(out))
+    assert _squash(f"Facts checked as of {_checked()}") in _squash(_text(out))
 
 
 @pytest.mark.pdf
@@ -163,6 +251,39 @@ def test_pdf_reproducible(built_pdf, tmp_path):
     stamp = "D:" + _checked().replace("-", "")
     assert str(meta["/CreationDate"]).startswith(stamp)
     assert str(meta["/ModDate"]).startswith(stamp)
+
+
+@pytest.mark.pdf
+def test_pdf_font_dates_pinned(built_pdf):
+    """Embedded font instances carry the facts date, not the build time.
+
+    WeasyPrint saves each variable font instance with fontTools, which writes the
+    current time into head.modified unless SOURCE_DATE_EPOCH is set; two builds a
+    second apart would then differ.
+    """
+    from datetime import datetime, timezone
+    from io import BytesIO
+
+    from fontTools.ttLib import TTFont
+
+    # fontTools head dates count seconds from 1904-01-01.
+    epoch_1904 = datetime(1904, 1, 1, tzinfo=timezone.utc)
+    day = datetime.strptime(_checked(), "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    expected = int((day - epoch_1904).total_seconds())
+    seen = 0
+    reader = _reader(built_pdf)
+    for page in reader.pages:
+        for ref in page.get("/Resources", {}).get("/Font", {}).values():
+            font = ref.get_object()
+            for desc_font in font.get("/DescendantFonts", []):
+                descriptor = desc_font.get_object()["/FontDescriptor"].get_object()
+                stream = descriptor.get("/FontFile2")
+                if stream is None:
+                    continue
+                head = TTFont(BytesIO(stream.get_object().get_data()))["head"]
+                assert head.modified == expected, font["/BaseFont"]
+                seen += 1
+    assert seen, "no embedded TrueType fonts found"
 
 
 @pytest.mark.pdf
@@ -209,15 +330,29 @@ def test_pdf_tables_fit_page():
     assert evidence >= 1, "evidence summary table not found"
 
 
-def test_cli_skips_without_weasyprint(monkeypatch, tmp_path, capsys):
-    monkeypatch.setattr(build_pdf, "weasyprint_available", lambda: (False, "no pango"))
+def test_cli_skips_without_require_pdf(monkeypatch, tmp_path, capsys):
+    # Skips even when WeasyPrint loads: only REQUIRE_PDF=1 builds the PDF.
+    monkeypatch.setattr(build_pdf, "weasyprint_available", lambda: (True, ""))
+    monkeypatch.setattr(build_pdf, "build", lambda *a: pytest.fail("built without REQUIRE_PDF"))
     monkeypatch.delenv("REQUIRE_PDF", raising=False)
     out = tmp_path / "p.pdf"
     assert build_pdf.main(["--out", str(out)]) == 0
     assert "skipped" in capsys.readouterr().out
     assert not out.exists()
+
+
+def test_cli_fails_without_weasyprint_when_required(monkeypatch, tmp_path):
+    monkeypatch.setattr(build_pdf, "weasyprint_available", lambda: (False, "no pango"))
     monkeypatch.setenv("REQUIRE_PDF", "1")
+    out = tmp_path / "p.pdf"
     assert build_pdf.main(["--out", str(out)]) == 1
+    assert not out.exists()
+
+
+def test_pdf_tests_gated_on_require_pdf(monkeypatch):
+    monkeypatch.delenv("REQUIRE_PDF", raising=False)
+    with pytest.raises(pytest.skip.Exception):
+        pdf_or_skip()
 
 
 @pytest.mark.site_output
