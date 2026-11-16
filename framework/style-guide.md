@@ -75,9 +75,16 @@ Put page-specific parts under *The design* as H3 headings. The linter checks onl
 
 Some topics have no section of their own. Config artifacts become links under *Reference design*. Integrations and data or adaptation needs go into *What you need*. Related work (agent-school, NVIDIA and Databricks blueprints, LFN projects) goes into *Used by and next steps* on platform pages and into the related-work bullets under *Deploy and verify* on use-case pages.
 
-On use-case pages, *How it works* holds one Mermaid flowchart with capability names only, then H3 tables such as the slots table and a worked example in prose. *Governance* holds the action table, a parameter table with no values, and a RACI table. *Deploy and verify* holds numbered deploy steps and a `Check | PB-02 gate or parameter | Owner` table before the related-work bullets.
+Use-case pages come in two tiers, set by `depth` in front matter. The linter picks the page budget and the stub rules from it.
 
-Flagships and catalog entries share one use-case template. A catalog entry sets `flagship: false` and must fill At a glance, Governance, Sources, and Limitations. It may stub the other sections with a body that starts `_Stub:`. The linter picks budgets from the `flagship` flag.
+| Tier | Template | What it holds |
+|---|---|---|
+| Recipe (`depth: recipe`) | [use-case recipe](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/templates/use-case-blueprint.md) | Every section filled, no stubs. *How it works* holds exactly one Mermaid flowchart with capability names only, then H3 tables such as the slots table and a worked example in prose. *Deploy and verify* holds numbered deploy steps and a `Check \| PB-02 gate or parameter \| Owner` table before the related-work bullets |
+| Entry (`depth: entry`) | [catalog entry](https://github.com/ravisharma5/otel-telco-blueprints/blob/main/templates/use-case-entry.md) | At a glance, Problem and value, What you need, Governance, Sources, and Limitations filled. *How it works* and *Deploy and verify* are stubs whose body starts `_Stub:`. No diagram |
+
+On both tiers, *Governance* holds the action table and a parameter table with no values; recipes add a RACI table, and entries may. A flagship is always a recipe.
+
+An entry ends *What you need* with a *What you must add* H3: a `Gap | What you add | Source` table. Each row names a gap you fill before production, such as task data, evaluation, integrations, or language scope. Each Source cell repeats a link from the Sources table, and the language-scope row cites the model card.
 
 There's no Sandbox, Tested, or Maintained tier and no readiness level. Blueprints are recipes: each key claim names its basis and links its source.
 

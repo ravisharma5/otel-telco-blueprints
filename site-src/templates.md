@@ -19,10 +19,20 @@ Copy the raw template from the repository and fill in each section.
 --8<-- "platform-blueprint.md"
 ````
 
-## Use-case blueprint template
+## Use-case recipe template
+
+A recipe is the full use-case page, with a diagram, a worked example, and deploy steps.
 
 ````markdown
 --8<-- "use-case-blueprint.md"
+````
+
+## Use-case catalog-entry template
+
+A catalog entry is one page. It stubs How it works and Deploy and verify, and lists what you must add before production.
+
+````markdown
+--8<-- "use-case-entry.md"
 ````
 
 ## Reference page template

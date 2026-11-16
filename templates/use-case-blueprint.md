@@ -26,9 +26,8 @@ placement:  # required; one key per tier (far-edge | regional | core); runs list
   regional: {runs: ["llm-small", "safety"], note: ""}  # put every otel_slots entry on a tier; note: 15 words or fewer, required when runs is empty to say why
 ---
 
-<!-- One template serves flagships and catalog entries.
-     Catalog entries (flagship: false) must fill At a glance, Governance, Sources, and Limitations.
-     The other sections may contain only a line that starts with _Stub: <reason>_.
+<!-- Recipe template (depth: recipe). Page budget: 1350 prose words. A recipe fills every section and stubs none.
+     For a one-page catalog entry, use templates/use-case-entry.md instead.
      Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status.
      Vale tips: start the text after a bullet label or an H3 colon in lowercase; refer to tables by name, never as "above" or "below". -->
 

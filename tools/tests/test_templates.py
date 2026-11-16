@@ -464,6 +464,59 @@ def must_add_rows(body: str) -> tuple[list[str], list[list[str]]] | None:
     return found[0] if found else None
 
 
+def test_entry_template_shape():
+    fm, body = split_doc(ENTRY_TEMPLATE)
+    schema = json.loads((SCHEMAS / SCHEMA_FILES["use-case"]).read_text())
+    assert set(fm) == set(schema["properties"])
+    assert fm["depth"] == "entry" and fm["flagship"] is False
+    assert [t for t, _ in sections(body)] == section_titles("use-case")
+    for title in ("How it works", "Deploy and verify"):
+        assert visible(raw_section(body, title)).strip().startswith("_Stub:"), title
+    assert "```mermaid" not in ENTRY_TEMPLATE.read_text()
+    head, rows = must_add_rows(body)
+    assert head == MUST_ADD_HEADER and rows == []
+    gov = section(body, "Governance")
+    headers = [tbl[0] for tbl in tables(gov)]
+    assert USE_CASE_ACTION_HEADER in headers and USE_CASE_PARAM_HEADER in headers
+    assert any(NO_DEFAULT in p for p in paragraphs(gov))
+    raw = raw_front_matter(ENTRY_TEMPLATE)
+    assert 'depth: "entry"' in raw and "flagship: false" in raw
+    assert NO_COURSE_SENTENCE in raw
+
+
+def test_entry_template_framing():
+    text = ENTRY_TEMPLATE.read_text()
+    assert STANDARD_LINE in text
+    assert not re.search(r"\b(GA|TP|DP)\b", text)
+    assert not re.search(r"(?i)unverified|validated|production-ready|readiness level", text)
+    assert JOB_TITLE.findall(text) == []
+
+
+def test_use_case_template_depth_comment():
+    raw = raw_front_matter(TEMPLATE_FILES["use-case"])
+    line = next(ln for ln in raw.splitlines() if ln.startswith("depth:"))
+    assert line.startswith('depth: "recipe"') and f"{PAGE_WORDS['recipe']} prose words" in line
+    entry = raw_front_matter(ENTRY_TEMPLATE)
+    line = next(ln for ln in entry.splitlines() if ln.startswith("depth:"))
+    assert f"{PAGE_WORDS['entry']} prose words" in line
+    for path, key in ((TEMPLATE_FILES["use-case"], "recipe"), (ENTRY_TEMPLATE, "entry")):
+        stated = set(map(int, re.findall(r"Page budget: (\d+) prose words", path.read_text())))
+        assert stated == {PAGE_WORDS[key]}, (path.name, stated)
+
+
+@pytest.mark.parametrize("section", BUDGETS["types"]["use-case"]["sections"], ids=lambda s: s["title"])
+def test_entry_template_budget_comments_match_budgets(section):
+    text = ENTRY_TEMPLATE.read_text()
+    heading = f"\n## {section['title']}\n"
+    start = text.index(heading)
+    end = text.find("\n## ", start + 1)
+    match = BUDGET_COMMENT.search(text, start, end if end != -1 else len(text))
+    assert match, f"no budget comment in ## {section['title']}"
+    for unit, limit in section.items():
+        if unit != "title":
+            assert re.search(rf"\b{limit} {UNIT_WORD[unit]}s?\b", match.group(1)), (section["title"], unit)
+
+
 def test_entry_budget_fixture_is_maximal():
     fm, body = split_doc(ENTRY_MAX)
     assert fm["depth"] == "entry" and fm["flagship"] is False
