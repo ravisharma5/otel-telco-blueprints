@@ -124,7 +124,7 @@ Keep a corpus register, and record the licence of every corpus before you index 
 
 ### Worked example: alarm and root-cause triage
 
-Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` holds roles for TMF642 list and get, TMF628 read, TMF639 read, TMF621 search, the device `show interface` command, the Classification tool, and `submit_action_request`. It holds no direct notify role. The gateway denies and audits every other call.
+Rising CRC errors and BFD flaps on router r2 open incident `inc-2041`. `noc-triage-agent` holds roles for TMF642 list and get, TMF628 read, TMF639 read, TMF621 search, the device `show interface` command, the Classification tool, and `submit_action_request`. It holds no direct notify role. The authorization layer denies every other call and logs the denial.
 
 The agent reads the alarms, the CRC counters on eth1, and the inventory links to r3, asks the Classification tool for the likely cause, then searches for an open ticket. Its triage note, creating the ticket for `inc-2041`, and restarting eth1 on r2 all go through the action request. The restart is `req-0001` on the [decision gate](../../architecture/decision-gate.md) page. If triage needs a customer line's network state, the CAMARA call carries its declared purpose, and consent stays in CAMARA's own flow. [PB-10](../compliance-operating-model/README.md) covers customer consent design.
 
@@ -181,7 +181,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 18 | The MCP gateway screens tool requests and responses with NeMo guardrails, and by default fails a call when the guardrail service is unavailable | Red Hat guidance | [MCP gateway guardrails](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-guardrails) |
 
 - Gate: the TM Forum Conformance Test Kit passes for each TMF API an MCP server fronts, at the pinned version.
-- Gate: for every tool, a call with a valid token and no role for that tool is rejected, and the rejection appears in the audit log.
+- Gate: for every tool, a call with a valid token and no role for that tool is rejected, and the rejection appears in the authorization layer's logs. A request that an AuthPolicy denies never reaches the MCP gateway router, so the router's audit log doesn't show it.
 - Gate: the diff of every tool name and description is reviewed before an MCP server release.
 - Gate: every API with writes has a stateful mock in the evaluation set ([PB-02](../evaluation-acceptance/README.md)).
 - Gate: no agent token can reach a write endpoint directly; writes appear only as action requests.
