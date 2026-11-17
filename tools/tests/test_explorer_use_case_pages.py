@@ -704,6 +704,34 @@ def test_you_bring_row(explorer_dist, data, copy):
 
 
 @pytest.mark.site_output
+def test_sandbox_chip_in_header(explorer_dist, data, copy):
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        headers = tree.root.find_all(lambda n: n.has_class("header-chips"))
+        assert len(headers) == 1, uc["slug"]
+        chips = headers[0].find_all(lambda n: n.has_class("sandbox-chip"))
+        fit = uc["sandbox"]["fit"]
+        assert [c.text().strip() for c in chips] == [copy["sandbox"]["fit"][fit]], uc["slug"]
+        assert chips[0].has_class(f"sandbox-{fit}"), uc["slug"]
+        assert not chips[0].has_class("depth-chip")
+
+
+@pytest.mark.site_output
+def test_sandbox_row(explorer_dist, data, copy):
+    why_copy = copy["use_case"]["why"]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        why = tree.root.find_all(lambda n: n.attrs.get("id") == "why")[0]
+        heads = why.find_all(lambda n: n.tag == "th" and n.text().strip() == why_copy["rows"]["sandbox"])
+        assert len(heads) == 1, uc["slug"]
+        text = _squash(heads[0].parent.text())
+        assert _squash(uc["sandbox"]["label"]) in text, uc["slug"]
+        assert _squash(uc["sandbox"]["why"]) in text, uc["slug"]
+        links = [a.attrs.get("href", "") for a in heads[0].parent.find_all(lambda n: n.tag == "a")]
+        assert links == [BASE + "platform/security-identity-sandbox/#when-a-use-case-needs-a-sandbox"], links
+
+
+@pytest.mark.site_output
 def test_no_overlay_and_clean_recipe_links(explorer_dist, data):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)

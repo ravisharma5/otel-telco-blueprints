@@ -1,0 +1,26 @@
+---
+// Static sandbox chip on the use-case page: which sandbox layer the use case
+// needs on top of the PB-08 base controls. Monochrome, like the depth chip, so
+// it never competes with the stage chip's color. Labels live in copy.md.
+import { frontmatter as copy } from '../content/copy.md';
+import type { Sandbox } from '../lib/data';
+
+interface Props {
+  sandbox: Sandbox;
+}
+
+const { sandbox } = Astro.props;
+const labels = copy.sandbox.fit as Record<Sandbox['fit'], string>;
+---
+<span class={`sandbox-chip sandbox-${sandbox.fit}`}>{labels[sandbox.fit]}</span>
+
+<style>
+  .sandbox-chip {
+    display: inline-flex; align-items: center;
+    padding: var(--space-xs) var(--space-control-x);
+    background: var(--color-surface-2); color: var(--color-text);
+    border: 1px solid var(--color-border); border-radius: var(--radius-full);
+    font-size: var(--text-label); font-weight: var(--weight-bold);
+    line-height: var(--leading-label);
+  }
+</style>

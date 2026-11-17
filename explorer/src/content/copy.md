@@ -55,6 +55,13 @@ adaptation:
     gate-labels: Gate labels from your approvers
     tool-contracts: A contract for each tool
     corpus: Your domain corpus
+# Sandbox chip and row on use-case pages, keyed by the sandbox field in front
+# matter. Must match FIT_LABELS in tools/site/render_sandbox.py (a test checks).
+sandbox:
+  fit:
+    none: Base sandbox only
+    execution: Sandbox the tools and code
+    whole-agent: Sandbox the whole agent
 footer:
   notes:
     licence: Docs CC BY 4.0 · Code Apache-2.0
@@ -247,6 +254,7 @@ use_case:
       sites: Sites
       takes: Takes
       bring: You bring
+      sandbox: Sandbox
     sites_join: " and "
     takes: "{slots} and {blueprints}"
     # {rung} is the adaptation rung label; {expertise} joins the expertise labels with bring_join.
@@ -254,6 +262,10 @@ use_case:
     bring_join: "; "
     bring_link: What to bring and where it goes
     bring_path: platform/bring-your-own-data/
+    # {fit} is the sandbox fit label; {why} is the trigger line from front matter.
+    sandbox: "{fit}. {why}."
+    sandbox_link: When a use case needs a sandbox
+    sandbox_path: "platform/security-identity-sandbox/#when-a-use-case-needs-a-sandbox"
   stages:
     inform: Never changes the network. People read and decide.
     recommend: Suggests fixes. An approver signs off every change.

@@ -818,6 +818,21 @@ def test_adaptation_exported(data):
     assert set(CHANGE_LABELS) == set(CHANGE_ORDER) == {"none", "retrain"}
 
 
+def test_sandbox_exported(data):
+    from tools.site.export_explorer import _sandbox
+    from tools.site.render_sandbox import FIT_LABELS
+
+    for uc in data["use_cases"]:
+        fm = front_matter(REPO_ROOT / "catalog" / uc["domain"] / uc["slug"] / "README.md")
+        sb = fm["sandbox"]
+        assert uc["sandbox"] == {"fit": sb["fit"], "label": FIT_LABELS[sb["fit"]], "why": sb["why"]}, uc["slug"]
+    with pytest.raises(SystemExit):
+        _sandbox({"fit": "kernel", "why": "x"}, "demo/x")
+    with pytest.raises(SystemExit):
+        _sandbox(None, "demo/x")
+    assert "sandbox" not in data["filters"]
+
+
 def test_cli_writes_json(tmp_path, data):
     out = tmp_path / "x.json"
     subprocess.run(

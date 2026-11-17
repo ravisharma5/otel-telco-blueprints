@@ -265,6 +265,21 @@ def test_adaptation_copy_matches_the_exporter():
     assert why["bring_link"] and why["bring_path"] == "platform/bring-your-own-data/"
 
 
+def test_sandbox_copy_matches_the_exporter():
+    from tools.site.render_sandbox import FIT_LABELS
+
+    copy = _copy()
+    assert copy["sandbox"]["fit"] == FIT_LABELS
+    # A chip label is a short heading, not a button: "Sandbox the tools and code" is five words.
+    for label in FIT_LABELS.values():
+        assert len(label.split()) <= 5 < LIMITS["headings"], label
+    why = copy["use_case"]["why"]
+    assert why["rows"]["sandbox"] and len(why["rows"]["sandbox"].split()) <= LIMITS["headings"]
+    assert "{fit}" in why["sandbox"] and "{why}" in why["sandbox"]
+    assert why["sandbox_link"] and len(why["sandbox_link"].split()) <= LIMITS["headings"]
+    assert why["sandbox_path"] == "platform/security-identity-sandbox/#when-a-use-case-needs-a-sandbox"
+
+
 def test_unused_regional_only_copy_removed():
     # No serving rule uses the regional-only reason, so its copy line is gone.
     assert "regional-only" not in COPY_PATH.read_text(encoding="utf-8")

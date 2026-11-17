@@ -137,6 +137,12 @@ export interface Adaptation {
   expertise: { id: string; label: string }[];
 }
 
+export interface Sandbox {
+  fit: 'none' | 'execution' | 'whole-agent';
+  label: string;
+  why: string;
+}
+
 export interface UseCase {
   id: string;
   slug: string;
@@ -149,6 +155,7 @@ export interface UseCase {
   goal: string;
   depth: Depth;
   adaptation: Adaptation;
+  sandbox: Sandbox;
   card: Card;
   counts: Counts;
   slot_names: string[];

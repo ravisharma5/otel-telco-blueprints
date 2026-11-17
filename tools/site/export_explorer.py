@@ -45,6 +45,7 @@ from tools.site.render_bring import (
     EXPERTISE_ORDER,
     RUNG_LABELS,
 )
+from tools.site.render_sandbox import FIT_LABELS, FIT_ORDER
 from tools.site.render_serving import _source_labels
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -120,12 +121,20 @@ REQUIRED_FM = (
     "autonomy_ceiling",
     "depth",
     "adaptation",
+    "sandbox",
 )
 
 _MD = MarkdownIt("commonmark")
 
 
 # --- pure functions ---------------------------------------------------------
+
+
+def _sandbox(sb, rel: str) -> dict:
+    """The explorer's view of a use case's sandbox field: fit, its label, and the why line."""
+    if not isinstance(sb, dict) or sb.get("fit") not in FIT_ORDER or sb.get("fit") not in FIT_LABELS:
+        raise SystemExit(f"{rel}: sandbox.fit {(sb or {}).get('fit')!r} has no label")
+    return {"fit": sb["fit"], "label": FIT_LABELS[sb["fit"]], "why": str(sb.get("why") or "").strip()}
 
 
 def _adaptation(ad, rel: str) -> dict:
@@ -604,6 +613,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
     if fm["autonomy_ceiling"] not in STAGE_IDS:
         raise SystemExit(f"{rel}: autonomy_ceiling {fm['autonomy_ceiling']} has no stage label")
     adaptation = _adaptation(fm["adaptation"], rel)
+    sandbox = _sandbox(fm["sandbox"], rel)
     placement = fm["placement"]
     known_roles = set(_role_order(data["variants"]))
     for tier, entry in placement.items():
@@ -641,6 +651,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         "goal": goal,
         "depth": {"id": fm["depth"], "label": DEPTH_LABELS[fm["depth"]]},
         "adaptation": adaptation,
+        "sandbox": sandbox,
         "card": fm["card"],
         "counts": {
             "slots": len(fm["otel_slots"]),

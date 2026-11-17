@@ -11,6 +11,7 @@ import OptionCard from '../../components/OptionCard.astro';
 import NeedsCards from '../../components/NeedsCards.astro';
 import RecipeCard from '../../components/RecipeCard.astro';
 import DepthChip from '../../components/DepthChip.astro';
+import SandboxChip from '../../components/SandboxChip.astro';
 import { frontmatter as copy } from '../../content/copy.md';
 import {
   defaults,
@@ -50,6 +51,7 @@ const bring = fill(why.bring, {
     .map((e, i) => (i === 0 ? e.label : e.label.charAt(0).toLowerCase() + e.label.slice(1)))
     .join(why.bring_join),
 });
+const sandbox = fill(why.sandbox, { fit: useCase.sandbox.label, why: useCase.sandbox.why });
 const sites = usedTiers(useCase)
   .map((tier) => tierLabels[tier as keyof typeof tierLabels])
   .join(why.sites_join);
@@ -71,7 +73,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
       <section id="why" class="page-section" aria-labelledby="why-title">
         <p class="eyebrow">{useCase.domain_label}</p>
         <h1 id="why-title" tabindex="-1">{useCase.title}</h1>
-        <p class="header-chips"><DepthChip depth={useCase.depth} /></p>
+        <p class="header-chips"><DepthChip depth={useCase.depth} /> <SandboxChip sandbox={useCase.sandbox} /></p>
         <p class="lede">{useCase.card.summary}</p>
         <div class="summary-grid">
           <div class="summary-card">
@@ -95,6 +97,7 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
                 <tr><th scope="row">{why.rows.sites}</th><td>{sites}</td></tr>
                 <tr><th scope="row">{why.rows.takes}</th><td>{takes}</td></tr>
                 <tr><th scope="row">{why.rows.bring}</th><td>{bring} <a href={import.meta.env.BASE_URL + why.bring_path}>{why.bring_link}</a></td></tr>
+                <tr><th scope="row">{why.rows.sandbox}</th><td>{sandbox} <a href={import.meta.env.BASE_URL + why.sandbox_path}>{why.sandbox_link}</a></td></tr>
               </tbody>
             </table>
           </div>
