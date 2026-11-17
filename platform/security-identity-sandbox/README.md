@@ -76,7 +76,7 @@ The agent holds an identity but no credentials, and it can reach only the two ga
 | Egress only to the AI Gateway and MCP Gateway | Network policy allows those two hosts and drops everything else | Network policy, plus the OpenShell egress proxy |
 | Per-agent workload identity | Each agent gets its own SPIFFE identity and short-lived token | Zero Trust Workload Identity Manager |
 | Resource limits | CPU, memory, and process caps on each agent pod | Limits in the sandbox template |
-| Secrets never in model context | Tool credentials are injected at the network boundary, and platform secrets stay in the secret store, not in the agent pod | OpenShell credential injection; External Secrets Operator |
+| Secrets never in model context | Credentials are injected at the network boundary, so the agent can call an API but can't read the key. Platform secrets stay in the secret store, not in the agent pod | OpenShell credential injection for inference and approved API endpoints; MCP Gateway credentials from Vault; External Secrets Operator |
 
 ### Sandbox options
 
@@ -84,7 +84,7 @@ The agent holds an identity but no credentials, and it can reach only the two ga
 |---|---|---|
 | OpenShift sandboxed containers | Runs each agent pod in a micro-VM with its own guest kernel through `Kata`, so a container escape stays inside the VM | [Layered sandboxing](https://developers.redhat.com/articles/2026/07/16/layered-sandboxing-ai-agents-openshift-and-openshell) |
 | Red Hat build of Agent Sandbox | A programmable API for isolated agent workloads, with `SandboxTemplate` and `SandboxWarmPool`; the template can turn on sandboxed containers | [Red Hat build of Agent Sandbox](https://developers.redhat.com/articles/2026/07/15/red-hat-build-agent-sandbox-isolated-workload-management-kubernetes) |
-| NVIDIA OpenShell, an NVIDIA project | Application-layer policy: per-binary network rules, filesystem restriction, and credentials injected into inference calls | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
+| NVIDIA OpenShell, an NVIDIA project | Application-layer policy: per-binary network rules, filesystem restriction, and credentials injected at the network boundary. Its OpenShift driver runs each agent as a pod. Red Hat plans to integrate it into Red Hat AI | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai); [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
 
 Each option can be replaced. Layer them. OpenShell policy inside a sandboxed-containers micro-VM covers both injected instructions and kernel escapes, and an Agent Sandbox template can make that layering the default.
 
@@ -189,6 +189,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 5 | A quickstart deploys agents with OpenShell egress policy inside sandboxed-containers VMs on OpenShift | Red Hat guidance | [Secure agents with OpenShell and Kata](https://github.com/rh-ai-quickstart/secure-agents-with-openshell-kata) |
 | 6 | An agent needs both an application-layer sandbox and a kernel-level sandbox | Red Hat guidance | [Why your AI agent needs two sandboxes](https://developers.redhat.com/articles/2026/07/23/why-your-ai-agent-needs-two-sandboxes-benchmark-data) |
 | 7 | Agent security on Red Hat AI works in layers, from identity and sandbox to gateway and gated actions | Red Hat guidance | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
+| 8 | OpenShell injects inference and API credentials at the network boundary, so the agent never holds them, and its OpenShift driver runs each agent as a pod with full policy enforcement | Red Hat guidance | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
 | 8 | The Zero Trust Workload Identity Manager gives each workload a SPIFFE identity on OpenShift | Red Hat guidance | [Zero Trust Workload Identity Manager docs](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/zero-trust-workload-identity-manager) |
 | 9 | Keycloak can act as the authorization server for MCP | project documentation | [Keycloak MCP authorization server](https://www.keycloak.org/securing-apps/mcp-authz-server) |
 | 10 | Token exchange issues a new token for a named audience | project documentation | [RFC 8693 OAuth 2.0 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693) |
