@@ -44,8 +44,8 @@ Until you answer it, a shared identity, a shell, or a secret in the prompt can t
 |---|---|---|---|
 | Give each agent its own identity | One shared service account; one account per namespace; one workload identity per agent | One SPIFFE identity per agent from the workload identity manager, with short-lived tokens | Tool roles then bind to one agent, so a compromised agent can't borrow another agent's tools ([PB-05 Integration](../integration/README.md)) |
 | Layer the sandbox | Plain container; application-layer policy on a shared kernel; application-layer policy inside a micro-VM | Application-layer policy inside a micro-VM for any agent that handles untrusted input or runs generated code | Application-layer policy alone still shares the host kernel ([Layered sandboxing](https://developers.redhat.com/articles/2026/07/16/layered-sandboxing-ai-agents-openshift-and-openshell)) |
-| Keep secrets at the boundary | Environment variables or the prompt; a secret mounted into the agent pod; a secret store with credentials injected at the network boundary | A secret store, with tool credentials injected at the network boundary | The agent never holds the credential, so injected text can't make it leak one ([Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai)) |
-| Decide where tool responses are screened | In the agent prompt; in each MCP server; at the MCP Gateway | At the MCP Gateway, failing closed | One place screens every tool response before it reaches any agent ([MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available)) |
+| Keep secrets at the boundary | Environment variables or the prompt; a secret mounted into the agent pod; a secret store with credentials injected at the network boundary | A secret store, with tool credentials injected at the network boundary | The agent never holds the credential, so injected text can't make it leak one ([MCP gateway credentials with Vault](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-vault)) |
+| Decide where tool responses are screened | In the agent prompt; in each MCP server; at the MCP Gateway | At the MCP Gateway, failing closed | One place screens every tool response before it reaches any agent ([MCP gateway guardrails](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-guardrails)) |
 | Decide how to run air-gapped | Connected; a proxy to public registries; a full mirror | A full mirror, following the flow below, wherever policy keeps a site offline | Every model, package, and adapter then comes from a store you control |
 
 ## Reference design
@@ -84,7 +84,7 @@ The agent holds an identity but no credentials, and it can reach only the two ga
 |---|---|---|
 | OpenShift sandboxed containers | Runs each agent pod in a micro-VM with its own guest kernel through `Kata`, so a container escape stays inside the VM | [Layered sandboxing](https://developers.redhat.com/articles/2026/07/16/layered-sandboxing-ai-agents-openshift-and-openshell) |
 | Red Hat build of Agent Sandbox | A programmable API for isolated agent workloads, with `SandboxTemplate` and `SandboxWarmPool`; the template can turn on sandboxed containers | [Red Hat build of Agent Sandbox](https://developers.redhat.com/articles/2026/07/15/red-hat-build-agent-sandbox-isolated-workload-management-kubernetes) |
-| NVIDIA OpenShell, an NVIDIA project | Application-layer policy: per-binary network rules, filesystem restriction, and credentials injected at the network boundary | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
+| NVIDIA OpenShell, an NVIDIA project | Application-layer policy: per-binary network rules, filesystem restriction, and credentials injected into inference calls | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
 
 Each option can be replaced. Layer them. OpenShell policy inside a sandboxed-containers micro-VM covers both injected instructions and kernel escapes, and an Agent Sandbox template can make that layering the default.
 
@@ -92,11 +92,11 @@ Each option can be replaced. Layer them. OpenShell policy inside a sandboxed-con
 
 | Concern | Design | Source |
 |---|---|---|
-| Per-agent identity | Each agent runs with its own SPIFFE identity, so roles bind to one agent | [Zero Trust Workload Identity Manager announcement](https://www.redhat.com/en/blog/zero-trust-workload-identity-manager-11-generally-available-red-hat-openshift) |
+| Per-agent identity | Each agent runs with its own SPIFFE identity, so roles bind to one agent | [Zero Trust Workload Identity Manager docs](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/zero-trust-workload-identity-manager) |
 | Short-lived tokens | Identity documents and their keys are short-lived and rotate automatically; the agent fetches new ones from the Workload API before they expire, so a stolen token stops working quickly | [SPIFFE concepts](https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/) |
 | Tool authorization | Keycloak acts as the MCP authorization server, and the gateway exchanges tokens per backend and checks each tool against the token's roles, as [PB-05 Integration](../integration/README.md) describes | [Keycloak MCP authorization server](https://www.keycloak.org/securing-apps/mcp-authz-server); [RFC 8693 OAuth 2.0 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693) |
 | Platform secrets | External Secrets Operator syncs secrets from your vault; authenticate its secret store with short-term credentials and allow its egress explicitly | [External Secrets Operator](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/external-secrets-operator-for-red-hat-openshift) |
-| Tool credentials | Injected at the network boundary, so the agent never holds them | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
+| Tool credentials | Injected at the network boundary, so the agent never holds them | [MCP gateway credentials with Vault](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-vault) |
 
 | Parameter | What it controls | Who sets it | How to calibrate |
 |---|---|---|---|
@@ -109,8 +109,8 @@ This page gives no default values. You set each parameter with security review a
 
 | Defence | Where | Source |
 |---|---|---|
-| Screen every tool response for injected instructions, and fail closed | MCP Gateway, with guardrails, as [PB-05 Integration](../integration/README.md) describes | [MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available) |
-| Keep write credentials out of the agent | Sandbox and secret store | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
+| Screen every tool response for injected instructions, and fail closed | MCP Gateway, with guardrails, as [PB-05 Integration](../integration/README.md) describes | [MCP gateway guardrails](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-guardrails) |
+| Keep write credentials out of the agent | Sandbox and secret store | [MCP gateway credentials with Vault](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-vault) |
 | Send every write through a gated action request | The [decision gate](../../architecture/decision-gate.md) and [PB-07 Action layer](../action-layer/README.md) | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
 | Review tool descriptions as changes | MCP server catalog, behind the gateway | [PB-05 Integration](../integration/README.md) |
 | Treat retrieved passages as data, not instructions | Agent prompt and the gateway screen | [ETSI EN 304 223](https://www.etsi.org/deliver/etsi_en/304200_304299/304223/02.01.01_60/en_304223v020101p.pdf) |
@@ -184,15 +184,15 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 |---|---|---|---|
 | 1 | OpenShell enforces application-layer policy inside a sandboxed-containers micro-VM with its own guest kernel; OpenShell alone shares the host kernel | Red Hat guidance | [Layered sandboxing](https://developers.redhat.com/articles/2026/07/16/layered-sandboxing-ai-agents-openshift-and-openshell) |
 | 2 | Agent Sandbox offers an API for isolated workloads, with templates and warm pools that can turn on sandboxed containers | Red Hat guidance | [Red Hat build of Agent Sandbox](https://developers.redhat.com/articles/2026/07/15/red-hat-build-agent-sandbox-isolated-workload-management-kubernetes) |
-| 3 | OpenShell applies per-binary network rules and filesystem restriction, and injects credentials at the network boundary | Red Hat guidance | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
+| 3 | OpenShell applies per-binary network rules and filesystem restriction, and its sandbox supervisor injects inference credentials so the agent never holds them | Red Hat guidance | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
 | 4 | OpenShell is an NVIDIA runtime for running autonomous agents in a sandbox | project documentation | [OpenShell repository](https://github.com/NVIDIA/OpenShell) |
 | 5 | A quickstart deploys agents with OpenShell egress policy inside sandboxed-containers VMs on OpenShift | Red Hat guidance | [Secure agents with OpenShell and Kata](https://github.com/rh-ai-quickstart/secure-agents-with-openshell-kata) |
 | 6 | An agent needs both an application-layer sandbox and a kernel-level sandbox | Red Hat guidance | [Why your AI agent needs two sandboxes](https://developers.redhat.com/articles/2026/07/23/why-your-ai-agent-needs-two-sandboxes-benchmark-data) |
 | 7 | Agent security on Red Hat AI works in layers, from identity and sandbox to gateway and gated actions | Red Hat guidance | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
-| 8 | The Zero Trust Workload Identity Manager gives each workload a SPIFFE identity on OpenShift | Red Hat guidance | [Zero Trust Workload Identity Manager announcement](https://www.redhat.com/en/blog/zero-trust-workload-identity-manager-11-generally-available-red-hat-openshift) |
+| 8 | The Zero Trust Workload Identity Manager gives each workload a SPIFFE identity on OpenShift | Red Hat guidance | [Zero Trust Workload Identity Manager docs](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/zero-trust-workload-identity-manager) |
 | 9 | Keycloak can act as the authorization server for MCP | project documentation | [Keycloak MCP authorization server](https://www.keycloak.org/securing-apps/mcp-authz-server) |
 | 10 | Token exchange issues a new token for a named audience | project documentation | [RFC 8693 OAuth 2.0 Token Exchange](https://www.rfc-editor.org/rfc/rfc8693) |
-| 11 | The MCP gateway screens tool requests and responses with NeMo guardrails | Red Hat guidance | [MCP gateway announcement](https://www.redhat.com/en/blog/model-context-protocol-gateway-red-hat-openshift-now-generally-available) |
+| 11 | The MCP gateway screens tool requests and responses with NeMo guardrails, and by default fails a call when the guardrail service is unavailable | Red Hat guidance | [MCP gateway guardrails](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-guardrails) |
 | 12 | External Secrets Operator syncs secrets from external managers, should authenticate with short-term credentials, and needs its egress allowed explicitly | Red Hat guidance | [External Secrets Operator](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance/external-secrets-operator-for-red-hat-openshift) |
 | 13 | `oc-mirror` mirrors platform and operator images for disconnected installs | Red Hat guidance | [Disconnected environments](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/disconnected_environments/index) |
 | 14 | The inference service rejects OCI URIs for adapters | research | [KServe issue 6094](https://github.com/kserve/kserve/issues/6094) |
@@ -202,6 +202,7 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 18 | Training Hub installs from the Red Hat Python index | Red Hat guidance | [Unsloth and Training Hub](https://developers.redhat.com/articles/2026/04/01/unsloth-and-training-hub-lightning-fast-lora-and-qlora-fine-tuning) |
 | 19 | Indirect prompt injection and data poisoning are AI-specific security risks | project documentation | [ETSI EN 304 223](https://www.etsi.org/deliver/etsi_en/304200_304299/304223/02.01.01_60/en_304223v020101p.pdf) |
 | 20 | SPIFFE keys and certificates are short-lived and rotate automatically, and workloads fetch new ones from the Workload API before they expire | project documentation | [SPIFFE concepts](https://spiffe.io/docs/latest/spiffe-about/spiffe-concepts/) |
+| 21 | The MCP gateway can fetch credentials from Vault and inject them into requests to MCP servers | Red Hat guidance | [MCP gateway credentials with Vault](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-vault) |
 
 - Gate: every agent has its own workload identity, and no two agents share a token.
 - Gate: no agent pod has a shell or a write credential.
