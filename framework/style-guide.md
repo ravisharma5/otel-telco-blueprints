@@ -125,7 +125,7 @@ Each section uses the unit that fits it. Tune the numbers in [`budgets.yaml`](ht
 | Sources table | Every key claim gets one row with its basis and a source link, as defined in [definitions.md](definitions.md#sources-table) |
 | Model card source | The model card URL |
 | Research source | The paper URL |
-| Red Hat guidance source | The Red Hat doc or article URL. A developers.redhat.com technical article counts as Red Hat guidance, not a blog post |
+| Red Hat guidance source | The Red Hat doc, article, or blog post URL. developers.redhat.com articles and redhat.com blog posts count as Red Hat guidance. Prefer the doc when it states the same claim |
 | Industry use case source | The source URL, or a repo file that resolves |
 | Project documentation source | The upstream project doc, or the standards body's specification or whitepaper URL |
 

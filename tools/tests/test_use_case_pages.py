@@ -35,7 +35,7 @@ from tools.tests.test_platform_pages import (
     ADAPTATION,
     ALLOWED_ROLES,
     BLOG_URL,
-    RH_DEVELOPER_ARTICLE,
+    RH_GUIDANCE_POST,
     CODE_FENCE,
     DECISION_CARD,
     DEMOTE,
@@ -707,11 +707,11 @@ def test_shared_sources_no_blog_under_project_documentation(path):
 
 
 @PAGES
-def test_shared_red_hat_developer_articles_are_red_hat_guidance(path):
+def test_shared_red_hat_articles_and_blog_posts_are_red_hat_guidance(path):
     table = tables(sections(body(path)).get("Sources", []))[0]
     basis, source = table[0].index("Basis"), table[0].index("Source")
     for row in table[1:]:
-        if RH_DEVELOPER_ARTICLE.search(row[source]):
+        if RH_GUIDANCE_POST.search(row[source]):
             assert row[basis].strip().lower() == "red hat guidance", row
 
 

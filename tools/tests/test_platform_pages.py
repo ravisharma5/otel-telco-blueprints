@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -540,59 +539,28 @@ def test_project_documentation_rows_are_not_blog_posts(path):
             assert not BLOG_URL.search(row[source]), row[source]
 
 
-# The documented exception (framework/definitions.md, Claim basis): technical
-# articles on developers.redhat.com are Red Hat guidance, not blog posts, though
-# their URLs carry a date. They are never filed under another basis.
-RH_DEVELOPER_ARTICLE = re.compile(r"\]\(https://developers\.redhat\.com/articles/")
+# framework/definitions.md, Claim basis: technical articles on
+# developers.redhat.com and posts on the redhat.com blog are Red Hat guidance,
+# though their URLs carry a date or a /blog/ folder. They are never filed under
+# another basis.
+RH_GUIDANCE_POST = re.compile(
+    r"\]\(https://(developers\.redhat\.com/articles/|www\.redhat\.com/en/blog/)"
+)
 
 
 @PAGES
-def test_red_hat_developer_articles_are_red_hat_guidance(path):
+def test_red_hat_articles_and_blog_posts_are_red_hat_guidance(path):
     table = tables(sections(body(path)).get("Sources and acceptance", []))[0]
     basis, source = table[0].index("Basis"), table[0].index("Source")
     for row in table[1:]:
-        if RH_DEVELOPER_ARTICLE.search(row[source]):
+        if RH_GUIDANCE_POST.search(row[source]):
             assert row[basis].strip().lower() == "red hat guidance", row
 
 
-# No tracked public page cites the redhat.com blog (framework/definitions.md,
-# Claim basis). Cite Red Hat documentation, release notes, or a
-# developers.redhat.com article; where none supports a claim, state it as
-# something the operator checks. The pattern is built from fragments, so this
-# file never matches itself.
-RH_BLOG_URL = re.compile(re.escape("redhat.com/en/" + "blog"), re.I)
-PUBLIC_PAGE_SUFFIXES = (".md", ".yaml", ".yml", ".json", ".html")
-PRIVATE_PREFIXES = ("." + "planning/", "con" + "text/")
-
-
-def _tracked_public_pages() -> list[str]:
-    out = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=REPO_ROOT, capture_output=True, text=True, check=True
-    ).stdout
-    return [
-        p for p in out.split("\0")
-        if p.endswith(PUBLIC_PAGE_SUFFIXES) and not p.startswith(PRIVATE_PREFIXES)
-    ]
-
-
-def test_no_public_page_cites_the_red_hat_blog():
-    pages = _tracked_public_pages()
-    assert any(p.startswith("platform/") for p in pages), "no tracked pages found"
-    hits = []
-    for rel in pages:
-        full = REPO_ROOT / rel
-        if not full.is_file():
-            continue
-        for lineno, line in enumerate(full.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
-            if RH_BLOG_URL.search(line):
-                hits.append(f"{rel}:{lineno}")
-    assert not hits, "redhat.com blog cited in public pages:\n" + "\n".join(hits)
-
-
-def test_red_hat_blog_guard_matches_blog_urls_only():
-    assert RH_BLOG_URL.search("https://www.redhat.com/en/" + "blog/some-post")
-    assert not RH_BLOG_URL.search("https://developers.redhat.com/articles/2026/05/14/some-article")
-    assert not RH_BLOG_URL.search("https://docs.redhat.com/en/documentation/some_product/1")
+def test_red_hat_guidance_post_pattern():
+    assert RH_GUIDANCE_POST.search("[a](https://www.redhat.com/en/blog/some-post)")
+    assert RH_GUIDANCE_POST.search("[a](https://developers.redhat.com/articles/2026/05/14/x)")
+    assert not RH_GUIDANCE_POST.search("[a](https://docs.redhat.com/en/documentation/x/1)")
 
 
 def test_gating_gate_rules():
