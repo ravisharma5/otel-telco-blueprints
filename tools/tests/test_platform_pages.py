@@ -1346,9 +1346,9 @@ def test_security_sandbox_fit_section():
         assert set(urls) <= allowed, set(urls) - allowed
     whole = table[3]
     assert "OpenShell" in " ".join(whole) and "Red Hat AI" in " ".join(whole), whole
-    assert "request or make changes" in whole[1], whole[1]
+    assert "acts within policy" in whole[1] and "writes directly" in whole[1], whole[1]
     flat = re.sub(r"\s+", " ", sec)
-    for want in ("deny-unless-allowed", "write credentials", "raw"):
+    for want in ("deny-unless-allowed", "write credentials", "raw", "action request that a person approves"):
         assert want in flat, want
     no_urls = re.sub(r"\(https?://[^)]*\)", "", _without_fit_block(sec))
     assert not FIT_BANNED.search(no_urls), FIT_BANNED.findall(no_urls)

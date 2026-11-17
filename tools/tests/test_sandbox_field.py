@@ -7,8 +7,8 @@ top of the PB-08 base controls:
 - execution: the agent's tools run code or binaries against live gear (dry
   runs, check mode, probes), or parse raw network bytes or files an attacker
   can shape, so those tools run in their own sandbox
-- whole-agent: the use case can request or make changes on its own (a write
-  path, or it acts within policy), so the agent itself runs in the sandbox
+- whole-agent: the use case acts within policy or has its own write
+  path, so the agent itself runs in the sandbox
 
 These tests derive the fit from the page text and fail when the field
 disagrees. They scan only How it works, What you need, and Limitations, after
@@ -88,7 +88,7 @@ def triggers(text: str) -> bool:
 
 
 def changes(path) -> bool:
-    """The use case can request or make changes on its own."""
+    """The use case acts within policy or writes directly."""
     fm = front_matter(path) or {}
     need = _raw_section(body(path), "What you need") or ""
     return fm.get("autonomy_ceiling") == "act-within-policy" or bool(WRITE_PATH.search(need))
