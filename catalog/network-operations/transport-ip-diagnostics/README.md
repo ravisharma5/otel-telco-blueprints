@@ -14,6 +14,9 @@ adaptation:
     - {item: "BFD, LSP ping, TWAMP, and YANG-Push probe tools", domains: ["transport-ip"], mechanism: "tool-contract"}
     - {item: "Transport triage skill and capability manifests", domains: ["transport-ip"], mechanism: "skill-manifest"}
     - {item: "Fix ceilings and approver roles", domains: ["transport-ip"], mechanism: "gate-policy"}
+sandbox:
+  fit: "execution"
+  why: "Runs LSP ping and TWAMP probes against live paths"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

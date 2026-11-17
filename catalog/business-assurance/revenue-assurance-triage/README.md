@@ -14,6 +14,9 @@ adaptation:
     - {item: "Your leakage and fraud categories in the triage skill", domains: ["oss-bss"], mechanism: "skill-manifest"}
     - {item: "Clear, hold, and escalate ceilings and approvers", domains: ["oss-bss"], mechanism: "gate-policy"}
     - {item: "Gate set of past cases your analysts labelled", domains: ["oss-bss"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads cases your detection model flags; the agent runs no code"
 otel_slots: ["llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

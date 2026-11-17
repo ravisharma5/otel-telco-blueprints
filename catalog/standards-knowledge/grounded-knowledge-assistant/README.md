@@ -14,6 +14,9 @@ adaptation:
     - {item: "TM Forum documents", domains: ["oss-bss"], mechanism: "rag-corpus"}
     - {item: "Vendor manuals and runbooks", domains: ["ran", "core-cnf", "transport-ip"], mechanism: "rag-corpus"}
     - {item: "Routing threshold and answer-only ceiling", domains: ["oss-bss"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads retrieved standards and runbook passages; the agent runs no code"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

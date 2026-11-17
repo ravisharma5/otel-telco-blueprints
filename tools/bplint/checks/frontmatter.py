@@ -7,6 +7,9 @@ together; taxonomy, gate labels, and corpus follow the Classification,
 Decision, and Embedding slots; tool contracts expertise and a tool contract
 item go together; LoRA training data only with the lora-if-gap rung; a golden
 set always.
+SB001: a use case's sandbox fit must agree with its autonomy ceiling: a use
+case that can act within policy needs whole-agent, and an inform-only use case
+cannot be whole-agent. The page-text rules for the fit live in the tests.
 AS001: an empty agent_school list needs the no-course sentence in the
 At a glance Agent-school courses cell. AS002: every course number must be in
 the pinned list in tools/bplint/agent-school-courses.yaml (read locally, no
@@ -63,13 +66,14 @@ def _json_path(err, key) -> str:
 def _word_limit_message(err, path) -> str | None:
     """'<path>: N words; the limit is L' for a word-limit pattern error, else None.
 
-    Applies to card fields and placement notes, whose patterns end in {0,K}
+    Applies to card fields, placement notes, and the sandbox why line, whose patterns end in {0,K}
     for an L = K + 1 word limit.
     """
     parts = [str(p) for p in err.absolute_path]
     in_card = parts[:1] == ["card"]
     in_note = len(parts) == 3 and parts[0] == "placement" and parts[2] == "note"
-    if err.validator != "pattern" or not (in_card or in_note) or not isinstance(err.instance, str):
+    in_why = parts == ["sandbox", "why"]
+    if err.validator != "pattern" or not (in_card or in_note or in_why) or not isinstance(err.instance, str):
         return None
     m = _WORD_LIMIT.search(str(err.validator_value))
     if not m:
@@ -194,6 +198,32 @@ def _adaptation_findings(doc, fm) -> list[Finding]:
     ]
 
 
+def _sandbox_messages(fm) -> list[str]:
+    """SB001 rule failures, one message per rule. Runs after the schema passes."""
+    sb = fm.get("sandbox")
+    if not isinstance(sb, dict):
+        return []
+    fit = sb.get("fit")
+    ceiling = fm.get("autonomy_ceiling")
+    out = []
+    if ceiling == "act-within-policy" and fit != "whole-agent":
+        out.append(
+            "a use case that can act within policy can make changes on its own, so sandbox the whole agent "
+            f"(fit 'whole-agent'); found fit '{fit}'"
+        )
+    if fit == "whole-agent" and ceiling == "inform":
+        out.append("an inform-only use case has no path to act, so it cannot be whole-agent")
+    return out
+
+
+def _sandbox_findings(doc, fm) -> list[Finding]:
+    line = _key_line(doc, "sandbox")
+    return [
+        Finding(doc.path, line, 1, "error", "SB001", f"$.sandbox: {text}")
+        for text in _sandbox_messages(fm)
+    ]
+
+
 def _course_findings(doc, fm) -> list[Finding]:
     courses = fm.get("agent_school")
     if not isinstance(courses, list):
@@ -296,6 +326,7 @@ def check(doc, ctx) -> list[Finding]:
         )
         out.extend(_depth_findings(doc, fm))
         out.extend(_adaptation_findings(doc, fm))
+        out.extend(_sandbox_findings(doc, fm))
     if not out:
         out.extend(_course_findings(doc, fm))
     return out

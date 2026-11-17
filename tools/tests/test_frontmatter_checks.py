@@ -61,6 +61,7 @@ UC_ADAPTATION = {
     "expertise": ["golden-set", "tool-contracts"],
     "bring": [{"item": "Read-only widget tools", "domains": ["oss-bss"], "mechanism": "tool-contract"}],
 }
+UC_SANDBOX = {"fit": "none", "why": "Reads fictional widget records through the gateways"}
 UC_ONE_LINER = "Drafts triage labels with human approval. Needs a tool-calling LLM slot."
 PB_ONE_LINER = "Gives each team a model endpoint. Depends on a gateway."
 UC_GLANCE_VALUES = {"One-liner": UC_ONE_LINER, "Autonomy ceiling": "Recommend with approval"}
@@ -85,6 +86,7 @@ def use_case_fm(**overrides):
         "card": dict(UC_CARD),
         "placement": {k: dict(v) for k, v in UC_PLACEMENT.items()},
         "adaptation": {**UC_ADAPTATION, "bring": [dict(b) for b in UC_ADAPTATION["bring"]]},
+        "sandbox": dict(UC_SANDBOX),
     }
     if overrides.get("flagship") is True and "depth" not in overrides:
         fm["depth"] = "recipe"  # a flagship is always a recipe (DP001)
@@ -432,6 +434,55 @@ def test_lora_data_only_with_lora_if_gap(tmp_path):
     assert "lora-data" in msg
     ok = classify_fm(rung="lora-if-gap", bring=[_item("classification-labels"), _item("lora-data")])
     assert lint(tmp_path, render(ok, use_case_sections())) == []
+
+
+# ---- SB001 ----------------------------------------------------------------
+
+
+def sb001(tmp_path, fm):
+    """The SB001 messages joined; every finding must be SB001."""
+    findings = lint(tmp_path, render(fm, use_case_sections()))
+    assert findings and set(codes(findings)) == {"SB001"}, [f"{f.code} {f.message}" for f in findings]
+    return " | ".join(f.message for f in findings)
+
+
+def _sb(fit):
+    return {"fit": fit, "why": "Reads fictional widget records through the gateways"}
+
+
+def test_act_within_policy_needs_whole_agent(tmp_path):
+    from tools.bplint.checks.frontmatter import _sandbox_messages
+
+    for fit in ("none", "execution"):
+        msgs = _sandbox_messages(use_case_fm(autonomy_ceiling="act-within-policy", sandbox=_sb(fit)))
+        assert len(msgs) == 1 and "act within policy" in msgs[0] and "whole-agent" in msgs[0], msgs
+    assert _sandbox_messages(use_case_fm(autonomy_ceiling="act-within-policy", sandbox=_sb("whole-agent"))) == []
+
+
+def test_inform_cannot_be_whole_agent(tmp_path):
+    from tools.bplint.checks.frontmatter import _sandbox_messages
+
+    msgs = _sandbox_messages(use_case_fm(autonomy_ceiling="inform", sandbox=_sb("whole-agent")))
+    assert len(msgs) == 1 and "inform" in msgs[0], msgs
+    for fit in ("none", "execution"):
+        assert _sandbox_messages(use_case_fm(autonomy_ceiling="inform", sandbox=_sb(fit))) == []
+
+
+@pytest.mark.parametrize("fit", ["none", "execution", "whole-agent"])
+def test_recommend_with_approval_takes_any_fit(tmp_path, fit):
+    assert lint(tmp_path, render(use_case_fm(sandbox=_sb(fit)), use_case_sections())) == []
+
+
+def test_sb001_finding_from_the_linter(tmp_path):
+    msg = sb001(tmp_path, use_case_fm(sandbox=_sb("whole-agent"), autonomy_ceiling="inform"))
+    assert msg.startswith("$.sandbox:") and "inform" in msg
+
+
+def test_sandbox_why_word_limit_message(tmp_path):
+    fm = use_case_fm(sandbox={"fit": "none", "why": " ".join(["word"] * 13)})
+    findings = lint(tmp_path, render(fm, use_case_sections()))
+    assert codes(findings) == ["FM002"]
+    assert findings[0].message == "$.sandbox.why: 13 words; the limit is 12"
 
 
 # ---- AS001 / AS002 --------------------------------------------------------

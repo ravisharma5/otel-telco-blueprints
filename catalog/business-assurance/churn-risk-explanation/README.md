@@ -14,6 +14,9 @@ adaptation:
     - {item: "Retention explanation skill and tool manifests", domains: ["customer-care"], mechanism: "skill-manifest"}
     - {item: "Retention offer ceilings and approver roles", domains: ["customer-care"], mechanism: "gate-policy"}
     - {item: "Gate set of past retention cases your SMEs labelled", domains: ["customer-care"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads churn scores your own model computes; the agent runs no code"
 otel_slots: ["llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

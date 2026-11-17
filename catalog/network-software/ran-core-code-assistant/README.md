@@ -13,6 +13,9 @@ adaptation:
     - {item: "Your RAN and core repositories", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
     - {item: "Specifications your code implements", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
     - {item: "Internal design documents", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
+sandbox:
+  fit: "none"
+  why: "Reads code index passages; the agent runs no code itself"
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

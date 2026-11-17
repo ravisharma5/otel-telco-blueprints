@@ -13,6 +13,9 @@ adaptation:
     - {item: "TM Forum frameworks under your membership terms", domains: ["oss-bss"], mechanism: "rag-corpus"}
     - {item: "TM Forum Open API specifications", domains: ["oss-bss"], mechanism: "rag-corpus"}
     - {item: "Your architecture documents and integration designs", domains: ["oss-bss"], mechanism: "rag-corpus"}
+sandbox:
+  fit: "none"
+  why: "Reads retrieved TM Forum and design passages; the agent runs no code"
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

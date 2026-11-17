@@ -70,6 +70,7 @@ USE_CASE = {
         "expertise": ["golden-set", "tool-contracts"],
         "bring": [{"item": "Read-only widget tools", "domains": ["oss-bss"], "mechanism": "tool-contract"}],
     },
+    "sandbox": {"fit": "none", "why": "Reads fictional widget records through the gateways"},
 }
 
 PLATFORM = {
@@ -152,6 +153,38 @@ def test_use_case_bad_adaptation_fails(change):
     ad = {k: v for k, v in dict(USE_CASE["adaptation"], **change).items() if v is not None}
     paths = _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, adaptation=ad))
     assert any(p == "adaptation" or p.startswith("adaptation.") for p in paths), paths
+
+
+def test_use_case_sandbox_is_required():
+    v = _validator("use-case.schema.json")
+    assert not v.is_valid({k: x for k, x in USE_CASE.items() if k != "sandbox"})
+
+
+@pytest.mark.parametrize("fit", ["none", "execution", "whole-agent"])
+def test_use_case_sandbox_fits_pass(fit):
+    sb = dict(USE_CASE["sandbox"], fit=fit)
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, sandbox=sb)) == []
+
+
+@pytest.mark.parametrize(
+    "sandbox",
+    [
+        {"fit": "kernel", "why": "Reads fictional widget records"},
+        {"fit": "none"},
+        {"why": "Reads fictional widget records"},
+        {"fit": "none", "why": ""},
+        {"fit": "none", "why": " ".join(["word"] * 13)},
+        {"fit": "none", "why": "Reads fictional widget records", "tier": "sandbox"},
+    ],
+)
+def test_use_case_bad_sandbox_fails(sandbox):
+    paths = _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, sandbox=sandbox))
+    assert any(p == "sandbox" or p.startswith("sandbox.") for p in paths), paths
+
+
+def test_use_case_sandbox_why_allows_twelve_words():
+    sb = dict(USE_CASE["sandbox"], why=" ".join(["word"] * 12))
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, sandbox=sb)) == []
 
 
 @pytest.mark.parametrize("field", ["card", "placement"])

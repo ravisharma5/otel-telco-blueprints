@@ -12,6 +12,9 @@ adaptation:
   bring:
     - {item: "Fictional widget alarm tools", domains: ["oss-bss"], mechanism: "tool-contract"}
     - {item: "Fictional widget fault taxonomy", domains: ["oss-bss"], mechanism: "classification-labels"}
+sandbox:
+  fit: "none"
+  why: "Reads fictional widget records; the agent runs no code"
 otel_slots: ["classification", "llm", "safety"]
 autonomy_ceiling: "recommend-with-approval"
 placement_tier: ["regional"]

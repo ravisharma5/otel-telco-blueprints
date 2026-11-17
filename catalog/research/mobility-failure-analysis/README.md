@@ -13,6 +13,9 @@ adaptation:
     - {item: "Mobility procedure specifications with usage rights", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
     - {item: "Event rebuild tools over radio and core traces", domains: ["ran", "core-cnf"], mechanism: "tool-contract"}
     - {item: "Mobility analysis skill and capability manifests", domains: ["ran"], mechanism: "skill-manifest"}
+sandbox:
+  fit: "execution"
+  why: "Event tools rebuild each mobility event from raw traces"
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

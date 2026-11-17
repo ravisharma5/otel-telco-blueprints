@@ -14,6 +14,9 @@ adaptation:
     - {item: "Cell inventory read tool: boosters and coverage cells", domains: ["ran"], mechanism: "tool-contract"}
     - {item: "Energy-saving planner skill and manifests", domains: ["ran"], mechanism: "skill-manifest"}
     - {item: "Window ceilings, playbooks, and rollback jobs", domains: ["ran"], mechanism: "gate-policy"}
+sandbox:
+  fit: "whole-agent"
+  why: "Can act within policy on booster-cell energy windows"
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3

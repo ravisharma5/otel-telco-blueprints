@@ -14,6 +14,9 @@ adaptation:
     - {item: "Alert, RADIUS, and 5G authentication read tools", domains: ["core-cnf", "transport-ip"], mechanism: "tool-contract"}
     - {item: "Security triage skill and capability manifests", domains: ["core-cnf"], mechanism: "skill-manifest"}
     - {item: "Block, suspend, and isolate ceilings and approvers", domains: ["core-cnf", "transport-ip"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads alerts your detectors already raised; the agent runs no code"
 otel_slots: ["classification", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

@@ -15,6 +15,9 @@ adaptation:
     - {item: "Contracts for your KPI analysis tools", domains: ["ran"], mechanism: "tool-contract"}
     - {item: "Health-check skill and capability manifests", domains: ["ran"], mechanism: "skill-manifest"}
     - {item: "Parameter change ceilings and approver roles", domains: ["ran"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Explains findings your analysis tools compute; the agent runs no code"
 otel_slots: ["classification", "llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

@@ -15,6 +15,9 @@ adaptation:
     - {item: "TMF621 ticket and care case system contracts", domains: ["oss-bss", "customer-care"], mechanism: "tool-contract"}
     - {item: "Care diagnostics skill and capability manifests", domains: ["customer-care"], mechanism: "skill-manifest"}
     - {item: "Consent, commitment, and ticket ceilings", domains: ["customer-care"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads consented CAMARA device diagnostics; the agent runs no code"
 otel_slots: ["llm", "safety", "embedding", "reranker", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

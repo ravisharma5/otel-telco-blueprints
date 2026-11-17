@@ -14,6 +14,9 @@ adaptation:
     - {item: "Change procedures as skills with manifests", domains: ["transport-ip"], mechanism: "skill-manifest"}
     - {item: "Change-approval and closure record tools", domains: ["oss-bss"], mechanism: "tool-contract"}
     - {item: "Gate set of past changes your approvers labelled", domains: ["oss-bss"], mechanism: "gate-policy"}
+sandbox:
+  fit: "whole-agent"
+  why: "Agents request changes on their own through the action request"
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

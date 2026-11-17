@@ -13,6 +13,9 @@ adaptation:
     - {item: "Fictional widget fault taxonomy", domains: ["oss-bss"], mechanism: "classification-labels"}
     - {item: "Fictional widget manuals", domains: ["oss-bss"], mechanism: "rag-corpus"}
     - {item: "Fictional widget action ceilings", domains: ["oss-bss"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads fictional widget records; the agent runs no code"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm", "classification"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

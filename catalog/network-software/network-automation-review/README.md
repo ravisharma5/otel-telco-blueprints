@@ -13,6 +13,9 @@ adaptation:
     - {item: "Vendor command-line and NOS references", domains: ["transport-ip"], mechanism: "rag-corpus"}
     - {item: "Change repository with past reviewed changes", domains: ["transport-ip"], mechanism: "rag-corpus"}
     - {item: "Rollout ceilings and approver roles", domains: ["transport-ip"], mechanism: "gate-policy"}
+sandbox:
+  fit: "execution"
+  why: "Runs YANG validation, NETCONF validate, and Ansible check mode"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

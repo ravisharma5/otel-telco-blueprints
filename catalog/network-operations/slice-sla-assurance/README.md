@@ -14,6 +14,9 @@ adaptation:
     - {item: "Slice SLO, KPI, analytics, and forecast read tools", domains: ["oss-bss", "core-cnf"], mechanism: "tool-contract"}
     - {item: "Slice assurance skill and capability manifests", domains: ["oss-bss"], mechanism: "skill-manifest"}
     - {item: "Slice change ceilings, playbooks, and rollback", domains: ["oss-bss", "core-cnf"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads slice KPIs and analytics through read tools; runs no code"
 otel_slots: ["llm", "decision", "safety", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

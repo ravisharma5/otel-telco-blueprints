@@ -16,6 +16,9 @@ adaptation:
     - {item: "Triage skill and capability manifests", domains: ["ran", "transport-ip"], mechanism: "skill-manifest"}
     - {item: "Ceilings and approver roles for notes and fixes", domains: ["ran", "transport-ip"], mechanism: "gate-policy"}
     - {item: "Vocabulary and report examples, only after a measured gap", domains: ["ran", "transport-ip"], mechanism: "lora-data"}
+sandbox:
+  fit: "none"
+  why: "Reads alarms and runbooks through read tools; the agent runs no code"
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

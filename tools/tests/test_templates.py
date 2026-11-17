@@ -234,7 +234,8 @@ def test_use_case_template_has_mermaid_slot_and_no_tier_field():
     fences = [t for t in flow if t.type == "fence" and t.info.strip() == "mermaid"]
     assert text.count("```mermaid") == 1 and len(fences) == 1
     assert "![" not in text and "diagrams/" not in text
-    assert not re.search(r"maturity|sandbox|maintained", text, re.I)
+    # The sandbox key names a sandbox layer (PB-08), not a maturity tier.
+    assert not re.search(r"maturity|maintained|\b(sandbox|tested)\s+tier\b|tier:\s*\"?sandbox", text, re.I)
     fence = fences[0].content
     assert not re.search(r"Red Hat|OpenShift|vLLM|llm-d|\bL(?:10|[0-9])\b", fence)
     notify = re.search(r'--\s*"NOTIFY"\s*-->\s*(\w+)', fence)

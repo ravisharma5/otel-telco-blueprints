@@ -12,6 +12,9 @@ adaptation:
   bring:
     - {item: "Fictional widget alarm tools", domains: ["oss-bss"], mechanism: "tool-contract"}
     - {item: "Fictional triage procedure", domains: ["oss-bss"], mechanism: "skill-manifest"}
+sandbox:
+  fit: "none"
+  why: "Reads fictional widget records; the agent runs no code"
 otel_slots: ["llm", "safety"]
 autonomy_ceiling: "recommend-with-approval"
 one_liner: "Drafts fictional triage labels with human approval. Needs a tool-calling LLM slot."

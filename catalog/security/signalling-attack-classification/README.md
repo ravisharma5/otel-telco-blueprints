@@ -13,6 +13,9 @@ adaptation:
     - {item: "Attack taxonomy and labelled attack traffic", domains: ["core-cnf"], mechanism: "classification-labels"}
     - {item: "Decoded core signalling for training and tests", domains: ["core-cnf"], mechanism: "classification-labels"}
     - {item: "Labelling skill scoped to the interfaces you watch", domains: ["core-cnf"], mechanism: "skill-manifest"}
+sandbox:
+  fit: "none"
+  why: "Reads records your detectors already flagged; the agent runs no code"
 otel_slots: ["classification", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

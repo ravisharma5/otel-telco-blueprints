@@ -14,6 +14,9 @@ adaptation:
     - {item: "3GPP procedure specifications and runbooks", domains: ["core-cnf", "ran"], mechanism: "rag-corpus"}
     - {item: "NAS, NGAP, and S1AP parser tool contracts", domains: ["core-cnf", "ran"], mechanism: "tool-contract"}
     - {item: "Trace analysis skill and capability manifests", domains: ["core-cnf"], mechanism: "skill-manifest"}
+sandbox:
+  fit: "execution"
+  why: "Parser tools decode raw NAS, NGAP, and S1AP messages"
 otel_slots: ["embedding", "reranker", "safety", "classification", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

@@ -14,6 +14,9 @@ adaptation:
     - {item: "Read-only gateway and Wi-Fi diagnostic tools", domains: ["customer-care"], mechanism: "tool-contract"}
     - {item: "Care diagnostics skill and tool manifests", domains: ["customer-care"], mechanism: "skill-manifest"}
     - {item: "Consent check and remote-fix ceilings", domains: ["customer-care"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads gateway diagnostics and care articles; the agent runs no code"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

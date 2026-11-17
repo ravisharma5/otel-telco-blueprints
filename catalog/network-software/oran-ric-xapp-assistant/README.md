@@ -13,6 +13,9 @@ adaptation:
     - {item: "O-RAN E2AP and E2SM specifications", domains: ["vran-oran"], mechanism: "rag-corpus"}
     - {item: "Your xApp code and RIC framework", domains: ["vran-oran"], mechanism: "rag-corpus"}
     - {item: "Read-only ceiling: no writes to code or the RIC", domains: ["vran-oran"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads specification and code index passages; the agent runs no code"
 otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

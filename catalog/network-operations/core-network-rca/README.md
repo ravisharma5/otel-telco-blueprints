@@ -15,6 +15,9 @@ adaptation:
     - {item: "Alarm, analytics, log, trace, and counter read tools", domains: ["core-cnf", "oss-bss"], mechanism: "tool-contract"}
     - {item: "Core root-cause skill and capability manifests", domains: ["core-cnf"], mechanism: "skill-manifest"}
     - {item: "Restart and failover ceilings with approver roles", domains: ["core-cnf"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads network function logs and counters through read tools; runs no code"
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

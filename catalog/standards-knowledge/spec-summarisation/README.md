@@ -13,6 +13,9 @@ adaptation:
     - {item: "Specification sets with release and version", domains: ["ran", "core-cnf", "transport-ip"], mechanism: "rag-corpus"}
     - {item: "Change-request archives", domains: ["ran", "core-cnf"], mechanism: "rag-corpus"}
     - {item: "Routing threshold and summary-only ceiling", domains: ["ran", "core-cnf", "transport-ip"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads retrieved specification clauses; the agent runs no code"
 otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

@@ -15,6 +15,9 @@ adaptation:
     - {item: "Read-only device tool contracts", domains: ["transport-ip", "ran"], mechanism: "tool-contract"}
     - {item: "Triage skill and capability manifests", domains: ["oss-bss"], mechanism: "skill-manifest"}
     - {item: "Action ceilings, approver roles, and playbooks", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "gate-policy"}
+sandbox:
+  fit: "whole-agent"
+  why: "Can act within policy on low-risk router incidents"
 otel_slots: ["llm", "decision", "safety", "classification"]
 autonomy_ceiling: "act-within-policy"
 tmf_an_level_target: 3

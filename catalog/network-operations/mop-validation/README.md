@@ -15,6 +15,9 @@ adaptation:
     - {item: "Dry-run tools that cannot commit a change", domains: ["transport-ip"], mechanism: "tool-contract"}
     - {item: "MOP review skill and capability manifests", domains: ["transport-ip"], mechanism: "skill-manifest"}
     - {item: "Approval ceilings for high-risk changes", domains: ["transport-ip", "ran", "core-cnf"], mechanism: "gate-policy"}
+sandbox:
+  fit: "execution"
+  why: "Dry-runs each MOP through NETCONF validate and Ansible check mode"
 otel_slots: ["llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

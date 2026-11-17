@@ -14,6 +14,9 @@ adaptation:
     - {item: "NWDAF analytics and UDR subscription read tools", domains: ["core-cnf"], mechanism: "tool-contract"}
     - {item: "Read-only manifests for router and core tools", domains: ["transport-ip", "core-cnf"], mechanism: "skill-manifest"}
     - {item: "Read-only ceilings and the routing threshold", domains: ["transport-ip", "core-cnf"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Calls read-only router and core tools; the agent runs no code"
 otel_slots: ["llm", "decision", "safety"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]

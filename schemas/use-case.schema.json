@@ -13,6 +13,7 @@
     "flagship",
     "depth",
     "adaptation",
+    "sandbox",
     "otel_slots",
     "autonomy_ceiling",
     "placement_tier",
@@ -83,6 +84,22 @@
               }
             }
           }
+        }
+      }
+    },
+    "sandbox": {
+      "description": "Which sandbox layer the use case needs on top of the PB-08 base controls. none: the agent only reads through the gateways. execution: sandbox the tools and code it runs. whole-agent: sandbox the agent itself. bplint SB001 checks it against autonomy_ceiling.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fit", "why"],
+      "properties": {
+        "fit": { "enum": ["none", "execution", "whole-agent"] },
+        "why": {
+          "description": "One line of 12 words or fewer naming the trigger.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 90,
+          "pattern": "^\\s*\\S+(?:\\s+\\S+){0,11}\\s*$"
         }
       }
     },

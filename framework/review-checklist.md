@@ -31,6 +31,7 @@ Run `make lint` from the repo root. Fix every error, and fix or justify every wa
 | AG001 | error | A required at-a-glance row is missing |
 | DP001 | error | A flagship use case has `depth: entry`; a flagship is always a recipe |
 | AD001 | error | A use case's adaptation field disagrees with its OTel slots |
+| SB001 | error | A use case's sandbox fit disagrees with its autonomy ceiling |
 | AS001 | error | `agent_school` is empty, but the at-a-glance Agent-school courses cell lacks "None: no agent-school course covers this use case yet" |
 | AS002 | error | An agent-school course number is not in the pinned course list (`tools/bplint/agent-school-courses.yaml`) |
 | BG001 | error | A section or page is over budget |

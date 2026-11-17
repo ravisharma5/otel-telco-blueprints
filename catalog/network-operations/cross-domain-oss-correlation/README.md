@@ -15,6 +15,9 @@ adaptation:
     - {item: "Alarm, inventory, and performance read tools", domains: ["oss-bss"], mechanism: "tool-contract"}
     - {item: "Correlation skill and capability manifests", domains: ["oss-bss"], mechanism: "skill-manifest"}
     - {item: "Grouping ceilings and approver roles", domains: ["oss-bss"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reads alarms, topology, and inventory through read tools; runs no code"
 otel_slots: ["classification", "embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2

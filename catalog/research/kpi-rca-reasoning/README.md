@@ -13,6 +13,9 @@ adaptation:
     - {item: "Root-cause taxonomy and SME-confirmed degradations", domains: ["ran"], mechanism: "classification-labels"}
     - {item: "KPI reasoning skill over your computed KPI data", domains: ["ran"], mechanism: "skill-manifest"}
     - {item: "Parameter change ceilings and approver roles", domains: ["ran"], mechanism: "gate-policy"}
+sandbox:
+  fit: "none"
+  why: "Reasons from KPI counters you already hold; the agent runs no code"
 otel_slots: ["classification", "llm", "safety", "decision"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
