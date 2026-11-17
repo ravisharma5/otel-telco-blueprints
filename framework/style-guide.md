@@ -84,9 +84,9 @@ Use-case pages come in two tiers, set by `depth` in front matter. The linter pic
 
 On both tiers, *Governance* holds the action table and a parameter table with no values; recipes add a RACI table, and entries may. A flagship is always a recipe.
 
-An entry ends *What you need* with a *What you must add* H3: a `Gap | What you add | Source` table. Each row names a gap you fill before production, such as task data, evaluation, integrations, or language scope. Each Source cell repeats a link from the Sources table, and the language-scope row cites the model card.
+An entry ends *What you need* with a *What you must add* H3: a `Gap | What you add | Source` table. The generated *What you bring* and *Sandbox* H3s come before it. Each row names a gap you fill before production, such as task data, evaluation, integrations, or language scope. Each Source cell repeats a link from the Sources table, and the language-scope row cites the model card.
 
-There's no Sandbox, Tested, or Maintained tier and no readiness level. Blueprints are recipes: each key claim names its basis and links its source.
+There's no Sandbox, Tested, or Maintained tier and no readiness level. The `sandbox` front-matter field is not a tier: it names the sandbox layer a use case needs, as PB-08 sets out. Blueprints are recipes: each key claim names its basis and links its source.
 
 ## Budget units
 

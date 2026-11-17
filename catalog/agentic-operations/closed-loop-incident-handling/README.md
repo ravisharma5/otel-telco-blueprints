@@ -188,6 +188,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 <!-- generated:what-you-bring end -->
 
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Sandbox the whole agent: run it under OpenShell policy inside a micro-VM | Can act within policy on low-risk router incidents | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
+
 ## Governance
 
 Each action request passes the [decision gate](../../../architecture/decision-gate.md), and the outcome never exceeds the policy ceiling for its class.

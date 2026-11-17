@@ -20,7 +20,7 @@ otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains a failed 5G handover or registration from rebuilt signalling and the 3GPP procedures, with citations. Informs only. Depends on your tools that rebuild each mobility event and your own failure cases."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -111,6 +111,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Mobility analysis skill and capability manifests | RAN | Skill or capability manifest | SME | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Sandbox the tools and code: run them in their own micro-VM | Event tools rebuild each mobility event from raw traces | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

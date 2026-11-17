@@ -23,7 +23,7 @@ autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains RAN and RF health findings that analytical tools compute, and recommends parameter changes to a human approver. Never changes a cell itself. Depends on your performance counters, your own analysis tools, and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [101]
 card:
@@ -120,6 +120,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Parameter change ceilings and approver roles | RAN | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Explains findings your analysis tools compute; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

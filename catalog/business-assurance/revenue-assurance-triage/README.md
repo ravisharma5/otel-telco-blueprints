@@ -22,7 +22,7 @@ autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains the cases your own fraud or revenue assurance model flags, and proposes a hold or an escalation for approval. Never scores a case itself. Depends on your detection model, called as a tool, and your billing records."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-10", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [202]
 card:
@@ -115,6 +115,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Gate set of past cases your analysts labelled | OSS and BSS | Gate and action-layer policy | Risk owner | [OSS and BSS](../../../platform/bring-your-own-data/README.md#domain-oss-and-bss) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads cases your detection model flags; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

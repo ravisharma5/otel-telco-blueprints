@@ -22,7 +22,7 @@ autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Helps a care agent troubleshoot a home broadband fault from gateway diagnostics and care articles, and proposes remote fixes for approval. Never talks to the customer. Depends on your device management platform and the customer's consent."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-10", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -118,6 +118,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Consent check and remote-fix ceilings | Customer and care | Gate and action-layer policy | Risk owner | [Customer and care](../../../platform/bring-your-own-data/README.md#domain-customer-and-care) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads gateway diagnostics and care articles; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

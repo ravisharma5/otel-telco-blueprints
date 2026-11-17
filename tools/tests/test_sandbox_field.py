@@ -202,3 +202,85 @@ def test_fit_table_shape():
     )
     assert rows[1].split("|")[2].strip() == "None yet"
     assert "../../catalog/demo/widget-gamma/README.md" in rows[2]
+
+
+# ---------- the generated Sandbox block on every page, and the PB-08 link ----------
+
+BLOCK = re.compile(r"<!-- generated:sandbox start -->\n(.*?)<!-- generated:sandbox end -->", re.S)
+SANDBOX_H3 = re.compile(r"^### Sandbox[ \t]*$", re.M)
+BRING_END = "<!-- generated:what-you-bring end -->"
+PB08_PAGE_LINK = "../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox"
+
+
+def _need(path) -> str:
+    return _raw_section(body(path), "What you need") or ""
+
+
+@PAGES
+def test_every_page_has_the_sandbox_block(path):
+    need = _need(path)
+    heads = list(SANDBOX_H3.finditer(need))
+    assert len(heads) == 1, "What you need needs exactly one '### Sandbox' H3"
+    after = need[heads[0].end() :]
+    nxt = re.search(r"^#{2,3} ", after, re.M)
+    sub = after[: nxt.start()] if nxt else after
+    assert sub.count("<!-- generated:sandbox start -->") == 1
+    assert sub.count("<!-- generated:sandbox end -->") == 1
+    assert body(path).count("<!-- generated:sandbox start -->") == 1
+    # Only the marker pair and its generated table sit under the H3.
+    assert BLOCK.sub("", sub).strip() == "", sub
+    bring_end = need.find(BRING_END)
+    assert 0 <= bring_end < heads[0].start(), "the Sandbox block comes after the What you bring block"
+    between = need[bring_end + len(BRING_END) : heads[0].start()]
+    assert between.strip() == "", "the Sandbox H3 comes directly after the What you bring block"
+    must = MUST_ADD_H3.search(need)
+    if must:
+        assert heads[0].start() < must.start(), "the Sandbox block comes before What you must add"
+
+
+def test_sandbox_blocks_current():
+    from pathlib import Path
+
+    from tools.site import render_sandbox
+
+    assert render_sandbox.main(["--check"]) == 0
+    with pytest.raises(SystemExit):
+        render_sandbox.main(["--allow-missing"])
+    makefile = (Path(render_sandbox.ROOT) / "Makefile").read_text(encoding="utf-8")
+    target = re.search(r"^render:\n((?:\t.*\n)+)", makefile, re.M)
+    assert target and "tools.site.render_sandbox" in target.group(1)
+    assert target.group(1).index("render_bring") < target.group(1).index("render_sandbox")
+
+
+@PAGES
+def test_sandbox_block_matches_field(path):
+    sb = _sandbox(path)
+    m = BLOCK.search(body(path))
+    assert m, "no generated block"
+    rows = [ln for ln in m.group(1).splitlines() if ln.startswith("| ") and not ln.startswith("| Sandbox fit |")]
+    assert len(rows) == 1, rows
+    cells = [c.strip() for c in rows[0].strip().strip("|").split("|")]
+    assert cells[0] == FIT_PAGE_TEXT[sb["fit"]]
+    assert cells[1] == sb["why"]
+    assert f"]({PB08_PAGE_LINK})" in cells[2]
+
+
+@PAGES
+def test_sandbox_block_adds_no_prose_words(path):
+    from tools.bplint.markdown import parse_doc
+
+    raw = path.read_text(encoding="utf-8")
+    stripped = BLOCK.sub("<!-- generated:sandbox start -->\n<!-- generated:sandbox end -->", raw)
+    assert stripped != raw
+
+    def words(text):
+        return sum(s.prose_words for s in parse_doc(path, text).sections)
+
+    assert words(raw) == words(stripped)
+
+
+@PAGES
+def test_every_page_lists_pb08(path):
+    listed = (front_matter(path) or {}).get("platform_blueprints") or []
+    assert "PB-08" in listed
+    assert listed == sorted(listed)

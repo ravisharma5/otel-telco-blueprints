@@ -22,7 +22,7 @@ autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Diagnoses transport and IP faults from read-only probe results and recommends fixes to a human approver. Never changes a router itself. Depends on IETF RFCs and vendor documents in retrieval and on read-only diagnostic tools."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [301]
 card:
@@ -117,6 +117,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Fix ceilings and approver roles | Transport and IP | Gate and action-layer policy | Risk owner | [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Sandbox the tools and code: run them in their own micro-VM | Runs LSP ping and TWAMP probes against live paths | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

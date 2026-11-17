@@ -53,7 +53,7 @@ FIT_PAGE_TEXT = {
         "and the six sandbox controls are enough"
     ),
     "execution": "Sandbox the tools and code: run them in their own micro-VM",
-    "whole-agent": "Sandbox the whole agent: OpenShell policy inside a micro-VM",
+    "whole-agent": "Sandbox the whole agent: run it under OpenShell policy inside a micro-VM",
 }
 PB08_ANCHOR = "when-a-use-case-needs-a-sandbox"
 PB08_LINK = "../../../platform/security-identity-sandbox/README.md#" + PB08_ANCHOR

@@ -20,7 +20,7 @@ otel_slots: ["embedding", "reranker", "safety", "decision", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Summarises 3GPP specifications and change requests with a citation for each clause, or abstains. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-10", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-10", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [103, 402]
 card:
@@ -114,6 +114,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Routing threshold and summary-only ceiling | RAN; 5G core CNFs; Transport and IP | Gate and action-layer policy | Risk owner | [RAN](../../../platform/bring-your-own-data/README.md#domain-ran); [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs); [Transport and IP](../../../platform/bring-your-own-data/README.md#domain-transport-and-ip) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads retrieved specification clauses; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

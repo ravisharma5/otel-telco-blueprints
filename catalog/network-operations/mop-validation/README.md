@@ -173,6 +173,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 <!-- generated:what-you-bring end -->
 
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Sandbox the tools and code: run them in their own micro-VM | Dry-runs each MOP through NETCONF validate and Ansible check mode | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
+
 ### What you must add
 
 | Gap | What you add | Source |

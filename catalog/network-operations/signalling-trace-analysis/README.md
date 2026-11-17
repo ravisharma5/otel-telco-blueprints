@@ -21,7 +21,7 @@ otel_slots: ["embedding", "reranker", "safety", "classification", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains failed procedures in 5G and LTE signalling traces and cites the decoded messages and 3GPP clauses. Informs only. Depends on parser tools that decode each message, labelled traces from your network, and a retrained Classification head."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-09", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: [201]
 card:
@@ -116,6 +116,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Trace analysis skill and capability manifests | 5G core CNFs | Skill or capability manifest | SME | [5G core CNFs](../../../platform/bring-your-own-data/README.md#domain-5g-core-cnfs) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Sandbox the tools and code: run them in their own micro-VM | Parser tools decode raw NAS, NGAP, and S1AP messages | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 

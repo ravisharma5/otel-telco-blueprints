@@ -1292,6 +1292,113 @@ def test_security_sandbox_options():
         assert "](http" in row[src], row
 
 
+FIT_SECTION = "When a use case needs a sandbox"
+FIT_HEADER = ["Fit", "Trigger", "Layers to add", "Source"]
+FIT_BLOCK = re.compile(r"<!-- generated:sandbox-fit start -->\n(.*?)<!-- generated:sandbox-fit end -->", re.S)
+FIT_BANNED = re.compile(r"\bGA\b|\bTP\b|\bDP\b|preview|supported|unverified|validated", re.I)
+MD_URL = re.compile(r"\]\((https?://[^)\s]+)\)")
+
+
+def _fit_section_text() -> str:
+    text = body(SECURITY)
+    ref = re.search(r"^## Reference design[ \t]*$(.*?)(?=^## )", text, re.M | re.S)
+    assert ref, "no Reference design section"
+    m = re.search(rf"^### {re.escape(FIT_SECTION)}[ \t]*$(.*?)(?=^### |\Z)", ref.group(1), re.M | re.S)
+    assert m, f"no '### {FIT_SECTION}' H3 under Reference design"
+    return m.group(1)
+
+
+def _sources_urls() -> set[str]:
+    table = table_with_header(SECURITY, "Sources and acceptance", ["#", "Claim", "Basis", "Source"])
+    src = table[0].index("Source")
+    return {u for row in table[1:] for u in MD_URL.findall(row[src])}
+
+
+def _fit_table() -> list[list[str]]:
+    sec = _fit_section_text()
+    rows = [
+        [c.strip() for c in ln.strip().strip("|").split("|")]
+        for ln in sec.splitlines()
+        if ln.startswith("|") and not re.fullmatch(r"\|(\s*:?-+:?\s*\|)+", ln.strip())
+    ]
+    start = next(i for i, r in enumerate(rows) if r == FIT_HEADER)
+    out = [rows[start]]
+    for r in rows[start + 1 :]:
+        if len(r) != len(FIT_HEADER):
+            break
+        out.append(r)
+    return out
+
+
+def test_security_sandbox_fit_section():
+    from tools.site.render_sandbox import FIT_LABELS, FIT_ORDER
+
+    sec = _fit_section_text()
+    table = _fit_table()
+    assert len(table) == 4, table
+    for row, fit in zip(table[1:], FIT_ORDER):
+        assert row[0].startswith(FIT_LABELS[fit]), (row[0], fit)
+        assert f"`{fit}`" in row[0], row[0]
+    allowed = _sources_urls()
+    for row in table[1:]:
+        urls = MD_URL.findall(row[3])
+        assert urls, row
+        assert set(urls) <= allowed, set(urls) - allowed
+    whole = table[3]
+    assert "OpenShell" in " ".join(whole) and "Red Hat AI" in " ".join(whole), whole
+    assert "request or make changes" in whole[1], whole[1]
+    flat = re.sub(r"\s+", " ", sec)
+    for want in ("deny-unless-allowed", "write credentials", "raw"):
+        assert want in flat, want
+    no_urls = re.sub(r"\(https?://[^)]*\)", "", _without_fit_block(sec))
+    assert not FIT_BANNED.search(no_urls), FIT_BANNED.findall(no_urls)
+    decisions = table_with_header(SECURITY, "Decisions you must make", ["Decision", "Recommendation"])
+    rec = decisions[0].index("Recommendation")
+    layer = next(r for r in decisions[1:] if r[0] == "Layer the sandbox")
+    assert "micro-VM" in layer[rec], layer[rec]
+    assert "Application-layer policy alone still shares the host kernel" in layer[decisions[0].index("Because")]
+
+
+def _without_fit_block(text: str) -> str:
+    return FIT_BLOCK.sub("", text)
+
+
+def test_security_fit_table_lists_every_use_case():
+    from tools.site.render_sandbox import FIT_LABELS
+    from tools.tests.test_use_case_pages import page_key, use_case_pages
+
+    m = FIT_BLOCK.search(_fit_section_text())
+    assert m, "no generated sandbox-fit block in the section"
+    rows = {
+        r[0]: r[1]
+        for r in (
+            [c.strip() for c in ln.strip().strip("|").split("|")]
+            for ln in m.group(1).splitlines()
+            if ln.startswith("| ") and not ln.startswith("| Fit |")
+        )
+    }
+    label_of = {v: k for k, v in FIT_LABELS.items()}
+    seen = []
+    for label, cell in rows.items():
+        fit = label_of[label]
+        for key in re.findall(r"\]\(\.\./\.\./catalog/([a-z-]+/[a-z-]+)/README\.md\)", cell):
+            path = REPO_ROOT / "catalog" / key / "README.md"
+            assert (front_matter(path) or {})["sandbox"]["fit"] == fit, key
+            seen.append(key)
+    assert sorted(seen) == sorted(page_key(p) for p in use_case_pages())
+    assert len(seen) == len(set(seen)) == 26
+
+
+def test_security_sources_unchanged():
+    import subprocess
+    import sys
+
+    table = table_with_header(SECURITY, "Sources and acceptance", ["#", "Claim", "Basis", "Source"])
+    assert len(table) - 1 == 22
+    rc = subprocess.run([sys.executable, "-m", "tools.site.facts", "--check"], cwd=REPO_ROOT, capture_output=True)
+    assert rc.returncode == 0, rc.stderr.decode()
+
+
 def test_security_no_shell_rule_has_no_default():
     """A zero-tolerance rule cannot have a default, so "no shell" stands alone."""
     for unit in _units(SECURITY):

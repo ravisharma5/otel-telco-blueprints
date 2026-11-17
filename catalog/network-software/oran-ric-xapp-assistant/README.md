@@ -20,7 +20,7 @@ otel_slots: ["embedding", "reranker", "safety", "llm"]
 autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers xApp development questions with citations to O-RAN specifications and your RIC code, or abstains. Informs only and never changes code or the network. Depends on a specification and code index you build and evaluate."
-platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-11"]
+platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-11"]
 clarity_reviewed: "2026-11-16"
 agent_school: []
 card:
@@ -109,6 +109,16 @@ Any component can be replaced. The Red Hat products named here show one way to b
 | Read-only ceiling: no writes to code or the RIC | vRAN and O-RAN | Gate and action-layer policy | Risk owner | [vRAN and O-RAN](../../../platform/bring-your-own-data/README.md#domain-vran-and-o-ran) |
 
 <!-- generated:what-you-bring end -->
+
+### Sandbox
+
+<!-- generated:sandbox start -->
+
+| Sandbox fit | Trigger on this page | Where to read |
+|---|---|---|
+| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads specification and code index passages; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+
+<!-- generated:sandbox end -->
 
 ### What you must add
 
