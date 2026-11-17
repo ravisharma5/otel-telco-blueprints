@@ -25,7 +25,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Finds the likely cause of a 5G core outage from network function logs, traces, and counters, and proposes a fix for approval. Never restarts or fails over a network function on its own. Depends on a Classification head retrained on your core fault taxonomy and on task evaluation with replayed incidents."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [101, 201, 402]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 card:
   goal: "incidents"
   summary: "Correlates 5G core logs, traces, counters, and alarms to rank likely causes, writes an RCA note, and proposes fixes for approval."
@@ -180,7 +180,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Sandbox fit | Trigger on this page | Where to read |
 |---|---|---|
-| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads network function logs and counters through read tools; runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+| Base sandbox only: the agent reads through the gateways, so the six sandbox controls and the gateway screen are enough | Reads network function logs and counters through read tools; runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
 
 <!-- generated:sandbox end -->
 

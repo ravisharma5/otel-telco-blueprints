@@ -27,7 +27,7 @@ one_liner: "Runs triage on RAN and transport alarms and recommends fixes for app
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-10", "PB-11"]
 agent_school: [101, 401, 402, 403]
 also_covers: ["NOC ticket triage"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 card:
   goal: "incidents"
   summary: "Finds the likely cause in RAN and transport alarms and proposes fixes for approval. It fine-tunes the model only when evaluation shows a gap."
@@ -215,7 +215,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Sandbox fit | Trigger on this page | Where to read |
 |---|---|---|
-| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads alarms and runbooks through read tools; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+| Base sandbox only: the agent reads through the gateways, so the six sandbox controls and the gateway screen are enough | Reads alarms and runbooks through read tools; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
 
 <!-- generated:sandbox end -->
 

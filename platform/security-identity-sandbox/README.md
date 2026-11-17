@@ -14,7 +14,7 @@ top_decisions:
   - "Layer the sandbox"
   - "Keep secrets at the boundary"
 agent_school: [102, 303, 304]
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-17"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
@@ -90,14 +90,14 @@ Each option can be replaced. Layer them. OpenShell policy inside a sandboxed-con
 
 ### When a use case needs a sandbox
 
-Every agent keeps the six [sandbox controls](#sandbox-controls), so a base sandbox never means no sandbox. A use case's sandbox fit says which layer to add on top.
+Every agent keeps the six [sandbox controls](#sandbox-controls). That is the base sandbox, so a fit of `none` never means no sandbox. A use case's fit says which layer to add on top.
 Add the execution layer when the agent's tools run code or binaries against live gear, or parse raw network bytes or files an attacker can shape.
-Tools that compute from counters or records you already hold stay at base controls; tools that decode raw messages or rebuild events from raw traces need the execution layer.
-A read-only tool loop stays at base controls or execution, because the MCP Gateway's deny-unless-allowed rule and the absence of write credentials bound what it can reach; the whole-agent layer is for a use case that can request or make changes on its own.
+Tools that compute from counters or records you already hold stay on the base sandbox. Tools that decode raw messages or rebuild events from raw traces need the execution layer.
+A read-only tool loop stays on the base sandbox or the execution layer, because the MCP Gateway's deny-unless-allowed rule and the lack of write credentials limit what it can reach. Sandbox the whole agent when the use case can request or make changes on its own.
 
 | Fit | Trigger | Layers to add | Source |
 |---|---|---|---|
-| Base sandbox only (`none`) | The agent only reads through the AI Gateway and the MCP Gateway, and runs no code itself | Nothing beyond the six sandbox controls, the workload identity, and the gateway screen | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
+| Base sandbox only (`none`) | The agent only reads through the AI Gateway and the MCP Gateway, and runs no code itself | Nothing beyond the six sandbox controls and the gateway screen | [Every layer counts](https://developers.redhat.com/articles/2026/05/14/every-layer-counts-defense-depth-ai-agents-red-hat-ai) |
 | Sandbox the tools and code (`execution`) | Its tools run code or binaries against live gear, or parse raw network bytes or files an attacker can shape | OpenShell policy inside a sandboxed-containers micro-VM around those tools, from an Agent Sandbox template. The agent's reasoning stays outside, and credentials are injected at the network boundary | [Layered sandboxing](https://developers.redhat.com/articles/2026/07/16/layered-sandboxing-ai-agents-openshift-and-openshell); [Red Hat build of Agent Sandbox](https://developers.redhat.com/articles/2026/07/15/red-hat-build-agent-sandbox-isolated-workload-management-kubernetes); [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai) |
 | Sandbox the whole agent (`whole-agent`) | It can request or make changes on its own: a write path, or acts within policy | The same layering around the agent itself, so its process, tool calls, and code share one sandbox boundary and it holds no credentials. OpenShell is an NVIDIA project that Red Hat plans to integrate into Red Hat AI | [Red Hat AI and OpenShell](https://www.redhat.com/en/blog/red-hat-ai-and-openshell-driving-security-enhanced-agent-execution-for-enterprise-ai); [Layered sandboxing](https://developers.redhat.com/articles/2026/07/16/layered-sandboxing-ai-agents-openshift-and-openshell); [OpenShell repository](https://github.com/NVIDIA/OpenShell) |
 

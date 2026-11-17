@@ -24,7 +24,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Correlates RAN, transport, and core alarms into one incident using topology and inventory, and recommends the grouping to a human approver. Never changes an OSS record itself. Depends on your alarm, inventory, and performance APIs and a retrained Classification head."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-11"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 agent_school: [301, 402]
 card:
   goal: "incidents"
@@ -128,7 +128,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Sandbox fit | Trigger on this page | Where to read |
 |---|---|---|
-| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads alarms, topology, and inventory through read tools; runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+| Base sandbox only: the agent reads through the gateways, so the six sandbox controls and the gateway screen are enough | Reads alarms, topology, and inventory through read tools; runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
 
 <!-- generated:sandbox end -->
 

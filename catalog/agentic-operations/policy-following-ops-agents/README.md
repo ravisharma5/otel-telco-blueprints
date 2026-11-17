@@ -23,7 +23,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Runs operations agents under written policies: each proposed change names its action class, and the decision gate holds it to that class's ceiling. Recommends with approval only. Depends on orchestration and change control that live outside the model."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-11"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 agent_school: [301, 303, 401]
 card:
   goal: "change"

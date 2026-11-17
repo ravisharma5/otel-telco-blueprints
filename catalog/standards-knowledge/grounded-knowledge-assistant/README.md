@@ -24,7 +24,7 @@ one_liner: "Answers standards and runbook questions with citations, or abstains 
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [103, 201, 203, 402]
 also_covers: ["Telecom standards Q&A over documents you hold rights to", "Grounded RAG assistants"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 card:
   goal: "answer"
   summary: "Answers standards and runbook questions from your own documents with citations, or says it can't answer and shows what it searched."
@@ -171,7 +171,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Sandbox fit | Trigger on this page | Where to read |
 |---|---|---|
-| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads retrieved standards and runbook passages; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+| Base sandbox only: the agent reads through the gateways, so the six sandbox controls and the gateway screen are enough | Reads retrieved standards and runbook passages; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
 
 <!-- generated:sandbox end -->
 

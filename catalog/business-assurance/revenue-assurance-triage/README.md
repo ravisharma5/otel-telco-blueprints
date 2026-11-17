@@ -23,7 +23,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains the cases your own fraud or revenue assurance model flags, and proposes a hold or an escalation for approval. Never scores a case itself. Depends on your detection model, called as a tool, and your billing records."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-10", "PB-11"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 agent_school: [202]
 card:
   goal: "customers"
@@ -122,7 +122,7 @@ Any component can be replaced. The Red Hat products named here show one way to b
 
 | Sandbox fit | Trigger on this page | Where to read |
 |---|---|---|
-| Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, and the six sandbox controls are enough | Reads cases your detection model flags; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
+| Base sandbox only: the agent reads through the gateways, so the six sandbox controls and the gateway screen are enough | Reads cases your detection model flags; the agent runs no code | [PB-08: when a use case needs a sandbox](../../../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) |
 
 <!-- generated:sandbox end -->
 

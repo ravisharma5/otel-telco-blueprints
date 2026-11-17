@@ -23,7 +23,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Diagnoses transport and IP faults from read-only probe results and recommends fixes to a human approver. Never changes a router itself. Depends on IETF RFCs and vendor documents in retrieval and on read-only diagnostic tools."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 agent_school: [301]
 card:
   goal: "incidents"

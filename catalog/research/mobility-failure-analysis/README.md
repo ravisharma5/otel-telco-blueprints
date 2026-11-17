@@ -21,7 +21,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains a failed 5G handover or registration from rebuilt signalling and the 3GPP procedures, with citations. Informs only. Depends on your tools that rebuild each mobility event and your own failure cases."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 agent_school: []
 card:
   goal: "incidents"

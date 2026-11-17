@@ -26,7 +26,7 @@ one_liner: "Handles router incidents from alarm to ticket with read-only tools, 
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [101, 301, 302, 403]
 also_covers: ["Closed-loop incident handling"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 card:
   goal: "incidents"
   summary: "An agent investigates router alarms with read-only tools and opens tickets. Every fix passes a gate, and low-risk fixes skip approval only after earning it."

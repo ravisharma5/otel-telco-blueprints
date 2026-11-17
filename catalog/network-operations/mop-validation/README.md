@@ -25,7 +25,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Checks each method of procedure (MOP) against inventory, vendor documents, and runbooks, dry-runs it through tools, and recommends approval or rejection to the change approver. Never executes a MOP. Depends on your own MOP-based evaluation against emulated network devices."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [301, 401]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 card:
   goal: "change"
   summary: "Reviews each change's MOP against inventory, documents, and a dry run, then recommends approval or rejection to the change approver."

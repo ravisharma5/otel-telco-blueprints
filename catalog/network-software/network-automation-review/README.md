@@ -22,7 +22,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Reviews network automation changes and recommends approval to a human approver. Never applies a change itself. Depends on schema checks and dry runs outside the model and on the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-17"
 agent_school: [301]
 card:
   goal: "change"

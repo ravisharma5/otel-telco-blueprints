@@ -49,8 +49,8 @@ FIT_LABELS = {
 }
 FIT_PAGE_TEXT = {
     "none": (
-        "Base sandbox only: the agent reads through the gateways, so its identity, the gateway screen, "
-        "and the six sandbox controls are enough"
+        "Base sandbox only: the agent reads through the gateways, so the six sandbox controls and the "
+        "gateway screen are enough"
     ),
     "execution": "Sandbox the tools and code: run them in their own micro-VM",
     "whole-agent": "Sandbox the whole agent: run it under OpenShell policy inside a micro-VM",
