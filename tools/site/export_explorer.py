@@ -52,6 +52,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "explorer/src/generated/explorer.json"
 SERVING_PAGE = "platform/serving-routing-placement/README.md"
 GOALS_FILE = "data/explorer/goals.yaml"
+TRY_IT_FILE = "data/explorer/try-it.yaml"
 
 TIERS = ("far-edge", "regional", "core")
 BATCH_VALUES = ("yes", "no")
@@ -652,6 +653,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         "depth": {"id": fm["depth"], "label": DEPTH_LABELS[fm["depth"]]},
         "adaptation": adaptation,
         "sandbox": sandbox,
+        "try_it_url": data["try_it"].get(fm["id"]),
         "card": fm["card"],
         "counts": {
             "slots": len(fm["otel_slots"]),
@@ -679,6 +681,20 @@ def _goal_ids(repo_root: Path) -> list[str]:
     if len(set(goals)) != len(goals):
         raise SystemExit(f"{GOALS_FILE}: goal ids must be unique")
     return goals
+
+
+def _try_it(repo_root: Path) -> dict[str, str]:
+    """Use-case id to reference-implementation URL; a missing file means no Try it links."""
+    path = repo_root / TRY_IT_FILE
+    if not path.is_file():
+        return {}
+    entries = load_yaml(path) or {}
+    if not isinstance(entries, dict):
+        raise SystemExit(f"{TRY_IT_FILE}: expected a map of use-case id to URL")
+    for uc_id, url in entries.items():
+        if not isinstance(url, str) or not url.startswith("https://"):
+            raise SystemExit(f"{TRY_IT_FILE}: {uc_id} needs an https URL, got {url!r}")
+    return entries
 
 
 def _serving_data(repo_root: Path) -> dict:
@@ -718,6 +734,7 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
     repo_root = Path(repo_root)
     data = _serving_data(repo_root)
     data["goal_ids"] = _goal_ids(repo_root)
+    data["try_it"] = _try_it(repo_root)
     use_cases = []
     for path in sorted((repo_root / "catalog").glob("*/*/README.md")):
         if path.parent.parent.name in SKIPPED_DOMAINS:
@@ -727,6 +744,9 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
             use_cases.append(uc)
     domain_rank = list(DOMAIN_LABELS)
     use_cases.sort(key=lambda u: (domain_rank.index(u["domain"]), u["slug"]))
+    unknown = sorted(set(data["try_it"]) - {u["id"] for u in use_cases})
+    if unknown:
+        raise SystemExit(f"{TRY_IT_FILE}: unknown use-case id {', '.join(unknown)}")
     for key in ("id", "slug"):
         values = [u[key] for u in use_cases]
         if len(set(values)) != len(values):

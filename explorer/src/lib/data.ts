@@ -156,6 +156,7 @@ export interface UseCase {
   depth: Depth;
   adaptation: Adaptation;
   sandbox: Sandbox;
+  try_it_url: string | null;
   card: Card;
   counts: Counts;
   slot_names: string[];

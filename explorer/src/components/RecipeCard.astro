@@ -18,7 +18,18 @@ const href = import.meta.env.BASE_URL + useCase.recipe_url;
     <p class="muted">{r.notes.body}</p>
     <ul class="tags">{r.tags.map((tag) => <li class="tag">{tag}</li>)}</ul>
   </div>
-  <a class="primary-button" href={href}>{copy.buttons.open_recipe} <span aria-hidden="true">→</span></a>
+  <div class="recipe-actions">
+    <a class="primary-button" href={href}>{copy.buttons.open_recipe} <span aria-hidden="true">→</span></a>
+    {useCase.try_it_url && (
+      <>
+        <a class="try-it" href={useCase.try_it_url} rel="noopener">
+          {copy.buttons.try_it} <span aria-hidden="true">↗</span>
+          <span class="visually-hidden">{copy.notes.external}</span>
+        </a>
+        <p class="try-it-note muted">{r.notes.try_it}</p>
+      </>
+    )}
+  </div>
 </div>
 
 <style>
@@ -34,6 +45,16 @@ const href = import.meta.env.BASE_URL + useCase.recipe_url;
     font-weight: var(--weight-bold); line-height: var(--leading-label);
   }
   .muted { color: var(--color-text-muted); }
+  .recipe-actions { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-sm); max-width: 320px; }
+  .try-it {
+    display: inline-flex; align-items: center; gap: var(--space-sm);
+    min-height: var(--target-button); padding: 12px 20px;
+    background: transparent; color: var(--color-text);
+    border: 1px solid var(--color-border-control); border-radius: var(--radius-full); text-decoration: none;
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  .try-it:hover { border-color: var(--color-text); color: var(--color-text); }
+  .try-it-note { margin: 0; font-size: var(--text-label); line-height: var(--leading-label); }
   .tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
   .tag {
     padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm);
@@ -41,6 +62,7 @@ const href = import.meta.env.BASE_URL + useCase.recipe_url;
   }
   @media (max-width: 639px) {
     .recipe-card { padding: var(--space-lg) var(--space-md); }
-    .recipe-card .primary-button { width: 100%; justify-content: center; }
+    .recipe-actions { max-width: none; width: 100%; }
+    .recipe-card .primary-button, .recipe-card .try-it { width: 100%; justify-content: center; }
   }
 </style>

@@ -1,0 +1,4 @@
+# Use cases with a runnable reference implementation, keyed by use-case id.
+# The explorer shows a "Try it" link on that use case's page only. Each URL must
+# be https and must also be listed in data/facts-check.yaml extra_urls.
+UC-AGOPS-01: https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop

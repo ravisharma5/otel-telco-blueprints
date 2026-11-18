@@ -827,3 +827,25 @@ def test_toggle_hidden_and_section_nav_current(explorer_dist, data, copy):
     home.feed((explorer_dist / "index.html").read_text(encoding="utf-8"))
     links = home.root.find_all(lambda n: n.tag == "a" and n.attrs.get("aria-current"))
     assert [(a.text().strip(), a.attrs["aria-current"]) for a in links] == [(use_cases["label"], "page")]
+
+
+TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop"
+
+
+@pytest.mark.site_output
+def test_try_it_link_only_on_f2(explorer_dist, data, copy):
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        impl = tree.root.find_all(lambda n: n.tag == "a" and "otel-telco-blueprints-impl" in n.attrs.get("href", ""))
+        actions = tree.root.find_all(lambda n: n.tag in ("a", "button"))
+        assert not [n for n in actions if n.text().lower().startswith("deploy")], uc["slug"]
+        if uc["id"] != "UC-AGOPS-01":
+            assert impl == [], uc["slug"]
+            continue
+        assert len(impl) == 1, impl
+        link = impl[0]
+        assert link.attrs["href"] == TRY_IT_URL
+        assert "noopener" in link.attrs.get("rel", "")
+        assert copy["buttons"]["try_it"] in link.text()
+        assert copy["notes"]["external"] in link.text()
+        assert _squash(copy["use_case"]["recipe"]["notes"]["try_it"]) in _squash(tree.root.text())

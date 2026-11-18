@@ -395,3 +395,12 @@ def test_exported_prose_passes_vale():
         if a["Severity"] in ("error", "warning")
     ]
     assert bad == []
+
+
+def test_try_it_copy():
+    copy = _copy()
+    button = copy["buttons"]["try_it"]
+    note = copy["use_case"]["recipe"]["notes"]["try_it"]
+    assert _words(button) <= LIMITS["buttons"], button
+    assert _words(note) <= LIMITS["notes"], note
+    assert _banned_hits(button) == [] and _banned_hits(note) == []

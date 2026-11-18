@@ -885,3 +885,21 @@ def test_fill_matches_own_keys_only():
     body = src.split("export function fill", 1)[1].split("\n}\n", 1)[0]
     assert "Object.hasOwn(values, name)" in body, body
     assert " in values" not in body, body
+
+
+TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop"
+
+
+def test_try_it_exported(data, tmp_path):
+    by_id = {uc["id"]: uc for uc in data["use_cases"]}
+    assert by_id["UC-AGOPS-01"]["try_it_url"] == TRY_IT_URL
+    others = [uc["id"] for uc in data["use_cases"] if uc["id"] != "UC-AGOPS-01" and uc["try_it_url"] is not None]
+    assert others == [], others
+    for bad, needle in (({"UC-NOPE-99": TRY_IT_URL}, "UC-NOPE-99"), ({"UC-AGOPS-01": "http://example.com/"}, "https")):
+        root = tmp_path / needle.replace("-", "")
+        shutil.copytree(REPO_ROOT / "data", root / "data")
+        shutil.copytree(REPO_ROOT / "catalog", root / "catalog")
+        _copy_serving_page(root)
+        (root / "data/explorer/try-it.yaml").write_text(yaml.safe_dump(bad), encoding="utf-8")
+        with pytest.raises(SystemExit, match=needle):
+            ex.build_explorer_data(root)

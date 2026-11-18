@@ -26,6 +26,7 @@ buttons:
   github: GitHub
   write: Write a blueprint
   open_recipe: Open the recipe
+  try_it: Try it offline
   # {count} is the number of options in the setup state, filled at build time.
   show_all_options: "Show all {count} options"
 notes:
@@ -391,6 +392,7 @@ use_case:
     title: "Build it: {title}"
     notes:
       body: Step-by-step build, full settings, gates, and the ten readiness questions to answer before production.
+      try_it: Run the gate on recorded incidents and mock systems on a laptop, with no GPU and no model.
     tags:
       - Deploy steps
       - Verification checks

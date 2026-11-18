@@ -55,3 +55,13 @@ def test_impl_wording():
     assert texts
     for text in texts:
         assert not BANNED.search(text), text
+
+
+def test_try_it_matches_facts():
+    import yaml
+
+    try_it = yaml.safe_load((REPO_ROOT / "data/explorer/try-it.yaml").read_text(encoding="utf-8")) or {}
+    facts = yaml.safe_load((REPO_ROOT / "data/facts-check.yaml").read_text(encoding="utf-8"))
+    assert try_it.get("UC-AGOPS-01") == QUICKSTART, try_it
+    for url in try_it.values():
+        assert url in facts["extra_urls"], url
