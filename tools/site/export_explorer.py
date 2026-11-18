@@ -13,6 +13,12 @@ largest first, and band each GPU by its share of memory. While a GPU is not in
 the fits band, swap the heaviest slot on it that has an operator-made FP8 build
 and pack again. Core setups use the published builds and show no fit bar.
 
+Each use case also carries its story, read from the recipe body at build time:
+the problem (the Problem and value paragraph up to its KPI sentence), the How it
+works steps (first sentence of each numbered step), and the Worked example (its
+title and up to three sentences of its first paragraph). A catalog entry stubs
+How it works and has no worked example, so those blocks are left out, never invented.
+
 Each use case carries its goal (card.goal, one id from data/explorer/goals.yaml)
 and its recipe depth. The top-level goals list holds only goals that at least
 one use case names, in file order, so the home page never shows an empty goal.
@@ -30,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -439,6 +446,77 @@ def _plain(cell: str) -> str:
     return "".join(parts).strip()
 
 
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"(])")
+EXAMPLE_PREFIX = "Worked example:"
+EXAMPLE_SENTENCES = 3
+
+
+def _sentences(text: str) -> list[str]:
+    """Split plain text into sentences: a stop, then space, then a capital, digit, quote, or bracket."""
+    return [s for s in _SENTENCE_END.split(" ".join(text.split())) if s]
+
+
+def _blocks(body: str):
+    """Top-level blocks of a section body: ("p", text), ("ol", [item text]), ("h3", title)."""
+    tokens = _MD.parse(body)
+    out = []
+    i = 0
+    while i < len(tokens):
+        t = tokens[i]
+        if t.type == "paragraph_open" and t.level == 0:
+            out.append(("p", _plain(tokens[i + 1].content)))
+        elif t.type == "heading_open" and t.tag == "h3":
+            out.append(("h3", tokens[i + 1].content.strip()))
+        elif t.type == "ordered_list_open" and t.level == 0:
+            items, depth = [], 0
+            i += 1
+            while tokens[i].type != "ordered_list_close" or depth:
+                tk = tokens[i]
+                if tk.type in ("ordered_list_open", "bullet_list_open"):
+                    depth += 1
+                elif tk.type in ("ordered_list_close", "bullet_list_close"):
+                    depth -= 1
+                elif tk.type == "list_item_open" and not depth:
+                    items.append(None)
+                elif tk.type == "inline" and not depth and items and items[-1] is None:
+                    items[-1] = _plain(tk.content)
+                i += 1
+            out.append(("ol", [x or "" for x in items]))
+        i += 1
+    return out
+
+
+def _story(doc, rel: str, depth: str) -> dict:
+    """Problem, How it works steps, and worked example, as plain text from the recipe."""
+    section = doc.section("Problem and value")
+    paras = [b for kind, b in _blocks(section.body_text if section else "") if kind == "p"]
+    if not paras:
+        raise SystemExit(f"{rel}: Problem and value has no paragraph for the explorer story")
+    problem = []
+    for sentence in _sentences(paras[0]):
+        if sentence.startswith("The KPI"):
+            break
+        problem.append(sentence)
+    steps, example = [], None
+    how = doc.section("How it works")
+    blocks = _blocks(how.body_text) if how else []
+    lists = [b for kind, b in blocks if kind == "ol"]
+    if lists:
+        steps = [_sentences(item)[0] for item in lists[0] if item]
+    for i, (kind, value) in enumerate(blocks):
+        if kind == "h3" and value.startswith(EXAMPLE_PREFIX):
+            text = next((b for k, b in blocks[i + 1 :] if k == "p"), "")
+            if text:
+                example = {
+                    "title": value[len(EXAMPLE_PREFIX) :].strip(),
+                    "text": " ".join(_sentences(text)[:EXAMPLE_SENTENCES]),
+                }
+            break
+    if depth == "recipe" and not (steps and example):
+        raise SystemExit(f"{rel}: a full recipe needs numbered How it works steps and a {EXAMPLE_PREFIX} section")
+    return {"problem": " ".join(problem), "steps": steps, "example": example}
+
+
 def _table(doc, rel: str, key: str) -> list[list[str]]:
     section_name = TABLE_SECTIONS[key]
     expected = EXPORTER_TABLE_HEADERS[key]
@@ -655,6 +733,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         "sandbox": sandbox,
         "try_it_url": data["try_it"].get(fm["id"]),
         "card": fm["card"],
+        "story": _story(doc, rel, fm["depth"]),
         "counts": {
             "slots": len(fm["otel_slots"]),
             "blueprints": len(fm["platform_blueprints"]),

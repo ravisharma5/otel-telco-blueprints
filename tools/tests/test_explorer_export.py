@@ -979,7 +979,7 @@ def test_story_example_matches_recipe(data):
         if uc["depth"]["id"] != "recipe":
             continue
         body = _section(pages[uc["id"]], "How it works").body_text
-        match = re.search(r"^### Worked example: (.+)\n\n(.+?)(?:\n\n|\Z)", body, re.M | re.S)
+        match = re.search(r"^### Worked example: ([^\n]+)\n\n(.+?)(?:\n\n|\Z)", body, re.M | re.S)
         assert match, uc["slug"]
         example = uc["story"]["example"]
         assert example["title"] == match.group(1).strip(), uc["slug"]
