@@ -56,6 +56,22 @@ def all_states(data):
                 yield uc, SETUP_BY_ID[setup_id], batch, state
 
 
+CPU_SETUP = "far-edge-xeon6-cpu"
+
+
+def is_cpu(setup):
+    return setup["accelerators"] is None
+
+
+def gpu_states(data):
+    """States of the GPU setups: two batch values, options, and a fit rule."""
+    return [t for t in all_states(data) if not is_cpu(t[1])]
+
+
+def cpu_states(data):
+    return [t for t in all_states(data) if is_cpu(t[1])]
+
+
 def regional_states(data):
     return [t for t in all_states(data) if t[1]["tier"] == "regional"]
 
@@ -157,16 +173,16 @@ def test_fp8_swap_never_grows_a_slot():
 
 
 def test_ten_states_per_use_case(data):
+    # Five GPU setups with two batch values each, plus one CPU state: 11 per use case.
     states = list(all_states(data))
     setups = SETUPS["setups"]
+    gpu_setups = [s for s in setups if not is_cpu(s)]
     assert len(data["use_cases"]) == len(exported_pages())
-    assert len(setups) * len(BATCH) == 10
-    assert len(states) == len(exported_pages()) * len(setups) * len(BATCH)
+    assert len(gpu_setups) * len(BATCH) == 10
+    assert len(states) == len(exported_pages()) * (len(gpu_setups) * len(BATCH) + 1)
     for uc in data["use_cases"]:
         assert list(uc["states"]) == [s["id"] for s in setups]
-        for by_batch in uc["states"].values():
-            assert sorted(by_batch) == sorted(BATCH)
-    for uc, setup, batch, state in states:
+    for uc, setup, batch, state in gpu_states(data):
         assert [t["tier"] for t in state["tiers"]] == list(TIERS)
         assert isinstance(state["flags"], list) and state["flags"]
         assert state["variants"], f"{uc['id']} {setup['id']}: no variants"
@@ -174,6 +190,106 @@ def test_ten_states_per_use_case(data):
         assert len(state["options"]) == len(OPTIONS)
         helps = sum(1 for o in state["options"] if o["state"] == "helps")
         assert state["options_worth_testing"] == helps
+
+
+def test_state_keys(data):
+    for uc in data["use_cases"]:
+        for setup_id, by_batch in uc["states"].items():
+            if setup_id == CPU_SETUP:
+                assert list(by_batch) == [ex.CPU_BATCH] == ["any"]
+            else:
+                assert sorted(by_batch) == sorted(BATCH)
+        assert sum(len(b) for b in uc["states"].values()) == 11
+
+
+def test_cpu_state_shape(data):
+    states = cpu_states(data)
+    assert len(states) == len(data["use_cases"])
+    for uc, setup, batch, state in states:
+        assert batch == "any"
+        assert state["fit"] == [] and state["options"] == []
+        assert state["options_worth_testing"] == 0
+        assert state["runs_here"] == bool(placed(uc["id"], "far-edge"))
+        assert [t["tier"] for t in state["tiers"]] == list(TIERS)
+
+
+def test_cpu_prefers_cpu_builds():
+    assert ex._start_variant("embedding", VARIANTS, cpu=True)["id"] == "embedding-small-cpu"
+    assert ex._start_variant("embedding", VARIANTS, cpu=False)["id"] == "embedding-0.6b-bf16"
+    assert ex._start_variant("embedding", VARIANTS)["id"] == "embedding-0.6b-bf16"
+    cpu_roles = {v["role"] for v in VARIANTS if not v["gpu"] and v["source"] == "published"}
+    for role in {v["role"] for v in VARIANTS} - cpu_roles:
+        assert ex._start_variant(role, VARIANTS, cpu=True) == ex._start_variant(role, VARIANTS), role
+
+
+def test_cpu_fit_sums_cpu_builds():
+    cpu = SETUP_BY_ID[CPU_SETUP]
+    fit = ex._cpu_fit(["classification", "embedding"], cpu, VARIANTS)
+    assert fit == {
+        "slots": [
+            {"role": "classification", "slot_name": "Classification", "weights_gb": 17},
+            {"role": "embedding", "slot_name": "Embedding", "weights_gb": 1.5},
+        ],
+        "weights_gb": 18.5,
+        "memory_parameter": "System memory set aside for AI",
+    }
+    assert ex._cpu_fit([], cpu, VARIANTS) is None
+    assert ex._cpu_fit(["embedding"], SETUP_BY_ID["regional-96"], VARIANTS) is None
+
+
+def test_runs_here_on_every_state(data):
+    for uc, setup, batch, state in all_states(data):
+        assert state["runs_here"] == bool(placed(uc["id"], setup["tier"])), (uc["id"], setup["id"])
+        assert "cpu_fit" in state
+        if not is_cpu(setup):
+            assert state["cpu_fit"] is None
+
+
+def _with_far_edge(tmp_path, runs):
+    shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
+    shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
+    page = tmp_path / "catalog/standards-knowledge/grounded-knowledge-assistant/README.md"
+    _, fm_text, rest = page.read_text(encoding="utf-8").split("---\n", 2)
+    fm = yaml.safe_load(fm_text)
+    fm["placement"]["far-edge"] = {"runs": runs, "note": "Runs at the cell site."}
+    page.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n" + rest, encoding="utf-8")
+    return fm["id"]
+
+
+@pytest.mark.parametrize("role", ["llm-large", "safety"])
+def test_far_edge_role_must_be_cpu_capable(tmp_path, role):
+    _with_far_edge(tmp_path, [role])
+    with pytest.raises(SystemExit) as exc:
+        ex.build_explorer_data(tmp_path)
+    msg = str(exc.value)
+    assert "grounded-knowledge-assistant/README.md" in msg
+    assert role in msg and CPU_SETUP in msg and "cpu.roles" in msg, msg
+
+
+def test_cpu_setup_exported(data):
+    out = {s["id"]: s for s in data["setups"]}
+    cpu = out[CPU_SETUP]
+    assert cpu["cpu_only"] is True and cpu["gpu_count"] == 0
+    assert cpu["memory_per_gpu_gb"] is None and cpu["vendor"] is None
+    assert cpu["batch_values"] == ["any"]
+    for sid, s in out.items():
+        if sid != CPU_SETUP:
+            assert s["cpu_only"] is False and s["batch_values"] == ["yes", "no"]
+
+
+def test_cpu_settings_only_when_something_runs(data, tmp_path):
+    for uc, setup, batch, state in cpu_states(data):
+        if not state["runs_here"]:
+            assert state["flags"] == [] and state["cpu_fit"] is None
+    uc_id = _with_far_edge(tmp_path, ["decision"])
+    built = ex.build_explorer_data(tmp_path)
+    uc = next(u for u in built["use_cases"] if u["id"] == uc_id)
+    state = uc["states"][CPU_SETUP]["any"]
+    assert state["runs_here"] is True
+    settings = [f["setting"] for f in state["flags"] if f["scope"] == "setup"]
+    assert "Decision build" in settings and "Cores for AI" in settings
+    assert state["cpu_fit"]["slots"][0]["role"] == "decision"
 
 
 def test_tier_cards(data):
@@ -484,7 +600,7 @@ def test_option_reasons(data):
 
 
 def test_option_states_follow_rules(data):
-    for uc, setup, batch, state in all_states(data):
+    for uc, setup, batch, state in gpu_states(data):
         props = {
             "tier": setup["tier"],
             "vendor": setup["accelerators"]["vendor"],
@@ -525,7 +641,7 @@ def test_helps_only_where_a_target_slot_runs(data):
     # "Helps here" needs a slot the reason is about running at the setup's tier,
     # read from the recipe placement and options.yaml; excluded slots never count.
     bad = []
-    for uc, setup, batch, state in all_states(data):
+    for uc, setup, batch, state in gpu_states(data):
         roles = set(placed(uc["id"], setup["tier"]))
         for src in OPTIONS:
             o = option(state, src["id"])
@@ -538,7 +654,7 @@ def test_option_helping_at_another_tier_says_so(data):
     # An option that helps this use case only at another tier reads "doesn't apply"
     # on this setup, never "little benefit", and its reason names that tier.
     seen = 0
-    for uc, setup, batch, state in all_states(data):
+    for uc, setup, batch, state in gpu_states(data):
         roles = set(placed(uc["id"], setup["tier"]))
         for src in OPTIONS:
             targets = set(_helps_roles(src, uc["id"]))
@@ -574,7 +690,7 @@ def test_fp8_option_follows_fit(data):
     # The FP8 option helps exactly where FP8 builds were swapped in, says when the
     # setup is still tight or too tight, and is "not needed" where bf16 fits.
     seen = {"helps": 0, "fits-without-fp8": 0, "still-tight": 0, "still-too-tight": 0}
-    for uc, setup, batch, state in all_states(data):
+    for uc, setup, batch, state in gpu_states(data):
         o = option(state, "fp8-regional")
         for other in state["options"]:
             assert "fit_note_id" in other

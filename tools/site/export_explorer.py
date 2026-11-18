@@ -12,6 +12,10 @@ build (the small LLM at its fit_reference build), pack the slots per GPU
 largest first, and band each GPU by its share of memory. While a GPU is not in
 the fits band, swap the heaviest slot on it that has an operator-made FP8 build
 and pack again. Core setups use the published builds and show no fit bar.
+A CPU-only setup has one state, shows no fit bar, and sums the weights of its
+far-edge slots against the memory the operator sets aside. Its slots start at
+their published CPU build where one exists, and a recipe that places a role at
+the far edge outside the setup's cpu.roles stops the run.
 
 Each use case also carries its story, read from the recipe body at build time:
 the problem (the Problem and value paragraph up to its KPI sentence), the How it
@@ -63,6 +67,7 @@ TRY_IT_FILE = "data/explorer/try-it.yaml"
 
 TIERS = ("far-edge", "regional", "core")
 BATCH_VALUES = ("yes", "no")
+CPU_BATCH = "any"  # batch work changes nothing on a CPU-only site, so it has one state
 FP8_ARCHES = ("ada", "hopper", "blackwell", "cdna3")
 
 # Table headers the exporter parses on every recipe. The card-field tests hold
@@ -208,8 +213,20 @@ def _role_order(variants) -> list[str]:
     return order
 
 
-def _start_variant(role: str, variants) -> dict:
-    """Smallest published GPU build for a role; the small LLM uses its fit_reference build."""
+def _is_cpu(setup: dict) -> bool:
+    """A CPU-only setup has no accelerators (and a cpu block instead)."""
+    return setup["accelerators"] is None
+
+
+def _start_variant(role: str, variants, cpu: bool = False) -> dict:
+    """Smallest published GPU build for a role; the small LLM uses its fit_reference build.
+
+    With cpu true, a role that has a published CPU build (gpu false) starts there.
+    """
+    if cpu:
+        cpu_builds = [v for v in variants if v["role"] == role and not v["gpu"] and v["source"] == "published"]
+        if cpu_builds:
+            return min(cpu_builds, key=lambda v: v["weights_gb"])
     if role == "llm-small":
         refs = [v for v in variants if v["role"] == role and v.get("fit_reference")]
         if len(refs) != 1:
@@ -278,8 +295,8 @@ def choose_variants(roles, setup: dict, variants, bands: dict):
     swap to operator-made FP8 builds, heaviest first on a GPU that is not in
     the fits band, until every GPU fits or no FP8 build is left.
     """
-    current = {role: _start_variant(role, variants) for role in roles}
-    if setup["tier"] != "regional" or not roles:
+    current = {role: _start_variant(role, variants, cpu=_is_cpu(setup)) for role in roles}
+    if setup["tier"] != "regional" or _is_cpu(setup) or not roles:
         return [current[r] for r in roles], []
     acc = setup["accelerators"]
     count, gpu_gb = acc["count_per_node"], acc["memory_per_gpu_gb"]
@@ -312,6 +329,26 @@ def choose_variants(roles, setup: dict, variants, bands: dict):
             ("too-tight" if fp8_left else "too-tight-after-fp8") if f["band"] == "too-tight" else f["band"]
         )
     return [current[r] for r in roles], fit
+
+
+def _cpu_fit(roles, setup: dict, variants) -> dict | None:
+    """Weights of the far-edge slots on a CPU-only setup, from their CPU-preferred builds.
+
+    No band and no percent: the operator compares the sum with the memory set aside
+    for AI (the setup's memory parameter, which has no default). None for GPU setups
+    and when nothing runs at the setup's tier.
+    """
+    if not _is_cpu(setup) or not roles:
+        return None
+    slots = [
+        {"role": r, "slot_name": ROLE_NAMES[r], "weights_gb": _start_variant(r, variants, cpu=True)["weights_gb"]}
+        for r in roles
+    ]
+    return {
+        "slots": slots,
+        "weights_gb": round(sum(s["weights_gb"] for s in slots), 1),
+        "memory_parameter": setup["cpu"]["memory_parameter"],
+    }
 
 
 FIT_NOTES = {"fits": None, "tight": "still-tight", "too-tight": "still-too-tight"}
@@ -566,7 +603,7 @@ def _tier_cards(placement: dict, setup: dict) -> list[dict]:
     return cards
 
 
-def _setup_row_applies(row: dict, setup: dict, batch: str, roles: list[str], swapped: bool) -> bool:
+def _setup_row_applies(row: dict, setup: dict, batch: str | None, roles: list[str], swapped: bool) -> bool:
     """A per-setup row shows for its setup and batch value, and only when its
     when_roles (a role placed at the tier) and when_fp8_swap (an FP8 build was
     swapped in) conditions hold."""
@@ -586,7 +623,7 @@ def _sources(urls: list[str], labels: dict[str, str], where: str) -> list[dict]:
     return [{"url": u, "label": labels[u]} for u in urls]
 
 
-def _flags(flags: dict, setup: dict, batch: str, roles: list[str], swapped: bool, labels: dict) -> list[dict]:
+def _flags(flags: dict, setup: dict, batch: str | None, roles: list[str], swapped: bool, labels: dict) -> list[dict]:
     out = [
         {
             "setting": r["setting"],
@@ -648,8 +685,10 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
         other_tier_variants += _variant_rows([_start_variant(r, data["variants"]) for r in runs], tier)
     swapped_roles = [v["role"] for v in variants if v["operator_made"]]
     swapped = bool(swapped_roles)
+    cpu = _is_cpu(setup)
     options = []
-    for opt in data["options"]:
+    # A CPU-only setup has no advanced options: every option reads the setup's GPUs.
+    for opt in [] if cpu else data["options"]:
         row = {"id": opt["id"], **{k: opt.get(k) for k in OPTION_TEXT_KEYS}}
         row["sources"] = _sources(opt["sources"], data["source_labels"], f"data/serving/options.yaml: {opt['id']}")
         row.update(option_state(opt, setup, batch, uc_id, swapped, worst_band(fit), placement, swapped_roles))
@@ -657,13 +696,19 @@ def _state(uc_id, placement, setup, batch, data) -> dict:
     return {
         "tiers": _tier_cards(placement, setup),
         "fit": fit,
-        "flags": _flags(data["flags"], setup, batch, roles, swapped, data["source_labels"]),
+        "runs_here": bool(roles),
+        "cpu_fit": _cpu_fit(roles, setup, data["variants"]),
+        "flags": _flags(data["flags"], setup, None if cpu else batch, roles, swapped, data["source_labels"]),
         "variants": variants,
         "other_tier_variants": other_tier_variants,
         "quantized_check": any(v["operator_made"] for v in variants),
         "options": options,
         "options_worth_testing": sum(1 for o in options if o["state"] == "helps"),
     }
+
+
+def _batch_values(setup: dict) -> list[str]:
+    return [CPU_BATCH] if _is_cpu(setup) else list(BATCH_VALUES)
 
 
 def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
@@ -703,6 +748,14 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
                 raise SystemExit(f"{rel}: placement.{tier} has unknown role {role}")
             if role not in known_roles:
                 raise SystemExit(f"data/serving/slot-variants.yaml: no variant for role {role} placed by {rel}")
+    for setup in data["setups"]:
+        if not setup.get("cpu"):
+            continue
+        for role in (placement.get(setup["tier"]) or {}).get("runs") or []:
+            if role not in setup["cpu"]["roles"]:
+                raise SystemExit(
+                    f"{rel}: placement.{setup['tier']} runs {role}, which {setup['id']} does not list in cpu.roles"
+                )
     for slot in fm["otel_slots"]:
         if slot not in SLOT_NAMES:
             raise SystemExit(f"{rel}: otel_slots has unknown slot {slot}")
@@ -715,7 +768,7 @@ def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
         if not row[who]:
             raise SystemExit(f"{rel}: parameter {row[0]} has an empty Who sets it cell")
     states = {
-        setup["id"]: {batch: _state(fm["id"], placement, setup, batch, data) for batch in BATCH_VALUES}
+        setup["id"]: {batch: _state(fm["id"], placement, setup, batch, data) for batch in _batch_values(setup)}
         for setup in data["setups"]
     }
     return {
@@ -835,7 +888,13 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
     depths = {u["depth"]["id"] for u in use_cases}
     changes = {u["adaptation"]["change"] for u in use_cases}
     goal_counts = {g: sum(1 for u in use_cases if u["goal"] == g) for g in data["goal_ids"]}
-    tiers = {c["tier"] for u in use_cases for s in u["states"].values() for c in s["yes"]["tiers"] if c["used"]}
+    tiers = {
+        c["tier"]
+        for u in use_cases
+        for by_batch in u["states"].values()
+        for c in next(iter(by_batch.values()))["tiers"]
+        if c["used"]
+    }
     return {
         "setups": [
             {
@@ -843,9 +902,11 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
                 "label": s["label"],
                 "tier": s["tier"],
                 "ampere_note": s["ampere_note"],
-                "gpu_count": s["accelerators"]["count_per_node"],
-                "memory_per_gpu_gb": s["accelerators"]["memory_per_gpu_gb"],
-                "vendor": s["accelerators"]["vendor"],
+                "gpu_count": 0 if _is_cpu(s) else s["accelerators"]["count_per_node"],
+                "memory_per_gpu_gb": None if _is_cpu(s) else s["accelerators"]["memory_per_gpu_gb"],
+                "vendor": None if _is_cpu(s) else s["accelerators"]["vendor"],
+                "cpu_only": _is_cpu(s),
+                "batch_values": _batch_values(s),
             }
             for s in data["setups"]
         ],

@@ -301,7 +301,8 @@ def test_copy_never_types_a_setup():
     needles = set()
     for setup in setups:
         needles.add(setup["label"].lower())
-        needles.add(f"{setup['accelerators']['memory_per_gpu_gb']} gb")
+        if setup["accelerators"]:  # a CPU-only setup has no GPU memory size
+            needles.add(f"{setup['accelerators']['memory_per_gpu_gb']} gb")
     hits = [
         f"{'.'.join(path)}: {needle}"
         for path, text in _strings(_copy())
