@@ -8,7 +8,7 @@ clarity_reviewed: "2026-11-16"
 
 <!-- generated:facts-stamp start -->
 
-Facts checked as of 2026-11-16.
+Facts checked as of 2026-11-18.
 
 <!-- generated:facts-stamp end -->
 
@@ -187,11 +187,11 @@ Each use case links a source for every key claim. This table counts those source
 <!-- vale Google.Colons = NO -->
 <!-- generated:evidence-summary start -->
 
-Counted from each page's Sources table on 2026-11-16. Each number is how many Sources rows on the page have that Basis.
+Counted from each page's Sources table on 2026-11-18. Each number is how many Sources rows on the page have that Basis.
 
 | Use case | Depth | Model card | Research | Red Hat guidance | Industry use case | Project documentation | Named gates | What you bring |
 |---|---|---|---|---|---|---|---|---|
-| [UC-AGOPS-01](../catalog/agentic-operations/closed-loop-incident-handling/README.md) Governed closed-loop incident handling | Full recipe | 5 | 3 | 2 | 0 | 3 | Decision false-ACT budget; Decision minimum ACT probability; Decision REVIEW band; Decision calibration error ceiling; Minimum share of no-write scenarios; Non-inferiority margin; Shadow agreement floor; Canary window; Override rate ceiling; Ceiling for read requests; Ceiling for notify requests; Ceiling for low-risk writes; Ceiling for high-risk writes; Required approver role per action class; Label-mass floor | Retrain the Classification head. You bring: Your fault or alert taxonomy, A golden set your experts label, Gate labels from your approvers, A contract for each tool |
+| [UC-AGOPS-01](../catalog/agentic-operations/closed-loop-incident-handling/README.md) Governed closed-loop incident handling | Full recipe | 5 | 3 | 2 | 0 | 4 | Decision false-ACT budget; Decision minimum ACT probability; Decision REVIEW band; Decision calibration error ceiling; Minimum share of no-write scenarios; Non-inferiority margin; Shadow agreement floor; Canary window; Override rate ceiling; Ceiling for read requests; Ceiling for notify requests; Ceiling for low-risk writes; Ceiling for high-risk writes; Required approver role per action class; Label-mass floor | Retrain the Classification head. You bring: Your fault or alert taxonomy, A golden set your experts label, Gate labels from your approvers, A contract for each tool |
 | [UC-AGOPS-02](../catalog/agentic-operations/router-core-read-only-ops/README.md) Read-only router and 5G core operations | Catalog entry | 4 | 0 | 0 | 0 | 3 | Decision routing threshold; Non-inferiority margin; LLM groundedness floor; Safety abstain-recall floor; Tool error rate threshold; Trace live retention period | No model change: skills and tool contracts. You bring: A golden set your experts label, Gate labels from your approvers, A contract for each tool |
 | [UC-AGOPS-03](../catalog/agentic-operations/policy-following-ops-agents/README.md) Policy-following operations agents | Catalog entry | 6 | 0 | 0 | 0 | 0 | Ceiling per risk class; Required approver role per action class; Decision false-ACT budget; Safety abstain-recall floor; Minimum share of no-write scenarios; Override rate ceiling | No model change: skills and tool contracts. You bring: A golden set your experts label, Gate labels from your approvers, A contract for each tool |
 | [UC-BIZ-01](../catalog/business-assurance/churn-risk-explanation/README.md) Churn risk explanation | Catalog entry | 5 | 0 | 0 | 0 | 3 | LLM groundedness floor; Safety abstain-recall floor; Decision false-ACT budget; Ceiling for high-risk writes; Required approver role per action class; Trace archive retention period | No model change: skills and tool contracts. You bring: A golden set your experts label, Gate labels from your approvers, A contract for each tool |
