@@ -207,6 +207,9 @@ use_case:
       batch: Does batch work share the GPUs?
     notes:
       ampere: On Ampere cards, use W4A16 builds instead of FP8.
+      # Shown under the batch question for a setup with one state (batch_values
+      # ["any"] in the JSON, the CPU-only setup); the radios are disabled.
+      batch_na: Batch work doesn't change this setup, so it has one view.
       # Link values that fail the check. {setup} is the default setup's label and
       # {batch} its batch_sentence, both filled at build time.
       invalid_setup: "The setup in the link isn't in the list, so this page shows the default: {setup}."
@@ -223,6 +226,8 @@ use_case:
       "no": Only interactive traffic uses the GPUs.
     # Live-region announcement after a change.
     announce: "Showing {setup}, {batch}."
+    # Announcement for a setup with one state, so no batch phrase.
+    announce_single: "Showing {setup}."
     announce_batch:
       "yes": batch work shares the GPUs
       "no": interactive traffic only
@@ -252,6 +257,8 @@ use_case:
       advanced: Advanced serving options
     notes:
       setup_sub: "{setup}. {batch} Change your setup to update this section."
+      # Sub-line of a CPU-only setup's one state; it has no GPU batch sentence.
+      setup_sub_cpu: "{setup}. Change your setup to update this section."
   why:
     headings:
       why: Why do it
@@ -282,6 +289,11 @@ use_case:
     act: Runs approved low-risk actions after evaluation earns that stage. Everything else goes to a person.
   tiers:
     your_setup: Your setup
+    # State where no slot runs at the chosen setup's tier (runs_here false in the
+    # JSON). {tier} is the tier word from use_case.advanced.tiers. The link opens
+    # the gallery filtered to that tier.
+    nothing_here: "Nothing in this use case runs at the {tier}."
+    nothing_here_link: See the use cases that do
   fit:
     gpu_title: "GPU {n} of {count}: {slots}"
     weights: "Weights: about {gb} GB of {total} GB"
@@ -298,6 +310,11 @@ use_case:
       too-tight-after-fp8: Even with FP8 builds, the slots are too big. Use smaller slots, a GPU with more memory, or move a slot to core.
     # {fits} and {tight} are the band edges from data/serving/setups.yaml fit_bands.
     footnote: "Estimate: the smallest build of each slot, weights only. Leave room for the KV cache. Fits: {fits}% or less. Tight: up to {tight}%. Too tight: over {tight}%."
+    # CPU-only setup (cpu_fit in the JSON): no bar and no percent. {gb} is
+    # cpu_fit.weights_gb; {slots} joins the slot names with advanced.list_and.
+    cpu:
+      weights: "Weights in system memory: about {gb} GB for {slots}."
+      footnote: "Estimate: CPU builds, weights only. Compare with the system memory you set aside for AI, and leave room for the KV cache."
   settings:
     caption: Key settings for this setup
     columns:
@@ -318,6 +335,8 @@ use_case:
   advanced:
     notes:
       sub: Options to test. Each says where it helps and how to check it on your traffic with the same gates.
+      # Replaces the option cards on a CPU-only setup's state (options [] in the JSON).
+      cpu_site: These options tune GPU serving. This setup runs on CPU only, so none of them applies here.
     # Toggle label once every option shows; the UI-SPEC wording runs past the 4-word button limit.
     toggle_fewer: Show options for this use case
     helps: "Helps here: {reason}"

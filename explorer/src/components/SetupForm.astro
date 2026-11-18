@@ -1,9 +1,10 @@
 ---
 // Your setup. The form ships hidden and the page script shows it, so without
 // JavaScript the static default-setup line and the no-JS notes show instead.
-// The script accepts only the ids in data-setup-ids and "yes"/"no".
+// The script accepts only the ids in data-setup-ids and "yes"/"no". Setups in
+// data-single-ids have one state, so the script disables the batch radios for them.
 import { frontmatter as copy } from '../content/copy.md';
-import { batchValues, defaults, fill, setups, stateKey, statesOf, type UseCase } from '../lib/data';
+import { batchValues, defaults, fill, setups, singleState, stateKey, statesOf, type UseCase } from '../lib/data';
 
 interface Props {
   useCase: UseCase;
@@ -31,11 +32,13 @@ const invalidNotes = (['setup', 'batch', 'both'] as const).map((which) => ({
   data-setup-form
   data-setup-ids={setups.map((setup) => setup.id).join(' ')}
   data-ampere-ids={setups.filter((setup) => setup.ampere_note).map((setup) => setup.id).join(' ')}
+  data-single-ids={setups.filter(singleState).map((setup) => setup.id).join(' ')}
   data-default-setup={defaults.setup}
   data-default-batch={defaults.batch}
   data-announce={s.announce}
   data-announce-yes={s.announce_batch.yes}
   data-announce-no={s.announce_batch.no}
+  data-announce-single={s.announce_single}
   hidden
 >
   <div class="field">
@@ -47,7 +50,7 @@ const invalidNotes = (['setup', 'batch', 'both'] as const).map((which) => ({
     </select>
     <p id="setup-helper" class="helper" hidden={!defaultSetup?.ampere_note}>{s.notes.ampere}</p>
   </div>
-  <fieldset>
+  <fieldset aria-describedby="batch-note">
     <legend>{s.headings.batch}</legend>
     {batchValues.map((value) => (
       <label class="radio-row">
@@ -55,6 +58,7 @@ const invalidNotes = (['setup', 'batch', 'both'] as const).map((which) => ({
         <span>{s.batch_options[value]}</span>
       </label>
     ))}
+    <p id="batch-note" class="helper" data-batch-note hidden>{s.notes.batch_na}</p>
   </fieldset>
 </form>
 <noscript>
@@ -99,6 +103,7 @@ const invalidNotes = (['setup', 'batch', 'both'] as const).map((which) => ({
     display: flex; align-items: center; gap: var(--space-sm); min-height: var(--target-chip);
     font-size: var(--text-label); line-height: var(--leading-label); cursor: pointer;
   }
+  .radio-row:has(input:disabled) { color: var(--color-text-muted); cursor: default; }
   .radio-row input { accent-color: var(--color-text); margin: 0; width: 18px; height: 18px; flex-shrink: 0; }
   .options-counts { margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border); }
   .options-count { display: flex; align-items: baseline; gap: var(--space-sm); margin: 0; }

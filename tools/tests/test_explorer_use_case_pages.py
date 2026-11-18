@@ -55,7 +55,11 @@ def _key(setup, batch):
 
 
 def _keys(data):
-    return [_key(s["id"], b) for s in data["setups"] for b in ("yes", "no")]
+    return [_key(s["id"], b) for s in data["setups"] for b in s["batch_values"]]
+
+
+def _cpu_setups(data):
+    return [s for s in data["setups"] if s["cpu_only"]]
 
 
 def _default_key(data):
@@ -316,8 +320,9 @@ def test_fit_bars_match_state(explorer_dist, data, copy):
         for key, setup_id, state in _states(uc):
             bars = _in_parts(tree, key, lambda n: n.has_class("fit-bar"))
             assert len(bars) == len(state["fit"]), key
-            if _setup(data, setup_id)["tier"] == "core":
+            if _setup(data, setup_id)["tier"] == "core" or not state["fit"]:
                 assert bars == []
+                assert _in_parts(tree, key, lambda n: n.has_class("fit-footnote")) == [], key
                 continue
             for bar, entry in zip(bars, state["fit"]):
                 text = bar.text()
@@ -389,6 +394,9 @@ def test_key_settings_match_state(explorer_dist, data, copy):
         tree = _page(explorer_dist, uc)
         for key, _, state in _states(uc):
             tables = _in_parts(tree, key, lambda n: n.tag == "table" and n.has_class("settings-table"))
+            if not state["flags"]:
+                assert tables == [], key
+                continue
             assert len(tables) == 1, key
             heads = [th.text() for th in tables[0].find_all(lambda n: n.tag == "th" and n.attrs.get("scope") == "col")]
             assert heads == [cols["setting"], cols["value"], cols["why"]]
@@ -414,6 +422,8 @@ def test_key_settings_link_their_sources(explorer_dist, data, copy):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)
         for key, _, state in _states(uc):
+            if not state["flags"]:
+                continue
             table = _in_parts(tree, key, lambda n: n.tag == "table" and n.has_class("settings-table"))[0]
             rows = table.find_all(lambda n: n.tag == "tr" and "data-flag" in n.attrs)
             for row, flag in zip(rows, state["flags"]):
@@ -566,10 +576,14 @@ def test_rail_count_matches_helps_cards(explorer_dist, data):
 def test_toggle_label_count(explorer_dist, data, copy):
     template = copy["buttons"]["show_all_options"]
     assert "{count}" in template
+    cpu = {s["id"] for s in _cpu_setups(data)}
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)
-        for key, _, state in _states(uc):
+        for key, setup_id, state in _states(uc):
             toggles = _in_parts(tree, key, lambda n: n.tag == "button" and n.has_class("options-toggle"))
+            if setup_id in cpu:
+                assert toggles == [], key
+                continue
             assert len(toggles) == 1, key
             toggle = toggles[0]
             assert toggle.text() == template.replace("{count}", str(len(state["options"])))
@@ -944,3 +958,98 @@ def fill_takes(copy, uc):
     return copy["use_case"]["why"]["takes"].replace("{slots}", plural("slots")).replace(
         "{blueprints}", plural("blueprints")
     )
+
+
+# ---------- CPU-only setups and the nothing-here note ----------
+
+
+@pytest.mark.site_output
+def test_single_cpu_state_block(explorer_dist, data, copy):
+    cpu = _cpu_setups(data)
+    assert cpu, "expected a CPU-only setup in the data"
+    sections = copy["use_case"]["sections"]["notes"]
+    batch_sentences = copy["use_case"]["setup"]["batch_sentence"].values()
+    for setup in cpu:
+        assert setup["batch_values"] == ["any"]
+        for uc in data["use_cases"]:
+            tree = _page(explorer_dist, uc)
+            blocks = [b for b in _blocks(tree) if b.attrs["data-state"].startswith(setup["id"] + "|")]
+            assert [b.attrs["data-state"] for b in blocks] == [_key(setup["id"], "any")], uc["slug"]
+            sub = blocks[0].find_all(lambda n: n.has_class("sub"))[0].text()
+            assert sub == sections["setup_sub_cpu"].replace("{setup}", setup["label"]), sub
+            assert not any(sentence in sub for sentence in batch_sentences), sub
+
+
+@pytest.mark.site_output
+def test_batch_disabled_for_single_state(explorer_dist, data, copy):
+    setup_copy = copy["use_case"]["setup"]
+    single = [s["id"] for s in data["setups"] if s["batch_values"] == ["any"]]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        forms = tree.root.find_all(lambda n: "data-setup-form" in n.attrs)
+        assert forms[0].attrs.get("data-single-ids", "").split() == single, uc["slug"]
+        assert forms[0].attrs.get("data-announce-single") == setup_copy["announce_single"]
+        notes = tree.root.find_all(lambda n: "data-batch-note" in n.attrs)
+        assert len(notes) == 1 and "hidden" in notes[0].attrs, uc["slug"]
+        assert notes[0].text() == setup_copy["notes"]["batch_na"]
+        fieldset = tree.root.find_all(lambda n: n.tag == "fieldset")[0]
+        assert notes[0].attrs.get("id") in fieldset.attrs.get("aria-describedby", "").split()
+        script = _page_scripts(explorer_dist, tree)
+        # Source check of the built script: single-state ids, disabled radios,
+        # the batch note, and the batch-free announcement.
+        for needle in ("singleIds", ".disabled", "data-batch-note", "announceSingle", "|any"):
+            assert needle in script, (uc["slug"], needle)
+
+
+@pytest.mark.site_output
+def test_cpu_state_renders_compact(explorer_dist, data, copy):
+    note = copy["use_case"]["advanced"]["notes"]["cpu_site"]
+    for setup in _cpu_setups(data):
+        key = _key(setup["id"], "any")
+        for uc in data["use_cases"]:
+            tree = _page(explorer_dist, uc)
+            assert _in_parts(tree, key, lambda n: n.has_class("fit-bar")) == [], uc["slug"]
+            assert _in_parts(tree, key, lambda n: n.has_class("option-card")) == [], uc["slug"]
+            assert _in_parts(tree, key, lambda n: n.has_class("option-grid")) == [], uc["slug"]
+            notes = _in_parts(tree, key, lambda n: n.has_class("cpu-options"))
+            assert len(notes) == 1 and notes[0].text() == note, uc["slug"]
+            text = " ".join(p.text() for p in _parts(tree, key))
+            assert "%" not in text, uc["slug"]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        assert len(tree.root.find_all(lambda n: n.has_class("cpu-options"))) == len(_cpu_setups(data))
+
+
+@pytest.mark.site_output
+def test_nothing_here_note(explorer_dist, data, copy):
+    tiers_copy = copy["use_case"]["tiers"]
+    tier_words = copy["use_case"]["advanced"]["tiers"]
+    seen = 0
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, setup_id, state in _states(uc):
+            notes = _in_parts(tree, key, lambda n: n.has_class("nothing-here"))
+            if state["runs_here"]:
+                assert notes == [], key
+                continue
+            tier = _setup(data, setup_id)["tier"]
+            assert len(notes) == 1, (uc["slug"], key)
+            text = notes[0].text()
+            assert tiers_copy["nothing_here"].replace("{tier}", tier_words[tier]) in text
+            assert _links(notes[0]) == [(f"{BASE}?tier={tier}#gallery", tiers_copy["nothing_here_link"])]
+            seen += 1
+    assert seen, "expected at least one state where nothing runs at the setup's tier"
+
+
+@pytest.mark.site_output
+def test_key_settings_absent_when_empty(explorer_dist, data, copy):
+    heading = copy["use_case"]["sections"]["headings"]["settings"]
+    seen = 0
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, _, state in _states(uc):
+            tables = _in_parts(tree, key, lambda n: n.tag == "table" and n.has_class("settings-table"))
+            heads = [h for h in _in_parts(tree, key, lambda n: n.tag == "h3") if h.text() == heading]
+            assert len(tables) == len(heads) == (1 if state["flags"] else 0), key
+            seen += not state["flags"]
+    assert seen, "expected a state with no Key settings"

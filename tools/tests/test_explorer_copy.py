@@ -405,3 +405,34 @@ def test_try_it_copy():
     assert _words(button) <= LIMITS["buttons"], button
     assert _words(note) <= LIMITS["notes"], note
     assert _banned_hits(button) == [] and _banned_hits(note) == []
+
+
+# CPU-only setup strings: (key path, limit key or None, placeholders the template needs).
+CPU_COPY = [
+    (("use_case", "fit", "cpu", "weights"), None, {"{gb}", "{slots}"}),
+    (("use_case", "fit", "cpu", "footnote"), None, set()),
+    (("use_case", "tiers", "nothing_here"), None, {"{tier}"}),
+    (("use_case", "tiers", "nothing_here_link"), None, set()),
+    (("use_case", "advanced", "notes", "cpu_site"), "notes", set()),
+    (("use_case", "setup", "notes", "batch_na"), "notes", set()),
+    (("use_case", "sections", "notes", "setup_sub_cpu"), "notes", {"{setup}"}),
+    (("use_case", "setup", "announce_single"), None, {"{setup}"}),
+]
+SPEED = re.compile(r"(?i)\d\s*ms\b|tok/s|\bfaster\b|throughput|latency of")
+
+
+@pytest.mark.parametrize("path,limit,placeholders", CPU_COPY, ids=lambda v: ".".join(v) if isinstance(v, tuple) else None)
+def test_cpu_copy_keys(path, limit, placeholders):
+    node = _copy()
+    for key in path:
+        assert isinstance(node, dict) and key in node, ".".join(path)
+        node = node[key]
+    assert isinstance(node, str) and node.strip()
+    for placeholder in placeholders:
+        assert placeholder in node, (path, placeholder)
+    if limit:
+        assert _words(node) <= LIMITS[limit], node
+    assert _banned_hits(node) == [], node
+    assert not SPEED.search(node), node
+    # The CPU sub-line drops the GPU batch sentence.
+    assert "{batch}" not in node

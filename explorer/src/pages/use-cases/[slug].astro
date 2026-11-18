@@ -21,6 +21,7 @@ import {
   useCases,
   usedTiers,
   type Option,
+  type Setup,
   type UseCase,
 } from '../../lib/data';
 
@@ -67,6 +68,11 @@ const ordered = (options: Option[]) => [
   ...options.filter((o) => !shown(o)),
 ];
 const batchSentence = copy.use_case.setup.batch_sentence as Record<string, string>;
+const tierWords = copy.use_case.advanced.tiers as Record<string, string>;
+const subLine = (setup: Setup, batch: string) =>
+  setup.cpu_only
+    ? fill(sections.notes.setup_sub_cpu, { setup: setup.label })
+    : fill(sections.notes.setup_sub, { setup: setup.label, batch: batchSentence[batch] });
 ---
 <Base title={fill(copy.use_case.page_title, { title: useCase.title, site: copy.site.name })} current="use-case">
   <div class="use-case-page">
@@ -128,11 +134,21 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
         <h2 id="setup-title" tabindex="-1">{sections.headings.setup}</h2>
         {states.map(({ key, setup, batch, state }) => (
           <div class="state-block" data-state={key} hidden={key !== defaultKey}>
-            <p class="sub">{fill(sections.notes.setup_sub, { setup: setup.label, batch: batchSentence[batch] })}</p>
+            <p class="sub">{subLine(setup, batch)}</p>
             <h3>{sections.headings.where}</h3>
+            {!state.runs_here && (
+              <p class="note nothing-here">
+                {fill(copy.use_case.tiers.nothing_here, { tier: tierWords[setup.tier] })}{' '}
+                <a href={`${import.meta.env.BASE_URL}?tier=${setup.tier}#gallery`}>{copy.use_case.tiers.nothing_here_link}</a>
+              </p>
+            )}
             <TierCards tiers={state.tiers} fit={state.fit} />
-            <h3>{sections.headings.settings}</h3>
-            <div class="table-scroll"><KeySettings flags={state.flags} /></div>
+            {state.flags.length > 0 && (
+              <>
+                <h3>{sections.headings.settings}</h3>
+                <div class="table-scroll"><KeySettings flags={state.flags} /></div>
+              </>
+            )}
           </div>
         ))}
         <h3>{sections.headings.thresholds}</h3>
@@ -146,7 +162,11 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
           {copy.use_case.advanced.sources_lead}{' '}
           <a href={import.meta.env.BASE_URL + copy.use_case.advanced.sources_path}>{copy.use_case.advanced.sources_link}</a>
         </p>
-        {states.map(({ key, state }, i) => (
+        {states.map(({ key, setup, state }, i) => setup.cpu_only ? (
+          <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
+            <p class="note cpu-options">{copy.use_case.advanced.notes.cpu_site}</p>
+          </div>
+        ) : (
           <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
             <button
               type="button"

@@ -109,9 +109,19 @@ export interface Option {
   fit_note_id: string | null;
 }
 
+/** Weights of the far-edge slots on a CPU-only setup; no band and no percent. */
+export interface CpuFit {
+  slots: (SlotRef & { weights_gb: number })[];
+  weights_gb: number;
+  memory_parameter: string;
+}
+
 export interface State {
   tiers: TierCard[];
+  /** False when no slot of the use case runs at the setup's tier. */
+  runs_here: boolean;
   fit: FitEntry[];
+  cpu_fit: CpuFit | null;
   flags: Flag[];
   variants: Variant[];
   other_tier_variants: Variant[];
@@ -126,8 +136,11 @@ export interface Setup {
   tier: string;
   ampere_note: boolean;
   gpu_count: number;
-  memory_per_gpu_gb: number;
-  vendor: string;
+  memory_per_gpu_gb: number | null;
+  vendor: string | null;
+  cpu_only: boolean;
+  /** ["yes", "no"] for GPU setups; ["any"] for a setup with one state. */
+  batch_values: string[];
 }
 
 export interface Adaptation {
@@ -206,11 +219,16 @@ export function stateKey(setup: string, batch: string): string {
   return `${setup}|${batch}`;
 }
 
-/** Every state of a use case, in setup order then batch order. */
+/** Setups with one state: the batch choice does not change them. */
+export function singleState(setup: Setup): boolean {
+  return setup.batch_values.length === 1;
+}
+
+/** Every state of a use case, in setup order then batch order. A CPU setup has one. */
 export function statesOf(uc: UseCase): { key: string; setup: Setup; batch: string; state: State }[] {
   const out = [];
   for (const setup of setups) {
-    for (const batch of batchValues) {
+    for (const batch of setup.batch_values) {
       out.push({ key: stateKey(setup.id, batch), setup, batch, state: uc.states[setup.id][batch] });
     }
   }

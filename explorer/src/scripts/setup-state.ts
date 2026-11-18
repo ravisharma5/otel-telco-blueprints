@@ -17,17 +17,26 @@ function initSetup(): void {
 
   const setupIds = (form.dataset.setupIds ?? '').split(' ').filter(Boolean);
   const ampereIds = new Set((form.dataset.ampereIds ?? '').split(' ').filter(Boolean));
+  // Setups with one state (CPU only): batch work does not change them.
+  const singleIds = new Set((form.dataset.singleIds ?? '').split(' ').filter(Boolean));
+  const batchNote = form.querySelector<HTMLElement>('[data-batch-note]');
   const defaultSetup = form.dataset.defaultSetup ?? setupIds[0];
   const defaultBatch = form.dataset.defaultBatch ?? BATCH_VALUES[0];
   const parts = Array.from(document.querySelectorAll<HTMLElement>('[data-state], [data-for-state]'));
 
   const show = (setup: string, batch: string): void => {
-    const key = `${setup}|${batch}`;
+    const single = singleIds.has(setup);
+    const key = single ? `${setup}|any` : `${setup}|${batch}`;
     for (const part of parts) {
       part.hidden = (part.dataset.state ?? part.dataset.forState) !== key;
     }
     for (const option of Array.from(select.options)) option.selected = option.value === setup;
-    for (const radio of radios) radio.checked = radio.value === batch;
+    // The checked batch value stays, so a switch back to a GPU setup keeps it.
+    for (const radio of radios) {
+      radio.checked = radio.value === batch;
+      radio.disabled = single;
+    }
+    if (batchNote) batchNote.hidden = !single;
     if (helper) helper.hidden = !ampereIds.has(setup);
     applyToggles();
   };
@@ -40,6 +49,10 @@ function initSetup(): void {
   const announce = (setup: string, batch: string): void => {
     if (!announcer) return;
     const label = Array.from(select.options).find((option) => option.value === setup)?.text ?? '';
+    if (singleIds.has(setup)) {
+      announcer.textContent = (form.dataset.announceSingle ?? '').replace('{setup}', label);
+      return;
+    }
     const batchText = batch === 'yes' ? form.dataset.announceYes ?? '' : form.dataset.announceNo ?? '';
     announcer.textContent = (form.dataset.announce ?? '')
       .replace('{setup}', label)
