@@ -43,6 +43,7 @@ DATA_SCHEMAS = {
 SIZING_HEADER = ["Slot", "Precision", "Weights", "Hardware class"]
 MARKERS = ("sizing", "flags-per-slot", "setups", "setup-flags")
 EXPECTED_SETUPS = {
+    "far-edge-xeon6-cpu": "Far edge, Intel Xeon 6 (Granite Rapids), CPU only",
     "regional-48": "Regional site, one 48 GB GPU (Ada or newer)",
     "regional-96": "Regional site, one 96 GB GPU",
     "regional-2x48": "Regional site, two 48 GB GPUs",
@@ -267,7 +268,29 @@ def test_no_status_or_release_in_data(data_name):
 # ---------- per-setup facts ----------
 
 
+CPU_SETUP = "far-edge-xeon6-cpu"
+CPU_ROLES = ["embedding", "reranker", "classification", "llm-small", "decision"]
+CPU_SETTINGS = [
+    "Cores for AI",
+    "VLLM_CPU_OMP_THREADS_BIND",
+    "--kv-cache-memory-bytes",
+    "System memory set aside for AI",
+    "Latency test",
+    "Cache and memory bandwidth cap",
+    "Decision build",
+]
+PERF_CLAIM = re.compile(r"tok/s|tokens per second|\d+\s*ms\b|x faster", re.I)
+
+
 def setup_row(s: dict) -> list[str]:
+    if s["accelerators"] is None:
+        return [
+            s["label"],
+            "Far edge",
+            "None",
+            "None (CPU only)",
+            s["cpu"]["model_class"] + "; size it against the system memory you set aside for AI",
+        ]
     acc = s["accelerators"]
     notes = acc["model_class"] + (f"; {AMPERE_NOTE}" if s["ampere_note"] else "")
     return [
@@ -308,9 +331,10 @@ def test_setups_table_matches_data():
     table = table_with_header(SERVING, "Reference design", SETUP_HEADER)
     assert table[0] == SETUP_HEADER
     assert table[1:] == [setup_row(s) for s in setups]
-    assert table[1][0] == "Regional site, one 48 GB GPU (Ada or newer)"
+    assert table[1][0] == "Far edge, Intel Xeon 6 (Granite Rapids), CPU only"
+    assert table[2][0] == "Regional site, one 48 GB GPU (Ada or newer)"
     for s, row in zip(setups, table[1:], strict=True):
-        if s["accelerators"]["memory_per_gpu_gb"] == 48:
+        if s["accelerators"] and s["accelerators"]["memory_per_gpu_gb"] == 48:
             assert "Ampere" in row[4] and "W4A16" in row[4], row
 
 
@@ -341,6 +365,71 @@ def test_per_setup_flags_cover_every_setup():
         assert r["why"].strip(), r
         if r["when_batch"] == "yes":
             assert "batch" in r["why"].lower(), r
+
+
+def test_cpu_setup_profile():
+    data = load("setups.yaml")
+    assert data["setups"][0]["id"] == CPU_SETUP
+    assert data["default"]["setup"] == "regional-96"
+    cpu = data["setups"][0]
+    assert cpu["label"] == "Far edge, Intel Xeon 6 (Granite Rapids), CPU only"
+    assert cpu["tier"] == "far-edge"
+    assert cpu["accelerators"] is None
+    assert cpu["engine_image"] == "registry.redhat.io/rhaii/vllm-cpu-rhel9"
+    assert cpu["host"] == {"cpu_architecture": "x86_64"}
+    assert cpu["ampere_note"] is False
+    assert cpu["cpu"]["memory_parameter"] == "System memory set aside for AI"
+    assert cpu["cpu"]["roles"] == CPU_ROLES
+    assert "llm-large" not in cpu["cpu"]["roles"] and "safety" not in cpu["cpu"]["roles"]
+    assert "vDU" in cpu["cpu"]["model_class"]
+
+
+def test_setup_schema_cpu_shape():
+    data = load("setups.yaml")
+    v = validator("serving-setups.schema.json")
+    assert v.is_valid(data)
+    cpu_i = next(i for i, s in enumerate(data["setups"]) if s["id"] == CPU_SETUP)
+    gpu_i = next(i for i, s in enumerate(data["setups"]) if s["accelerators"])
+
+    def broken(fn):
+        bad = copy.deepcopy(data)
+        fn(bad["setups"])
+        return bad
+
+    cases = {
+        "null accelerators without cpu": lambda s: s[cpu_i].pop("cpu"),
+        "gpu setup with cpu": lambda s: s[gpu_i].update(cpu=copy.deepcopy(s[cpu_i]["cpu"])),
+        "unknown role": lambda s: s[cpu_i]["cpu"]["roles"].append("llm-huge"),
+        "extra key in cpu": lambda s: s[cpu_i]["cpu"].update(memory_gb=64),
+    }
+    for name, fn in cases.items():
+        assert not v.is_valid(broken(fn)), name
+
+
+def cpu_rows() -> list[dict]:
+    return [r for r in load("flags.yaml")["per_setup"] if r["setup"] == CPU_SETUP]
+
+
+def test_cpu_setup_flags():
+    rows = cpu_rows()
+    assert [r["setting"] for r in rows] == CPU_SETTINGS
+    for r in rows:
+        assert r["when_batch"] is None, r["setting"]
+        want = ["decision"] if r["setting"] == "Decision build" else CPU_ROLES
+        assert r.get("when_roles") == want, r["setting"]
+        assert "llm-large" not in r["when_roles"] and "safety" not in r["when_roles"]
+    core = next(r for r in rows if r["setting"] == "Cores for AI")
+    assert "isolated" in core["why"] and "housekeeping" in core["why"]
+    decision = next(r for r in rows if r["setting"] == "Decision build")
+    assert "W4A16" in decision["value"] and "W8A8" in decision["value"]
+    assert "LLM Compressor" in decision["value"]
+    assert "evaluate" in decision["why"]
+
+
+def test_cpu_setup_no_numbers():
+    for r in cpu_rows():
+        for text in (r["value"], r["why"]):
+            assert not PERF_CLAIM.search(text), (r["setting"], text)
 
 
 def test_setup_flags_table_matches_data():

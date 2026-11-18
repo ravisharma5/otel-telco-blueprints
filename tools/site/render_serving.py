@@ -36,6 +36,8 @@ SIZING_COLUMNS = (
 SETUP_COLUMNS = ("Setup", "Tier", "GPUs per node", "Memory per GPU", "Notes")
 SETUP_FLAG_COLUMNS = ("Setup", "Setting", "Value", "Why")
 AMPERE_NOTE = "Ampere cards use W4A16 instead of FP8"
+CPU_NOTE = "size it against the system memory you set aside for AI"
+TIER_WORDS = {"far-edge": "Far edge", "regional": "Regional", "core": "Core"}
 OPTION_COLUMNS = (
     "Option",
     "What it does",
@@ -112,6 +114,10 @@ def setups_table(data_dir: Path = DATA_DIR) -> str:
     rows = []
     for s in _load(data_dir, "setups.yaml")["setups"]:
         acc = s["accelerators"]
+        if acc is None:  # CPU-only: no GPU, sized against the memory set aside for AI
+            notes = s["cpu"]["model_class"] + f"; {CPU_NOTE}"
+            rows.append([s["label"], TIER_WORDS[s["tier"]], "None", "None (CPU only)", notes])
+            continue
         notes = acc["model_class"] + (f"; {AMPERE_NOTE}" if s["ampere_note"] else "")
         rows.append(
             [

@@ -37,7 +37,7 @@ Each use case answers the serving and placement question in the [readiness quest
 
 | Tier | Platform (role and Red Hat product) | OTel slots placed here | Latency range | Place a slot here when |
 |---|---|---|---|---|
-| Far edge | Single-model inference box on RHEL with Podman running Red Hat AI Inference, or on Red Hat Device Edge (MicroShift) with KServe | One model per box, either Decision as the gate, Classification, or a small LLM; small Embedding and Reranker models can run on CPU (see [Far edge on CPU only](#far-edge-on-cpu-only)) | milliseconds per decision | A decision must happen next to a network element at a cell site or hub |
+| Far edge | Single-model inference box on RHEL with Podman running Red Hat AI Inference, or on Red Hat Device Edge (MicroShift) with KServe | One model per MicroShift box, either Decision as the gate, Classification, or a small LLM; a CPU-only single-node OpenShift server shared with a vDU can run the CPU roles (see [Far edge on CPU only](#far-edge-on-cpu-only)) | milliseconds per decision | A decision must happen next to a network element at a cell site or hub |
 | Regional | Closed-loop site on single-node OpenShift with Red Hat OpenShift AI | Decision, Safety, Classification, a small LLM, Embedding, Reranker, and the large LLM in a quantized build; a local retrieval index | sub-second closed loop | Network data must stay in the region, and the loop must close on site |
 | Core | Shared model and lifecycle platform on multi-node Red Hat OpenShift with Red Hat OpenShift AI | The large LLM at full precision under Distributed Inference with llm-d, Decision replicas, and shared Safety, Classification, Embedding, and Reranker services; plus the Models-as-a-Service front door, Training Hub, SDG Hub, EvalHub, Model Registry, and the fleet hub (Red Hat Advanced Cluster Management) | seconds (interactive) to minutes-hours (batch) | Many teams share the work, it needs the largest model, or it changes models through adaptation and evaluation |
 
@@ -47,7 +47,15 @@ Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanc
 
 ### Far edge on CPU only
 
-A far-edge box with no accelerator can still serve the slots that answer in one pass: small Embedding models from 22M to 335M, the smallest Reranker (0.6B), and single-pass Classification. Run them on the CPU image of Red Hat AI Inference, `vllm-cpu-rhel9` ([release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes)), in vLLM's pooling mode ([vLLM pooling models](https://docs.vllm.ai/en/latest/models/pooling_models/)).
+A far-edge server with no accelerator, such as a single-node OpenShift server shared with a vDU, can still serve these roles on the CPU image of Red Hat AI Inference, `vllm-cpu-rhel9` ([release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes)):
+
+- Embedding: the small models from 22M to 335M, and Embedding 0.6B
+- Reranker: the 0.6B model
+- Classification, in a single pass
+- a small LLM from 1B to 4B
+- Decision, as a check step: check that the shipped 4-bit build runs on the CPU image, or make a W8A8 or an AWQ or GPTQ build and evaluate it ([vLLM CPU installation](https://docs.vllm.ai/en/latest/getting_started/installation/cpu/))
+
+Embedding, Reranker, and Classification run in vLLM's pooling mode ([vLLM pooling models](https://docs.vllm.ai/en/latest/models/pooling_models/)). The large model never runs there.
 
 ### Servers shared with a vDU
 

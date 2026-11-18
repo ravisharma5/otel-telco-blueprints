@@ -120,6 +120,55 @@ per_slot:
 # Every source is a Source link in the serving page Sources table.
 
 per_setup:
+  - setup: far-edge-xeon6-cpu
+    setting: "Cores for AI"
+    value: "<spare non-real-time cores>"
+    why: "AI never runs on the isolated cores the vDU pins for real-time work, and the reserved housekeeping cores stay with the platform pods, so plan spare cores for AI when you split the CPUs."
+    when_batch: null
+    when_roles: [embedding, reranker, classification, llm-small, decision]
+    source: "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs"
+  - setup: far-edge-xeon6-cpu
+    setting: "VLLM_CPU_OMP_THREADS_BIND"
+    value: "<CPU id list of those cores>"
+    why: "Binds the vLLM threads to those cores; the default auto binding uses the cores of each NUMA node instead."
+    when_batch: null
+    when_roles: [embedding, reranker, classification, llm-small, decision]
+    source: "https://docs.vllm.ai/en/latest/getting_started/installation/cpu/"
+  - setup: far-edge-xeon6-cpu
+    setting: "--kv-cache-memory-bytes"
+    value: "<bytes for the KV cache>"
+    why: "Caps KV cache memory, so weights plus KV cache stay inside the memory set aside for AI; it replaces the older VLLM_CPU_KVCACHE_SPACE setting."
+    when_batch: null
+    when_roles: [embedding, reranker, classification, llm-small, decision]
+    source: "https://docs.vllm.ai/en/latest/getting_started/installation/cpu/"
+  - setup: far-edge-xeon6-cpu
+    setting: "System memory set aside for AI"
+    value: "<GB you set aside>"
+    why: "The CPU fit compares the far-edge slot weights with this; a worker whose weights and KV cache exceed its NUMA node's memory is killed."
+    when_batch: null
+    when_roles: [embedding, reranker, classification, llm-small, decision]
+    source: "https://docs.vllm.ai/en/latest/getting_started/installation/cpu/"
+  - setup: far-edge-xeon6-cpu
+    setting: "Latency test"
+    value: "With and without AI load, before rollout"
+    why: "Run the platform latency tests with the AI workload running and compare DU timing with a run without it."
+    when_batch: null
+    when_roles: [embedding, reranker, classification, llm-small, decision]
+    source: "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/cnf-performing-platform-verification-latency-tests"
+  - setup: far-edge-xeon6-cpu
+    setting: "Cache and memory bandwidth cap"
+    value: "<Intel RDT allocation for the AI cores>"
+    why: "Optionally, Intel RDT cache allocation and memory bandwidth allocation limit how much of the shared cache and memory bandwidth the AI cores take."
+    when_batch: null
+    when_roles: [embedding, reranker, classification, llm-small, decision]
+    source: "https://docs.kernel.org/filesystems/resctrl.html"
+  - setup: far-edge-xeon6-cpu
+    setting: "Decision build"
+    value: "Check the shipped W4A16 build on the CPU image, or make a W8A8 or an AWQ or GPTQ W4A16 build with LLM Compressor"
+    why: "vLLM on x86 CPUs lists AWQ, GPTQ, and compressed-tensors INT8 W8A8; evaluate any build on the same gates before it serves traffic."
+    when_batch: null
+    when_roles: [decision]
+    source: "https://docs.vllm.ai/en/latest/getting_started/installation/cpu/"
   - setup: regional-48
     setting: "Model build"
     value: "FP8 W8A8, made by the operator (W4A16 on Ampere)"

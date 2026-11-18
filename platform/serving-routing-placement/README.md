@@ -147,13 +147,14 @@ Load adapters only at start, pinned by digest. Never enable runtime adapter load
 
 ### Setup profiles
 
-Each setup is a hardware profile to size a site's slots against. Memory per GPU is the smallest card the setup allows.
+Each setup is a hardware profile to size a site's slots against. Memory per GPU is the smallest card the setup allows. The CPU-only far-edge setup has no GPU, so size it against the system memory you set aside for AI.
 
 <!-- vale Google.OxfordComma = NO -->
 <!-- generated:setups start -->
 
 | Setup | Tier | GPUs per node | Memory per GPU | Notes |
 |---|---|---|---|---|
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | Far edge | None | None (CPU only) | Intel Xeon 6 (Granite Rapids) server shared with a vDU; size it against the system memory you set aside for AI |
 | Regional site, one 48 GB GPU (Ada or newer) | Regional | 1 | 48 GB | 48 GB PCIe data-center GPU, Ada or newer; Ampere cards use W4A16 instead of FP8 |
 | Regional site, one 96 GB GPU | Regional | 1 | 96 GB | 96 GB PCIe data-center GPU, Blackwell |
 | Regional site, two 48 GB GPUs | Regional | 2 | 48 GB | 48 GB PCIe data-center GPU, Ada or newer; Ampere cards use W4A16 instead of FP8 |
@@ -170,6 +171,13 @@ These settings come on top of the key flags per slot; values in angle brackets a
 
 | Setup | Setting | Value | Why |
 |---|---|---|---|
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | Cores for AI | `<spare non-real-time cores>` | AI never runs on the isolated cores the vDU pins for real-time work, and the reserved housekeeping cores stay with the platform pods, so plan spare cores for AI when you split the CPUs. |
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | VLLM_CPU_OMP_THREADS_BIND | `<CPU id list of those cores>` | Binds the vLLM threads to those cores; the default auto binding uses the cores of each NUMA node instead. |
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | `--kv-cache-memory-bytes` | `<bytes for the KV cache>` | Caps KV cache memory, so weights plus KV cache stay inside the memory set aside for AI; it replaces the older VLLM_CPU_KVCACHE_SPACE setting. |
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | System memory set aside for AI | `<GB you set aside>` | The CPU fit compares the far-edge slot weights with this; a worker whose weights and KV cache exceed its NUMA node's memory is killed. |
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | Latency test | With and without AI load, before rollout | Run the platform latency tests with the AI workload running and compare DU timing with a run without it. |
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | Cache and memory bandwidth cap | `<Intel RDT allocation for the AI cores>` | Optionally, Intel RDT cache allocation and memory bandwidth allocation limit how much of the shared cache and memory bandwidth the AI cores take. |
+| Far edge, Intel Xeon 6 (Granite Rapids), CPU only | Decision build | Check the shipped W4A16 build on the CPU image, or make a W8A8 or an AWQ or GPTQ W4A16 build with LLM Compressor | vLLM on x86 CPUs lists AWQ, GPTQ, and compressed-tensors INT8 W8A8; evaluate any build on the same gates before it serves traffic. |
 | Regional site, one 48 GB GPU (Ada or newer) | Model build | FP8 W8A8, made by the operator (W4A16 on Ampere) | No OTel FP8 build is published, so build one from the pinned checkpoint, register it, and pin it by digest; FP8 halves the bf16 weights, so several slots share one 48 GB GPU. |
 | Regional site, one 48 GB GPU (Ada or newer) | `--max-model-len` | `<your longest prompt plus answer>` | Caps the KV cache each request can take, so the slots sharing one 48 GB GPU keep their room. |
 | Regional site, one 48 GB GPU (Ada or newer) | `--gpu-memory-utilization` | `<share for this slot>` | Gives each slot's vLLM instance a fixed share of GPU memory; the shares of all slots on one GPU sum to less than 1. |
@@ -343,6 +351,10 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 30 | KV cache offload keeps blocks in CPU memory and optional storage tiers, runs on CUDA, ROCm, and XPU only, works best with a CPU tier larger than the GPU KV cache, and has no storage tiers on engines that span several nodes; instances sharing a filesystem tier reuse each other's blocks | project documentation | [vLLM KV offloading](https://docs.vllm.ai/en/latest/features/kv_offloading_usage/) |
 | 31 | Start with CPU memory and add local disk or a shared filesystem when the cache outgrows it; a shared filesystem keeps the cache through restarts and shares it across replicas but never evicts, its transfer cost must not outweigh the savings, and Gemma 4 needs `--no-disable-hybrid-kv-cache-manager` | project documentation | [llm-d KV cache offloading](https://github.com/llm-d/llm-d/blob/565373b741e90bffa27930b4669c6e1f222f6225/docs/architecture/kv-management/kv-offloader.md) |
 | 32 | The CPU tier counts toward the pod's memory limit, and the llm-d router adds a prefix-cache scorer for it | project documentation | [llm-d tiered prefix cache](https://github.com/llm-d/llm-d/tree/565373b741e90bffa27930b4669c6e1f222f6225/guides/tiered-prefix-cache) |
+| 33 | vLLM on CPU binds its threads to a CPU id list set in `VLLM_CPU_OMP_THREADS_BIND` (auto binds each NUMA node's cores), `--kv-cache-memory-bytes` replaces `VLLM_CPU_KVCACHE_SPACE`, a worker whose weights and KV cache exceed its NUMA node's memory is killed, and x86 CPUs support AWQ, GPTQ, and compressed-tensors INT8 W8A8 | project documentation | [vLLM CPU installation](https://docs.vllm.ai/en/latest/getting_started/installation/cpu/) |
+| 34 | The RAN DU profile pins platform CPU to the reserved cores, and unreserved cores are available as allocatable CPU for workloads | Red Hat guidance | [RAN DU reference design](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs) |
+| 35 | Run the platform latency tests (`hwlatdetect`, `cyclictest`, `oslat`) to validate node tuning for your workload, including on single-node OpenShift | Red Hat guidance | [latency tests](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/cnf-performing-platform-verification-latency-tests) |
+| 36 | Linux resctrl exposes Intel RDT cache allocation and memory bandwidth allocation, so a resource group can limit the cache and memory bandwidth its CPUs and tasks use | project documentation | [Linux resctrl](https://docs.kernel.org/filesystems/resctrl.html) |
 
 - Gate: after every deploy, ask each generative slot to identify itself, and fail the rollout if the answer is wrong or empty.
 - Gate: on MI350-class GPUs, confirm the pod sets `VLLM_ROCM_USE_AITER=0` and that a fixed prompt returns well-formed text before traffic arrives.

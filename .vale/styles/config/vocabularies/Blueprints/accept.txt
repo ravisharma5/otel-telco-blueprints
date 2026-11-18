@@ -64,3 +64,5 @@ MOPs
 rApps?
 CNFs?
 VNFs?
+Xeon
+resctrl

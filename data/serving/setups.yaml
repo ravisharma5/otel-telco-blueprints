@@ -3,6 +3,9 @@
 # Inference vLLM image it runs (no tag; pin the tag in your deployment).
 # memory_per_gpu_gb is the smallest card the setup allows, so the fit bar
 # never overstates room. Two 48 GB GPUs are packed per GPU, never one pool.
+# A CPU-only setup (accelerators: null, plus a cpu block) has no GPU and no fit
+# bar: it is sized against the named memory parameter, which has no default,
+# and the explorer gives it one state, because batch work does not change it.
 
 default:
   setup: regional-96
@@ -14,6 +17,18 @@ fit_bands:
   why: "The fit bar counts weights only. Keeping weights at 60% of GPU memory or less leaves room for the KV cache at useful context lengths and concurrency; over 80% leaves too little."
 
 setups:
+  - id: far-edge-xeon6-cpu
+    label: "Far edge, Intel Xeon 6 (Granite Rapids), CPU only"
+    tier: far-edge
+    accelerators: null
+    cpu:
+      model_class: "Intel Xeon 6 (Granite Rapids) server shared with a vDU"
+      memory_parameter: "System memory set aside for AI"
+      roles: [embedding, reranker, classification, llm-small, decision]
+    host:
+      cpu_architecture: x86_64
+    engine_image: "registry.redhat.io/rhaii/vllm-cpu-rhel9"
+    ampere_note: false
   - id: regional-48
     label: "Regional site, one 48 GB GPU (Ada or newer)"
     tier: regional

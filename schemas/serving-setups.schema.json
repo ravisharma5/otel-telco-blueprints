@@ -40,9 +40,10 @@
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
         "label": { "type": "string", "minLength": 1 },
-        "tier": { "type": "string", "enum": ["regional", "core"] },
+        "tier": { "type": "string", "enum": ["far-edge", "regional", "core"] },
         "accelerators": {
-          "type": "object",
+          "description": "The GPUs per node, or null for a CPU-only setup.",
+          "type": ["object", "null"],
           "additionalProperties": false,
           "required": ["vendor", "model_class", "count_per_node", "memory_per_gpu_gb", "arch", "intra_node_interconnect"],
           "properties": {
@@ -52,6 +53,22 @@
             "memory_per_gpu_gb": { "type": "number", "exclusiveMinimum": 0 },
             "arch": { "type": "string", "enum": ["ada", "hopper", "blackwell", "cdna3"] },
             "intra_node_interconnect": { "type": "string", "enum": ["none", "pcie", "nvlink", "infinity-fabric"] }
+          }
+        },
+        "cpu": {
+          "description": "A CPU-only setup: no fit bar; sized against the named memory parameter, with the roles it can run.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model_class", "memory_parameter", "roles"],
+          "properties": {
+            "model_class": { "type": "string", "minLength": 1 },
+            "memory_parameter": { "type": "string", "minLength": 1 },
+            "roles": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "serving-slot-variants.schema.json#/$defs/role" }
+            }
           }
         },
         "host": {
@@ -64,10 +81,18 @@
         },
         "engine_image": {
           "type": "string",
-          "enum": ["registry.redhat.io/rhaii/vllm-cuda-rhel9", "registry.redhat.io/rhaii/vllm-rocm-rhel9"]
+          "enum": [
+            "registry.redhat.io/rhaii/vllm-cuda-rhel9",
+            "registry.redhat.io/rhaii/vllm-rocm-rhel9",
+            "registry.redhat.io/rhaii/vllm-cpu-rhel9"
+          ]
         },
         "ampere_note": { "type": "boolean" }
-      }
+      },
+      "oneOf": [
+        { "properties": { "accelerators": { "type": "object" } }, "not": { "required": ["cpu"] } },
+        { "properties": { "accelerators": { "type": "null" } }, "required": ["cpu"] }
+      ]
     }
   }
 }

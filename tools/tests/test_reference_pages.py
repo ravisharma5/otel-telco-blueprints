@@ -819,6 +819,29 @@ def test_placement_no_ms_numbers():
     assert MS_NUMBER.findall(PLACEMENT.read_text(encoding="utf-8")) == []
 
 
+VLLM_CPU_INSTALL = "https://docs.vllm.ai/en/latest/getting_started/installation/cpu/"
+
+
+def _placement_section(title: str) -> str:
+    text = body(PLACEMENT)
+    start = text.index(f"### {title}\n")
+    end = text.find("\n#", start + 4)
+    return text[start : end if end != -1 else len(text)]
+
+
+def test_placement_cpu_roles():
+    section = _placement_section("Far edge on CPU only")
+    for role in ("Embedding", "Reranker", "Classification", "small LLM", "Decision"):
+        assert role in section, role
+    assert VLLM_CPU_INSTALL in section
+    assert "31B" not in section and "large LLM" not in section
+    table = _find_table(PLACEMENT, ["Tier", "OTel slots placed here", "Latency range"])
+    far = next(row for row in table[1:] if row[0] == "Far edge")
+    cell = far[table[0].index("OTel slots placed here")]
+    assert "one model" in cell.lower() or "One model" in cell
+    assert "vDU" in cell and "far-edge-on-cpu-only" in cell
+
+
 def test_placement_all_slots():
     text = body(PLACEMENT)
     for slot in ("LLM", "Embedding", "Reranker", "Safety", "Decision", "Classification"):
