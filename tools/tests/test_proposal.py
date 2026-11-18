@@ -142,7 +142,10 @@ def test_facts_extra_urls():
 
 # ---- the stamp moves only with a clean re-check -------------------------
 
-TODAY = datetime.date(2026, 11, 16)
+# Dates follow the stored stamp, so a re-stamp does not break the write tests.
+STAMP = str(FACTS["checked"])
+TODAY = datetime.date.fromisoformat(STAMP)
+_DAY = datetime.timedelta(days=1)
 
 
 def _edit_a_source(root):
@@ -184,7 +187,7 @@ def test_write_refuses_a_new_digest_without_a_recheck(tmp_path):
     root = _copy_inputs(tmp_path)
     _edit_a_source(root)
     before = (root / "data/facts-check.yaml").read_text(encoding="utf-8")
-    for checked in (FACTS["checked"], "2026-11-15", "2026-11-17"):
+    for checked in (STAMP, str(TODAY - _DAY), str(TODAY + _DAY)):
         with pytest.raises(SystemExit):
             facts.write_facts(root, checked, today=TODAY)
     assert (root / "data/facts-check.yaml").read_text(encoding="utf-8") == before
@@ -205,12 +208,12 @@ def test_write_takes_a_clean_report_of_the_current_sources(tmp_path):
     facts.recheck(root, stale, fetch=_fetch(), fetch_json=_card_json())
     _edit_a_source(root)
     with pytest.raises(SystemExit, match="digest"):
-        facts.write_facts(root, "2026-11-16", reports=[stale], today=TODAY)
+        facts.write_facts(root, STAMP, reports=[stale], today=TODAY)
     fresh = tmp_path / "after-edit.tsv"
     assert facts.recheck(root, fresh, fetch=_fetch(), fetch_json=_card_json()) == 0
-    facts.write_facts(root, "2026-11-16", reports=[fresh], today=TODAY)
+    facts.write_facts(root, STAMP, reports=[fresh], today=TODAY)
     assert _stamp(root)["sources_digest"] == facts.sources_digest(root)
-    assert _stamp(root)["checked"] == "2026-11-16"
+    assert _stamp(root)["checked"] == STAMP
 
 
 def test_write_refuses_failing_urls_until_a_rerun_clears_them(tmp_path):
@@ -220,12 +223,12 @@ def test_write_refuses_failing_urls_until_a_rerun_clears_them(tmp_path):
     full = tmp_path / "full.tsv"
     assert facts.recheck(root, full, fetch=_fetch({url}), fetch_json=_card_json()) == 1
     with pytest.raises(SystemExit, match="still fail"):
-        facts.write_facts(root, "2026-11-16", reports=[full], today=TODAY)
+        facts.write_facts(root, STAMP, reports=[full], today=TODAY)
     rerun = tmp_path / "rerun.tsv"
     assert facts.recheck(root, rerun, only=full, fetch=_fetch(), fetch_json=_card_json()) == 0
     with pytest.raises(SystemExit, match="full re-check"):
-        facts.write_facts(root, "2026-11-16", reports=[rerun], today=TODAY)
-    facts.write_facts(root, "2026-11-16", reports=[full, rerun], today=TODAY)
+        facts.write_facts(root, STAMP, reports=[rerun], today=TODAY)
+    facts.write_facts(root, STAMP, reports=[full, rerun], today=TODAY)
     assert _stamp(root)["sources_digest"] == facts.sources_digest(root)
 
 
@@ -235,14 +238,14 @@ def test_write_needs_changed_cards_acknowledged(tmp_path):
     rep = tmp_path / "r.tsv"
     assert facts.recheck(root, rep, fetch=_fetch(), fetch_json=_card_json("feedface00")) == 1
     with pytest.raises(SystemExit, match="card revision changed"):
-        facts.write_facts(root, "2026-11-16", reports=[rep], today=TODAY)
+        facts.write_facts(root, STAMP, reports=[rep], today=TODAY)
     changed = {m for m in facts.read_report(rep).card_changes}
-    facts.write_facts(root, "2026-11-16", cards={m: "feedface" for m in changed}, reports=[rep], today=TODAY)
+    facts.write_facts(root, STAMP, cards={m: "feedface" for m in changed}, reports=[rep], today=TODAY)
 
 
 def test_write_rejects_bad_dates(tmp_path):
     root = _copy_inputs(tmp_path)
-    for bad in ("16 Nov 2026", "2026-11-17", "2026-11-01"):
+    for bad in ("16 Nov 2026", str(TODAY + _DAY), str(TODAY - 15 * _DAY)):
         with pytest.raises(SystemExit):
             facts.write_facts(root, bad, today=TODAY)
 
