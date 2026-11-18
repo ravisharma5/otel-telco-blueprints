@@ -185,7 +185,10 @@ def test_ten_states_per_use_case(data):
     for uc, setup, batch, state in gpu_states(data):
         assert [t["tier"] for t in state["tiers"]] == list(TIERS)
         assert isinstance(state["flags"], list) and state["flags"]
-        assert state["variants"], f"{uc['id']} {setup['id']}: no variants"
+        # A use case that runs nothing at this setup's tier (site log reduction
+        # runs only at the far edge) has no variants there.
+        assert state["runs_here"] == bool(placed(uc["id"], setup["tier"])), (uc["id"], setup["id"])
+        assert bool(state["variants"]) == state["runs_here"], f"{uc['id']} {setup['id']}: variants"
         assert [o["id"] for o in state["options"]] == OPTION_IDS
         assert len(state["options"]) == len(OPTIONS)
         helps = sum(1 for o in state["options"] if o["state"] == "helps")
@@ -334,7 +337,9 @@ def test_variants_match_placement(data):
 
 def test_two_gpu_setup_never_pools(data):
     for uc, setup, batch, state in all_states(data):
-        if setup["id"] == "regional-2x48":
+        if setup["id"] == "regional-2x48" and not placed(uc["id"], "regional"):
+            assert state["fit"] == []
+        elif setup["id"] == "regional-2x48":
             assert len(state["fit"]) == 2
             assert all(f["total_gb"] == 48 and f["gpu_count"] == 2 for f in state["fit"])
             assert [f["gpu_index"] for f in state["fit"]] == [1, 2]
@@ -345,6 +350,9 @@ def test_two_gpu_setup_never_pools(data):
 def test_fit_entries_follow_rules(data):
     for uc, setup, batch, state in regional_states(data):
         acc = setup["accelerators"]
+        if not placed(uc["id"], "regional"):
+            assert state["fit"] == [] and state["variants"] == [], uc["id"]
+            continue
         assert len(state["fit"]) == acc["count_per_node"]
         slots_on_gpus = []
         for f in state["fit"]:
@@ -843,7 +851,8 @@ def test_published_only_and_unique_slugs(data):
 def test_filters_only_present_values(data):
     used_tiers = {t for uc in data["use_cases"] for t in TIERS if placed(uc["id"], t)}
     assert data["filters"]["tiers"] == [t for t in TIERS if t in used_tiers]
-    assert "far-edge" not in data["filters"]["tiers"]
+    assert "far-edge" in data["filters"]["tiers"]
+    assert data["filters"]["tiers"][0] == "far-edge"
     assert {d["id"] for d in data["filters"]["domains"]} == {uc["domain"] for uc in data["use_cases"]}
     assert {s["id"] for s in data["filters"]["stages"]} == {uc["stage"]["id"] for uc in data["use_cases"]}
 

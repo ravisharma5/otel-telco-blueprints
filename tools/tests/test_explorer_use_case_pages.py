@@ -322,7 +322,11 @@ def test_fit_bars_match_state(explorer_dist, data, copy):
             assert len(bars) == len(state["fit"]), key
             if _setup(data, setup_id)["tier"] == "core" or not state["fit"]:
                 assert bars == []
-                assert _in_parts(tree, key, lambda n: n.has_class("fit-footnote")) == [], key
+                # The CPU footnote shares the fit-footnote style; test_cpu_fit_line covers it.
+                gpu_notes = _in_parts(
+                    tree, key, lambda n: n.has_class("fit-footnote") and not n.has_class("cpu-footnote")
+                )
+                assert gpu_notes == [], key
                 continue
             for bar, entry in zip(bars, state["fit"]):
                 text = bar.text()
@@ -1090,3 +1094,46 @@ def test_cpu_fit_line(explorer_dist, data, copy):
         assert _in_parts(tree, key, lambda n: n.has_class("fit-bar")) == []
         notes = _in_parts(tree, key, lambda n: n.has_class("cpu-footnote"))
         assert len(notes) == 1 and notes[0].text() == cpu_copy["footnote"]
+
+
+CPU_SETUP = "far-edge-xeon6-cpu"
+FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction"}
+
+
+@pytest.mark.site_output
+def test_cpu_fit_values_on_far_edge_pages(explorer_dist, data):
+    """F3 sizes Classification (about 17 GB) and site log reduction sizes the
+    small CPU Embedding build (about 1.5 GB); neither shows a percent."""
+    by_slug = {uc["slug"]: uc for uc in data["use_cases"]}
+    expected = {"alarm-triage-adaptation": ("Classification", 17), "site-log-reduction": ("Embedding", 1.5)}
+    for slug, (slot_name, gb) in expected.items():
+        uc = by_slug[slug]
+        fit = uc["states"][CPU_SETUP]["any"]["cpu_fit"]
+        assert [s["slot_name"] for s in fit["slots"]] == [slot_name]
+        assert fit["weights_gb"] == gb
+        tree = _page(explorer_dist, uc)
+        lines = _in_parts(tree, _key(CPU_SETUP, "any"), lambda n: n.has_class("cpu-fit"))
+        assert len(lines) == 1 and f"{_num(gb)} GB" in lines[0].text() and "%" not in lines[0].text()
+
+
+@pytest.mark.site_output
+def test_cpu_settings_on_f3(explorer_dist, data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == "alarm-triage-adaptation")
+    tree = _page(explorer_dist, uc)
+    tables = _in_parts(tree, _key(CPU_SETUP, "any"), lambda n: n.tag == "table" and n.has_class("settings-table"))
+    assert len(tables) == 1
+    text = _squash(tables[0].text())
+    for want in ("Cores for AI", "VLLM_CPU_OMP_THREADS_BIND", "Latency test"):
+        assert _squash(want) in text, want
+    assert _squash("Decision build") not in text
+
+
+@pytest.mark.site_output
+def test_nothing_here_count(explorer_dist, data):
+    pages = 0
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        notes = _in_parts(tree, _key(CPU_SETUP, "any"), lambda n: n.has_class("nothing-here"))
+        assert (len(notes) == 1) == (uc["slug"] not in FAR_EDGE_SLUGS), uc["slug"]
+        pages += len(notes) == 1
+    assert pages == len(data["use_cases"]) - len(FAR_EDGE_SLUGS) == 25

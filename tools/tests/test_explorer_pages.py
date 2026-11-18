@@ -660,3 +660,44 @@ def test_built_script_handles_tier_safely(explorer_dist):
     assert "tiers" in script
     chips = tree.root.find_all(lambda n: n.tag == "button" and n.attrs.get("data-group") == "tiers")
     assert chips and all(c.attrs.get("data-value") for c in chips)
+
+
+# The use cases that place a role at the far edge, read from catalog front matter.
+FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction"}
+
+
+def _far_edge_slugs_from_catalog():
+    out = set()
+    for path in sorted((REPO_ROOT / "catalog").glob("*/*/README.md")):
+        text = path.read_text(encoding="utf-8")
+        fm = yaml.safe_load(text.split("---", 2)[1]) if text.startswith("---") else {}
+        if ((fm or {}).get("placement") or {}).get("far-edge", {}).get("runs"):
+            out.add(path.parent.name)
+    return out
+
+
+@pytest.mark.site_output
+def test_far_edge_chip_on_home(explorer_dist):
+    tree = _home(explorer_dist)
+    chips = tree.root.find_all(
+        lambda n: n.tag == "button" and n.attrs.get("data-group") == "tiers" and n.attrs.get("data-value") == "far-edge"
+    )
+    assert len(chips) == 1
+    assert chips[0].text() == TIER_LABELS["far-edge"]
+    counts = tree.root.find_all(lambda n: "data-result-count" in n.attrs)
+    assert len(counts) == 1, "the filter bar needs one visible result count"
+
+
+@pytest.mark.site_output
+def test_far_edge_use_cases_listed(explorer_dist):
+    assert _far_edge_slugs_from_catalog() == FAR_EDGE_SLUGS
+    data = _data()
+    tree = _home(explorer_dist)
+    by_slug = {}
+    for card in _cards(tree):
+        links = card.find_all(lambda n: n.tag == "a")
+        slug = links[0].attrs["href"].rstrip("/").rsplit("/", 1)[-1]
+        by_slug[slug] = card
+    tagged = {slug for slug, card in by_slug.items() if "far-edge" in card.attrs["data-tiers"].split()}
+    assert tagged == FAR_EDGE_SLUGS
+    assert {uc["slug"] for uc in data["use_cases"]} >= FAR_EDGE_SLUGS
