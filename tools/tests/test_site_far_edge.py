@@ -158,3 +158,53 @@ def test_site_pages_vendor_neutral(label, text):
 @pytest.mark.parametrize("label,text", site_texts(), ids=lambda v: v if len(v) < 60 else "text")
 def test_no_performance_numbers_on_site_pages(label, text):
     assert PERFORMANCE.findall(URL_IN_LINK.sub("]", text)) == [], label
+
+
+# ---------- Site log reduction ----------
+
+SLR = "network-operations/site-log-reduction"
+PB10_ROI = "../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi"
+GATE_LINK = "../../../architecture/decision-gate.md"
+CURRENCY_OR_SAVING = re.compile(r"[$€£¥]\s?\d|\d+(\.\d+)?\s?%|\bsaves? \d")
+
+
+def test_site_log_reduction_spec():
+    fm = front_matter(site_page(SLR)) or {}
+    assert fm["id"] == "UC-OPS-10"
+    assert fm["depth"] == "entry"
+    assert fm["otel_slots"] == ["embedding"]
+    assert fm["autonomy_ceiling"] == "inform"
+    assert fm["placement_tier"] == ["far-edge"]
+    placement = fm["placement"]
+    assert placement["far-edge"]["runs"] == ["embedding"]
+    assert placement["regional"]["runs"] == [] and placement["core"]["runs"] == []
+    assert fm["adaptation"]["rung"] == "retrieval"
+    assert fm["sandbox"]["fit"] == "none"
+    assert fm["card"]["goal"] == "incidents"
+
+
+def test_site_log_reduction_roi_measure():
+    text = section_text(site_page(SLR), "Problem and value")
+    flat = re.sub(r"\s+", " ", text)
+    assert re.search(r"(?i)GB per day per site", flat)
+    assert re.search(r"(?i)number of sites", flat)
+    assert re.search(r"(?i)cost per GB", flat)
+    assert re.search(r"(?i)you supply|operator supplies|your own", flat)
+    assert CURRENCY_OR_SAVING.findall(URL_IN_LINK.sub("]", flat)) == []
+    assert PB10_ROI in flat
+
+
+def test_site_log_reduction_scope():
+    flat = re.sub(r"\s+", " ", body(site_page(SLR)))
+    assert re.search(r"(?i)operational logs only", flat)
+    assert re.search(r"(?i)security logs keep their own retention", flat)
+    assert re.search(r"(?i)raw logs stay (on the site server|local|at the site)[^.]*retention period", flat)
+    assert re.search(r"(?i)never deletes? (a )?(raw )?logs? before", flat)
+
+
+def test_site_log_reduction_governance():
+    gov = section_text(site_page(SLR), "Governance")
+    assert "Every outcome is LOOK" in gov
+    assert f"[decision gate]({GATE_LINK})" in gov
+    outcomes = re.findall(r"\| (LOOK|NOTIFY|REVIEW|ACT|STOP) \|", gov)
+    assert outcomes and set(outcomes) == {"LOOK"}, outcomes

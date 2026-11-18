@@ -106,6 +106,7 @@ nav:
           - MOP validation: catalog/network-operations/mop-validation/README.md
           - Transport and IP diagnostics: catalog/network-operations/transport-ip-diagnostics/README.md
           - Cross-domain OSS correlation: catalog/network-operations/cross-domain-oss-correlation/README.md
+          - Site log reduction: catalog/network-operations/site-log-reduction/README.md
       - Agentic operations:
           - Governed closed-loop incident handling: catalog/agentic-operations/closed-loop-incident-handling/README.md
           - Read-only router and 5G core operations: catalog/agentic-operations/router-core-read-only-ops/README.md

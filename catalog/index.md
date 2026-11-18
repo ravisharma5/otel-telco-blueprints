@@ -43,6 +43,7 @@ The Use cases page shows the same use cases as cards.
 | [UC-OPS-07](network-operations/mop-validation/README.md) | MOP validation | Full recipe |  |
 | [UC-OPS-08](network-operations/transport-ip-diagnostics/README.md) | Transport and IP diagnostics | Catalog entry |  |
 | [UC-OPS-09](network-operations/cross-domain-oss-correlation/README.md) | Cross-domain OSS correlation | Catalog entry |  |
+| [UC-OPS-10](network-operations/site-log-reduction/README.md) | Site log reduction | Catalog entry |  |
 
 ## Agentic operations
 
@@ -106,6 +107,7 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
@@ -137,6 +139,7 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
@@ -168,6 +171,7 @@ These recipes use [the Adaptation page](../platform/adaptation/README.md):
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
@@ -199,6 +203,7 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
@@ -230,6 +235,7 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
@@ -309,6 +315,7 @@ These recipes use [the Security, identity, and sandbox page](../platform/securit
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
@@ -352,6 +359,7 @@ These recipes use [the Compliance, sovereignty, and operating model page](../pla
 - [UC-OPS-05 RAN energy saving](network-operations/ran-energy-saving/README.md)
 - [UC-OPS-06 Slice SLA assurance](network-operations/slice-sla-assurance/README.md)
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 
 ### PB-11 Bring your own data and policies
 
@@ -376,6 +384,7 @@ These recipes use [the Bring your own data and policies page](../platform/bring-
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-08 Transport and IP diagnostics](network-operations/transport-ip-diagnostics/README.md)
 - [UC-OPS-09 Cross-domain OSS correlation](network-operations/cross-domain-oss-correlation/README.md)
+- [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-01 KPI root-cause reasoning](research/kpi-rca-reasoning/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)

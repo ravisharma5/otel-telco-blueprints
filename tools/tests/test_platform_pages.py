@@ -1386,7 +1386,7 @@ def test_security_fit_table_lists_every_use_case():
             assert (front_matter(path) or {})["sandbox"]["fit"] == fit, key
             seen.append(key)
     assert sorted(seen) == sorted(page_key(p) for p in use_case_pages())
-    assert len(seen) == len(set(seen)) == 26
+    assert len(seen) == len(set(seen)) == 27
 
 
 def test_security_sources_unchanged():

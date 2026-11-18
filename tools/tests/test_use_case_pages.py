@@ -112,6 +112,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-operations/ran-energy-saving": "UC-OPS-05",
     "network-operations/slice-sla-assurance": "UC-OPS-06",
     "network-operations/mop-validation": "UC-OPS-07",
+    "network-operations/site-log-reduction": "UC-OPS-10",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
@@ -188,6 +189,16 @@ ENTRY_SPECS: dict[str, dict] = {
         "tmf": 2,
         "agent_school": [301, 402],
         "goal": "incidents",
+    },
+    "network-operations/site-log-reduction": {
+        "id": "UC-OPS-10",
+        "slots": {"embedding"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [],
+        "goal": "incidents",
+        "tiers": ["far-edge"],
+        "far_edge": ["embedding"],
     },
     "agentic-operations/router-core-read-only-ops": {
         "id": "UC-AGOPS-02",
@@ -277,6 +288,10 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     },
     "network-operations/slice-sla-assurance": {"SLO breach forecast horizon": "Business owner"},
     "network-operations/mop-validation": {"MOP defect recall floor": "Risk owner"},
+    "network-operations/site-log-reduction": {
+        "Raw log retention period": "Risk owner",
+        "New-pattern similarity threshold": "Model owner",
+    },
 }
 
 # RACI activities a use case may name that no platform page defines
@@ -857,8 +872,8 @@ def test_entry_front_matter_matches_spec(key):
     assert fm.get("tmf_an_level_target") == spec["tmf"]
     assert (fm.get("agent_school") or []) == spec["agent_school"]
     assert (fm.get("card") or {}).get("goal") == spec["goal"]
-    assert fm.get("placement_tier") == ["regional", "core"]
-    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
+    assert fm.get("placement_tier") == spec.get("tiers", ["regional", "core"])
+    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == spec.get("far_edge", [])
 
 
 def test_entry_checks_pass_on_the_entry_fixture():
