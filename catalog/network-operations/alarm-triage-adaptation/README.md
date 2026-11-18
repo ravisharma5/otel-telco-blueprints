@@ -22,7 +22,7 @@ sandbox:
 otel_slots: ["classification", "llm", "safety", "decision", "embedding", "reranker"]
 autonomy_ceiling: "recommend-with-approval"
 tmf_an_level_target: 2
-placement_tier: ["regional", "core"]
+placement_tier: ["far-edge", "regional", "core"]
 one_liner: "Runs triage on RAN and transport alarms and recommends fixes for approval. Starts with retrieval and skills only, and earns a LoRA adapter only when evaluation shows a measured gap. Depends on the acceptance gates and a model registry that binds each adapter to its base revision."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-10", "PB-11"]
 agent_school: [101, 401, 402, 403]
@@ -36,7 +36,7 @@ card:
   measures: ["Mean time to identify", "Incidents triaged without rework"]
   risk: "Every fix needs approval, and each new base model means retraining and re-checking."
 placement:
-  far-edge: {runs: [], note: "Not used: triage runs at the regional site."}
+  far-edge: {runs: ["classification"], note: "Optional: Classification on CPU labels site events at the cell site."}
   regional: {runs: ["llm-large", "classification", "safety", "decision", "embedding", "reranker"], note: "The triage agent, cause labels, retrieval, and the gate run here."}
   core: {runs: ["llm-large", "classification"], note: "Data generation, training, and evaluation for the adapter and Classification head run here."}
 ---
@@ -54,7 +54,7 @@ placement:
 | Audience | Model owners, operations engineers, approvers, and risk owners who run alarm triage |
 | OTel slots | `classification`: labels the likely cause; `llm`: the triage agent and the LoRA target; `safety`: checks the evidence behind a finding; `decision`: the gate label; `embedding` and `reranker`: retrieval |
 | Autonomy ceiling | Recommend with approval |
-| Placement tier | Regional for triage; core for data generation, training, and evaluation |
+| Placement tier | Regional for triage by default; optionally far edge, where Classification labels site events on CPU; core for data generation, training, and evaluation |
 | Agent-school courses | 101, 401, 402, and 403 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) |
 
 ## Problem and value
@@ -128,11 +128,13 @@ Train only when every row holds. The parameters belong to [PB-03](../../../platf
 
 The Classification card's head predicts eight root-cause classes from the synthetic TeleLogs drive-test dataset, not your alarm causes. Retrain the Classification head on your own alarm taxonomy, as a full fine-tune of a small head, and gate it on the Classification per-class recall floor with a temporal holdout and on the Classification other-or-abstain recall floor. The Decision card publishes quantized weights only, so the model owner confirms an adaptation path with the card before training the Decision slot.
 
+Site option: at a cell site whose single-node OpenShift server has spare non-real-time cores, Classification can run on CPU and label site events, so the site sends structured incidents upstream instead of raw lines. AI stays off the cores the vDU pins, as [Servers shared with a vDU](../../../architecture/placement.md#servers-shared-with-a-vdu) sets out. Regional triage stays the default.
+
 ### Slots and checkpoints
 
 | Slot | Checkpoint | Role | Placement |
 |---|---|---|---|
-| `classification` | OTel-LLM-8.3B-Classification with its head retrained on your alarm taxonomy, pinned by revision | Labels the likely cause; its head is retrained at the core | Regional and core |
+| `classification` | OTel-LLM-8.3B-Classification with its head retrained on your alarm taxonomy, pinned by revision | Labels the likely cause; its head is retrained at the core | Regional and core; optionally far edge on CPU |
 | `llm` | OTel-2.0-LLM-31B-IT, pinned by revision | The triage agent; the core also runs it for data generation and evaluation | Regional and core |
 | `safety` | OTel-LLM-12B-Safety or OTel-LLM-8.3B-Safety, pinned by revision | Checks the evidence behind a finding | Regional |
 | `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Gives the gate label | Regional |
@@ -266,6 +268,9 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 7 | The inference service rejects OCI URIs for LoRA adapters | research | [KServe issue 6094](https://github.com/kserve/kserve/issues/6094) |
 | 8 | Course 401 governs skills and capability manifests, 402 builds the knowledge service, and 403 tunes OTel with SDG Hub data and OSFT | project documentation | [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) |
 | 9 | The Decision model is published as a quantized build, with training details still to come | model card | [OTel-2.0-Decision-26B-A4B-4bit model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) |
+| 10 | Red Hat AI Inference ships a CPU image, `vllm-cpu-rhel9` | Red Hat guidance | [Red Hat AI Inference release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes) |
+| 11 | vLLM serves classification models in pooling mode with the classify task | project documentation | [vLLM pooling models](https://docs.vllm.ai/en/latest/models/pooling_models/) |
+| 12 | The RAN DU reference design pins platform pods to reserved cores and splits the CPUs into reserved and isolated sets | Red Hat guidance | [RAN DU reference design](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs) |
 
 ## Deploy and verify
 
