@@ -72,6 +72,7 @@ _Stub: this catalog entry has no worked example or diagram yet._
 - [ ] Retention: raw logs stay on the site server for the retention period you set, and the flow never deletes a log before that period ends
 - [ ] Embedding revision: a new embedding checkpoint changes every group, so record the revision with the group set
 - [ ] Prerequisites: spare non-real-time cores on the cell-site single-node OpenShift server, as [Servers shared with a vDU](../../../architecture/placement.md#servers-shared-with-a-vdu) sets out
+- [ ] Placement: the far edge runs Embedding on the cell-site server.
 
 | Component role | Red Hat product used |
 |---|---|

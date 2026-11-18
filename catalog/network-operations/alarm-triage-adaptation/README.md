@@ -36,7 +36,7 @@ card:
   measures: ["Mean time to identify", "Incidents triaged without rework"]
   risk: "Every fix needs approval, and each new base model means retraining and re-checking."
 placement:
-  far-edge: {runs: ["classification"], note: "Optional: Classification on CPU labels site events at the cell site."}
+  far-edge: {runs: ["classification"], note: "Optional: classification on CPU labels site events at the cell site."}
   regional: {runs: ["llm-large", "classification", "safety", "decision", "embedding", "reranker"], note: "The triage agent, cause labels, retrieval, and the gate run here."}
   core: {runs: ["llm-large", "classification"], note: "Data generation, training, and evaluation for the adapter and Classification head run here."}
 ---
@@ -134,7 +134,7 @@ Site option: at a cell site whose single-node OpenShift server has spare non-rea
 
 | Slot | Checkpoint | Role | Placement |
 |---|---|---|---|
-| `classification` | OTel-LLM-8.3B-Classification with its head retrained on your alarm taxonomy, pinned by revision | Labels the likely cause; its head is retrained at the core | Regional and core; optionally far edge on CPU |
+| `classification` | OTel-LLM-8.3B-Classification with its head retrained on your alarm taxonomy, pinned by revision | Labels the likely cause; its head is retrained at the core | Regional, core, and far edge |
 | `llm` | OTel-2.0-LLM-31B-IT, pinned by revision | The triage agent; the core also runs it for data generation and evaluation | Regional and core |
 | `safety` | OTel-LLM-12B-Safety or OTel-LLM-8.3B-Safety, pinned by revision | Checks the evidence behind a finding | Regional |
 | `decision` | OTel-2.0-Decision-26B-A4B-4bit, pinned by revision | Gives the gate label | Regional |
