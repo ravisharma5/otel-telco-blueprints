@@ -26,7 +26,7 @@ one_liner: "Handles router incidents from alarm to ticket with read-only tools, 
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [101, 301, 302, 403]
 also_covers: ["Closed-loop incident handling"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-18"
 card:
   goal: "incidents"
   summary: "An agent investigates router alarms with read-only tools and opens tickets. Every fix passes a gate, and low-risk fixes skip approval only after earning it."
@@ -91,7 +91,7 @@ flowchart TD
 4. To change anything, ticket creation included, the agent sends an action request with `submit_action_request`. It holds no write credentials, and the gateway checks that it may submit requests for the risk class.
 5. Action orchestration checks the request against the decision gate schema. A REST API step asks the Decision slot a fixed label question on `/v1/chat/completions` with log probabilities; the agent's own label is advisory.
 6. A switch step takes the lower of the model label and the policy ceiling. A label mass below the Label-mass floor fails closed to STOP, and STOP ends the step with no change.
-7. REVIEW waits for the `approver` role. ACT runs only an approved playbook within policy. NOTIFY runs a notification job that posts to the ticket or the operations channel, with no network change.
+7. REVIEW waits for the `approver` role. ACT runs only an approved playbook within policy. NOTIFY runs a notification job that posts to the ticket or operations channel, with no network change.
 8. A job template runs the playbook, a verification job reads the same object, and a rollback job runs if verification fails. The workflow writes the audit record, updates the TMF621 ticket, and, once verification passes, clears the TMF642 alarm through `/clearAlarm`.
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. A confirmed false ACT drops the use case and its action class back one stage, as [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy) sets out. A blocked prompt injection in alarm, ticket, or device text opens a SOC case and does not drop a stage.
@@ -259,6 +259,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 11 | Agent tasks can be scored by checking the end state of stateful mocked systems | research | [tau2-bench](https://github.com/sierra-research/tau2-bench) |
 | 12 | Zero events in n trials bounds the event rate below about 3/n at 95% confidence | research | [If nothing goes wrong, is everything all right? JAMA](https://pubmed.ncbi.nlm.nih.gov/6827763/) |
 | 13 | At Level 3 the system also shares analysis and decision, and levels apply to selected scenarios | project documentation | [TM Forum Autonomous Networks whitepaper](https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf) |
+| 14 | An offline replay of this recipe's gate on recorded labels and stateful mocks reports gate outcomes, trajectory checks, and a false-ACT rate with its interval, and uses no model | project documentation | [F2 offline results report](https://github.com/ravisharma5/otel-telco-blueprints-impl/blob/main/f2-closed-loop/results/2026-11-18/report.md) |
 
 ## Deploy and verify
 
@@ -282,9 +283,10 @@ Apply these settings in order. No class rises past its stage until the gates pas
 | Human overrides stay below the ceiling during the canary | Override rate ceiling | Business owner |
 | OTel 2.5 is no worse than the 2.0 baseline on identical items | Non-inferiority margin | Risk owner |
 
-- Agent-school: 101 builds the NOC assistant loop, 301 adds an approval gate to a closed loop, 302 puts policies in front of the MCP gateway and adds a judge suite, and 403 measures OTel 2.0 on the course tapes, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
-- Architecture: the [decision gate](../../../architecture/decision-gate.md) page for the policy table and the message examples
-- TM Forum: the [TMF642](https://github.com/tmforum-apis/TMF642_AlarmManagement) and [TMF621](https://github.com/tmforum-apis/TMF621_TroubleTicket) API repositories for the contracts each MCP server fronts
+- Agent-school: 101 builds the NOC assistant loop, 301 adds an approval gate, 302 adds MCP gateway policies and a judge suite, and 403 measures OTel 2.0 on the course tapes, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
+- Architecture: the [decision gate](../../../architecture/decision-gate.md) page for the policy table and message examples
+- Reference implementation: the [offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop) replays incidents through the gate on a laptop, with no GPU and no model
+- TM Forum: [TMF642](https://github.com/tmforum-apis/TMF642_AlarmManagement) and [TMF621](https://github.com/tmforum-apis/TMF621_TroubleTicket) API contracts
 
 ## Limitations
 
