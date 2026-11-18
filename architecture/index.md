@@ -4,7 +4,7 @@ title: "Architecture overview"
 question: "How do the six OTel model slots map onto Red Hat products, and how do requests flow?"
 doc_status: done
 clarity_reviewed: "2026-11-11"
-platform_blueprints: ["PB-04", "PB-05", "PB-06", "PB-07"]
+platform_blueprints: ["PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---
 
@@ -18,7 +18,7 @@ otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classificati
 | Answer | Every slot runs on Red Hat AI Inference (vLLM) behind gateways, and guardrails plus a Decision-model gate sit between the agent and any change to the network |
 | Audience | Architects and platform teams |
 | OTel slots | All six: LLM, Embedding, Reranker, Safety, Decision, Classification |
-| Platform blueprints | PB-04, PB-05, PB-06, PB-07 |
+| Platform blueprints | PB-04, PB-05, PB-06, PB-07, PB-08, PB-11 |
 
 ## The question
 
@@ -52,12 +52,12 @@ The layers extend the components of Table 1 in the [Red Hat Developer blueprint 
 
 | Layer | Plane | Role | Red Hat product used |
 |---|---|---|---|
-| Data and knowledge | Data and execution | Load, embed, store, and rerank operator knowledge | Vector store; OTel Embedding and Reranker on Red Hat AI Inference (vLLM) with KServe; Data Science Pipelines for loading |
+| Data and knowledge | Data and execution | Load, embed, store, and rerank operator knowledge; [PB-11](../platform/bring-your-own-data/README.md) lists the data and policies to bring by network domain and harness mechanism | Vector store; OTel Embedding and Reranker on Red Hat AI Inference (vLLM) with KServe; Data Science Pipelines for loading |
 | Model endpoint inferencing | Data and execution | Run every OTel slot behind an OpenAI-compatible API | Red Hat AI Inference (vLLM) on KServe; Distributed Inference with llm-d for generative slots in the core |
 | Network capabilities | Data and execution | Offer read, notify, and action-request tools for network and business systems | Standards-based MCP servers (TM Forum, CAMARA, device command line); classifier-as-tool |
 | AI Gateway | Data and execution | Decide who may call which model, which slot handles a request, and which replica serves it | Models-as-a-Service front door; OTel Decision model for content routing; llm-d scheduler for replica choice |
 | MCP Gateway | Data and execution | Authorize every tool call by token claims, and apply rate limits and audit | MCP gateway in Red Hat Connectivity Link with Kuadrant policies and Keycloak |
-| Agent runtime | Data and execution | Own the loop, context, and tool calls inside a sandbox | Harness (LangGraph or custom) in a sandbox on Red Hat OpenShift |
+| Agent runtime | Data and execution | Own the loop, context, and tool calls inside a sandbox; [PB-08](../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox) sets the sandbox layer each use case needs | Harness (LangGraph or custom) in a sandbox on Red Hat OpenShift |
 | Safety and governance | Data and execution | Screen inputs and outputs, abstain without evidence, and gate each step | NeMo Guardrails; OTel Safety slot for abstention; OTel Decision slot as the gate |
 | Action | Data and execution | Be the only path to a state change, with gate, approval, execution, verification, and audit | Red Hat Ansible Automation Platform with Automation Orchestrator and Event-Driven Ansible |
 | Placement | Placement | Run each slot on the site that fits its latency and data rules | Red Hat OpenShift (core); single-node OpenShift with Red Hat OpenShift AI (regional); RHEL with Podman or Red Hat Device Edge (far edge) |
@@ -125,6 +125,7 @@ The agent reads and notifies through the MCP Gateway and asks for a change throu
 ## Used by
 
 - [PB-04](../platform/serving-routing-placement/README.md), [PB-05](../platform/integration/README.md), [PB-06](../platform/safety-autonomy-gating/README.md), [PB-07](../platform/action-layer/README.md): serving, integration, gating, and the action layer build on this map
+- [PB-08](../platform/security-identity-sandbox/README.md#when-a-use-case-needs-a-sandbox), [PB-11](../platform/bring-your-own-data/README.md): the sandbox fit for the agent runtime, and the operator data and policies for the data and knowledge layer
 - [Readiness questions](../framework/index.md): what each part of this design must show before production
 - [Decision gate](decision-gate.md): the label policy behind the investigate-then-act flow
 - [Adaptation ladder](adaptation-ladder.md): how each slot is fitted to an operator's network

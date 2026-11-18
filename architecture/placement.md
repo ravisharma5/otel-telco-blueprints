@@ -37,13 +37,23 @@ Each use case answers the serving and placement question in the [readiness quest
 
 | Tier | Platform (role and Red Hat product) | OTel slots placed here | Latency range | Place a slot here when |
 |---|---|---|---|---|
-| Far edge | Single-model inference box on RHEL with Podman running Red Hat AI Inference, or on Red Hat Device Edge (MicroShift) with KServe | One model per box, either Decision as the gate, Classification, or a small LLM; small Embedding models on CPU | milliseconds per decision | A decision must happen next to a network element at a cell site or hub |
+| Far edge | Single-model inference box on RHEL with Podman running Red Hat AI Inference, or on Red Hat Device Edge (MicroShift) with KServe | One model per box, either Decision as the gate, Classification, or a small LLM; small Embedding and Reranker models can run on CPU (see [Far edge on CPU only](#far-edge-on-cpu-only)) | milliseconds per decision | A decision must happen next to a network element at a cell site or hub |
 | Regional | Closed-loop site on single-node OpenShift with Red Hat OpenShift AI | Decision, Safety, Classification, a small LLM, Embedding, Reranker, and the large LLM in a quantized build; a local retrieval index | sub-second closed loop | Network data must stay in the region, and the loop must close on site |
 | Core | Shared model and lifecycle platform on multi-node Red Hat OpenShift with Red Hat OpenShift AI | The large LLM at full precision under Distributed Inference with llm-d, Decision replicas, and shared Safety, Classification, Embedding, and Reranker services; plus the Models-as-a-Service front door, Training Hub, SDG Hub, EvalHub, Model Registry, and the fleet hub (Red Hat Advanced Cluster Management) | seconds (interactive) to minutes-hours (batch) | Many teams share the work, it needs the largest model, or it changes models through adaptation and evaluation |
 
 Any component can be replaced. The Red Hat products named here show one way to build this design.
 
 Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanced Cluster Management. The core builds, evaluates, and versions each model, and the fleet hub copies it to each site before rollout.
+
+### Far edge on CPU only
+
+A far-edge box with no accelerator can still serve the slots that answer in one pass: small Embedding models from 22M to 335M, the smallest Reranker (0.6B), and single-pass Classification. Run them on the CPU image of Red Hat AI Inference, `vllm-cpu-rhel9` ([release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes)), in vLLM's pooling mode ([vLLM pooling models](https://docs.vllm.ai/en/latest/models/pooling_models/)).
+
+### Servers shared with a vDU
+
+At a cell site, AI may share a single-node OpenShift server with the virtual distributed unit (vDU). The performance profile splits the CPUs into reserved housekeeping cores and isolated cores, and the vDU pins its real-time work to isolated cores ([low-latency tuning](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/cnf-tuning-low-latency-nodes-with-perf-profile)).
+AI runs only on non-real-time cores, never on the isolated cores the vDU pins for real-time work. The RAN DU reference design keeps the reserved housekeeping cores for platform pods ([RAN DU reference design](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs)), so plan spare non-real-time cores for AI when you split the CPUs. Bind the vLLM threads to those cores ([vLLM CPU installation](https://docs.vllm.ai/en/latest/getting_started/installation/cpu/)).
+Before rollout, the operator runs the platform latency tests with the AI workload running and compares DU timing with a run without it ([latency tests](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/cnf-performing-platform-verification-latency-tests)).
 
 ## Trade-offs and limits
 

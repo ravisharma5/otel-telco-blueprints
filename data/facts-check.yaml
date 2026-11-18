@@ -3,8 +3,8 @@
 # fails when sources_digest no longer matches the Sources tables, serving-data URLs,
 # extra_urls, and the URL lines of the architecture pages and the proposal.
 checked: "2026-11-18"
-sources_digest: "1a88365e75cef11068e31d7313cab7b5a77af1097b29c325f196b0d9441aca3d"
-url_count: 200
+sources_digest: "40eb903142756ccf72de34aea95703f981f737522f594b97c8ff7760b0042729"
+url_count: 204
 card_revisions:
   OTel-2.0-Decision-26B-A4B-4bit: "7ff608e3"
   OTel-2.0-LLM-31B-IT: "dd9a4c46"
