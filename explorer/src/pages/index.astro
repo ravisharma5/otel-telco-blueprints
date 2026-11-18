@@ -173,6 +173,12 @@ const steps = how.steps.headings.map((title, i) => ({ n: i + 1, title, body: how
     }
     const params = new URLSearchParams(window.location.search);
     setGoal(params.get('goal') ?? '');
+    // ?tier= presses a tier filter chip only when it equals a rendered chip's
+    // value; the URL value is compared, never shown.
+    const tier = params.get('tier');
+    for (const chip of chips) {
+      if (chip.dataset.group === 'tiers' && chip.dataset.value === tier) chip.setAttribute('aria-pressed', 'true');
+    }
     bar.hidden = false;
     update();
   }

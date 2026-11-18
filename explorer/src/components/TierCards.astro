@@ -1,18 +1,26 @@
 ---
 // Where each model runs: one card per tier for one setup state, with the fit
-// bars on the regional card of a regional setup.
+// bars on the regional card of a regional setup. A CPU-only setup has no bar:
+// its selected card shows one weights line (cpuFit) and a footnote, no percent.
 import FitBar from './FitBar.astro';
 import { frontmatter as copy } from '../content/copy.md';
-import { fill, fitBands, type FitEntry, type TierCard } from '../lib/data';
+import { fill, fitBands, joinList, num, type CpuFit, type FitEntry, type TierCard } from '../lib/data';
 
 interface Props {
   tiers: TierCard[];
   fit: FitEntry[];
+  cpuFit?: CpuFit | null;
 }
 
-const { tiers, fit } = Astro.props;
+const { tiers, fit, cpuFit = null } = Astro.props;
 const labels = copy.home.gallery.filters.tiers;
 const footnote = fill(copy.use_case.fit.footnote, { fits: fitBands.fits_max_pct, tight: fitBands.tight_max_pct });
+const cpuLine = cpuFit
+  ? fill(copy.use_case.fit.cpu.weights, {
+      gb: num(cpuFit.weights_gb),
+      slots: joinList(cpuFit.slots.map((slot) => slot.slot_name), copy.use_case.advanced.list_and),
+    })
+  : '';
 ---
 <ul class="tier-grid">
   {tiers.map((tier) => (
@@ -29,10 +37,12 @@ const footnote = fill(copy.use_case.fit.footnote, { fits: fitBands.fits_max_pct,
       )}
       <p class="tier-note">{tier.note}</p>
       {tier.matches_setup && tier.tier === 'regional' && fit.map((entry) => <FitBar entry={entry} />)}
+      {tier.matches_setup && cpuFit && <p class="cpu-fit">{cpuLine}</p>}
     </li>
   ))}
 </ul>
 {fit.length > 0 && <p class="fit-footnote">{footnote}</p>}
+{cpuFit && <p class="fit-footnote cpu-footnote">{copy.use_case.fit.cpu.footnote}</p>}
 
 <style>
   .tier-grid {
@@ -60,6 +70,7 @@ const footnote = fill(copy.use_case.fit.footnote, { fits: fitBands.fits_max_pct,
   .unused .tag { background: var(--color-surface); }
   .your-setup { font-weight: var(--weight-bold); }
   .tier-note { margin: 0; }
+  .cpu-fit { margin: 0; font-weight: var(--weight-bold); }
   .fit-footnote {
     margin: var(--space-md) 0 0; color: var(--color-text-muted);
     font-size: var(--text-label); line-height: var(--leading-label);

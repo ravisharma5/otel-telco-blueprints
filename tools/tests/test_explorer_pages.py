@@ -610,8 +610,8 @@ def test_no_coming_soon_and_no_innerhtml(explorer_dist):
 
 
 def test_filter_script_reads_only_the_goal_parameter():
-    """The home script reads one URL parameter, goal, and uses it only after it
-    matches a goal id rendered on the page. It writes textContent, never HTML."""
+    """The home script reads two URL parameters, goal and tier, and uses each only
+    after it matches a value rendered on the page. It writes textContent, never HTML."""
     for astro in (EXPLORER / "src").rglob("*.astro"):
         text = astro.read_text(encoding="utf-8")
         assert "innerHTML" not in text, astro.name
@@ -619,7 +619,7 @@ def test_filter_script_reads_only_the_goal_parameter():
             assert banned not in text, f"{astro.name} uses {banned}"
     home = (EXPLORER / "src/pages/index.astro").read_text(encoding="utf-8")
     script = home.split("<script>", 1)[1].split("</script>", 1)[0]
-    assert re.findall(r"params\.get\('([\w-]+)'\)", script) == ["goal"]
+    assert re.findall(r"params\.get\('([\w-]+)'\)", script) == ["goal", "tier"]
     assert "data-goal-id" in script, "goal ids must come from the rendered tiles"
     assert re.search(r"allowed\.has\(", script), "the goal value needs an allowlist check"
     assert "history.replaceState" in script and "pushState" not in script
@@ -635,3 +635,28 @@ def test_built_script_handles_goal_safely(explorer_dist):
     assert "goal" in script and "data-goal-id" in script
     for unsafe in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write"):
         assert unsafe not in script
+
+
+def test_home_tier_param_script():
+    """?tier= presses a Where it runs chip only when it equals a rendered chip's
+    data-value, then updates the count. The URL value never becomes text."""
+    home = (EXPLORER / "src/pages/index.astro").read_text(encoding="utf-8")
+    script = home.split("<script>", 1)[1].split("</script>", 1)[0]
+    assert script.count("params.get('tier')") == 1
+    tier_part = script.split("params.get('tier')", 1)[1].split("bar.hidden", 1)[0]
+    assert "data-group=\"tiers\"" in script or "group === 'tiers'" in tier_part
+    assert "dataset.value ===" in tier_part, "the tier value needs an equality check against rendered chips"
+    assert "aria-pressed" in tier_part and "update()" in script.split("params.get('tier')", 1)[1]
+    assert "textContent" not in tier_part, "the tier value must never become text"
+
+
+@pytest.mark.site_output
+def test_built_script_handles_tier_safely(explorer_dist):
+    tree = _home(explorer_dist)
+    script = "".join(tree.scripts)
+    for node in tree.root.find_all(lambda n: n.tag == "script" and "src" in n.attrs):
+        script += (explorer_dist / node.attrs["src"][len(BASE):]).read_text(encoding="utf-8")
+    assert re.search(r"get\([\"'`]tier[\"'`]\)", script)
+    assert "tiers" in script
+    chips = tree.root.find_all(lambda n: n.tag == "button" and n.attrs.get("data-group") == "tiers")
+    assert chips and all(c.attrs.get("data-value") for c in chips)

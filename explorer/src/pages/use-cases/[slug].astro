@@ -142,7 +142,7 @@ const subLine = (setup: Setup, batch: string) =>
                 <a href={`${import.meta.env.BASE_URL}?tier=${setup.tier}#gallery`}>{copy.use_case.tiers.nothing_here_link}</a>
               </p>
             )}
-            <TierCards tiers={state.tiers} fit={state.fit} />
+            <TierCards tiers={state.tiers} fit={state.fit} cpuFit={state.cpu_fit} />
             {state.flags.length > 0 && (
               <>
                 <h3>{sections.headings.settings}</h3>

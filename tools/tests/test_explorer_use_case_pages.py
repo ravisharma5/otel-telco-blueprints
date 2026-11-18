@@ -1053,3 +1053,40 @@ def test_key_settings_absent_when_empty(explorer_dist, data, copy):
             assert len(tables) == len(heads) == (1 if state["flags"] else 0), key
             seen += not state["flags"]
     assert seen, "expected a state with no Key settings"
+
+
+@pytest.mark.site_output
+def test_cpu_fit_line(explorer_dist, data, copy):
+    """The selected far-edge card of a CPU state shows the summed weights and every
+    slot name, with no bar and no percent; the footnote sits below the grid."""
+    cpu_copy = copy["use_case"]["fit"]["cpu"]
+    cases = [
+        (uc, _key(s["id"], "any"), uc["states"][s["id"]]["any"])
+        for s in _cpu_setups(data)
+        for uc in data["use_cases"]
+        if uc["states"][s["id"]]["any"]["cpu_fit"]
+    ]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, _, state in _states(uc):
+            if not state["cpu_fit"]:
+                assert _in_parts(tree, key, lambda n: n.has_class("cpu-fit")) == [], key
+                assert _in_parts(tree, key, lambda n: n.has_class("cpu-footnote")) == [], key
+    if not cases:
+        pytest.skip("no CPU state has a CPU fit yet; a far-edge use case makes this bite")
+    for uc, key, state in cases:
+        tree = _page(explorer_dist, uc)
+        fit = state["cpu_fit"]
+        cards = [c for c in _in_parts(tree, key, lambda n: n.has_class("tier-card")) if c.has_class("selected")]
+        assert len(cards) == 1, key
+        lines = cards[0].find_all(lambda n: n.has_class("cpu-fit"))
+        assert len(lines) == 1, (uc["slug"], key)
+        text = lines[0].text()
+        assert cpu_copy["weights"].split("{")[0].strip() in text
+        assert f"{_num(fit['weights_gb'])} GB" in text, text
+        for slot in fit["slots"]:
+            assert slot["slot_name"] in text, (key, slot)
+        assert "%" not in text
+        assert _in_parts(tree, key, lambda n: n.has_class("fit-bar")) == []
+        notes = _in_parts(tree, key, lambda n: n.has_class("cpu-footnote"))
+        assert len(notes) == 1 and notes[0].text() == cpu_copy["footnote"]
