@@ -212,11 +212,11 @@ def test_rail_contents(explorer_dist, data, copy):
         )
         assert len(asides) == 1, uc["slug"]
         rail = asides[0]
-        for key in ("slots", "blueprints", "tiers"):
-            tile = rail.find_all(lambda n, k=key: n.attrs.get("data-count") == k)
-            assert len(tile) == 1
-            number = tile[0].find_all(lambda n: n.has_class("count-number"))
-            assert number and number[0].text() == str(uc["counts"][key])
+        # At a glance keeps the domain, title, and stage; the counter tiles are gone.
+        glance = rail.find_all(lambda n: n.has_class("glance"))
+        assert len(glance) == 1, uc["slug"]
+        assert uc["title"] in glance[0].text() and uc["stage"]["label"] in glance[0].text()
+        assert rail.find_all(lambda n: "data-count" in n.attrs) == []
         # Setup select, with the five setups in order and a visible label.
         selects = rail.find_all(lambda n: n.tag == "select")
         assert len(selects) == 1
@@ -849,3 +849,98 @@ def test_try_it_link_only_on_f2(explorer_dist, data, copy):
         assert copy["buttons"]["try_it"] in link.text()
         assert copy["notes"]["external"] in link.text()
         assert _squash(copy["use_case"]["recipe"]["notes"]["try_it"]) in _squash(tree.root.text())
+
+
+# ---------- story: the problem, how it works, example ----------
+
+
+def _why(tree):
+    return tree.root.find_all(lambda n: n.tag == "section" and n.attrs.get("id") == "why")[0]
+
+
+def _story(tree):
+    stories = _why(tree).find_all(lambda n: n.has_class("story"))
+    assert len(stories) == 1
+    return stories[0]
+
+
+@pytest.mark.site_output
+def test_story_comes_first(explorer_dist, data):
+    """The story sits right after the title and summary, before Why do it and What it takes."""
+    for uc in data["use_cases"]:
+        why = _why(_page(explorer_dist, uc))
+        marks = [
+            n.attrs["class"].split()[0]
+            for n in why.find_all(lambda n: n.tag == "h1" or n.has_class("lede") or n.has_class("story") or n.has_class("summary-grid"))
+            if n.tag != "h1"
+        ]
+        assert marks == ["lede", "story", "summary-grid"], (uc["slug"], marks)
+        assert _state_of(_story(_page(explorer_dist, uc))) is None
+
+
+@pytest.mark.site_output
+def test_story_blocks_render_from_recipe(explorer_dist, data, copy):
+    heads = copy["use_case"]["story"]["headings"]
+    for uc in data["use_cases"]:
+        story = uc["story"]
+        node = _story(_page(explorer_dist, uc))
+        h3 = [h.text() for h in node.find_all(lambda n: n.tag == "h3")]
+        want = [heads["problem"]]
+        if story["steps"]:
+            want.append(heads["steps"])
+        if story["example"]:
+            want.append(heads["example"].replace("{title}", story["example"]["title"]))
+        assert h3 == want, (uc["slug"], h3)
+        assert _squash(story["problem"]) in _squash(node.text()), uc["slug"]
+        lists = node.find_all(lambda n: n.tag == "ol")
+        assert len(lists) == (1 if story["steps"] else 0), uc["slug"]
+        if story["steps"]:
+            items = lists[0].find_all(lambda n: n.tag == "li")
+            assert [_squash(li.text()) for li in items] == [_squash(s) for s in story["steps"]], uc["slug"]
+        if story["example"]:
+            assert _squash(story["example"]["text"]) in _squash(node.text()), uc["slug"]
+
+
+@pytest.mark.site_output
+def test_story_on_ran_energy_saving_and_an_entry(explorer_dist, data, copy):
+    heads = copy["use_case"]["story"]["headings"]
+    by_slug = {u["slug"]: u for u in data["use_cases"]}
+    full = _story(_page(explorer_dist, by_slug["ran-energy-saving"]))
+    text = full.text()
+    assert "cells stay fully powered through quiet nights" in text
+    assert "A scheduled run starts the planning agent hours before a low-traffic period." in text
+    assert "nrcell-rural-b3" in text
+    assert len(full.find_all(lambda n: n.tag == "li")) == 7
+    entry = by_slug["security-triage"]
+    assert entry["depth"]["id"] == "entry"
+    node = _story(_page(explorer_dist, entry))
+    assert [h.text() for h in node.find_all(lambda n: n.tag == "h3")] == [heads["problem"]]
+    assert "Detectors raise more alerts" in node.text()
+    assert "_Stub" not in node.text() and "Stub:" not in node.text()
+
+
+@pytest.mark.site_output
+def test_no_count_tiles_on_use_case_pages(explorer_dist, data, copy):
+    words = copy["home"]["gallery"]["counts"]
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        assert tree.root.find_all(lambda n: n.has_class("count-tiles") or n.has_class("count-tile")) == []
+        assert tree.root.find_all(lambda n: "data-count" in n.attrs) == []
+        text = tree.root.text()
+        n = uc["counts"]["blueprints"]
+        assert f"{n} {words['blueprints']['one' if n == 1 else 'other']}" not in text.replace(
+            fill_takes(copy, uc), ""
+        ), uc["slug"]
+
+
+def fill_takes(copy, uc):
+    """The What it takes row names the counts in a sentence; only the tiles go."""
+    words = copy["home"]["gallery"]["counts"]
+
+    def plural(key):
+        n = uc["counts"][key]
+        return f"{n} {words[key]['one' if n == 1 else 'other']}"
+
+    return copy["use_case"]["why"]["takes"].replace("{slots}", plural("slots")).replace(
+        "{blueprints}", plural("blueprints")
+    )

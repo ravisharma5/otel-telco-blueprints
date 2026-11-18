@@ -903,3 +903,103 @@ def test_try_it_exported(data, tmp_path):
         (root / "data/explorer/try-it.yaml").write_text(yaml.safe_dump(bad), encoding="utf-8")
         with pytest.raises(SystemExit, match=needle):
             ex.build_explorer_data(root)
+
+
+# ---------- story: problem, how it works, example ----------
+#
+# The story blocks are read from each recipe at build time; nothing new is typed
+# into front matter. These tests re-read the recipe with a separate, regex-based
+# reduction to plain text, so an exporter change or a recipe edit that drifts
+# apart fails here.
+
+LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+
+
+def _src_plain(text):
+    """Markdown to plain text the simple way: link text kept, backticks and emphasis dropped."""
+    return " ".join(LINK_RE.sub(r"\1", text).replace("`", "").replace("**", "").split())
+
+
+def _section(path, title):
+    doc = parse_doc(path, path.read_text(encoding="utf-8"))
+    sec = doc.section(title)
+    assert sec is not None, (path, title)
+    return sec
+
+
+def _pages_by_id():
+    return {front_matter(p)["id"]: p for p in exported_pages()}
+
+
+def test_story_exported_for_every_use_case(data):
+    for uc in data["use_cases"]:
+        story = uc["story"]
+        assert set(story) == {"problem", "steps", "example"}, uc["slug"]
+        assert story["problem"], uc["slug"]
+        if uc["depth"]["id"] == "recipe":
+            assert story["steps"], uc["slug"]
+            assert story["example"] and story["example"]["title"] and story["example"]["text"], uc["slug"]
+        else:
+            # Entries stub How it works and carry no worked example: omit, never invent.
+            assert story["steps"] == [] and story["example"] is None, uc["slug"]
+
+
+def test_story_problem_matches_recipe(data):
+    pages = _pages_by_id()
+    for uc in data["use_cases"]:
+        sec = _section(pages[uc["id"]], "Problem and value")
+        paras = [b for b in sec.body_text.split("\n\n") if b.strip() and not b.lstrip().startswith("<!--")]
+        source = _src_plain(paras[0])
+        problem = uc["story"]["problem"]
+        assert source.startswith(problem), uc["slug"]
+        # The KPI and target sentences stay in the recipe; the explorer shows the problem.
+        rest = source[len(problem):].strip()
+        assert rest == "" or rest.startswith("The KPI"), (uc["slug"], rest[:40])
+
+
+def test_story_steps_match_recipe(data):
+    pages = _pages_by_id()
+    for uc in data["use_cases"]:
+        if uc["depth"]["id"] != "recipe":
+            continue
+        sec = _section(pages[uc["id"]], "How it works")
+        assert len(uc["story"]["steps"]) == sec.ordered_items, uc["slug"]
+        items = re.findall(r"^\d+\. (.+?)(?=^\d+\. |\n\n|\Z)", sec.body_text, re.M | re.S)
+        assert len(items) == sec.ordered_items, uc["slug"]
+        for step, item in zip(uc["story"]["steps"], items):
+            src = _src_plain(item)
+            assert src.startswith(step), (uc["slug"], step)
+            assert step.endswith((".", "?", "!")), (uc["slug"], step)
+            assert "](" not in step and "`" not in step
+
+
+def test_story_example_matches_recipe(data):
+    pages = _pages_by_id()
+    for uc in data["use_cases"]:
+        if uc["depth"]["id"] != "recipe":
+            continue
+        body = _section(pages[uc["id"]], "How it works").body_text
+        match = re.search(r"^### Worked example: (.+)\n\n(.+?)(?:\n\n|\Z)", body, re.M | re.S)
+        assert match, uc["slug"]
+        example = uc["story"]["example"]
+        assert example["title"] == match.group(1).strip(), uc["slug"]
+        src = _src_plain(match.group(2))
+        assert src.startswith(example["text"]), uc["slug"]
+        sentences = re.split(r"(?<=[.!?])\s+(?=[A-Z0-9\"(])", example["text"])
+        assert 1 <= len(sentences) <= 3, uc["slug"]
+        assert "](" not in example["text"] and "`" not in example["text"]
+
+
+def test_story_for_ran_energy_saving(data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == "ran-energy-saving")
+    story = uc["story"]
+    assert story["problem"].startswith("Network energy use doesn't fall in step with traffic")
+    assert len(story["steps"]) == 7
+    assert story["steps"][0] == "A scheduled run starts the planning agent hours before a low-traffic period."
+    assert story["example"]["title"] == "a rural cluster overnight"
+    assert story["example"]["text"].startswith("The forecast for a rural cluster shows traffic on booster cell nrcell-rural-b3")
+
+
+def test_story_first_sentence_helper():
+    assert ex._sentences("Reads TS 28.552 counters. Then acts.") == ["Reads TS 28.552 counters.", "Then acts."]
+    assert ex._sentences("One only") == ["One only"]
