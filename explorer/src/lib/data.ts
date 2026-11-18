@@ -143,6 +143,13 @@ export interface Sandbox {
   why: string;
 }
 
+/** The use case's story, read from the recipe; an entry has no steps and no example. */
+export interface Story {
+  problem: string;
+  steps: string[];
+  example: { title: string; text: string } | null;
+}
+
 export interface UseCase {
   id: string;
   slug: string;
@@ -158,6 +165,7 @@ export interface UseCase {
   sandbox: Sandbox;
   try_it_url: string | null;
   card: Card;
+  story: Story;
   counts: Counts;
   slot_names: string[];
   platform_rows: string[][];

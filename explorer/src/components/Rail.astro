@@ -1,5 +1,5 @@
 ---
-// Left rail: at a glance, your setup, on this page, and the recipe button.
+// Left rail: at a glance (domain, title, stage), your setup, on this page, and the recipe button.
 import StageChip from './StageChip.astro';
 import SetupForm from './SetupForm.astro';
 import SectionNav from './SectionNav.astro';
@@ -11,12 +11,7 @@ interface Props {
 }
 
 const { useCase } = Astro.props;
-const words = copy.home.gallery.counts;
 const rail = copy.use_case.rail;
-const tiles = (['slots', 'blueprints', 'tiers'] as const).map((key) => {
-  const n = useCase.counts[key];
-  return { key, n, caption: n === 1 ? words[key].one : words[key].other };
-});
 ---
 <aside class="rail" aria-label={rail.label}>
   <div class="box glance">
@@ -24,14 +19,6 @@ const tiles = (['slots', 'blueprints', 'tiers'] as const).map((key) => {
     <p class="eyebrow">{useCase.domain_label}</p>
     <p class="rail-title">{useCase.title}</p>
     <StageChip stage={useCase.stage} />
-    <ul class="count-tiles">
-      {tiles.map((tile) => (
-        <li class="count-tile" data-count={tile.key}>
-          <span class="count-number">{tile.n}</span>
-          <span class="count-caption">{tile.caption}</span>
-        </li>
-      ))}
-    </ul>
   </div>
   <div class="box setup">
     <p class="box-heading">{rail.headings.setup}</p>
@@ -70,16 +57,6 @@ const tiles = (['slots', 'blueprints', 'tiers'] as const).map((key) => {
     font-weight: var(--weight-bold); line-height: var(--leading-label);
   }
   .rail-title { font-family: var(--font-display); font-weight: var(--weight-bold); }
-  .count-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); width: 100%; margin: 0; padding: 0; list-style: none; }
-  .count-tile {
-    display: flex; flex-direction: column; padding: var(--space-sm);
-    background: var(--color-surface-2); border-radius: var(--radius-md);
-  }
-  .count-number {
-    font-family: var(--font-display); font-weight: var(--weight-bold);
-    font-size: var(--text-heading); line-height: var(--leading-heading);
-  }
-  .count-caption { color: var(--color-text-muted); font-size: var(--text-label); line-height: var(--leading-label); }
   .rail-button { width: 100%; justify-content: center; }
   @media (max-width: 1023px) {
     .rail {

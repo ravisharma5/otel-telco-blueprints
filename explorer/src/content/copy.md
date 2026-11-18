@@ -191,7 +191,8 @@ home:
       body: These blueprints are open source. They're built with Red Hat products as one way to run each use case, and every claim links its source.
       replaceable: Any component can be replaced.
 # Use-case page. Setup labels come from data/serving/setups.yaml through the JSON;
-# count words reuse home.gallery.counts and tier labels reuse home.gallery.filters.tiers.
+# count words reuse home.gallery.counts (the What it takes row) and tier labels reuse
+# home.gallery.filters.tiers.
 use_case:
   page_title: "{title} · {site}"
   rail:
@@ -227,9 +228,17 @@ use_case:
       "no": interactive traffic only
     count_caption: advanced options worth testing on this setup
     no_js_setup: "Setup shown: {setup}."
+  # Story blocks at the top of the page, read from the recipe at build time.
+  # {title} is the worked example title from the recipe.
+  story:
+    label: What this use case does
+    headings:
+      problem: The problem
+      steps: How it works
+      example: "Example: {title}"
   sections:
     nav:
-      why: Why and what it takes
+      why: What it does and takes
       setup: Recommended for your setup
       needs: What you need
       recipe: Recipe

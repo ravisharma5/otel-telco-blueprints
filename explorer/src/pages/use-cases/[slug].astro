@@ -35,6 +35,8 @@ interface Props {
 const { useCase } = Astro.props;
 const sections = copy.use_case.sections;
 const why = copy.use_case.why;
+const storyHeads = copy.use_case.story.headings;
+const story = useCase.story;
 const words = copy.home.gallery.counts;
 const tierLabels = copy.home.gallery.filters.tiers;
 const defaultKey = stateKey(defaults.setup, defaults.batch);
@@ -75,6 +77,24 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
         <h1 id="why-title" tabindex="-1">{useCase.title}</h1>
         <p class="header-chips"><DepthChip depth={useCase.depth} /> <SandboxChip sandbox={useCase.sandbox} /></p>
         <p class="lede">{useCase.card.summary}</p>
+        <div class="story" role="group" aria-label={copy.use_case.story.label}>
+          <h3>{storyHeads.problem}</h3>
+          <p>{story.problem}</p>
+          {story.steps.length > 0 && (
+            <>
+              <h3>{storyHeads.steps}</h3>
+              <ol class="story-steps">
+                {story.steps.map((step) => <li>{step}</li>)}
+              </ol>
+            </>
+          )}
+          {story.example && (
+            <>
+              <h3>{fill(storyHeads.example, { title: story.example.title })}</h3>
+              <p>{story.example.text}</p>
+            </>
+          )}
+        </div>
         <div class="summary-grid">
           <div class="summary-card">
             <h3>{why.headings.why}</h3>
@@ -194,13 +214,23 @@ const batchSentence = copy.use_case.setup.batch_sentence as Record<string, strin
   .header-chips { margin: 0 0 var(--space-md); }
   .lede { max-width: var(--prose-max); margin: 0 0 var(--space-lg); color: var(--color-text-muted); }
   .sub { margin: 0 0 var(--space-md); color: var(--color-text-muted); max-width: var(--prose-max); }
-  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+  .story { max-width: var(--prose-max); margin: 0 0 var(--space-xl); }
+  .story h3 { margin: var(--space-lg) 0 var(--space-sm); }
+  .story h3:first-child { margin-top: 0; }
+  .story p { margin: 0; }
+  .story-steps { margin: 0; padding-left: var(--space-lg); }
+  .story-steps li + li { margin-top: var(--space-xs); }
+  /* Why do it and What it takes: compact cards under the story. */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
   .summary-card {
-    padding: var(--space-lg); border-radius: var(--radius-lg);
+    padding: var(--space-md); border-radius: var(--radius-lg);
     background: var(--color-surface); border: 1px solid var(--color-border); min-width: 0;
+    font-size: var(--text-label); line-height: var(--leading-label);
   }
-  .summary-card h3 { margin-top: 0; }
-  .outcome { margin: 0 0 var(--space-md); font-weight: var(--weight-bold); }
+  .summary-card h3 { margin: 0 0 var(--space-sm); }
+  .summary-card :global(.mini) { font-size: var(--text-label); }
+  .summary-card :global(.mini th), .summary-card :global(.mini td) { padding-top: var(--space-xs); padding-bottom: var(--space-xs); }
+  .outcome { margin: 0 0 var(--space-sm); font-weight: var(--weight-bold); }
   .state-block[hidden], .options-part[hidden], .quantized-check[hidden], .options-toggle[hidden] { display: none; }
   .table-scroll { overflow-x: auto; }
   .options-toggle { margin-bottom: var(--space-md); }
