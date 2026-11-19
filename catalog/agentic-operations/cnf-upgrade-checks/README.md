@@ -61,9 +61,9 @@ placement:
 ## Problem and value
 
 Vendor CNF upgrades fail on live state that nobody checked, such as an expiring certificate, a quota, a drifted configuration, or a missing dependency.
-This recipe checks workload state before and after each upgrade and sends every upgrade through the Decision gate and automation-platform jobs, so every hold, run, or rollback leaves an audit record.
+This recipe checks workload state before and after each upgrade. It sends every upgrade through the Decision gate and automation-platform jobs, so every hold, run, or rollback leaves an audit record.
 The KPIs are the time from vendor delivery to production and the first-time post-check pass rate.
-The ROI measure is failed upgrades avoided or rolled back early times your cost of an incident or outage, plus approver time saved per change; measure both in shadow with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures, from inputs you supply.
+The ROI measure is failed upgrades avoided or rolled back early times your cost of an incident or outage, plus approver time saved per change. Measure both in shadow with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures, from inputs you supply.
 
 ## How it works
 
@@ -94,17 +94,17 @@ flowchart TD
   NJ --> AU
 ```
 
-1. A vendor release in the software gateway, or an open upgrade window, triggers the agent, which runs checks and never runs a change itself.
-2. The agent plans the checks from the workload's capability manifest and reads state through read-only MCP tools behind the MCP gateway, which denies each call unless a role allows it, the deny-unless-allowed rule in [PB-05](../../../platform/integration/README.md#per-tool-authorization).
-3. It retrieves the release notes, upgrade guide, MOP, and past outcomes with the Embedding and Reranker slots, and writes a change summary; the Safety slot abstains when the evidence for GO is weak.
+1. A vendor release in the software gateway, or an open upgrade window, triggers the agent. The agent runs checks and never runs a change itself.
+2. The agent plans the checks from the workload's capability manifest. It reads state through read-only MCP tools behind the MCP gateway, which denies each call unless a role allows it, the deny-unless-allowed rule in [PB-05](../../../platform/integration/README.md#per-tool-authorization).
+3. It retrieves the release notes, upgrade guide, MOP, and past outcomes with the Embedding and Reranker slots, and writes a change summary. The Safety slot abstains when the evidence for GO is weak.
 4. It sends the upgrade as an action request with `submit_action_request`, and the Decision slot gives the pre-upgrade label at the [decision gate](../../../architecture/decision-gate.md).
-5. The gate takes the lower of the label and the ceiling for the change class; ACT runs the upgrade job, REVIEW goes to the approver, and STOP holds it.
+5. The gate takes the lower of the label and the ceiling for the change class. ACT runs the upgrade job, REVIEW goes to the approver, and STOP holds it.
 6. A post-check job reads the same workload; on a failure, the Classification slot labels the failure, and then the Decision slot gives the rollback-or-escalate label.
 7. Every path ends in the audit record and a ticket update.
 
 The outcome is the lower of the model label and the policy ceiling for the capability and risk class, so it never exceeds either. A STOP label forces STOP at every stage. Every change class starts at the shadow stage, and a confirmed false ACT drops the class back one stage, as [PB-06](../../../platform/safety-autonomy-gating/README.md#staged-autonomy) sets out.
 
-Only low-risk change classes can earn ACT, and that stage targets Level 3 for low-risk change classes only. Major upgrades are always REVIEW. An operator aiming for Level 4 can set it as a per-class target; the stage register earns each class up to the act stage (Level 3), and PB-06 treats Level 4 as a later target beyond these blueprints. This recipe claims no level.
+Only low-risk change classes can earn ACT, and that stage targets Level 3. Major upgrades are always REVIEW. An operator aiming for Level 4 can set it as a per-class target; the stage register earns each class up to the act stage (Level 3), and PB-06 treats Level 4 as a later target beyond these blueprints. This recipe claims no level.
 
 ### Tools and risk classes
 
