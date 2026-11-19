@@ -121,6 +121,7 @@ nav:
       - Security:
           - Security alert triage: catalog/security/security-triage/README.md
           - Signalling attack classification: catalog/security/signalling-attack-classification/README.md
+          - Software onboarding and CVE review: catalog/security/software-onboarding-cve-review/README.md
       - Research:
           - KPI root-cause reasoning: catalog/research/kpi-rca-reasoning/README.md
           - 5G mobility failure analysis: catalog/research/mobility-failure-analysis/README.md

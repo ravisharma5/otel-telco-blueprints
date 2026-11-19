@@ -105,6 +105,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "agentic-operations/cnf-upgrade-checks": "UC-AGOPS-05",
     "security/security-triage": "UC-SEC-01",
     "security/signalling-attack-classification": "UC-SEC-02",
+    "security/software-onboarding-cve-review": "UC-SEC-03",
     "business-assurance/broadband-digital-troubleshooting": "UC-CARE-02",
     "business-assurance/churn-risk-explanation": "UC-BIZ-01",
     "business-assurance/revenue-assurance-triage": "UC-BIZ-02",
@@ -234,6 +235,14 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [],
         "goal": "secure",
     },
+    "security/software-onboarding-cve-review": {
+        "id": "UC-SEC-03",
+        "slots": {"llm", "embedding", "reranker", "safety"},
+        "ceiling": "inform",
+        "tmf": None,
+        "agent_school": [],
+        "goal": "secure",
+    },
     "business-assurance/broadband-digital-troubleshooting": {
         "id": "UC-CARE-02",
         "slots": {"embedding", "reranker", "safety", "decision", "llm"},
@@ -296,6 +305,9 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     },
     "agentic-operations/site-change-risk-gate": {"Change types eligible for ACT": "Risk owner"},
     "agentic-operations/cnf-upgrade-checks": {"Change types eligible for ACT": "Risk owner"},
+    "security/software-onboarding-cve-review": {
+        "Open-finding severity that blocks a recommendation": "Risk owner",
+    },
 }
 
 # RACI activities a use case may name that no platform page defines

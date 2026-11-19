@@ -350,7 +350,7 @@ Apply these settings in order. Every change class starts at the shadow stage, an
 - Reference implementation: the gate pattern this recipe reuses runs end to end in the [closed-loop offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling), which replays incidents, not upgrades
 - Architecture: the [decision gate](../../../architecture/decision-gate.md) for labels and policy ceilings
 - Starting point: the [Red Hat Best Practices Test Suite for Kubernetes](https://github.com/redhat-best-practices-for-k8s/certsuite) checks CNF deployments on OpenShift, a source of checks for your capability manifests
-- Related: the [network automation review](../../network-software/network-automation-review/README.md) entry reviews automation changes before rollout
+- Related: the [network automation review](../../network-software/network-automation-review/README.md) entry reviews automation changes before rollout, and the [Software onboarding and CVE review](../../security/software-onboarding-cve-review/README.md) entry drafts the permit before the release reaches an upgrade
 
 ## Limitations
 

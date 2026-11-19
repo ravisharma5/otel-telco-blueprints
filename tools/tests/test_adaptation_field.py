@@ -43,7 +43,7 @@ RETRAIN_HEAD = re.compile(
 )
 # A model-card fact about the OTel rerankers, not an operator fine-tune.
 CARD_FACT = re.compile(r"(?i)one-label head|full fine-tune of qwen3")
-EXPECTED_COUNTS = {"retrieval": 7, "skills": 6, "retrieval-and-skills": 6, "head-retrain": 8, "lora-if-gap": 2}
+EXPECTED_COUNTS = {"retrieval": 7, "skills": 6, "retrieval-and-skills": 7, "head-retrain": 8, "lora-if-gap": 2}
 
 
 def _ad(path) -> dict:
@@ -164,7 +164,7 @@ def test_rung_counts():
     for p in use_case_pages():
         counts[_ad(p).get("rung")] = counts.get(_ad(p).get("rung"), 0) + 1
     assert counts == EXPECTED_COUNTS
-    assert sum(counts.values()) == 29
+    assert sum(counts.values()) == 30
 
 
 def test_matrix_reader():

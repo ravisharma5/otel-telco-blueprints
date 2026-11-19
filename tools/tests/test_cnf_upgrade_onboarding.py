@@ -1,4 +1,4 @@
-"""The CNF upgrade pre- and post-checks recipe.
+"""The CNF upgrade pre- and post-checks recipe and the software onboarding entry.
 
 An agent reads live workload state through read-only tools before and after a
 vendor CNF upgrade. Every upgrade passes the Decision gate, and automation
@@ -6,6 +6,9 @@ jobs run the upgrade, the post-check, and the rollback. These tests pin the
 gate contract, the per-class TM Forum targets, the write paths, the harness,
 the slots, the rollback design (text and diagram agree), the ROI measures, the
 fictitious worked example, and the vendor-neutral, number-free text.
+
+The software onboarding and CVE review entry recommends a permit-to-build
+decision to a person through read-only tools and never writes.
 """
 
 from __future__ import annotations
@@ -382,4 +385,113 @@ def test_cnf_vendor_neutral():
 
 def test_cnf_no_performance_numbers():
     text = URL_IN_LINK.sub("]", page().read_text(encoding="utf-8"))
+    assert PERFORMANCE.findall(text) == []
+
+
+# ---------- software onboarding and CVE review entry ----------
+
+ONBOARDING = "security/software-onboarding-cve-review"
+CNF_FROM_ENTRY = "../../agentic-operations/cnf-upgrade-checks/README.md"
+ENTRY_FROM_CNF = "../../security/software-onboarding-cve-review/README.md"
+
+
+def onboarding_page() -> Path:
+    path = REPO_ROOT / "catalog" / ONBOARDING / "README.md"
+    if not path.is_file():
+        pytest.skip(f"{ONBOARDING} has not landed yet")
+    return path
+
+
+def onboarding_text() -> str:
+    """Body with URLs removed and whitespace flattened."""
+    return _flat(URL_IN_LINK.sub("]", body(onboarding_page())))
+
+
+def test_onboarding_spec():
+    fm = front_matter(onboarding_page()) or {}
+    assert fm["id"] == "UC-SEC-03"
+    assert fm["title"] == "Software onboarding and CVE review"
+    assert fm["depth"] == "entry" and fm["flagship"] is False
+    assert fm["domain"] == "security"
+    assert set(fm["otel_slots"]) == {"llm", "embedding", "reranker", "safety"}
+    assert len(fm["otel_slots"]) == 4
+    assert fm["autonomy_ceiling"] == "inform"
+    assert "tmf_an_level_target" not in fm
+    placement = fm["placement"]
+    assert placement["far-edge"]["runs"] == []
+    assert set(placement["regional"]["runs"]) == {"embedding", "reranker", "safety"}
+    assert placement["core"]["runs"] == ["llm-large"]
+    assert fm["adaptation"]["rung"] == "retrieval-and-skills"
+    assert fm["sandbox"]["fit"] == "none"
+    assert fm["card"]["goal"] == "secure"
+
+
+def test_onboarding_never_writes():
+    text = onboarding_text()
+    assert "submit_action_request" not in text
+    assert "- [ ] Write path:" not in body(onboarding_page())
+    assert "write_low" not in text and "write_high" not in text
+    assert "signs off" in text or "signs the permit" in text
+    assert "never writes" in text or "holds no write tool" in text
+
+
+def test_onboarding_governance_look():
+    section = section_text(onboarding_page(), "Governance")
+    rows = table_rows(section)
+    header = rows[0]
+    col = next(i for i, h in enumerate(header) if h.startswith("Gate outcome"))
+    assert len(rows) > 1
+    for row in rows[1:]:
+        assert row[col] == "LOOK", row
+    flat = _flat(section)
+    assert "Every outcome is LOOK." in flat
+    assert re.search(r"nothing reaches the \[decision gate\]\(" + re.escape(GATE_LINK) + r"\)", flat)
+
+
+def test_onboarding_tools_read_only():
+    need = _flat(section_text(onboarding_page(), "What you need"))
+    bullet = next(b for b in re.findall(r"- \[ \] Integrations:[^\n]*", section_text(onboarding_page(), "What you need")))
+    for contract in ("inventory", "security and CVE", "compliance", "software gateway"):
+        assert contract in bullet, contract
+    assert "read-only" in bullet
+    assert "MCP gateway" in bullet
+    assert re.search(r"denies each call unless a role allows it", bullet), bullet
+    assert INTEGRATION_LINK in need
+
+
+def test_onboarding_output():
+    text = onboarding_text()
+    assert "permit-to-build summary" in text
+    assert re.search(r"(?i)CVE reductions", text)
+    assert re.search(r"(?i)open findings", text)
+    assert re.search(r"(?i)recommends approval or rejection", text)
+
+
+def test_onboarding_roi_measures():
+    flat = _flat(section_text(onboarding_page(), "Problem and value"))
+    for pattern in (
+        r"(?i)review time per release",
+        r"(?i)findings missed",
+        r"(?i)time from delivery to permit",
+    ):
+        assert re.search(pattern, flat), pattern
+    prose = URL_IN_LINK.sub("]", flat)
+    assert CURRENCY_OR_SAVING.findall(prose) == []
+    assert "%" not in prose
+    assert PB10_ROI in flat
+
+
+def test_onboarding_cross_links():
+    assert CNF_FROM_ENTRY in body(onboarding_page())
+    assert ENTRY_FROM_CNF in body(page())
+
+
+def test_onboarding_vendor_neutral():
+    text = URL_IN_LINK.sub("]", onboarding_page().read_text(encoding="utf-8"))
+    assert PUBLIC_VENDORS.findall(text) == []
+    assert SHORTHAND.findall(text) == []
+
+
+def test_onboarding_no_performance_numbers():
+    text = URL_IN_LINK.sub("]", onboarding_page().read_text(encoding="utf-8"))
     assert PERFORMANCE.findall(text) == []

@@ -70,6 +70,7 @@ The Use cases page shows the same use cases as cards.
 |---|---|---|---|
 | [UC-SEC-01](security/security-triage/README.md) | Security alert triage | Catalog entry |  |
 | [UC-SEC-02](security/signalling-attack-classification/README.md) | Signalling attack classification | Catalog entry |  |
+| [UC-SEC-03](security/software-onboarding-cve-review/README.md) | Software onboarding and CVE review | Catalog entry |  |
 
 ## Research
 
@@ -116,6 +117,7 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -150,6 +152,7 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -184,6 +187,7 @@ These recipes use [the Adaptation page](../platform/adaptation/README.md):
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -218,6 +222,7 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -250,6 +255,7 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -283,6 +289,7 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -338,6 +345,7 @@ These recipes use [the Security, identity, and sandbox page](../platform/securit
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
@@ -382,6 +390,7 @@ These recipes use [the Compliance, sovereignty, and operating model page](../pla
 - [UC-OPS-06 Slice SLA assurance](network-operations/slice-sla-assurance/README.md)
 - [UC-OPS-07 MOP validation](network-operations/mop-validation/README.md)
 - [UC-OPS-10 Site log reduction](network-operations/site-log-reduction/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 
 ### PB-11 Bring your own data and policies
 
@@ -413,6 +422,7 @@ These recipes use [the Bring your own data and policies page](../platform/bring-
 - [UC-RES-02 5G mobility failure analysis](research/mobility-failure-analysis/README.md)
 - [UC-SEC-01 Security alert triage](security/security-triage/README.md)
 - [UC-SEC-02 Signalling attack classification](security/signalling-attack-classification/README.md)
+- [UC-SEC-03 Software onboarding and CVE review](security/software-onboarding-cve-review/README.md)
 - [UC-SW-01 RAN and core code assistant](network-software/ran-core-code-assistant/README.md)
 - [UC-SW-02 Network automation review](network-software/network-automation-review/README.md)
 - [UC-SW-03 O-RAN RIC xApp assistant](network-software/oran-ric-xapp-assistant/README.md)
