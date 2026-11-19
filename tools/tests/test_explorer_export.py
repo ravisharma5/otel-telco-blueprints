@@ -1162,3 +1162,40 @@ def test_change_gate_cpu_state(data):
     for want in ("Decision build", "Cores for AI", "Latency test"):
         assert want in settings, want
     assert state["options"] == []
+
+
+# --- CNF upgrade checks: story and regional and core states -------------------
+
+CNF_SLUG = "cnf-upgrade-checks"
+CNF_REGIONAL = ["decision", "safety", "classification", "embedding", "reranker"]
+
+
+def test_cnf_story_exported(data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == CNF_SLUG)
+    story = uc["story"]
+    assert story["problem"] and "The KPI" not in story["problem"]
+    page = _pages_by_id()[uc["id"]]
+    how = _section(page, "How it works").body_text
+    items = re.findall(r"^\d+\. (.+?)(?=^\d+\. |\n\n|\Z)", how, re.M | re.S)
+    assert 3 <= len(story["steps"]) <= 8
+    assert story["steps"] == [ex._sentences(_src_plain(i))[0] for i in items]
+    title = re.search(r"^### Worked example: ([^\n]+)$", how, re.M).group(1).strip()
+    assert story["example"]["title"] == title
+
+
+def test_cnf_states_regional_core(data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == CNF_SLUG)
+    cpu = uc["states"][CPU_SETUP]
+    assert list(cpu) == ["any"]
+    assert cpu["any"]["runs_here"] is False
+    seen = set()
+    for owner, setup, _batch, state in gpu_states(data):
+        if owner is not uc:
+            continue
+        roles = [v["role"] for v in state["variants"]]
+        if setup["tier"] == "regional":
+            assert state["runs_here"] is True and roles == CNF_REGIONAL, (setup["id"], roles)
+        elif setup["tier"] == "core":
+            assert state["runs_here"] is True and roles == ["llm-large"], (setup["id"], roles)
+        seen.add(setup["tier"])
+    assert {"regional", "core"} <= seen
