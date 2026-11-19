@@ -166,6 +166,10 @@ const subLine = (setup: Setup, batch: string) =>
           <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
             <p class="note cpu-options">{copy.use_case.advanced.notes.cpu_site}</p>
           </div>
+        ) : !state.runs_here ? (
+          <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
+            <p class="note nothing-options">{copy.use_case.advanced.notes.nothing_here}</p>
+          </div>
         ) : (
           <div class="options-part" data-for-state={key} hidden={key !== defaultKey}>
             <button

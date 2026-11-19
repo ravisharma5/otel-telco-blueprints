@@ -72,6 +72,11 @@ def _states(uc):
             yield _key(setup, batch), setup, state
 
 
+def _option_states(uc):
+    """GPU states that show option cards: something runs at the setup's tier."""
+    return sum(1 for _, _, state in _states(uc) if state["runs_here"] and state["options"])
+
+
 def _page_path(dist, uc):
     return dist / "use-cases" / uc["slug"] / "index.html"
 
@@ -494,8 +499,9 @@ def test_option_cards(explorer_dist, data, copy):
         tree = _page(explorer_dist, uc)
         for key, _, state in _states(uc):
             cards = _in_parts(tree, key, lambda n: n.has_class("option-card"))
-            assert len(cards) == len(state["options"]), key
-            expected = _option_order(state["options"])
+            options = state["options"] if state["runs_here"] else []
+            assert len(cards) == len(options), key
+            expected = _option_order(options)
             assert [c.attrs["data-option-id"] for c in cards] == [o["id"] for o in expected], key
             for card, option in zip(cards, expected):
                 text = card.text()
@@ -585,7 +591,7 @@ def test_toggle_label_count(explorer_dist, data, copy):
         tree = _page(explorer_dist, uc)
         for key, setup_id, state in _states(uc):
             toggles = _in_parts(tree, key, lambda n: n.tag == "button" and n.has_class("options-toggle"))
-            if setup_id in cpu:
+            if setup_id in cpu or not state["runs_here"]:
                 assert toggles == [], key
                 continue
             assert len(toggles) == 1, key
@@ -792,7 +798,7 @@ def test_no_js_notes(explorer_dist, data, copy):
         forms = tree.root.find_all(lambda n: "data-setup-form" in n.attrs)
         assert len(forms) == 1 and "hidden" in forms[0].attrs
         toggles = tree.root.find_all(lambda n: n.has_class("options-toggle"))
-        assert toggles and all(_state_of(t) for t in toggles)
+        assert len(toggles) == _option_states(uc) and all(_state_of(t) for t in toggles), uc["slug"]
 
 
 @pytest.mark.site_output
@@ -835,7 +841,7 @@ def test_toggle_hidden_and_section_nav_current(explorer_dist, data, copy):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)
         toggles = tree.root.find_all(lambda n: n.has_class("options-toggle"))
-        assert toggles, uc["slug"]
+        assert len(toggles) == _option_states(uc), uc["slug"]
         assert all("hidden" in t.attrs for t in toggles), uc["slug"]
         links = tree.root.find_all(lambda n: n.tag == "a" and n.attrs.get("href") == BASE + use_cases["path"])
         nav = [a for a in links if a.text().strip() == use_cases["label"]]
@@ -1097,7 +1103,7 @@ def test_cpu_fit_line(explorer_dist, data, copy):
 
 
 CPU_SETUP = "far-edge-xeon6-cpu"
-FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction"}
+FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction", "site-change-risk-gate"}
 
 
 @pytest.mark.site_output
@@ -1137,3 +1143,48 @@ def test_nothing_here_count(explorer_dist, data):
         assert (len(notes) == 1) == (uc["slug"] not in FAR_EDGE_SLUGS), uc["slug"]
         pages += len(notes) == 1
     assert pages == len(data["use_cases"]) - len(FAR_EDGE_SLUGS) == 25
+
+
+@pytest.mark.site_output
+def test_change_gate_page_story_and_cpu(explorer_dist, data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == "site-change-risk-gate")
+    tree = _page(explorer_dist, uc)
+    text = _squash(tree.root.text())
+    story = uc["story"]
+    assert _squash(story["problem"]) in text
+    for step in story["steps"]:
+        assert _squash(step) in text, step
+    assert _squash(story["example"]["title"]) in text
+    key = _key(CPU_SETUP, "any")
+    cards = [c for c in _in_parts(tree, key, lambda n: n.has_class("tier-card")) if c.attrs.get("data-tier") == "far-edge"]
+    assert len(cards) == 1 and "Decision" in cards[0].text()
+    lines = _in_parts(tree, key, lambda n: n.has_class("cpu-fit"))
+    assert len(lines) == 1 and "17 GB" in lines[0].text()
+    tables = _in_parts(tree, key, lambda n: n.tag == "table" and n.has_class("settings-table"))
+    assert len(tables) == 1 and _squash("Decision build") in _squash(tables[0].text())
+    assert "%" not in " ".join(p.text() for p in _parts(tree, key))
+
+
+@pytest.mark.site_output
+def test_no_option_cards_when_nothing_runs(explorer_dist, data, copy):
+    """A GPU state with nothing placed at its tier shows the nothing-here note and
+    no option cards or toggle, only a short note in the advanced options."""
+    note = copy["use_case"]["advanced"]["notes"]["nothing_here"]
+    seen = 0
+    for uc in data["use_cases"]:
+        tree = _page(explorer_dist, uc)
+        for key, setup_id, state in _states(uc):
+            if setup_id == CPU_SETUP:
+                continue
+            cards = _in_parts(tree, key, lambda n: n.has_class("option-card"))
+            toggles = _in_parts(tree, key, lambda n: n.has_class("options-toggle"))
+            notes = _in_parts(tree, key, lambda n: n.has_class("nothing-options"))
+            if state["runs_here"]:
+                assert notes == [] and len(toggles) == 1, key
+                continue
+            seen += 1
+            assert cards == [] and toggles == [], (uc["slug"], key)
+            assert len(notes) == 1 and notes[0].text() == note, (uc["slug"], key)
+            counts = _in_parts(tree, key, lambda n: n.has_class("count-number"))
+            assert counts and counts[0].text() == "0", (uc["slug"], key)
+    assert seen

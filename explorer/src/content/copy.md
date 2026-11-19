@@ -337,6 +337,8 @@ use_case:
       sub: Options to test. Each says where it helps and how to check it on your traffic with the same gates.
       # Replaces the option cards on a CPU-only setup's state (options [] in the JSON).
       cpu_site: These options tune GPU serving. This setup runs on CPU only, so none of them applies here.
+      # Replaces the option cards on a GPU state where nothing runs at the setup's tier (runs_here false).
+      nothing_here: No model runs at this site, so no serving option applies here.
     # Toggle label once every option shows; the UI-SPEC wording runs past the 4-word button limit.
     toggle_fewer: Show options for this use case
     helps: "Helps here: {reason}"

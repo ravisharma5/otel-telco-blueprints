@@ -1128,3 +1128,37 @@ def test_story_for_ran_energy_saving(data):
 def test_story_first_sentence_helper():
     assert ex._sentences("Reads TS 28.552 counters. Then acts.") == ["Reads TS 28.552 counters.", "Then acts."]
     assert ex._sentences("One only") == ["One only"]
+
+
+# --- site change-risk gate: story and far-edge CPU state ----------------------
+
+SCG_SLUG = "site-change-risk-gate"
+
+
+def test_change_gate_story_exported(data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == SCG_SLUG)
+    story = uc["story"]
+    assert story["problem"] and "The KPI" not in story["problem"]
+    page = _pages_by_id()[uc["id"]]
+    how = _section(page, "How it works").body_text
+    items = re.findall(r"^\d+\. (.+?)(?=^\d+\. |\n\n|\Z)", how, re.M | re.S)
+    assert 3 <= len(story["steps"]) <= 8
+    assert story["steps"] == [ex._sentences(_src_plain(i))[0] for i in items]
+    title = re.search(r"^### Worked example: ([^\n]+)$", how, re.M).group(1).strip()
+    assert story["example"]["title"] == title
+
+
+def test_change_gate_cpu_state(data):
+    uc = next(u for u in data["use_cases"] if u["slug"] == SCG_SLUG)
+    states = uc["states"][CPU_SETUP]
+    assert list(states) == ["any"]
+    state = states["any"]
+    assert state["runs_here"] is True
+    slots = state["cpu_fit"]["slots"]
+    assert [s["role"] for s in slots] == ["decision"]
+    weight = ex._start_variant("decision", VARIANTS, cpu=True)["weights_gb"]
+    assert weight == 17 and state["cpu_fit"]["weights_gb"] == weight
+    settings = {f["setting"] for f in state["flags"]}
+    for want in ("Decision build", "Cores for AI", "Latency test"):
+        assert want in settings, want
+    assert state["options"] == []

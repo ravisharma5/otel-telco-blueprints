@@ -414,6 +414,7 @@ CPU_COPY = [
     (("use_case", "tiers", "nothing_here"), None, {"{tier}"}),
     (("use_case", "tiers", "nothing_here_link"), None, set()),
     (("use_case", "advanced", "notes", "cpu_site"), "notes", set()),
+    (("use_case", "advanced", "notes", "nothing_here"), "notes", set()),
     (("use_case", "setup", "notes", "batch_na"), "notes", set()),
     (("use_case", "sections", "notes", "setup_sub_cpu"), "notes", {"{setup}"}),
     (("use_case", "setup", "announce_single"), None, {"{setup}"}),

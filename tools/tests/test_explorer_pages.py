@@ -663,7 +663,7 @@ def test_built_script_handles_tier_safely(explorer_dist):
 
 
 # The use cases that place a role at the far edge, read from catalog front matter.
-FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction"}
+FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction", "site-change-risk-gate"}
 
 
 def _far_edge_slugs_from_catalog():
