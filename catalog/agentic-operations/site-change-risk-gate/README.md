@@ -51,14 +51,15 @@ placement:
 | Audience | Change managers, approvers, and risk owners for cell-site changes |
 | OTel slots | `decision`: the gate label for each pending change |
 | Autonomy ceiling | Act within policy, for low-risk change types only |
-| Placement tier | Far edge: the Decision slot on CPU at the cell-site single-node OpenShift server; no model at the regional site or core |
+| Placement tier | Far edge: the Decision slot on CPU on the cell-site single-node OpenShift server; no model at the regional site or core |
 | Agent-school courses | 301 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) |
 
 ## Problem and value
 
 Changes cause outages and truck rolls when they land on a busy or degraded cell site, whether an SMO or EMS operation, a ZTP or TALM policy, or an OS or firmware upgrade.
 This recipe checks live site state at the site before each change and sends the change through the Decision gate, so every hold or release leaves evidence and an audit record.
-The KPIs are the failed-change rate and truck rolls after changes; the ROI measure is changes deferred that would have failed times the cost of an outage or truck roll, plus the failed-change rate before and after, measured in shadow with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures, from inputs you supply.
+The KPIs are the failed-change rate and truck rolls after changes.
+The ROI measure is changes deferred that would have failed times the cost of an outage or truck roll, plus the failed-change rate before and after; measure both in shadow with the [PB-10](../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi) measures, from inputs you supply.
 
 ## How it works
 
@@ -126,7 +127,7 @@ The action layer holds the change and writes the audit record with the site stat
 - [ ] Integrations: read-only site state tools; the change system (SMO or EMS, ZTP or TALM policy) receives hold or proceed as action requests through the action layer
 - [ ] Write path: `submit_action_request` is the agent's only write tool, and only the job templates that release or hold a change hold write credentials
 - [ ] Prerequisites: a cell-site single-node OpenShift server with spare non-real-time cores, as [Servers shared with a vDU](../../../architecture/placement.md#servers-shared-with-a-vdu) sets out, and the CPU image of Red Hat AI Inference, `vllm-cpu-rhel9`
-- [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states; this recipe runs it on the CPU image instead, which the card does not name, so pass the Decision CPU check before it serves traffic
+- [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states; this recipe runs it on the CPU image instead, which the card doesn't name, so pass the Decision CPU check before it serves traffic
 - [ ] Decision CPU check: check the shipped W4A16 build on the CPU image, or make a W8A8 or an AWQ or GPTQ W4A16 build with LLM Compressor, and evaluate it on the same gates
 - [ ] Agent identity: a workload identity bound to the read roles and `submit_action_request` only, as PB-08 sets out
 - [ ] Data: recorded past changes with their outcomes, and a gate set weighted toward non-ACT cases

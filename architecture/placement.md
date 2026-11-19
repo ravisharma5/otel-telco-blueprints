@@ -3,7 +3,7 @@ type: "reference"
 title: "Placement tiers"
 question: "Which OTel slots run at the far edge, regional sites, and the core, and what latency can each tier support?"
 doc_status: done
-clarity_reviewed: "2026-11-11"
+clarity_reviewed: "2026-11-18"
 platform_blueprints: ["PB-04", "PB-08", "PB-10"]
 otel_slots: ["llm", "embedding", "reranker", "safety", "decision", "classification"]
 ---

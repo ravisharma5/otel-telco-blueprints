@@ -27,7 +27,7 @@ one_liner: "Runs triage on RAN and transport alarms and recommends fixes for app
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-10", "PB-11"]
 agent_school: [101, 401, 402, 403]
 also_covers: ["NOC ticket triage"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-18"
 card:
   goal: "incidents"
   summary: "Finds the likely cause in RAN and transport alarms and proposes fixes for approval. It fine-tunes the model only when evaluation shows a gap."
@@ -54,7 +54,7 @@ placement:
 | Audience | Model owners, operations engineers, approvers, and risk owners who run alarm triage |
 | OTel slots | `classification`: labels the likely cause; `llm`: the triage agent and the LoRA target; `safety`: checks the evidence behind a finding; `decision`: the gate label; `embedding` and `reranker`: retrieval |
 | Autonomy ceiling | Recommend with approval |
-| Placement tier | Regional for triage by default; optionally far edge, where Classification labels site events on CPU; core for data generation, training, and evaluation |
+| Placement tier | Regional for triage by default; optionally far edge, for Classification on CPU; core for data generation, training, and evaluation |
 | Agent-school courses | 101, 401, 402, and 403 in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md) |
 
 ## Problem and value

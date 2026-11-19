@@ -15,7 +15,7 @@ top_decisions:
   - "Keep the front door, content routing, and replica scheduling separate"
   - "Pick a serving option for each tier"
 agent_school: [104, 203]
-clarity_reviewed: "2026-11-16"
+clarity_reviewed: "2026-11-18"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
