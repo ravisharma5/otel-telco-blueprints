@@ -292,7 +292,7 @@ use_case:
     # State where no slot runs at the chosen setup's tier (runs_here false in the
     # JSON). {tier} is the tier word from use_case.advanced.tiers. The link opens
     # the gallery filtered to that tier.
-    nothing_here: "Nothing in this use case runs at the {tier}."
+    nothing_here: "Nothing in this use case runs at a {tier} site."
     nothing_here_link: See the use cases that do
   fit:
     gpu_title: "GPU {n} of {count}: {slots}"
