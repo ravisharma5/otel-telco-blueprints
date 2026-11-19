@@ -1,4 +1,4 @@
-"""F2 links to the public reference implementation: Sources row, Deploy and verify bullet, and try-it data."""
+"""Closed-loop incident handling links to the public reference implementation: Sources row, Deploy and verify bullet, and try-it data."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ import re
 from tools.tests.conftest import REPO_ROOT
 from tools.tests.test_platform_pages import section_text
 
-F2 = REPO_ROOT / "catalog/agentic-operations/closed-loop-incident-handling/README.md"
+CLOSED_LOOP = REPO_ROOT / "catalog/agentic-operations/closed-loop-incident-handling/README.md"
 IMPL = "https://github.com/ravisharma5/otel-telco-blueprints-impl"
-QUICKSTART = f"{IMPL}/tree/main/f2-closed-loop"
+QUICKSTART = f"{IMPL}/tree/main/closed-loop-incident-handling"
 REPORT_RE = re.compile(
-    r"\(https://github\.com/ravisharma5/otel-telco-blueprints-impl/blob/main/f2-closed-loop/results/"
+    r"\(https://github\.com/ravisharma5/otel-telco-blueprints-impl/blob/main/closed-loop-incident-handling/results/"
     r"\d{4}-\d{2}-\d{2}/report\.md\)"
 )
 BANNED = re.compile(
@@ -23,7 +23,7 @@ BANNED = re.compile(
 def _source_rows() -> list[list[str]]:
     """Body rows of the Sources table, as raw markdown cells."""
     rows = []
-    for line in section_text(F2, "Sources").splitlines():
+    for line in section_text(CLOSED_LOOP, "Sources").splitlines():
         if line.startswith("|") and not re.match(r"^\|\s*(#|-)", line):
             rows.append([c.strip() for c in line.strip().strip("|").split("|")])
     return rows
@@ -34,11 +34,11 @@ def _report_rows() -> list[list[str]]:
 
 
 def _quickstart_bullets() -> list[str]:
-    deploy = section_text(F2, "Deploy and verify")
+    deploy = section_text(CLOSED_LOOP, "Deploy and verify")
     return [ln for ln in deploy.splitlines() if ln.startswith("- ") and f"({QUICKSTART})" in ln]
 
 
-def test_f2_sources_links_report():
+def test_closed_loop_sources_links_report():
     rows = _report_rows()
     assert len(rows) == 1, rows
     _, claim, basis, _ = rows[0]
@@ -46,7 +46,7 @@ def test_f2_sources_links_report():
     assert "no model" in claim, claim
 
 
-def test_f2_deploy_bullet_links_quickstart():
+def test_closed_loop_deploy_bullet_links_quickstart():
     assert len(_quickstart_bullets()) == 1
 
 

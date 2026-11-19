@@ -1,4 +1,4 @@
-"""Far-edge site roles in the catalog: the F3 site option and the site entries.
+"""Far-edge site roles in the catalog: the alarm-triage site option and the site entries.
 
 The CPU-only far-edge setup sizes the roles a use case places at the far edge.
 These tests pin the first such roles: an optional Classification site option
@@ -20,7 +20,7 @@ from tools.tests.test_platform_pages import section_text
 from tools.tests.test_reference_pages import body, front_matter
 
 CATALOG = REPO_ROOT / "catalog"
-F3 = CATALOG / "network-operations" / "alarm-triage-adaptation" / "README.md"
+ALARM_TRIAGE = CATALOG / "network-operations" / "alarm-triage-adaptation" / "README.md"
 PLACEMENT = REPO_ROOT / "architecture" / "placement.md"
 VDU_LINK = "../../../architecture/placement.md#servers-shared-with-a-vdu"
 
@@ -45,9 +45,9 @@ VENDOR_NAMES = re.compile(r"(?i)AT&T|Ericsson|OCTO|Granite Rapids|Xeon|\bIntel\b
 PERFORMANCE = re.compile(r"(?i)tok/s|tokens per second|\b\d+\s?ms\b|\d+x faster")
 URL_IN_LINK = re.compile(r"\]\([^)]*\)")
 
-# F3's adaptation and sandbox before the site option landed: the site option
+# Alarm triage's adaptation and sandbox before the site option landed: the site option
 # changes neither.
-F3_ADAPTATION = {
+ALARM_TRIAGE_ADAPTATION = {
     "rung": "lora-if-gap",
     "expertise": ["taxonomy", "golden-set", "gate-labels", "tool-contracts", "corpus"],
     "bring": [
@@ -59,15 +59,15 @@ F3_ADAPTATION = {
         {"item": "Vocabulary and report examples, only after a measured gap", "domains": ["ran", "transport-ip"], "mechanism": "lora-data"},
     ],
 }
-F3_SANDBOX = {"fit": "none", "why": "Reads alarms and runbooks through read tools; the agent runs no code"}
+ALARM_TRIAGE_SANDBOX = {"fit": "none", "why": "Reads alarms and runbooks through read tools; the agent runs no code"}
 
 
 # ---------- helpers ----------
 
 
 def site_option_paragraph() -> str:
-    """The F3 body paragraph that names the far-edge site option."""
-    paras = [p for p in re.split(r"\n\s*\n", body(F3)) if p.strip().startswith("Site option:")]
+    """The alarm-triage body paragraph that names the far-edge site option."""
+    paras = [p for p in re.split(r"\n\s*\n", body(ALARM_TRIAGE)) if p.strip().startswith("Site option:")]
     assert len(paras) == 1, f"expected one 'Site option:' paragraph, found {len(paras)}"
     return re.sub(r"\s+", " ", paras[0].strip())
 
@@ -77,12 +77,12 @@ def prose_words(text: str) -> int:
 
 
 def site_texts() -> list[tuple[str, str]]:
-    """(label, text) for the F3 site text and each landed site page."""
-    fm = front_matter(F3) or {}
-    paras = [p for p in re.split(r"\n\s*\n", body(F3)) if p.strip().startswith("Site option:")]
+    """(label, text) for the alarm-triage site text and each landed site page."""
+    fm = front_matter(ALARM_TRIAGE) or {}
+    paras = [p for p in re.split(r"\n\s*\n", body(ALARM_TRIAGE)) if p.strip().startswith("Site option:")]
     out = [
-        ("F3 site option", " ".join(paras)),
-        ("F3 far-edge note", fm["placement"]["far-edge"]["note"]),
+        ("alarm-triage site option", " ".join(paras)),
+        ("alarm-triage far-edge note", fm["placement"]["far-edge"]["note"]),
     ]
     for key in SITE_PAGES:
         path = CATALOG / key / "README.md"
@@ -102,11 +102,11 @@ def placement_h3_slugs() -> set[str]:
     return {github_slug(m) for m in re.findall(r"^### (.+?)\s*$", PLACEMENT.read_text(encoding="utf-8"), re.M)}
 
 
-# ---------- F3 site option ----------
+# ---------- alarm-triage site option ----------
 
 
-def test_f3_far_edge_option():
-    fm = front_matter(F3) or {}
+def test_alarm_triage_far_edge_option():
+    fm = front_matter(ALARM_TRIAGE) or {}
     placement = fm["placement"]
     assert placement["far-edge"]["runs"] == ["classification"]
     assert placement["far-edge"]["note"].startswith("Optional")
@@ -118,34 +118,34 @@ def test_f3_far_edge_option():
     assert placement["core"]["runs"] == ["llm-large", "classification"]
 
 
-def test_f3_site_option_text():
+def test_alarm_triage_site_option_text():
     para = site_option_paragraph()
     assert "CPU" in para
     assert "structured incidents" in para
     assert re.search(r"(?i)regional triage stays the default", para)
     assert VDU_LINK in para
-    glance = section_text(F3, "At a glance")
+    glance = section_text(ALARM_TRIAGE, "At a glance")
     row = next(line for line in glance.splitlines() if line.startswith("| Placement tier"))
     assert "by default" in row and "far edge" in row
 
 
-def test_f3_site_option_sourced():
-    sources = section_text(F3, "Sources")
+def test_alarm_triage_site_option_sourced():
+    sources = section_text(ALARM_TRIAGE, "Sources")
     for url in (RHAII_NOTES, VLLM_POOLING, RAN_DU):
-        assert f"({url})" in sources, f"F3 Sources has no row linking {url}"
+        assert f"({url})" in sources, f"Alarm triage Sources has no row linking {url}"
     slugs = placement_h3_slugs()
-    for anchor in re.findall(r"architecture/placement\.md#([a-z0-9-]+)", body(F3)):
+    for anchor in re.findall(r"architecture/placement\.md#([a-z0-9-]+)", body(ALARM_TRIAGE)):
         assert anchor in slugs, f"placement.md has no H3 for #{anchor}"
 
 
-def test_f3_site_option_short():
+def test_alarm_triage_site_option_short():
     assert prose_words(site_option_paragraph()) <= 55
 
 
-def test_f3_bring_and_sandbox_unchanged():
-    fm = front_matter(F3) or {}
-    assert fm["adaptation"] == F3_ADAPTATION
-    assert fm["sandbox"] == F3_SANDBOX
+def test_alarm_triage_bring_and_sandbox_unchanged():
+    fm = front_matter(ALARM_TRIAGE) or {}
+    assert fm["adaptation"] == ALARM_TRIAGE_ADAPTATION
+    assert fm["sandbox"] == ALARM_TRIAGE_SANDBOX
 
 
 # ---------- every site text ----------
@@ -217,7 +217,7 @@ SCG = "agentic-operations/site-change-risk-gate"
 PB06_STAGED = "../../../platform/safety-autonomy-gating/README.md#staged-autonomy"
 PB04_SETTINGS = "../../../platform/serving-routing-placement/README.md#key-settings-per-setup"
 TMF_AN = "https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf"
-F2_FOLDER = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop"
+CLOSED_LOOP_FOLDER = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling"
 CODE_FENCE = re.compile(r"^```[^\n]*\n(.*?)^```", re.M | re.S)
 EXPECTED_H2 = [
     "At a glance", "Problem and value", "How it works", "What you need",
@@ -356,7 +356,7 @@ def test_change_gate_roi_measures():
 
 def test_change_gate_impl_links():
     deploy = _flat(section_text(site_page(SCG), "Deploy and verify"))
-    assert F2_FOLDER in deploy
+    assert CLOSED_LOOP_FOLDER in deploy
     assert GATE_LINK in deploy
-    bullet = next(b for b in re.findall(r"^- .*$", section_text(site_page(SCG), "Deploy and verify"), re.M) if F2_FOLDER in b)
+    bullet = next(b for b in re.findall(r"^- .*$", section_text(site_page(SCG), "Deploy and verify"), re.M) if CLOSED_LOOP_FOLDER in b)
     assert re.search(r"(?i)replays incidents, not changes", bullet), bullet

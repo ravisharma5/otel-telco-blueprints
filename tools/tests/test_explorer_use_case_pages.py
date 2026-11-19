@@ -853,11 +853,11 @@ def test_toggle_hidden_and_section_nav_current(explorer_dist, data, copy):
     assert [(a.text().strip(), a.attrs["aria-current"]) for a in links] == [(use_cases["label"], "page")]
 
 
-TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop"
+TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling"
 
 
 @pytest.mark.site_output
-def test_try_it_link_only_on_f2(explorer_dist, data, copy):
+def test_try_it_link_only_on_closed_loop(explorer_dist, data, copy):
     for uc in data["use_cases"]:
         tree = _page(explorer_dist, uc)
         impl = tree.root.find_all(lambda n: n.tag == "a" and "otel-telco-blueprints-impl" in n.attrs.get("href", ""))
@@ -1108,7 +1108,7 @@ FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction", "site-change-
 
 @pytest.mark.site_output
 def test_cpu_fit_values_on_far_edge_pages(explorer_dist, data):
-    """F3 sizes Classification (about 17 GB) and site log reduction sizes the
+    """Alarm triage sizes Classification (about 17 GB) and site log reduction sizes the
     small CPU Embedding build (about 1.5 GB); neither shows a percent."""
     by_slug = {uc["slug"]: uc for uc in data["use_cases"]}
     expected = {"alarm-triage-adaptation": ("Classification", 17), "site-log-reduction": ("Embedding", 1.5)}
@@ -1123,7 +1123,7 @@ def test_cpu_fit_values_on_far_edge_pages(explorer_dist, data):
 
 
 @pytest.mark.site_output
-def test_cpu_settings_on_f3(explorer_dist, data):
+def test_cpu_settings_on_alarm_triage(explorer_dist, data):
     uc = next(u for u in data["use_cases"] if u["slug"] == "alarm-triage-adaptation")
     tree = _page(explorer_dist, uc)
     tables = _in_parts(tree, _key(CPU_SETUP, "any"), lambda n: n.tag == "table" and n.has_class("settings-table"))

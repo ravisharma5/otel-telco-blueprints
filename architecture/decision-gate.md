@@ -143,7 +143,7 @@ Both messages follow the [decision gate schema](https://github.com/ravisharma5/o
 
 ### Reference implementation
 
-The [F2 closed-loop folder](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop) of the public reference implementation runs this gate pattern end to end. Its [dated offline results report](https://github.com/ravisharma5/otel-telco-blueprints-impl/blob/main/f2-closed-loop/results/2026-11-18/report.md) is an offline replay with recorded labels and no model. It tests the gate logic, the tool gateway, and the action jobs, not the quality of the Decision model.
+The [closed-loop incident handling folder](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling) of the public reference implementation runs this gate pattern end to end. Its [dated offline results report](https://github.com/ravisharma5/otel-telco-blueprints-impl/blob/main/closed-loop-incident-handling/results/2026-11-18/report.md) is an offline replay with recorded labels and no model. It tests the gate logic, the tool gateway, and the action jobs, not the quality of the Decision model.
 
 ## Trade-offs and limits
 

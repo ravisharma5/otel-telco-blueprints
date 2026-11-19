@@ -1012,7 +1012,7 @@ def test_fill_matches_own_keys_only():
     assert " in values" not in body, body
 
 
-TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop"
+TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling"
 
 
 def test_try_it_exported(data, tmp_path):

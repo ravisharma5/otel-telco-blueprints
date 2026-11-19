@@ -27,4 +27,4 @@ extra_urls:
   - https://www.gsma.com/newsroom/press-release/gsma-launches-open-telco-ai-to-accelerate-development-of-telco%E2%80%91grade-ai/
   - https://huggingface.co/GSMA
   - https://github.com/open-experiments/agent-school/blob/30458bda61cdc1ea939ce7d1fe6b8d425ed2bbad/docs/RoadMap.md
-  - https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop
+  - https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling

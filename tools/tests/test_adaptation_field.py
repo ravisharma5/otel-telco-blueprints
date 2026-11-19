@@ -34,7 +34,7 @@ from tools.tests.test_reference_pages import body, front_matter
 from tools.tests.test_use_case_pages import _id, page_key, use_case_pages
 
 PAGES = pytest.mark.parametrize("path", use_case_pages(), ids=_id)
-F3 = "network-operations/alarm-triage-adaptation"
+ALARM_TRIAGE = "network-operations/alarm-triage-adaptation"
 URL = re.compile(r"\(https?://[^)]*\)|https?://\S+")
 RETRAIN_HEAD = re.compile(
     r"(?i)retrain\w*[^.\n|]{0,40}classification head|classification head[^.\n|]{0,60}retrain|head (?:is )?retrained"
@@ -71,11 +71,11 @@ def test_classification_pages_retrain_the_head(path):
         assert RETRAIN_HEAD.search(_no_url(path)), "the page must say the Classification head is retrained"
 
 
-def test_only_f3_is_lora_if_gap():
+def test_only_alarm_triage_is_lora_if_gap():
     lora = [page_key(p) for p in use_case_pages() if _ad(p).get("rung") == "lora-if-gap"]
-    assert lora == [F3]
-    f3 = next(p for p in use_case_pages() if page_key(p) == F3)
-    text = body(f3)
+    assert lora == [ALARM_TRIAGE]
+    triage = next(p for p in use_case_pages() if page_key(p) == ALARM_TRIAGE)
+    text = body(triage)
     how = re.search(r"^## How it works[ \t]*$(.*?)(?=^## )", text, re.M | re.S)
     assert how and re.search(r"^### When to train a LoRA", how.group(1), re.M)
     assert "../../../platform/adaptation/README.md" in text
@@ -255,8 +255,8 @@ def test_render_bring_block_shape():
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
         assert _owner_claims(cells[3], item["domains"]) == _pb11_owners(item["domains"], item["mechanism"]), row
     assert "LoRA" not in out
-    f3 = {"adaptation": dict(FIXTURE_FM["adaptation"], rung="lora-if-gap")}
-    assert "only if a measured gap remains" in block(f3, mx)
+    triage = {"adaptation": dict(FIXTURE_FM["adaptation"], rung="lora-if-gap")}
+    assert "only if a measured gap remains" in block(triage, mx)
 
 
 def test_change_of_rung_covers_every_rung():
@@ -314,7 +314,7 @@ def test_bring_items_follow_the_page(path):
     if "decision" in slots or _governance_gate_rows(path):
         assert "gate-policy" in mechs
     if "lora-data" in mechs:
-        assert page_key(path) == F3
+        assert page_key(path) == ALARM_TRIAGE
 
 
 @PAGES

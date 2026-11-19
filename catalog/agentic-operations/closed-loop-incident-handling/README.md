@@ -259,7 +259,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 11 | Agent tasks can be scored by checking the end state of stateful mocked systems | research | [tau2-bench](https://github.com/sierra-research/tau2-bench) |
 | 12 | Zero events in n trials bounds the event rate below about 3/n at 95% confidence | research | [If nothing goes wrong, is everything all right? JAMA](https://pubmed.ncbi.nlm.nih.gov/6827763/) |
 | 13 | At Level 3 the system also shares analysis and decision, and levels apply to selected scenarios | project documentation | [TM Forum Autonomous Networks whitepaper](https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf) |
-| 14 | An offline replay of this recipe's gate on recorded labels and stateful mocks reports gate outcomes, trajectory checks, and a false-ACT rate with its interval, and uses no model | project documentation | [F2 offline results report](https://github.com/ravisharma5/otel-telco-blueprints-impl/blob/main/f2-closed-loop/results/2026-11-18/report.md) |
+| 14 | An offline replay of this recipe's gate on recorded labels and stateful mocks reports gate outcomes, trajectory checks, and a false-ACT rate with its interval, and uses no model | project documentation | [Closed-loop offline results report](https://github.com/ravisharma5/otel-telco-blueprints-impl/blob/main/closed-loop-incident-handling/results/2026-11-18/report.md) |
 
 ## Deploy and verify
 
@@ -285,7 +285,7 @@ Apply these settings in order. No class rises past its stage until the gates pas
 
 - Agent-school: 101 builds the NOC assistant loop, 301 adds an approval gate, 302 adds MCP gateway policies and a judge suite, and 403 measures OTel 2.0 on the course tapes, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
 - Architecture: the [decision gate](../../../architecture/decision-gate.md) page for the policy table and message examples
-- Reference implementation: the [offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop) replays incidents through the gate on a laptop, with no GPU and no model
+- Reference implementation: the [offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling) replays incidents through the gate on a laptop, with no GPU and no model
 - TM Forum: [TMF642](https://github.com/tmforum-apis/TMF642_AlarmManagement) and [TMF621](https://github.com/tmforum-apis/TMF621_TroubleTicket) API contracts
 
 ## Limitations

@@ -240,7 +240,7 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 6 | The RAN DU reference design pins platform pods to reserved cores, and unreserved cores stay allocatable for workloads | Red Hat guidance | [RAN DU reference design](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs) |
 | 7 | Topology Aware Lifecycle Manager rolls out cluster policies, and the enable field of a ClusterGroupUpgrade controls when an update starts, for example to fit a maintenance window | Red Hat guidance | [Topology Aware Lifecycle Manager](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/edge_computing/cnf-talm-for-cluster-updates) |
 | 8 | The PTP Operator reports the PTP clock state as LOCKED, HOLDOVER, or FREERUN, and fast event notifications pass clock sync status to vRAN applications on the DU node | Red Hat guidance | [Using PTP hardware](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/advanced_networking/using-ptp-hardware) |
-| 9 | The F2 offline replay runs the gate pattern on recorded incidents with recorded Decision labels and no model | project documentation | [F2 closed-loop folder](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop) |
+| 9 | The closed-loop offline replay runs the gate pattern on recorded incidents with recorded Decision labels and no model | project documentation | [Closed-loop incident handling folder](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling) |
 
 ## Deploy and verify
 
@@ -261,7 +261,7 @@ Apply these settings in order. Every change class starts at the shadow stage, an
 | Human overrides stay below the ceiling during the canary | Override rate ceiling | Business owner |
 
 - Agent-school: 301 adds an approval gate to a closed loop, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
-- Reference implementation: the gate pattern this recipe reuses runs end to end in the [F2 offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop), which replays incidents, not changes
+- Reference implementation: the gate pattern this recipe reuses runs end to end in the [closed-loop offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling), which replays incidents, not changes
 - Architecture: the [decision gate](../../../architecture/decision-gate.md) for labels and policy ceilings
 
 ## Limitations

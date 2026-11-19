@@ -1379,7 +1379,7 @@ LADDER_PAGE = REPO_ROOT / "architecture/adaptation-ladder.md"
 ADAPTATION_LINK = "../../../platform/adaptation/README.md"
 GATE_PAGE_LINK = "../../../architecture/decision-gate.md"
 KSERVE_ISSUE = "https://github.com/kserve/kserve/issues/6094"
-F2_IDS = ("inc-3107", "req-3107", "dec-3107", "noc-loop-agent")
+CLOSED_LOOP_IDS = ("inc-3107", "req-3107", "dec-3107", "noc-loop-agent")
 
 
 def _triage_h3(prefix: str) -> str:
@@ -1480,7 +1480,7 @@ def test_adaptation_ladder_decision_quantized():
 def test_adaptation_ladder_example_distinct():
     assert "inc-5520" in _triage_h3("Worked example:")
     text = body(TRIAGE)
-    for old in F2_IDS:
+    for old in CLOSED_LOOP_IDS:
         assert old not in text, old
 
 
