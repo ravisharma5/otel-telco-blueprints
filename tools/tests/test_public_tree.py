@@ -1,6 +1,6 @@
 """Backstop: nothing internal is tracked in the public tree.
 
-Four checks run over `git ls-files`:
+Five checks run over `git ls-files`:
 
 - test_no_internal_paths_tracked: no planning, context, agent, personal, or
   register-era path is tracked, at any depth and in any letter case.
@@ -10,6 +10,8 @@ Four checks run over `git ls-files`:
   planning folder, the planning repository, or the agent instructions file.
 - test_no_planning_ids: no tracked public file cites planning ids; public text
   states the rule itself instead.
+- test_no_flagship_labels: no tracked path or public file uses the internal
+  letter-and-digit shorthand for the flagship recipes; pages name them in words.
 
 The generic patterns come from tools/guards/patterns.py, which the git hooks
 share, so the rules cannot drift. Private terms are never stored in this
@@ -28,7 +30,11 @@ import subprocess
 import pytest
 
 from tools.guards.patterns import (
+    BINARY_SUFFIXES,
     compile_extra_terms,
+    FLAGSHIP_EXEMPT,
+    FLAGSHIP_RE,
+    flagship_hits,
     FORBIDDEN_PATH_RE,
     MENTIONS_RE,
     PLANNING_ID_RE,
@@ -151,3 +157,38 @@ def test_term_scan_covers_paths():
     assert hits == ["<path with private term #1>"]
     assert all(term not in h.lower() for h in hits)
     assert _term_hits([("docs/clean.md", "Clean text.\n")], extra) == []
+
+
+def _flagship_scan_targets():
+    """(path, text) for every public file the flagship-label check reads."""
+    for path, text in _public_texts():
+        if path in FLAGSHIP_EXEMPT or path.lower().endswith(tuple(BINARY_SUFFIXES)):
+            continue
+        if is_vendored(path, (REPO_ROOT / path).read_bytes()):
+            continue
+        yield path, text
+
+
+def test_no_flagship_labels():
+    hits = [p for p in _tracked() if not _excluded(p) and FLAGSHIP_RE.search(p)]
+    scanned = set()
+    for path, text in _flagship_scan_targets():
+        scanned.add(path)
+        hits += [f"{path}:{lineno}: {match}" for lineno, match in flagship_hits(text)]
+    assert not hits, "internal flagship labels in public paths or files:\n" + "\n".join(hits)
+    # The explorer copy and the data files are public text too.
+    assert "explorer/src/content/copy.md" in scanned
+    assert any(p.startswith("data/") for p in scanned)
+    assert "data/explorer/try-it.yaml" in scanned
+
+
+def test_flagship_scan_shape():
+    label = "F" + "2"
+    assert flagship_hits(f"The {label} folder.\n") == [(1, label)]
+    assert flagship_hits(f"x = {label.lower()}_folder\n") == [(1, label.lower() + "_")]
+    assert flagship_hits("Run " + "F" + "3" + "_IDS.\n")
+    # Protocol names, lint codes, and longer tokens do not match.
+    for clean in ("NGAP and " + "F" + "1AP", "noqa: " + "F" + "401", "F" + "5 key", "ref" + "2"):
+        assert flagship_hits(clean) == [], clean
+    # Base64 payloads in data URIs are skipped.
+    assert flagship_hits('src: url(data:font/woff2;base64,AAA+' + "F" + "2" + '+BBB=)') == []

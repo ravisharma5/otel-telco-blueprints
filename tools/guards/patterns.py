@@ -109,6 +109,28 @@ COMMIT_SCOPE_RE = re.compile(
     r"^[a-z]+\(\d{1,2}(?:\.\d+)?" + r"(?:-\d{2})?\)!?:", re.IGNORECASE | re.MULTILINE
 )
 
+# Internal shorthand for the flagship recipes: a letter F and a digit 1 to 4,
+# standing alone or before an underscore. Public text names each recipe in
+# words instead. Base64 data URIs are stripped before the scan, because their
+# encoded bytes can contain the shape by chance.
+FLAGSHIP_RE = re.compile(r"\b[Ff][1-4](?:\b|_)")
+DATA_URI_RE = re.compile(r"data:[\w/+.-]+;base64,[A-Za-z0-9+/=]+")
+
+# Tracked files where the flagship shape appears by accident only. uv.lock
+# holds hash-addressed package URLs whose folder names can match.
+FLAGSHIP_EXEMPT = frozenset({"uv.lock"})
+
+
+def flagship_hits(text: str) -> list:
+    """(line number, match) for each flagship label in text, data URIs removed."""
+    hits = []
+    for lineno, line in enumerate(text.splitlines(), 1):
+        match = FLAGSHIP_RE.search(DATA_URI_RE.sub("", line))
+        if match:
+            hits.append((lineno, match.group(0)))
+    return hits
+
+
 BINARY_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".gif", ".ico", ".woff", ".woff2"})
 
 # Files that cannot avoid fragment-built internal names in a way the content
