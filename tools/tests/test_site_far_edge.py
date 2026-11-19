@@ -28,6 +28,7 @@ VDU_LINK = "../../../architecture/placement.md#servers-shared-with-a-vdu"
 # page; the page tests skip until it exists.
 SITE_PAGES = [
     "network-operations/site-log-reduction",
+    "agentic-operations/site-change-risk-gate",
 ]
 
 RHAII_NOTES = (
@@ -208,3 +209,154 @@ def test_site_log_reduction_governance():
     assert f"[decision gate]({GATE_LINK})" in gov
     outcomes = re.findall(r"\| (LOOK|NOTIFY|REVIEW|ACT|STOP) \|", gov)
     assert outcomes and set(outcomes) == {"LOOK"}, outcomes
+
+
+# ---------- Site change-risk gate ----------
+
+SCG = "agentic-operations/site-change-risk-gate"
+PB06_STAGED = "../../../platform/safety-autonomy-gating/README.md#staged-autonomy"
+PB04_SETTINGS = "../../../platform/serving-routing-placement/README.md#key-settings-per-setup"
+TMF_AN = "https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf"
+F2_FOLDER = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/f2-closed-loop"
+CODE_FENCE = re.compile(r"^```[^\n]*\n(.*?)^```", re.M | re.S)
+EXPECTED_H2 = [
+    "At a glance", "Problem and value", "How it works", "What you need",
+    "Governance", "Sources", "Deploy and verify", "Limitations",
+]
+
+
+def _flat(text: str) -> str:
+    return re.sub(r"\s+", " ", text)
+
+
+def _h3_titles(text: str) -> list[str]:
+    return re.findall(r"^### (.+?)\s*$", text, re.M)
+
+
+def _no_fences(text: str) -> str:
+    return CODE_FENCE.sub("", text)
+
+
+def test_change_gate_front_matter():
+    path = site_page(SCG)
+    fm = front_matter(path) or {}
+    assert fm["id"] == "UC-AGOPS-04"
+    assert fm["depth"] == "recipe" and fm["flagship"] is False
+    assert fm["otel_slots"] == ["decision"]
+    assert fm["autonomy_ceiling"] == "act-within-policy"
+    assert fm["tmf_an_level_target"] == 3
+    assert fm["sandbox"]["fit"] == "whole-agent"
+    assert fm["placement_tier"] == ["far-edge"]
+    placement = fm["placement"]
+    assert placement["far-edge"]["runs"] == ["decision"]
+    assert placement["regional"]["runs"] == [] and placement["core"]["runs"] == []
+    assert fm["card"]["goal"] == "change"
+    flat = _flat(body(path))
+    assert re.search(r"(?i)Level 3 for low-risk change types only", flat)
+    assert f"({TMF_AN})" in section_text(path, "Sources")
+
+
+def test_change_gate_sections():
+    path = site_page(SCG)
+    h2 = re.findall(r"^## (.+?)\s*$", body(path), re.M)
+    assert h2 == EXPECTED_H2, h2
+    how = section_text(path, "How it works")
+    assert "```mermaid" in how
+    first_list = re.findall(r"^\d+\. ", how.split("### ")[0], re.M)
+    assert 3 <= len(first_list) <= 8, len(first_list)
+    h3 = _h3_titles(how)
+    assert "Tools and risk classes" in h3 and "Slots and checkpoints" in h3
+    assert sum(t.startswith("Worked example: ") for t in h3) == 1
+
+
+def test_change_gate_contract():
+    path = site_page(SCG)
+    text = _flat(section_text(path, "How it works") + " " + section_text(path, "Governance"))
+    for phrase in ("shadow stage", "lower of the", "forces STOP", "false ACT"):
+        assert phrase in text, phrase
+    assert GATE_LINK in text
+    assert PB06_STAGED in text
+    assert re.search(r"(?i)OS (and|or) firmware upgrades? (is|are) always REVIEW", text)
+
+
+def test_change_gate_site_state():
+    how = _flat(section_text(site_page(SCG), "How it works"))
+    for term in ("active alarms", "PTP lock", "traffic", "maintenance window"):
+        assert re.search(rf"(?i){term}", how), term
+    assert "SMO or EMS" in how
+    assert re.search(r"ZTP or TALM", how)
+
+
+def test_change_gate_no_llm_at_site():
+    path = site_page(SCG)
+    how = section_text(path, "How it works")
+    part = how[how.index("### Slots and checkpoints"):]
+    part = part[: part.index("### ", 4)] if "### " in part[4:] else part
+    rows = [ln for ln in part.splitlines() if ln.startswith("| `")]
+    assert len(rows) == 1, rows
+    assert rows[0].startswith("| `decision` |") and rows[0].rstrip().endswith("| Far edge |"), rows[0]
+    assert re.search(r"(?i)no 31B or other LLM runs at the site", _flat(body(path)))
+
+
+def test_change_gate_cpu_check():
+    from tools.tests.test_use_case_pages import pb04_flag_blocks
+
+    path = site_page(SCG)
+    need = section_text(path, "What you need")
+    flat = _flat(need)
+    assert "vllm-cpu-rhel9" in flat
+    assert re.search(r"(?i)W4A16 build on the CPU image", flat)
+    assert re.search(r"W8A8", flat) and re.search(r"AWQ or GPTQ", flat) and "LLM Compressor" in flat
+    assert re.search(r"(?i)same gates", flat)
+    code = "\n".join(CODE_FENCE.findall(need))
+    header = next(h for h in pb04_flag_blocks() if h.startswith("# Decision"))
+    assert header in code
+    for line in pb04_flag_blocks()[header]:
+        assert line in code, line
+    prose = _flat(_no_fences(need))
+    assert re.search(r"(?i)non-real-time cores", prose) and "isolated" in prose
+    for token in ("`VLLM_CPU_OMP_THREADS_BIND`", "`--kv-cache-memory-bytes`"):
+        assert token in prose, token
+    assert re.search(r"(?i)memory set aside for AI", prose)
+    assert PB04_SETTINGS in prose
+    all_code = "\n".join(CODE_FENCE.findall(body(path)))
+    assert "VLLM_CPU_OMP_THREADS_BIND" not in all_code
+    assert "--kv-cache-memory-bytes" not in all_code
+
+
+def test_change_gate_settings_anchor_exists():
+    serving = REPO_ROOT / "platform" / "serving-routing-placement" / "README.md"
+    slugs = {github_slug(m) for m in re.findall(r"^### (.+?)\s*$", serving.read_text(encoding="utf-8"), re.M)}
+    assert "key-settings-per-setup" in slugs
+
+
+def test_change_gate_engine_qualifier():
+    from tools.tests.test_use_case_pages import decision_engine_prerequisite
+
+    need = section_text(site_page(SCG), "What you need")
+    bullets = [ln for ln in need.splitlines() if ln.startswith("- [ ] Decision engine:")]
+    assert len(bullets) == 1, bullets
+    bullet = bullets[0]
+    assert decision_engine_prerequisite() in bullet
+    tail = bullet[bullet.index(decision_engine_prerequisite()) :]
+    assert "CPU image" in tail
+    assert re.search(r"(?i)Decision CPU check", tail)
+
+
+def test_change_gate_roi_measures():
+    text = section_text(site_page(SCG), "Problem and value")
+    flat = _flat(text)
+    assert re.search(r"(?i)changes deferred that would have failed", flat)
+    assert re.search(r"(?i)outage or truck roll", flat)
+    assert re.search(r"(?i)failed-change rate before and after", flat)
+    assert re.search(r"(?i)in shadow|shadow stage", flat)
+    assert CURRENCY_OR_SAVING.findall(URL_IN_LINK.sub("]", flat)) == []
+    assert PB10_ROI in flat
+
+
+def test_change_gate_impl_links():
+    deploy = _flat(section_text(site_page(SCG), "Deploy and verify"))
+    assert F2_FOLDER in deploy
+    assert GATE_LINK in deploy
+    bullet = next(b for b in re.findall(r"^- .*$", section_text(site_page(SCG), "Deploy and verify"), re.M) if F2_FOLDER in b)
+    assert re.search(r"(?i)replays incidents, not changes", bullet), bullet

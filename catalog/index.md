@@ -52,6 +52,7 @@ The Use cases page shows the same use cases as cards.
 | [UC-AGOPS-01](agentic-operations/closed-loop-incident-handling/README.md) | Governed closed-loop incident handling | Full recipe | Closed-loop incident handling |
 | [UC-AGOPS-02](agentic-operations/router-core-read-only-ops/README.md) | Read-only router and 5G core operations | Catalog entry |  |
 | [UC-AGOPS-03](agentic-operations/policy-following-ops-agents/README.md) | Policy-following operations agents | Catalog entry |  |
+| [UC-AGOPS-04](agentic-operations/site-change-risk-gate/README.md) | Site change-risk gate | Full recipe |  |
 
 ## Business assurance
 
@@ -91,6 +92,7 @@ These recipes use [the Intake and model selection page](../platform/intake-model
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -123,6 +125,7 @@ These recipes use [the Evaluation and acceptance page](../platform/evaluation-ac
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -155,6 +158,7 @@ These recipes use [the Adaptation page](../platform/adaptation/README.md):
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -187,6 +191,7 @@ These recipes use [the Serving, routing, and placement page](../platform/serving
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -219,6 +224,7 @@ These recipes use [the Integration page](../platform/integration/README.md):
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -249,6 +255,7 @@ These recipes use [the Safety and autonomy gating page](../platform/safety-auton
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -279,6 +286,7 @@ These recipes use [the Action layer page](../platform/action-layer/README.md):
 
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
 - [UC-OPS-01 Adaptation ladder on alarm and root-cause triage](network-operations/alarm-triage-adaptation/README.md)
@@ -299,6 +307,7 @@ These recipes use [the Security, identity, and sandbox page](../platform/securit
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -331,6 +340,7 @@ These recipes use [the Quality operations and observability page](../platform/qu
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
 - [UC-KNOW-01 Grounded knowledge assistant](standards-knowledge/grounded-knowledge-assistant/README.md)
 - [UC-KNOW-02 Standards and change-request summaries](standards-knowledge/spec-summarisation/README.md)
@@ -348,6 +358,7 @@ These recipes use [the Quality operations and observability page](../platform/qu
 These recipes use [the Compliance, sovereignty, and operating model page](../platform/compliance-operating-model/README.md):
 
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)
@@ -368,6 +379,7 @@ These recipes use [the Bring your own data and policies page](../platform/bring-
 - [UC-AGOPS-01 Governed closed-loop incident handling](agentic-operations/closed-loop-incident-handling/README.md)
 - [UC-AGOPS-02 Read-only router and 5G core operations](agentic-operations/router-core-read-only-ops/README.md)
 - [UC-AGOPS-03 Policy-following operations agents](agentic-operations/policy-following-ops-agents/README.md)
+- [UC-AGOPS-04 Site change-risk gate](agentic-operations/site-change-risk-gate/README.md)
 - [UC-BIZ-01 Churn risk explanation](business-assurance/churn-risk-explanation/README.md)
 - [UC-BIZ-02 Revenue assurance triage](business-assurance/revenue-assurance-triage/README.md)
 - [UC-CARE-01 CAMARA customer-care diagnostics](business-assurance/camara-care-diagnostics/README.md)

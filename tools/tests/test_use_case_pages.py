@@ -101,6 +101,7 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-operations/cross-domain-oss-correlation": "UC-OPS-09",
     "agentic-operations/router-core-read-only-ops": "UC-AGOPS-02",
     "agentic-operations/policy-following-ops-agents": "UC-AGOPS-03",
+    "agentic-operations/site-change-risk-gate": "UC-AGOPS-04",
     "security/security-triage": "UC-SEC-01",
     "security/signalling-attack-classification": "UC-SEC-02",
     "business-assurance/broadband-digital-troubleshooting": "UC-CARE-02",
@@ -292,6 +293,7 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
         "Raw log retention period": "Risk owner",
         "New-pattern similarity threshold": "Model owner",
     },
+    "agentic-operations/site-change-risk-gate": {"Change types eligible for ACT": "Risk owner"},
 }
 
 # RACI activities a use case may name that no platform page defines
