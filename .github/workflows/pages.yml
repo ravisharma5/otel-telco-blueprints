@@ -25,7 +25,8 @@ jobs:
   build:
     # Pinned image, so the pinned apt versions below exist.
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    # The build ran 7 to 10 minutes in November 2026; 20 leaves room as pages grow.
+    timeout-minutes: 20
     env:
       # Astro collects telemetry by default; keep it off in CI.
       ASTRO_TELEMETRY_DISABLED: "1"
