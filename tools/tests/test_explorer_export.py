@@ -1199,3 +1199,27 @@ def test_cnf_states_regional_core(data):
             assert state["runs_here"] is True and roles == ["llm-large"], (setup["id"], roles)
         seen.add(setup["tier"])
     assert {"regional", "core"} <= seen
+
+
+ONBOARDING_SLUG = "software-onboarding-cve-review"
+
+
+def test_onboarding_exported(data):
+    """The software onboarding entry sits under the security goal and sizes regional and core only."""
+    uc = next(u for u in data["use_cases"] if u["slug"] == ONBOARDING_SLUG)
+    assert uc["goal"] == "secure"
+    assert uc["depth"]["id"] == "entry"
+    assert uc["story"]["steps"] == [] and uc["story"]["example"] is None
+    cpu = uc["states"][CPU_SETUP]
+    assert all(state["runs_here"] is False for state in cpu.values())
+    seen = set()
+    for owner, setup, _batch, state in gpu_states(data):
+        if owner is not uc:
+            continue
+        roles = sorted(v["role"] for v in state["variants"])
+        if setup["tier"] == "regional":
+            assert state["runs_here"] is True and roles == ["embedding", "reranker", "safety"], (setup["id"], roles)
+        elif setup["tier"] == "core":
+            assert state["runs_here"] is True and roles == ["llm-large"], (setup["id"], roles)
+        seen.add(setup["tier"])
+    assert {"regional", "core"} <= seen
