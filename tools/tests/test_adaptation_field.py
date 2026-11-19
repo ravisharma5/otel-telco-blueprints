@@ -3,9 +3,9 @@
 Every use-case page records, in front matter, how far up the adaptation
 ladder it climbs (rung), which operator expertise it needs, and the items the
 operator brings. These tests tie that field to what the page says: a page
-with the Classification slot retrains its head; only the alarm triage recipe
-may train a LoRA adapter, and only after a measured gap; a page that names MCP
-tools needs skills and tool contracts. The generator (tools/site/render_bring)
+with the Classification slot retrains its head; only the alarm triage and CNF
+upgrade recipes may train a LoRA adapter, and only after a measured gap; a page
+that names MCP tools needs skills and tool contracts. The generator (tools/site/render_bring)
 reads owners and anchors from the PB-11 matrix; the tests read PB-11 on their
 own and check the Owner cell against every listed domain.
 """
@@ -35,13 +35,15 @@ from tools.tests.test_use_case_pages import _id, page_key, use_case_pages
 
 PAGES = pytest.mark.parametrize("path", use_case_pages(), ids=_id)
 ALARM_TRIAGE = "network-operations/alarm-triage-adaptation"
+CNF_UPGRADE = "agentic-operations/cnf-upgrade-checks"
+LORA_PAGES = {ALARM_TRIAGE, CNF_UPGRADE}
 URL = re.compile(r"\(https?://[^)]*\)|https?://\S+")
 RETRAIN_HEAD = re.compile(
     r"(?i)retrain\w*[^.\n|]{0,40}classification head|classification head[^.\n|]{0,60}retrain|head (?:is )?retrained"
 )
 # A model-card fact about the OTel rerankers, not an operator fine-tune.
 CARD_FACT = re.compile(r"(?i)one-label head|full fine-tune of qwen3")
-EXPECTED_COUNTS = {"retrieval": 7, "skills": 6, "retrieval-and-skills": 6, "head-retrain": 8, "lora-if-gap": 1}
+EXPECTED_COUNTS = {"retrieval": 7, "skills": 6, "retrieval-and-skills": 6, "head-retrain": 8, "lora-if-gap": 2}
 
 
 def _ad(path) -> dict:
@@ -71,13 +73,25 @@ def test_classification_pages_retrain_the_head(path):
         assert RETRAIN_HEAD.search(_no_url(path)), "the page must say the Classification head is retrained"
 
 
-def test_only_alarm_triage_is_lora_if_gap():
-    lora = [page_key(p) for p in use_case_pages() if _ad(p).get("rung") == "lora-if-gap"]
-    assert lora == [ALARM_TRIAGE]
-    triage = next(p for p in use_case_pages() if page_key(p) == ALARM_TRIAGE)
-    text = body(triage)
+def _how_it_works(key: str) -> tuple[str, str]:
+    page = next(p for p in use_case_pages() if page_key(p) == key)
+    text = body(page)
     how = re.search(r"^## How it works[ \t]*$(.*?)(?=^## )", text, re.M | re.S)
-    assert how and re.search(r"^### When to train a LoRA", how.group(1), re.M)
+    assert how, key
+    return text, how.group(1)
+
+
+def test_lora_if_gap_pages():
+    lora = {page_key(p) for p in use_case_pages() if _ad(p).get("rung") == "lora-if-gap"}
+    assert lora == LORA_PAGES
+    text, how = _how_it_works(ALARM_TRIAGE)
+    assert re.search(r"^### When to train a LoRA", how, re.M)
+    assert "../../../platform/adaptation/README.md" in text
+    text, how = _how_it_works(CNF_UPGRADE)
+    harness = re.search(r"^### Harness[ \t]*$(.*?)(?=^### |\Z)", how, re.M | re.S)
+    assert harness, "the CNF upgrade recipe needs a Harness H3 under How it works"
+    lora_rows = [ln for ln in harness.group(1).splitlines() if ln.startswith("| LoRA |")]
+    assert len(lora_rows) == 1 and "measured" in lora_rows[0] and "gap" in lora_rows[0], lora_rows
     assert "../../../platform/adaptation/README.md" in text
 
 
@@ -150,7 +164,7 @@ def test_rung_counts():
     for p in use_case_pages():
         counts[_ad(p).get("rung")] = counts.get(_ad(p).get("rung"), 0) + 1
     assert counts == EXPECTED_COUNTS
-    assert sum(counts.values()) == 28
+    assert sum(counts.values()) == 29
 
 
 def test_matrix_reader():
@@ -276,6 +290,7 @@ NEW_RECIPES = (
     "network-operations/slice-sla-assurance",
     "network-operations/mop-validation",
     "agentic-operations/site-change-risk-gate",
+    "agentic-operations/cnf-upgrade-checks",
 )
 EXPERTISE_GAP = {
     "taxonomy": "taxonomy",
@@ -314,7 +329,7 @@ def test_bring_items_follow_the_page(path):
     if "decision" in slots or _governance_gate_rows(path):
         assert "gate-policy" in mechs
     if "lora-data" in mechs:
-        assert page_key(path) == ALARM_TRIAGE
+        assert page_key(path) in LORA_PAGES
 
 
 @PAGES

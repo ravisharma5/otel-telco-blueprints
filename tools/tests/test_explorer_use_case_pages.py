@@ -1142,7 +1142,7 @@ def test_nothing_here_count(explorer_dist, data):
         notes = _in_parts(tree, _key(CPU_SETUP, "any"), lambda n: n.has_class("nothing-here"))
         assert (len(notes) == 1) == (uc["slug"] not in FAR_EDGE_SLUGS), uc["slug"]
         pages += len(notes) == 1
-    assert pages == len(data["use_cases"]) - len(FAR_EDGE_SLUGS) == 25
+    assert pages == len(data["use_cases"]) - len(FAR_EDGE_SLUGS) == 26
 
 
 @pytest.mark.site_output

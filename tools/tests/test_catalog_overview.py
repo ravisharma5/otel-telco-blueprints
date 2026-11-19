@@ -270,11 +270,11 @@ def test_catalog_covers_application_list_and_gaps():
 
 def test_catalog_counts():
     pages = list(_pages_by_key().values())
-    assert len(pages) == 28
+    assert len(pages) == 29
     recipes = [fm for fm in pages if fm.get("depth") == "recipe"]
     entries = [fm for fm in pages if fm.get("depth") == "entry"]
-    assert len(recipes) == 9 and len(entries) == 19
+    assert len(recipes) == 10 and len(entries) == 19
     assert sum(1 for fm in recipes if fm.get("flagship") is True) == 4
-    assert sum(1 for fm in recipes if fm.get("flagship") is False) == 5
+    assert sum(1 for fm in recipes if fm.get("flagship") is False) == 6
     for fm in pages:
         assert fm.get("card") and fm.get("placement") and fm.get("depth"), fm.get("id")
