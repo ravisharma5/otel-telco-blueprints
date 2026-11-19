@@ -262,6 +262,9 @@ options:
       - use_case: UC-AGOPS-01
         roles: [safety, classification]
         reason: FP8 builds of Safety and Classification make room for them beside the Decision slot on a regional GPU.
+      - use_case: UC-AGOPS-05
+        roles: [safety, classification]
+        reason: FP8 builds of Safety and Classification make room for them beside the Decision slot and retrieval on a regional GPU.
       - use_case: UC-KNOW-01
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM make room for them beside Embedding, Reranker, and the Decision slot.

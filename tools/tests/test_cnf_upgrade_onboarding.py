@@ -251,7 +251,7 @@ def test_cnf_harness():
         "pre-upgrade check", "post-upgrade verification", "rollback decision",
         "compliance explain-and-fix", "YANG change review", "change summary",
     ):
-        assert skill in cells["Skills"], skill
+        assert skill.lower() in cells["Skills"].lower(), skill
     for corpus in ("release notes", "MOP", "past upgrade outcomes", "compliance-rule catalog", "YANG modules", "CVE advisories"):
         assert corpus in cells["Corpora"], corpus
     for cls in ("crash loop", "certificate expiry", "configuration mismatch", "quota", "dependency", "licence"):

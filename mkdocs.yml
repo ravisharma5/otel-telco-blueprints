@@ -112,6 +112,7 @@ nav:
           - Read-only router and 5G core operations: catalog/agentic-operations/router-core-read-only-ops/README.md
           - Policy-following operations agents: catalog/agentic-operations/policy-following-ops-agents/README.md
           - Site change-risk gate: catalog/agentic-operations/site-change-risk-gate/README.md
+          - CNF upgrade pre- and post-checks: catalog/agentic-operations/cnf-upgrade-checks/README.md
       - Business assurance:
           - Churn risk explanation: catalog/business-assurance/churn-risk-explanation/README.md
           - Revenue assurance triage: catalog/business-assurance/revenue-assurance-triage/README.md
