@@ -49,13 +49,15 @@ Models and adapters reach edge sites through OpenShift GitOps and Red Hat Advanc
 
 A far-edge server with no accelerator, such as a single-node OpenShift server shared with a vDU, can still serve these roles on the CPU image of Red Hat AI Inference, `vllm-cpu-rhel9` ([release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes)):
 
-- Embedding: the small models from 22M to 335M, and Embedding 0.6B
+- Embedding: the small models from 22M to 335M, and Embedding 0.6B; Red Hat AI publishes the MiniLM base model of [OTel-Embedding-22M](https://huggingface.co/farbodtavakkoli/OTel-Embedding-22M) as a build tagged for CPU servers ([model card](https://huggingface.co/RedHatAI/all-minilm-l6-v2))
 - Reranker: the 0.6B model
 - Classification, in a single pass
 - a small LLM from 1B to 4B
-- Decision, as a check step: check that the shipped 4-bit build runs on the CPU image, or make a W8A8 or an AWQ or GPTQ build and evaluate it ([vLLM CPU installation](https://docs.vllm.ai/en/latest/getting_started/installation/cpu/))
+- Decision, as a check step: start from the [vLLM Gemma 4 recipe](https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html), which lists the base Gemma 4 26B-A4B model for CPU serving; then check that the shipped 4-bit build runs on the CPU image, or make a W8A8 or an AWQ or GPTQ build and evaluate it ([vLLM CPU installation](https://docs.vllm.ai/en/latest/getting_started/installation/cpu/))
 
 Embedding, Reranker, and Classification run in vLLM's pooling mode ([vLLM pooling models](https://docs.vllm.ai/en/latest/models/pooling_models/)). The large model never runs there.
+
+Red Hat's [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) serves the CPU image with Podman or on OpenShift, and says CPU inference works best with models under 3 billion parameters, which is why Decision is a check step.
 
 ### Servers shared with a vDU
 

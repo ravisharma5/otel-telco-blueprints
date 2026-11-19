@@ -197,6 +197,8 @@ These settings come on top of the key flags per slot; values in angle brackets a
 <!-- generated:setup-flags end -->
 <!-- vale Google.OxfordComma = YES -->
 
+Starting points for the CPU-only far-edge setup: the Red Hat AI Inference [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) serves the CPU image with Podman, or as a standalone deployment on OpenShift, and the [CPU serving quickstart](https://github.com/rh-ai-quickstart/llm-cpu-serving) deploys a small model with vLLM on CPU in OpenShift AI. For the Decision slot, the [vLLM Gemma 4 recipe](https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html) lists the base Gemma 4 26B-A4B for Intel Xeon 6 servers on vLLM's CPU image, from two NUMA nodes up. It doesn't cover the shipped W4A16 build or the Red Hat image, so the Decision build check still applies.
+
 ### Advanced serving options
 
 These are options to test, not defaults: turn one on, then check it on your traffic with the same gates.
@@ -355,6 +357,9 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 34 | The RAN DU profile pins platform CPU to the reserved cores, and unreserved cores are available as allocatable CPU for workloads | Red Hat guidance | [RAN DU reference design](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs) |
 | 35 | Run the platform latency tests (`hwlatdetect`, `cyclictest`, `oslat`) to validate node tuning for your workload, including on single-node OpenShift | Red Hat guidance | [latency tests](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/cnf-performing-platform-verification-latency-tests) |
 | 36 | Linux resctrl exposes Intel RDT cache allocation and memory bandwidth allocation, so a resource group can limit the cache and memory bandwidth its CPUs and tasks use | project documentation | [Linux resctrl](https://docs.kernel.org/filesystems/resctrl.html) |
+| 37 | Red Hat AI Inference serves models on x86_64 CPUs from its CPU image with Podman, or as a standalone deployment on OpenShift | Red Hat guidance | [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) |
+| 38 | A quickstart deploys a small model with vLLM on CPU in OpenShift AI, with no GPU | Red Hat guidance | [CPU serving quickstart](https://github.com/rh-ai-quickstart/llm-cpu-serving) |
+| 39 | vLLM's Gemma 4 recipe lists the base Gemma 4 26B-A4B for Intel Xeon 6 CPUs on vLLM's CPU image, from two NUMA nodes up | project documentation | [vLLM Gemma 4 recipe](https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html) |
 
 - Gate: after every deploy, ask each generative slot to identify itself, and fail the rollout if the answer is wrong or empty.
 - Gate: on MI350-class GPUs, confirm the pod sets `VLLM_ROCM_USE_AITER=0` and that a fixed prompt returns well-formed text before traffic arrives.

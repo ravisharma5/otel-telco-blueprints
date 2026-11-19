@@ -128,7 +128,7 @@ The action layer holds the change and writes the audit record with the site stat
 - [ ] Write path: `submit_action_request` is the agent's only write tool, and only the job templates that release or hold a change hold write credentials
 - [ ] Prerequisites: a cell-site single-node OpenShift server with spare non-real-time cores, as [Servers shared with a vDU](../../../architecture/placement.md#servers-shared-with-a-vdu) sets out, and the CPU image of Red Hat AI Inference, `vllm-cpu-rhel9`
 - [ ] Decision engine: vLLM 0.26 or 0.30 on CUDA or ROCm, as the [Decision model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-Decision-26B-A4B-4bit) states; this recipe runs it on the CPU image instead, which the card doesn't name, so pass the Decision CPU check before it serves traffic
-- [ ] Decision CPU check: check the shipped W4A16 build on the CPU image, or make a W8A8 or an AWQ or GPTQ W4A16 build with LLM Compressor, and evaluate it on the same gates
+- [ ] Decision CPU check: start from the CPU settings the [vLLM Gemma 4 recipe](https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html) lists for the base Gemma 4 26B-A4B model, which cover neither the 4-bit build nor the Red Hat image; then check the shipped W4A16 build on the CPU image, or make a W8A8 or an AWQ or GPTQ W4A16 build with LLM Compressor, and evaluate it on the same gates
 - [ ] Agent identity: a workload identity bound to the read roles and `submit_action_request` only, as PB-08 sets out
 - [ ] Data: recorded past changes with their outcomes, and a gate set weighted toward non-ACT cases
 - [ ] Traces: site-state summaries, gate decisions, approvals, and holds, as PB-09 sets out
@@ -241,6 +241,9 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 7 | Topology Aware Lifecycle Manager rolls out cluster policies, and the enable field of a ClusterGroupUpgrade controls when an update starts, for example to fit a maintenance window | Red Hat guidance | [Topology Aware Lifecycle Manager](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/edge_computing/cnf-talm-for-cluster-updates) |
 | 8 | The PTP Operator reports the PTP clock state as LOCKED, HOLDOVER, or FREERUN, and fast event notifications pass clock sync status to vRAN applications on the DU node | Red Hat guidance | [Using PTP hardware](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/advanced_networking/using-ptp-hardware) |
 | 9 | The closed-loop offline replay runs the gate pattern on recorded incidents with recorded Decision labels and no model | project documentation | [Closed-loop incident handling folder](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling) |
+| 10 | vLLM's Gemma 4 recipe lists the base Gemma 4 26B-A4B model for CPU serving on vLLM's CPU image | project documentation | [vLLM Gemma 4 recipe](https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html) |
+| 11 | Red Hat AI Inference deploys its CPU image on OpenShift as a standalone deployment on x86_64 CPUs | Red Hat guidance | [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) |
+| 12 | A quickstart deploys a small model with vLLM on CPU in OpenShift AI, with no GPU | Red Hat guidance | [CPU serving quickstart](https://github.com/rh-ai-quickstart/llm-cpu-serving) |
 
 ## Deploy and verify
 
@@ -263,6 +266,7 @@ Apply these settings in order. Every change class starts at the shadow stage, an
 - Agent-school: 301 adds an approval gate to a closed loop, in the [agent-school roadmap](https://github.com/open-experiments/agent-school/blob/main/docs/RoadMap.md)
 - Reference implementation: the gate pattern this recipe reuses runs end to end in the [closed-loop offline quickstart](https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling), which replays incidents, not changes
 - Architecture: the [decision gate](../../../architecture/decision-gate.md) for labels and policy ceilings
+- Starting point: the [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) deploys the CPU image standalone on OpenShift, and the [CPU serving quickstart](https://github.com/rh-ai-quickstart/llm-cpu-serving) serves a small model with vLLM on CPU in OpenShift AI; swap in the pinned Decision build
 
 ## Limitations
 

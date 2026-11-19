@@ -71,7 +71,7 @@ _Stub: this catalog entry has no worked example or diagram yet._
 - [ ] Tools and data: operational logs only; security logs keep their own retention and never pass through this flow
 - [ ] Retention: raw logs stay on the site server for the retention period you set, and the flow never deletes a log before that period ends
 - [ ] Embedding revision: a new embedding checkpoint changes every group, so record the revision with the group set
-- [ ] Prerequisites: spare non-real-time cores on the cell-site single-node OpenShift server, as [Servers shared with a vDU](../../../architecture/placement.md#servers-shared-with-a-vdu) sets out
+- [ ] Prerequisites: spare non-real-time cores on the cell-site single-node OpenShift server, as [Servers shared with a vDU](../../../architecture/placement.md#servers-shared-with-a-vdu) sets out; the [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) says CPU inference works best with models under 3 billion parameters, and Red Hat AI publishes the MiniLM base model of [OTel-Embedding-22M](https://huggingface.co/farbodtavakkoli/OTel-Embedding-22M) as a build tagged for CPU servers ([model card](https://huggingface.co/RedHatAI/all-minilm-l6-v2))
 - [ ] Placement: the far edge runs Embedding on the cell-site server.
 
 | Component role | Red Hat product used |
@@ -150,6 +150,9 @@ Each key claim links its source, as set out in [the Sources table](../../../fram
 | 4 | Red Hat AI Inference ships a CPU image, `vllm-cpu-rhel9` | Red Hat guidance | [Red Hat AI Inference release notes](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/release_notes/rhaii-350-ga-release-notes_release-notes) |
 | 5 | Log parsing turns unstructured log messages into structured events, and Drain parses streaming logs online with a fixed-depth tree | research | [Drain log parsing paper](https://jiemingzhu.github.io/pub/pjhe_icws2017.pdf) |
 | 6 | The RAN DU reference design pins platform pods to reserved cores, and unreserved cores stay allocatable for workloads | Red Hat guidance | [RAN DU reference design](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/scalability_and_performance/telco-ran-du-ref-design-specs) |
+| 7 | Red Hat AI Inference serves models on x86_64 CPUs from its CPU image, and CPU inference works best with models under 3 billion parameters | Red Hat guidance | [CPU inference guide](https://docs.redhat.com/en/documentation/red_hat_ai_inference/3.5/html/getting_started/about-cpu-inference_getting-started) |
+| 8 | OTel-Embedding-22M has 22M parameters and a sentence-transformers MiniLM base model | model card | [OTel-Embedding-22M model card](https://huggingface.co/farbodtavakkoli/OTel-Embedding-22M) |
+| 9 | Red Hat AI publishes that MiniLM model as a text-embedding ModelCar build with a CPU server hardware tag | model card | [Red Hat AI MiniLM model card](https://huggingface.co/RedHatAI/all-minilm-l6-v2) |
 
 ## Deploy and verify
 
