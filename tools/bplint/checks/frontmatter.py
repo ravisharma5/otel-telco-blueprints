@@ -24,6 +24,7 @@ import functools
 import re
 from pathlib import Path
 
+from ..ideas import IDEAS_DIR, is_idea
 from ..loader import load_yaml
 from ..report import Finding
 from ._paths import repo_relative
@@ -227,13 +228,13 @@ def _sandbox_findings(doc, fm) -> list[Finding]:
     ]
 
 
-IDEAS_DIR = "catalog/ideas/"
+IDEAS_PREFIX = f"catalog/{IDEAS_DIR}/"
 
 
 def _idea_findings(doc, fm, ctx) -> list[Finding]:
     """IDEA001: the idea object, the catalog/ideas/ folder, and flagship agree."""
-    in_ideas = repo_relative(doc, ctx.repo_root).startswith(IDEAS_DIR)
-    has_idea = isinstance(fm.get("idea"), dict)
+    in_ideas = repo_relative(doc, ctx.repo_root).startswith(IDEAS_PREFIX)
+    has_idea = is_idea(fm)
     out = []
     if in_ideas and not has_idea:
         out.append((_key_line(doc, "id"), "a page under catalog/ideas/ needs an idea object"))

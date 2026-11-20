@@ -46,6 +46,7 @@ from pathlib import Path
 
 from markdown_it import MarkdownIt
 
+from tools.bplint.ideas import IDEAS_DIR, is_idea
 from tools.bplint.loader import load_yaml
 from tools.bplint.markdown import parse_doc
 from tools.site.render_bring import (
@@ -90,13 +91,6 @@ DOMAIN_LABELS = {
 }
 SKIPPED_DOMAINS = ("demo",)
 
-# Exploration ideas live in catalog/ideas/<slug>/ and keep their real domain.
-IDEAS_DIR = "ideas"
-
-
-def is_idea(fm: dict) -> bool:
-    """True when the page carries the idea object; every tool uses this one rule."""
-    return isinstance(fm.get("idea"), dict)
 
 # Recipe depth labels, shared with the Recipes overview (render_catalog imports them).
 DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}

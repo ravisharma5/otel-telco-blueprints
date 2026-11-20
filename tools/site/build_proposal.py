@@ -30,6 +30,7 @@ from pathlib import Path
 
 import yaml
 
+from tools.bplint.ideas import is_idea
 from tools.bplint.loader import split_front_matter
 from tools.bplint.markdown import parse_doc
 from tools.site.export_explorer import (
@@ -38,7 +39,6 @@ from tools.site.export_explorer import (
     EXPORTER_TABLE_HEADERS,
     SKIPPED_DOMAINS,
     _plain,
-    is_idea,
 )
 from tools.site.render_bring import bring_summary
 from tools.site.render_catalog import domain_order

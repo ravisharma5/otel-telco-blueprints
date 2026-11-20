@@ -24,6 +24,7 @@ from pathlib import Path
 
 import yaml
 
+from tools.bplint.ideas import is_idea
 from tools.bplint.loader import split_front_matter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -201,9 +202,6 @@ def _use_cases(catalog: Path | None = None) -> dict[str, tuple[str, str]]:
 
     Idea pages are skipped, so an idea id left in the serving data fails loudly.
     """
-    # Imported here: export_explorer imports this module, so a top-level import is a cycle.
-    from tools.site.export_explorer import is_idea
-
     catalog = catalog or ROOT / "catalog"
     out = {}
     for path in sorted(catalog.glob("*/*/README.md")):

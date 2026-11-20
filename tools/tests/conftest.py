@@ -12,7 +12,8 @@ import sys
 import pytest
 import yaml
 
-from tools.site.export_explorer import SKIPPED_DOMAINS, is_idea
+from tools.bplint.ideas import is_idea
+from tools.site.export_explorer import SKIPPED_DOMAINS
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "tools/tests/fixtures"

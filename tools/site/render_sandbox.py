@@ -33,6 +33,7 @@ import re
 import sys
 from pathlib import Path
 
+from tools.bplint.ideas import is_idea
 from tools.site.render_bring import _front_matter, pages
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -146,9 +147,6 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="exit 1 if a block drifts")
     args = parser.parse_args(argv)
-    # Imported here: export_explorer imports this module, so a top-level import is a cycle.
-    from tools.site.export_explorer import is_idea
-
     stale = []
     entries = []
     for path in pages():

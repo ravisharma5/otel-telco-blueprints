@@ -8,6 +8,7 @@ from that subset is not evidence of a dangling reference.
 
 from __future__ import annotations
 
+from ..ideas import is_idea
 from ..report import Finding
 from .frontmatter import _key_line
 
@@ -101,7 +102,7 @@ def check_idea_merges(ctx) -> list[Finding]:
         covers = (host.front_matter.get("also_covers") if host is not None else None) or []
         if host is None:
             text = f"idea.merged_into '{target}' has no matching use case"
-        elif isinstance(host.front_matter.get("idea"), dict):
+        elif is_idea(host.front_matter):
             text = f"idea.merged_into '{target}' is itself an idea; merge into a front-page use case"
         elif not covers:
             text = f"idea.merged_into '{target}' has an empty also_covers; list this idea there"

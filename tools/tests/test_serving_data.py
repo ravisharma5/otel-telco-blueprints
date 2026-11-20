@@ -21,10 +21,10 @@ import yaml
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
+from tools.bplint.ideas import is_idea
 from tools.guards.patterns import PLANNING_ID_RE
 from tools.site import render_serving
 from tools.tests.conftest import REPO_ROOT
-from tools.site.export_explorer import is_idea
 from tools.tests.test_platform_pages import (
     SERVING,
     reference_design_text,

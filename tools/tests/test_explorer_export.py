@@ -1213,6 +1213,21 @@ def test_is_idea_rule():
     assert ex.IDEAS_DIR == "ideas"
 
 
+def test_idea_rule_defined_once():
+    """The ideas folder and is_idea live only in the leaf module every tool imports."""
+    from tools.bplint import ideas
+
+    assert ex.is_idea is ideas.is_idea and ex.IDEAS_DIR == ideas.IDEAS_DIR
+    leaf = REPO_ROOT / "tools/bplint/ideas.py"
+    for path in sorted((REPO_ROOT / "tools").rglob("*.py")):
+        if path == leaf or "tests" in path.relative_to(REPO_ROOT).parts:
+            continue
+        text = path.read_text(encoding="utf-8")
+        assert "def is_idea" not in text, path
+        assert not re.search(r"^IDEAS_DIR\s*=", text, re.M), path
+        assert '"catalog/ideas/"' not in text, path
+
+
 def test_real_catalog_has_22_use_cases_and_7_ideas(data):
     assert len(data["use_cases"]) == 22
     assert len(data["ideas"]) == 7

@@ -24,8 +24,9 @@ import re
 import sys
 from pathlib import Path
 
+from tools.bplint.ideas import IDEAS_DIR, is_idea
 from tools.bplint.loader import split_front_matter
-from tools.site.export_explorer import IDEAS_DIR, SKIPPED_DOMAINS, is_idea
+from tools.site.export_explorer import SKIPPED_DOMAINS
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "catalog"

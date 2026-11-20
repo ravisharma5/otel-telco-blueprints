@@ -25,7 +25,8 @@ from pathlib import Path
 
 from tools.bplint.loader import split_front_matter
 from tools.bplint.slug import github_slug
-from tools.site.export_explorer import DEPTH_LABELS, DOMAIN_LABELS, SKIPPED_DOMAINS, is_idea
+from tools.bplint.ideas import is_idea
+from tools.site.export_explorer import DEPTH_LABELS, DOMAIN_LABELS, SKIPPED_DOMAINS
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "catalog"

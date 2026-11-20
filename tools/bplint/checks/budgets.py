@@ -6,6 +6,7 @@ A section budget that omits a unit does not limit that unit.
 
 from __future__ import annotations
 
+from ..ideas import is_idea
 from ..report import Finding
 from . import structure_type
 
@@ -24,7 +25,7 @@ def _page_budget(tcfg, fm):
     pw = tcfg.get("page_words")
     if isinstance(pw, dict):
         pw = pw.get("recipe" if fm.get("depth") == "recipe" else "entry")
-    if pw is not None and isinstance(fm.get("idea"), dict):
+    if pw is not None and is_idea(fm):
         pw += tcfg.get("idea_block_words", 0)
     return pw
 
