@@ -26,6 +26,7 @@ agent_school: [301]  # course numbers from tools/bplint/agent-school-courses.yam
 clarity_reviewed: "2026-11-15"  # set after the humanizer pass; quoted ISO date
 source: ["<source-id>"]  # optional; where the use case came from
 also_covers: ["<merged application>"]  # optional; applications merged into this page, each 12 words or fewer; the Recipes overview lists them
+idea: {why: "<Why this stays an idea, in 30 words or fewer>", promote: ["<What would promote it, in 15 words or fewer>"]}  # optional; only on pages under catalog/ideas/: why, promote (1 to 4 items), merged_into (the recipe whose also_covers names it)
 card:  # required; the summary card on the explorer home page, in plain words
   goal: "incidents"  # one goal id from data/explorer/goals.yaml: answer | incidents | sla-energy | change | secure | software | customers
   summary: "<What it does, in 25 words or fewer>"

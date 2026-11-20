@@ -68,6 +68,8 @@ types:
     page_words:
       recipe: 1350
       entry: 550
+    # An idea page (front matter has an idea object) adds this to its page budget.
+    idea_block_words: 150
     sources_section: "Sources"
     at_a_glance_rows:
       - One-liner

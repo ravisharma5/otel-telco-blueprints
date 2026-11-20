@@ -23,7 +23,9 @@ def _counts(sec) -> dict[str, int]:
 def _page_budget(tcfg, fm):
     pw = tcfg.get("page_words")
     if isinstance(pw, dict):
-        return pw.get("recipe" if fm.get("depth") == "recipe" else "entry")
+        pw = pw.get("recipe" if fm.get("depth") == "recipe" else "entry")
+    if pw is not None and isinstance(fm.get("idea"), dict):
+        pw += tcfg.get("idea_block_words", 0)
     return pw
 
 

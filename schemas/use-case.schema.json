@@ -139,6 +139,23 @@
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,11}\\s*$" }
     },
+    "idea": {
+      "description": "Only on pages under catalog/ideas/. Marks an exploration idea, not a recipe. why: the reason it is an idea, 30 words or fewer. promote: what would move it back to the front page, 1 to 4 items of 15 words or fewer. merged_into: the front-page recipe whose also_covers now names it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["why", "promote"],
+      "properties": {
+        "why": { "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,29}\\s*$" },
+        "promote": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^\\s*\\S+(?:\\s+\\S+){0,14}\\s*$" }
+        },
+        "merged_into": { "type": "string", "pattern": "^UC-[A-Z]+-[0-9]{2}$" }
+      }
+    },
     "clarity_reviewed": { "$ref": "common.schema.json#/$defs/date" },
     "source": {
       "type": "array",

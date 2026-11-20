@@ -41,7 +41,7 @@ Page budget: 1800 prose words (about 4 pages at 450 words per page). Tables don'
 
 ### Use-case blueprint
 
-Page budget: 1350 prose words for a recipe (about 3 pages), 550 prose words for an entry (about 1 page). Front-matter `depth` picks the budget.
+Page budget: 1350 prose words for a recipe (about 3 pages), 550 prose words for an entry (about 1 page). Front-matter `depth` picks the budget. An idea page may add 150 prose words for its idea block.
 
 | # | Section | Budget |
 |---|---|---|
