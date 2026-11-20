@@ -589,6 +589,18 @@ def test_gating_no_deprecated_guardrails():
     assert not re.search(r"Guardrails Orchestrator|Orchestrator Guardrails", text)
 
 
+def test_gating_policies_as_action_classes():
+    """A written policy sits between the gate rules and the promotion thresholds."""
+    text = reference_design_text(GATING)
+    gate = text.index("### Gate rules")
+    policies = text.index("### Policies as action classes")
+    promotion = text.index("### Promotion thresholds")
+    assert gate < policies < promotion
+    section = text[policies:promotion]
+    for want in ("action class", "stage register", "override rate"):
+        assert want in section, want
+
+
 def test_gating_alarm_example_review():
     text = reference_design_text(GATING)
     example = text[text.index(f"### {WORKED_EXAMPLE_H3}") :]

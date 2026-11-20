@@ -112,6 +112,15 @@ The outcome is the lower of the model label and the policy ceiling for the capab
 
 NOTIFY works two ways. From the assist stage up, an agent may hold direct notify tools, such as an operations-channel message or a ticket comment, through the MCP Gateway; the shadow stage gets no notify role. An action request that the gate labels NOTIFY becomes a notification job that the action layer runs. For direct notify tools, the gateway's tool-role mapping enforces the stage, not the gate.
 
+### Policies as action classes
+
+A written operating policy, such as who may change what, when, and with whose approval, counts only once it becomes an action class with a ceiling in the stage register. A policy stated only as prose in the agent's prompt doesn't count, because the agent can't enforce it on itself. Each proposed change names its action class, and the gate holds it to that class's ceiling.
+
+Orchestration and change control stay outside the model, so the policy holds even when the agent is wrong. The 31B model card says the model alone doesn't guarantee correct or safe tool execution ([31B model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#tool-use-and-instruction-following)).
+
+- Test change procedures on a stateful mock before the shadow stage, because the card reports no check against methods of procedure ([31B model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed)).
+- Measure the share of changes proposed within policy and the approver override rate. The override rate ceiling below bounds the second.
+
 ### Promotion thresholds
 
 | Parameter | What it controls | Who sets it | How to calibrate |
@@ -121,6 +130,7 @@ NOTIFY works two ways. From the assist stage up, an agent may hold direct notify
 | Canary window | How long, and over how many requests, a raised ceiling runs on a small share of traffic | Risk owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): size the window to hold enough state-changing requests to bound the false-ACT rate |
 | Minimum ACT probability for the act stage | The lowest calibrated ACT probability at which the act stage may run a playbook alone | Risk owner, with SME review | Evaluation and acceptance calibration: fit on an operator gate set labelled by SMEs, and check calibration error |
 | Override rate ceiling | The share of human overrides that sends a use case back one stage | Business owner | [Evaluation and acceptance method](../evaluation-acceptance/README.md): count overrides per use case and action class in the trace |
+| Minimum share of no-write scenarios | The lowest share of test scenarios whose correct answer changes nothing | SME | Sample past changes and count those where people only looked or escalated |
 
 This page gives no default values. You set each parameter with SME review and version it with the policy ceilings.
 
@@ -168,6 +178,8 @@ Each key claim links its source, as set out in [the Sources table](../../framewo
 | 6 | NeMo Guardrails runs on OpenShift AI and screens input and output with configurable rails | Red Hat guidance | [Deploy NeMo Guardrails on OpenShift AI](https://developers.redhat.com/articles/2026/09/09/deploy-nemo-guardrails-on-red-hat-openshift-ai) |
 | 7 | The MCP gateway screens tool requests and responses with NeMo guardrails | Red Hat guidance | [MCP gateway guardrails](https://docs.redhat.com/en/documentation/red_hat_connectivity_link/1.5/html/secure_your_traffic/mcp-gateway-guardrails) |
 | 8 | An Automation Orchestrator workflow can call a REST service as a step and branch on the result | Red Hat guidance | [Automation Orchestrator REST API step](https://docs.redhat.com/en/documentation/automation_orchestrator/2026.8/develop-add_a_rest_api_step_to_a_workflow) |
+| 9 | Agentic use needs an external tool runtime, checked tool schemas, permission controls, audit logging, and human review, and the model alone doesn't guarantee correct or safe tool execution | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#tool-use-and-instruction-following) |
+| 10 | The card reports no check of the 31B against methods of procedure such as configuration changes and failovers | model card | [OTel-2.0-LLM-31B-IT model card](https://huggingface.co/farbodtavakkoli/OTel-2.0-LLM-31B-IT#operational-procedure-mop-validation-not-performed) |
 
 - Gate: the shadow agreement floor is met before a use case moves from shadow to assist.
 - Gate: the Safety abstain-recall floor is met on insufficient-context items before the Safety slot fronts answers.
