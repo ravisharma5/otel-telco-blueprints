@@ -295,6 +295,25 @@ def test_unknown_merge_host_fails(catalog: Path):
         render_ideas.main([], catalog=catalog)
 
 
+def test_page_without_front_matter_is_skipped(catalog: Path):
+    _write(catalog / "security/notes/README.md", "# Notes\n\nNo front matter here.\n")
+    assert [i["id"] for i in render_ideas.ideas(catalog)] == ["UC-AGOPS-09", "UC-OPS-12"]
+
+
+def test_idea_without_title_fails_clearly(catalog: Path):
+    page = catalog / "ideas/alpha-log/README.md"
+    page.write_text(page.read_text(encoding="utf-8").replace('title: "Site log reduction"\n', ""), encoding="utf-8")
+    with pytest.raises(SystemExit, match=r"render_ideas: catalog/ideas/alpha-log/README.md: front matter needs title"):
+        render_ideas.ideas(catalog)
+
+
+def test_merge_host_without_title_fails_clearly(catalog: Path):
+    page = catalog / "network-operations/host-page/README.md"
+    page.write_text(page.read_text(encoding="utf-8").replace('title: "Host recipe"\n', ""), encoding="utf-8")
+    with pytest.raises(SystemExit, match=r"network-operations/host-page/README.md: front matter needs title"):
+        render_ideas.ideas(catalog)
+
+
 # ---- front-page outputs skip idea pages ------------------------------------
 
 SANDBOX_BODY = "Intro line.\n\n### Sandbox\n\n<!-- generated:sandbox start -->\n<!-- generated:sandbox end -->\n"

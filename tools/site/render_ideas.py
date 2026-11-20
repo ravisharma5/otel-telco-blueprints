@@ -44,12 +44,12 @@ def _fail(msg: str) -> None:
     raise SystemExit(f"render_ideas: {msg}")
 
 
-def _front_matter(path: Path, where: str) -> dict:
-    # The block closes at the first line that is exactly "---", not at a "---" substring.
-    fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
-    if fm is None:
-        _fail(f"{where} has no front matter")
-    return fm
+def _need(fm: dict, key: str, where: str):
+    """fm[key], or a clear failure naming the page when the key is missing or empty."""
+    value = fm.get(key)
+    if value is None or value == "":
+        _fail(f"{where}: front matter needs {key}")
+    return value
 
 
 def _cell(text: str) -> str:
@@ -69,11 +69,14 @@ def ideas(catalog: Path = CATALOG) -> list[dict]:
     pages = []
     for path in sorted(catalog.glob("*/*/README.md")):
         where = path.relative_to(catalog.parent).as_posix()
-        fm = _front_matter(path, where)
+        # The block closes at the first line that is exactly "---", not at a "---" substring.
+        fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
+        if fm is None:  # not a catalog page; the other generators skip it too
+            continue
         if fm.get("type") != "use-case" or fm.get("domain") in SKIPPED_DOMAINS:
             continue
         pages.append((path, where, fm))
-    hosts = {fm["id"]: (path, fm) for path, _, fm in pages if not is_idea(fm) and fm.get("id")}
+    hosts = {fm["id"]: (path, where, fm) for path, where, fm in pages if not is_idea(fm) and fm.get("id")}
     out = []
     for path, where, fm in pages:
         if not is_idea(fm):
@@ -90,16 +93,16 @@ def ideas(catalog: Path = CATALOG) -> list[dict]:
         if merged:
             if merged not in hosts:
                 _fail(f"{where}: merged_into {merged} is not a front-page use case")
-            host_path, host_fm = hosts[merged]
+            host_path, host_where, host_fm = hosts[merged]
             host = {
                 "id": merged,
-                "title": host_fm["title"],
+                "title": _need(host_fm, "title", host_where),
                 "rel": host_path.relative_to(catalog).as_posix(),
             }
         out.append(
             {
-                "id": fm["id"],
-                "title": fm["title"],
+                "id": _need(fm, "id", where),
+                "title": _need(fm, "title", where),
                 "slug": path.parent.name,
                 "why": why,
                 "promote": promote,
