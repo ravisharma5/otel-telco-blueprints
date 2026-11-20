@@ -538,6 +538,19 @@ def test_ideas_line_counts_ideas(tmp_path):
     )
 
 
+def test_ideas_line_agrees_with_ideas_index(tmp_path):
+    """A misplaced idea page stops the proposal line, as it stops the ideas index."""
+    from tools.site.build_proposal import ideas_line
+
+    cat = _idea_catalog(tmp_path, 1)
+    stray = cat / "network-operations/idea-0/README.md"
+    stray.parent.mkdir(parents=True)
+    (cat / "ideas/idea-0/README.md").rename(stray)
+    with pytest.raises(SystemExit) as exc:
+        ideas_line(cat)
+    assert "an idea page must sit in catalog/ideas/" in str(exc.value)
+
+
 def test_ideas_block_matches_idea_pages():
     from tools.site.build_proposal import ideas_line
     from tools.tests.conftest import idea_pages

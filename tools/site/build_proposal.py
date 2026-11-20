@@ -31,7 +31,6 @@ from pathlib import Path
 import yaml
 
 from tools.bplint.ideas import is_idea
-from tools.bplint.loader import split_front_matter
 from tools.bplint.markdown import parse_doc
 from tools.site.export_explorer import (
     DEPTH_LABELS,
@@ -40,6 +39,7 @@ from tools.site.export_explorer import (
     SKIPPED_DOMAINS,
     _plain,
 )
+from tools.site import render_ideas
 from tools.site.render_bring import bring_summary
 from tools.site.render_catalog import domain_order
 
@@ -205,15 +205,11 @@ NUMBER_WORDS = ("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", 
 
 
 def ideas_line(catalog_dir: Path | None = None) -> str:
-    """One sentence with the idea count and a link to the ideas index, or "" with no ideas."""
-    catalog_dir = catalog_dir or ROOT / "catalog"
-    count = 0
-    for path in catalog_dir.glob("*/*/README.md"):
-        fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
-        if fm is None:
-            continue
-        if fm.get("type") == "use-case" and fm.get("domain") not in SKIPPED_DOMAINS and is_idea(fm):
-            count += 1
+    """One sentence with the idea count and a link to the ideas index, or "" with no ideas.
+
+    The count comes from render_ideas.ideas, so the proposal and the ideas index agree.
+    """
+    count = len(render_ideas.ideas(catalog_dir or ROOT / "catalog"))
     if not count:
         return ""
     number = NUMBER_WORDS[count - 1] if count <= len(NUMBER_WORDS) else str(count)
