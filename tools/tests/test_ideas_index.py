@@ -145,7 +145,7 @@ def test_idea_block_after_h1(catalog: Path):
     assert "# Site log reduction\n\n<!-- generated:idea start -->\n" in plain
     assert plain.index("<!-- generated:idea end -->") < plain.index("Intro line.")
     assert _block(plain, "idea") == (
-        f"\n{BANNER}\n\n"
+        f"\n\n{BANNER}\n\n"
         "**Why it's an idea:** Template mining is the usual baseline\n\n"
         "**What would promote it:**\n\n"
         "- [ ] A measured comparison on your own logs\n\n"
@@ -170,9 +170,10 @@ def test_render_is_idempotent_and_check_catches_drift(catalog: Path, capsys):
     assert render_ideas.main(["--check"], catalog=catalog) == 0
 
     page = catalog / "ideas/alpha-log/README.md"
-    page.write_text(page.read_text(encoding="utf-8").replace("usual baseline", "hand edit"), encoding="utf-8")
+    edited = page.read_text(encoding="utf-8").replace("idea:** Template mining", "idea:** Hand edit")
+    page.write_text(edited, encoding="utf-8")
     assert render_ideas.main(["--check"], catalog=catalog) == 1
-    assert "generated block out of date (idea)" in capsys.readouterr().err
+    assert "alpha-log/README.md: generated block out of date (idea)" in capsys.readouterr().err
 
     render_ideas.main([], catalog=catalog)
     index = catalog / "ideas/index.md"

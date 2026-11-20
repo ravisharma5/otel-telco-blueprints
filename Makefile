@@ -33,15 +33,18 @@ test-vale:
 	$(VALE) test .vale/styles/Blueprints
 
 # Rewrites the generated blocks: the serving page from data/serving/*.yaml, the
-# Recipes overview (catalog/index.md) from use-case front matter, and the What you
-# bring block on every use-case page from its adaptation field and the PB-11 matrix,
-# the Sandbox block on every use-case page and the PB-08 use-case list from the
-# sandbox field, and the proposal (proposal/index.md) from the blueprints.
-# tools/tests/test_serving_data.py, test_catalog_overview.py,
-# test_adaptation_field.py, test_sandbox_field.py, and test_proposal.py fail on drift.
+# Recipes overview (catalog/index.md) from use-case front matter, the ideas index
+# (catalog/ideas/index.md) and the idea block on every idea page from the idea
+# field, the What you bring block on every use-case page from its adaptation field
+# and the PB-11 matrix, the Sandbox block on every use-case page and the PB-08
+# use-case list from the sandbox field, and the proposal (proposal/index.md) from
+# the blueprints. tools/tests/test_serving_data.py, test_catalog_overview.py,
+# test_ideas_index.py, test_adaptation_field.py, test_sandbox_field.py, and
+# test_proposal.py fail on drift.
 render:
 	uv run python -m tools.site.render_serving
 	uv run python -m tools.site.render_catalog
+	uv run python -m tools.site.render_ideas
 	uv run python -m tools.site.render_bring
 	uv run python -m tools.site.render_sandbox
 	uv run python -m tools.site.build_proposal

@@ -1,4 +1,4 @@
-"""Shared test helpers: run the linter as a subprocess and locate Vale."""
+"""Shared test helpers: run the linter, locate Vale, and list catalog pages."""
 
 from __future__ import annotations
 
@@ -10,10 +10,41 @@ import subprocess
 import sys
 
 import pytest
+import yaml
+
+from tools.site.export_explorer import SKIPPED_DOMAINS, is_idea
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "tools/tests/fixtures"
 FIXED_TODAY = "2026-11-07"
+CATALOG = REPO_ROOT / "catalog"
+
+
+def _catalog_fm(path: pathlib.Path) -> dict:
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---"):
+        return {}
+    return yaml.safe_load(text.split("---", 2)[1]) or {}
+
+
+def use_case_pages(catalog: pathlib.Path = CATALOG) -> list[pathlib.Path]:
+    """Every use-case page under catalog/*/*/, ideas included, demo skipped, sorted."""
+    out = []
+    for path in sorted(catalog.glob("*/*/README.md")):
+        fm = _catalog_fm(path)
+        if fm.get("type") == "use-case" and fm.get("domain") not in SKIPPED_DOMAINS:
+            out.append(path)
+    return out
+
+
+def front_page_pages(catalog: pathlib.Path = CATALOG) -> list[pathlib.Path]:
+    """Use-case pages on the front page: not ideas, not demo (the shared is_idea rule)."""
+    return [p for p in use_case_pages(catalog) if not is_idea(_catalog_fm(p))]
+
+
+def idea_pages(catalog: pathlib.Path = CATALOG) -> list[pathlib.Path]:
+    """Use-case pages that carry the idea object (the shared is_idea rule)."""
+    return [p for p in use_case_pages(catalog) if is_idea(_catalog_fm(p))]
 
 
 def run_bplint(
