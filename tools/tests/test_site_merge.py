@@ -185,7 +185,9 @@ def test_read_moves_rejects_wrong_field_count(tmp_path, line):
 
 
 def _move(site, old=MOVE_OLD, new=MOVE_NEW):
-    _write(site / new.split("#", 1)[0] / "index.html", "<p>recipe</p>")
+    page, _, frag = new.partition("#")
+    body = f'<h3 id="{frag}">Section</h3>' if frag else "<p>recipe</p>"
+    _write(site / page / "index.html", body)
     merge_site.write_moves(site, [(old, new)], SITE_URL)
     return (site / old / "index.html").read_text(encoding="utf-8")
 
@@ -221,6 +223,20 @@ def test_move_missing_target_fails(tmp_path):
         merge_site.write_moves(tmp_path, [(MOVE_OLD, MOVE_NEW + "#x")], SITE_URL)
     assert "target" in str(exc.value) and "is missing" in str(exc.value)
     assert MOVE_NEW in str(exc.value)
+
+
+def test_move_missing_anchor_fails(tmp_path):
+    _write(tmp_path / MOVE_NEW / "index.html", '<h3 id="other-section">Other</h3>')
+    with pytest.raises(SystemExit) as exc:
+        merge_site.write_moves(tmp_path, [(MOVE_OLD, MOVE_NEW + "#what-you-need")], SITE_URL)
+    assert "anchor #what-you-need missing" in str(exc.value)
+    assert not (tmp_path / MOVE_OLD / "index.html").exists()
+
+
+def test_move_anchor_prefix_does_not_match(tmp_path):
+    _write(tmp_path / MOVE_NEW / "index.html", '<h3 id="what-you-need-now">Other</h3>')
+    with pytest.raises(SystemExit):
+        merge_site.write_moves(tmp_path, [(MOVE_OLD, MOVE_NEW + "#what-you-need")], SITE_URL)
 
 
 def test_move_old_still_built_fails(tmp_path):

@@ -13,7 +13,8 @@ this step, which does four things in order:
 3. write_moves: for every "old new" pair in tools/site/moved-urls.txt (the frozen list
    of use-case URLs moved by the catalog focus change), write a redirect page at the
    old path. Both paths are strict lowercase site-relative paths; only the new one may
-   carry a single #fragment, and the target must exist in the built site.
+   carry a single #fragment, and the target page (and its anchor, if any) must exist
+   in the built site.
 4. check_links: parse every HTML file in site/ and report any internal href or src
    (relative, or under the site base path) that resolves to no file.
 
@@ -203,8 +204,14 @@ def write_moves(site: Path, pairs: list[tuple[str, str]], site_url: str, root: P
         if not MOVED_NEW.fullmatch(new):
             raise SystemExit(f"redirect: bad moved target {new!r} for {old}")
         page_path = new.split("#", 1)[0]
-        if not (site / page_path / "index.html").is_file():
+        target_html = site / page_path / "index.html"
+        if not target_html.is_file():
             raise SystemExit(f"redirect: target {page_path} for {old} is missing")
+        if "#" in new:
+            frag = new.split("#", 1)[1]
+            anchor = re.compile(r"""\bid\s*=\s*["']""" + re.escape(frag) + r"""["']""")
+            if not anchor.search(target_html.read_text(encoding="utf-8")):
+                raise SystemExit(f"redirect: anchor #{frag} missing in {page_path} for {old}")
         page = site / old / "index.html"
         if page.exists():
             raise SystemExit(f"redirect: {old} is still built; it must only redirect")
