@@ -8,7 +8,7 @@ clarity_reviewed: "2026-11-16"
 
 <!-- generated:facts-stamp start -->
 
-Facts checked as of 2026-11-19.
+Facts checked as of 2026-11-20.
 
 <!-- generated:facts-stamp end -->
 
@@ -184,7 +184,7 @@ Each use case links a source for every key claim. This table counts those source
 <!-- vale Google.Colons = NO -->
 <!-- generated:evidence-summary start -->
 
-Counted from each page's Sources table on 2026-11-19. Each number is how many Sources rows on the page have that Basis.
+Counted from each page's Sources table on 2026-11-20. Each number is how many Sources rows on the page have that Basis.
 
 | Use case | Depth | Model card | Research | Red Hat guidance | Industry use case | Project documentation | Named gates | What you bring |
 |---|---|---|---|---|---|---|---|---|

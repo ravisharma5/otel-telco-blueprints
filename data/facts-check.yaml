@@ -2,8 +2,8 @@
 # --recheck-report <report>` after the source re-check; tools/tests/test_proposal.py
 # fails when sources_digest no longer matches the Sources tables, serving-data URLs,
 # extra_urls, and the URL lines of the architecture pages and the proposal.
-checked: "2026-11-19"
-sources_digest: "e3cc0ac9649520de114995df1033fc71298b148543d91cd17eaed82f875b9217"
+checked: "2026-11-20"
+sources_digest: "53df898d73d1a83c368e7f697557f198c7e3b6e25317827dfc39fbdc8ba5fb3f"
 url_count: 217
 card_revisions:
   OTel-2.0-Decision-26B-A4B-4bit: "7ff608e3"
