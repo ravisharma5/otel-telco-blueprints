@@ -227,7 +227,9 @@ def write_moves(site: Path, pairs: list[tuple[str, str]], site_url: str, root: P
         title = html.escape(_moved_title(new, root), quote=True)
         template = REDIRECT_FRAGMENT if "#" in new else REDIRECT
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(template.format(title=title, canonical=site_url + new, rel=rel), encoding="utf-8")
+        # A canonical URL names a page, never a fragment.
+        canonical = site_url + page_path
+        page.write_text(template.format(title=title, canonical=canonical, rel=rel), encoding="utf-8")
 
 
 # ---------- link check ----------

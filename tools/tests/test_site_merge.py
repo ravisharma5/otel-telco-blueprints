@@ -211,7 +211,7 @@ def test_move_fragment_target_has_one_hash(tmp_path):
     assert f'location.replace("{rel}")' in html
     assert "location.hash" not in html
     assert f'<meta http-equiv="refresh" content="0; url={rel}">' in html
-    assert f'<link rel="canonical" href="{SITE_URL}{new}">' in html
+    assert f'<link rel="canonical" href="{SITE_URL}{MOVE_NEW}">' in html
     script = re.search(r"<script>(.*?)</script>", html).group(1)
     assert script.count("#") == 1, script
     for url in re.findall(r'(?:href|url)=([^">]+)', html):
