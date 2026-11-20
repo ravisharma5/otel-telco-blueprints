@@ -184,6 +184,23 @@ def test_read_moves_rejects_wrong_field_count(tmp_path, line):
         merge_site.read_moves(f)
 
 
+def test_read_moves_rejects_duplicate_old(tmp_path):
+    f = tmp_path / "moved.txt"
+    f.write_text("a/ b/\na/ c/\n", encoding="utf-8")
+    with pytest.raises(SystemExit) as exc:
+        merge_site.read_moves(f)
+    assert "line 2: a/ is listed twice" in str(exc.value)
+
+
+@pytest.mark.parametrize("text", ["a/ b/\nb/ c/\n", "b/ c/\na/ b/#frag\n"])
+def test_read_moves_rejects_chains(tmp_path, text):
+    f = tmp_path / "moved.txt"
+    f.write_text(text, encoding="utf-8")
+    with pytest.raises(SystemExit) as exc:
+        merge_site.read_moves(f)
+    assert "which is itself moved" in str(exc.value)
+
+
 def _move(site, old=MOVE_OLD, new=MOVE_NEW):
     page, _, frag = new.partition("#")
     body = f'<h3 id="{frag}">Section</h3>' if frag else "<p>recipe</p>"

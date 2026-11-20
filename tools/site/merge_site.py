@@ -175,7 +175,10 @@ def write_redirects(site: Path, legacy_list: list[str], site_url: str) -> None:
 
 
 def read_moves(path: Path) -> list[tuple[str, str]]:
-    """Return the (old, new) pairs in the frozen moved list (comments and blanks skipped)."""
+    """Return the (old, new) pairs in the frozen moved list (comments and blanks skipped).
+
+    Each old path appears once, and no new path is itself an old path (no chains).
+    """
     pairs = []
     for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         text = line.strip()
@@ -184,7 +187,13 @@ def read_moves(path: Path) -> list[tuple[str, str]]:
         fields = text.split()
         if len(fields) != 2:
             raise SystemExit(f"redirect: {_display(path)} line {n}: want 'old new', got {text!r}")
+        if fields[0] in (old for old, _ in pairs):
+            raise SystemExit(f"redirect: {_display(path)} line {n}: {fields[0]} is listed twice")
         pairs.append((fields[0], fields[1]))
+    olds = {old for old, _ in pairs}
+    for old, new in pairs:
+        if new.split("#", 1)[0] in olds:
+            raise SystemExit(f"redirect: {old} points at {new}, which is itself moved; point at the final page")
     return pairs
 
 
