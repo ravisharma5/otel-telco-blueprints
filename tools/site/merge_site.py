@@ -1,7 +1,7 @@
 """Merge the explorer build into the docs site, write legacy redirects, check links.
 
 `make site` builds MkDocs into site/ and the explorer into explorer/dist/, then runs
-this step, which does three things in order:
+this step, which does four things in order:
 
 1. merge: copy every file from explorer/dist into site/. A file that exists in both
    builds with different bytes stops the run. MkDocs owns the only 404 page, so an
@@ -10,7 +10,11 @@ this step, which does three things in order:
    URLs published under catalog/ before recipes moved to recipes/), write a short
    redirect page to the matching recipes/ URL. Targets come only from that list and
    titles only from the recipe front matter; nothing is read from a URL or query.
-3. check_links: parse every HTML file in site/ and report any internal href or src
+3. write_moves: for every "old new" pair in tools/site/moved-urls.txt (the frozen list
+   of use-case URLs moved by the catalog focus change), write a redirect page at the
+   old path. Both paths are strict lowercase site-relative paths; only the new one may
+   carry a single #fragment, and the target must exist in the built site.
+4. check_links: parse every HTML file in site/ and report any internal href or src
    (relative, or under the site base path) that resolves to no file.
 
 The proposal PDF (built by tools/site/build_pdf.py before this step) is the one
@@ -37,12 +41,17 @@ ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "explorer/dist"
 SITE = ROOT / "site"
 LEGACY = ROOT / "tools/site/legacy-urls.txt"
+MOVED = ROOT / "tools/site/moved-urls.txt"
 MKDOCS_CONFIG = ROOT / "mkdocs.yml"
 BASE_PATH = "/otel-telco-blueprints/"
 OLD_PREFIX = "catalog/"
 NEW_PREFIX = "recipes/"
 # A legacy entry: catalog/ plus lowercase path segments, each ending in a slash.
 LEGACY_ENTRY = re.compile(r"^catalog/(?:[a-z0-9][a-z0-9-]*/)*$")
+# A moved pair: lowercase site-relative segments ending in a slash; only the new
+# path may add one #fragment. No scheme, query, leading slash, or dot segment.
+MOVED_OLD = re.compile(r"^[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*/$")
+MOVED_NEW = re.compile(r"^[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*/(?:#[a-z0-9-]+)?$")
 # Built by tools/site/build_pdf.py; may be skipped locally when Pango is missing.
 PROPOSAL_PDF = "proposal/otel-telco-blueprints-proposal.pdf"
 SKIP_SCHEMES = ("http:", "https:", "mailto:", "tel:", "data:", "javascript:")
@@ -62,6 +71,9 @@ REDIRECT = """<!doctype html>
 </body>
 </html>
 """
+
+# A fragment target already names its anchor, so the script must not add location.hash.
+REDIRECT_FRAGMENT = REDIRECT.replace('location.replace("{rel}" + location.hash)', 'location.replace("{rel}")')
 
 
 # ---------- merge ----------
@@ -97,10 +109,17 @@ def read_legacy(path: Path) -> list[str]:
     return [ln.strip() for ln in lines if ln.strip() and not ln.lstrip().startswith("#")]
 
 
+def _display(path: Path) -> str:
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _front_matter_title(path: Path) -> str:
     lines = path.read_text(encoding="utf-8").splitlines()
     if not lines or lines[0].strip() != "---":
-        raise SystemExit(f"redirect: {path.relative_to(ROOT)} has no front matter")
+        raise SystemExit(f"redirect: {_display(path)} has no front matter")
     for line in lines[1:]:
         if line.strip() == "---":
             break
@@ -110,7 +129,7 @@ def _front_matter_title(path: Path) -> str:
             if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
                 value = value[1:-1]
             return value
-    raise SystemExit(f"redirect: {path.relative_to(ROOT)} has no title")
+    raise SystemExit(f"redirect: {_display(path)} has no title")
 
 
 def _title_for(entry: str) -> str:
@@ -144,6 +163,56 @@ def write_redirects(site: Path, legacy_list: list[str], site_url: str) -> None:
             REDIRECT.format(title=title, canonical=site_url + target, rel=rel),
             encoding="utf-8",
         )
+
+
+def read_moves(path: Path) -> list[tuple[str, str]]:
+    """Return the (old, new) pairs in the frozen moved list (comments and blanks skipped)."""
+    pairs = []
+    for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        text = line.strip()
+        if not text or text.startswith("#"):
+            continue
+        fields = text.split()
+        if len(fields) != 2:
+            raise SystemExit(f"redirect: {_display(path)} line {n}: want 'old new', got {text!r}")
+        pairs.append((fields[0], fields[1]))
+    return pairs
+
+
+def _moved_title(target: str, root: Path = ROOT) -> str:
+    """Title from the source page the moved target is built from."""
+    page = target.split("#", 1)[0]
+    parts = page.rstrip("/").split("/")
+    source = None
+    if parts[0] == NEW_PREFIX.rstrip("/") and len(parts) == 3:
+        source = root / "catalog" / parts[1] / parts[2] / "README.md"
+    elif parts[0] == "platform" and len(parts) == 2:
+        source = root / "platform" / parts[1] / "README.md"
+    if source is None or not source.is_file():
+        raise SystemExit(f"redirect: no source page for {target}")
+    return _front_matter_title(source)
+
+
+def write_moves(site: Path, pairs: list[tuple[str, str]], site_url: str, root: Path = ROOT) -> None:
+    """Write a redirect stub at site/<old>/index.html for every moved pair."""
+    if not site_url.endswith("/"):
+        site_url += "/"
+    for old, new in pairs:
+        if not MOVED_OLD.fullmatch(old):
+            raise SystemExit(f"redirect: bad moved path {old!r}")
+        if not MOVED_NEW.fullmatch(new):
+            raise SystemExit(f"redirect: bad moved target {new!r} for {old}")
+        page_path = new.split("#", 1)[0]
+        if not (site / page_path / "index.html").is_file():
+            raise SystemExit(f"redirect: target {page_path} for {old} is missing")
+        page = site / old / "index.html"
+        if page.exists():
+            raise SystemExit(f"redirect: {old} is still built; it must only redirect")
+        rel = "../" * old.count("/") + new
+        title = html.escape(_moved_title(new, root), quote=True)
+        template = REDIRECT_FRAGMENT if "#" in new else REDIRECT
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(template.format(title=title, canonical=site_url + new, rel=rel), encoding="utf-8")
 
 
 # ---------- link check ----------
@@ -232,13 +301,14 @@ def main() -> int:
         raise SystemExit("merge: site/ is missing; build the docs first")
     merge(DIST, SITE)
     write_redirects(SITE, read_legacy(LEGACY), _site_url())
+    write_moves(SITE, read_moves(MOVED), _site_url())
     broken = check_links(SITE, optional_targets(SITE))
     if broken:
         print(f"links: {len(broken)} internal link(s) resolve to no file:", file=sys.stderr)
         for item in broken:
             print(f"  {item}", file=sys.stderr)
         return 1
-    print("merge: explorer merged, redirects written, links resolve")
+    print("merge: explorer merged, legacy and moved redirects written, links resolve")
     return 0
 
 
