@@ -24,6 +24,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Explains RAN and RF health findings that analytical tools compute, and recommends parameter changes to a human approver. Never changes a cell itself. Depends on your performance counters, your own analysis tools, and a retrained Classification head."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-11"]
+also_covers: ["KPI root-cause reasoning"]
 clarity_reviewed: "2026-11-17"
 agent_school: [101]
 card:

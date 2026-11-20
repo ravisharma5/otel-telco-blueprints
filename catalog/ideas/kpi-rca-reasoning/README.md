@@ -35,11 +35,32 @@ placement:
   far-edge: {runs: [], note: "Not used: the counters behind each KPI are collected regionally."}
   regional: {runs: ["classification", "safety", "decision"], note: "Root-cause labels, the Safety check, and the gate label run here."}
   core: {runs: ["llm-large"], note: "The large LLM writes the reasoning and each parameter proposal."}
+idea:
+  why: "RAN and RF health checks already cover KPI degradations, and open reasoning models struggled on TeleLogs without domain adaptation."
+  promote:
+    - "Your own labelled KPI degradations"
+    - "A measured gain over RAN and RF health checks"
+  merged_into: "UC-OPS-04"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # KPI root-cause reasoning
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** RAN and RF health checks already cover KPI degradations, and open reasoning models struggled on TeleLogs without domain adaptation.
+
+**What would promote it:**
+
+- [ ] Your own labelled KPI degradations
+- [ ] A measured gain over RAN and RF health checks
+
+Its scope now sits in [UC-OPS-04 RAN and RF health checks](../../network-operations/ran-rf-health-checks/README.md).
+
+<!-- generated:idea end -->
 
 ## At a glance
 

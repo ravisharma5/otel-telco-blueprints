@@ -271,9 +271,6 @@ options:
       - use_case: UC-CARE-01
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM make room for them beside retrieval and the Decision slot on a regional GPU.
-      - use_case: UC-KNOW-02
-        roles: [safety, llm-small]
-        reason: FP8 builds of Safety and the small LLM leave room for the Decision slot and retrieval while summaries run at the regional site.
       - use_case: UC-KNOW-03
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM leave room for Embedding and Reranker on the same regional GPU.
@@ -310,9 +307,6 @@ options:
       - use_case: UC-SEC-01
         roles: [classification, safety]
         reason: FP8 builds of Classification and Safety make room for them beside the Decision slot that labels each containment proposal.
-      - use_case: UC-SEC-02
-        roles: [classification, safety]
-        reason: FP8 builds of Classification and Safety halve their weights and leave KV-cache room on the regional GPU near the signalling records.
       - use_case: UC-CARE-02
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM make room for them beside retrieval and the Decision slot that labels each remote fix.
@@ -322,9 +316,6 @@ options:
       - use_case: UC-BIZ-02
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM make room for them beside the Decision slot that labels each hold or escalation.
-      - use_case: UC-RES-01
-        roles: [classification, safety]
-        reason: FP8 builds of Classification and Safety make room for them beside the Decision slot that labels each parameter proposal.
     related: []
     excluded_slots: [decision]
 

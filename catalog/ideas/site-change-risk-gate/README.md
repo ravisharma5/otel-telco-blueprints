@@ -36,11 +36,29 @@ placement:
   far-edge: {runs: ["decision"], note: "Decision labels each pending change on CPU at the cell site."}
   regional: {runs: [], note: "No model runs here; REVIEW requests reach the operator's NOC."}
   core: {runs: [], note: "No model runs here; acceptance replays recorded changes offline."}
+idea:
+  why: "Rules cover most pre-change checks, and the 26B Decision model has no measured fit on cell-site CPU beside a vDU."
+  promote:
+    - "Measured CPU fit and latency on a DU server under vDU load"
+    - "Evidence that the model adds value over rule-based pre-checks"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # Site change-risk gate
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** Rules cover most pre-change checks, and the 26B Decision model has no measured fit on cell-site CPU beside a vDU.
+
+**What would promote it:**
+
+- [ ] Measured CPU fit and latency on a DU server under vDU load
+- [ ] Evidence that the model adds value over rule-based pre-checks
+
+<!-- generated:idea end -->
 
 ## At a glance
 

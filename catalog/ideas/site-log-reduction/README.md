@@ -34,11 +34,31 @@ placement:
   far-edge: {runs: ["embedding"], note: "Embedding groups repeated log lines on the cell-site server."}
   regional: {runs: [], note: "Receives counts, samples, and new-pattern flags; no model runs here."}
   core: {runs: [], note: "Not used: grouping happens at the site."}
+idea:
+  why: "Template mining such as Drain is the usual baseline for log reduction, and embedding clusters can hide the rare line that matters in an outage."
+  promote:
+    - "A measured comparison with template mining on your own site logs"
+    - "Evidence that no rare fault line is hidden, on replayed incidents"
+    - "Measured CPU and memory use on a DU server under vDU load"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # Site log reduction
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** Template mining such as Drain is the usual baseline for log reduction, and embedding clusters can hide the rare line that matters in an outage.
+
+**What would promote it:**
+
+- [ ] A measured comparison with template mining on your own site logs
+- [ ] Evidence that no rare fault line is hidden, on replayed incidents
+- [ ] Measured CPU and memory use on a DU server under vDU load
+
+<!-- generated:idea end -->
 
 ## At a glance
 

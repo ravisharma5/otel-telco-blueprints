@@ -34,11 +34,32 @@ placement:
   far-edge: {runs: [], note: "Not used: classification runs at regional and core sites."}
   regional: {runs: ["classification", "safety"], note: "The attack label and the Safety check run here, close to the signalling records."}
   core: {runs: ["llm-large"], note: "The large LLM writes each explanation."}
+idea:
+  why: "The Classification head knows only TeleLogs root causes, no public labelled signalling-attack set exists to retrain it, and security alert triage already covers the flow."
+  promote:
+    - "A labelled signalling-attack set with usage rights"
+    - "A measured Classification head on that set"
+  merged_into: "UC-SEC-01"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # Signalling attack classification
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** The Classification head knows only TeleLogs root causes, no public labelled signalling-attack set exists to retrain it, and security alert triage already covers the flow.
+
+**What would promote it:**
+
+- [ ] A labelled signalling-attack set with usage rights
+- [ ] A measured Classification head on that set
+
+Its scope now sits in [UC-SEC-01 Security alert triage](../../security/security-triage/README.md).
+
+<!-- generated:idea end -->
 
 ## At a glance
 

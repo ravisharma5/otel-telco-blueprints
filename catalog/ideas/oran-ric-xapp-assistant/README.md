@@ -34,11 +34,29 @@ placement:
   far-edge: {runs: [], note: "Not used: development questions don't need to run at the cell site."}
   regional: {runs: ["embedding", "reranker", "safety"], note: "The specification and code index, passage order, and the Safety check run here."}
   core: {runs: ["llm-large"], note: "The large LLM answers from the retrieved passages and files."}
+idea:
+  why: "Most operators buy xApps from vendors rather than write them, so few teams need a code assistant for them."
+  promote:
+    - "Operators who build xApps in-house and want an assistant"
+    - "A code-navigation evaluation beyond multiple-choice benchmark scores"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # O-RAN RIC xApp assistant
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** Most operators buy xApps from vendors rather than write them, so few teams need a code assistant for them.
+
+**What would promote it:**
+
+- [ ] Operators who build xApps in-house and want an assistant
+- [ ] A code-navigation evaluation beyond multiple-choice benchmark scores
+
+<!-- generated:idea end -->
 
 ## At a glance
 

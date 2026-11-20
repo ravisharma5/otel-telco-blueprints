@@ -23,7 +23,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Answers standards and runbook questions with citations, or abstains and lists what it searched. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [103, 201, 203, 402]
-also_covers: ["Telecom standards Q&A over documents you hold rights to", "Grounded RAG assistants"]
+also_covers: ["Telecom standards Q&A over documents you hold rights to", "Grounded RAG assistants", "Standards and change-request summaries"]
 clarity_reviewed: "2026-11-17"
 card:
   goal: "answer"

@@ -34,11 +34,32 @@ placement:
   far-edge: {runs: [], note: "Not used: signalling traces are collected at the regional site."}
   regional: {runs: ["embedding", "reranker", "safety"], note: "Retrieval over the procedures and the Safety check run here."}
   core: {runs: ["llm-large"], note: "The large LLM writes each step-by-step explanation."}
+idea:
+  why: "Signalling trace analysis covers the same traces, and the event rebuild tools are the real work."
+  promote:
+    - "Event rebuild tools and labelled failed procedures"
+    - "Measured value beyond signalling trace analysis"
+  merged_into: "UC-OPS-02"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # 5G mobility failure analysis
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** Signalling trace analysis covers the same traces, and the event rebuild tools are the real work.
+
+**What would promote it:**
+
+- [ ] Event rebuild tools and labelled failed procedures
+- [ ] Measured value beyond signalling trace analysis
+
+Its scope now sits in [UC-OPS-02 Signalling trace analysis](../../network-operations/signalling-trace-analysis/README.md).
+
+<!-- generated:idea end -->
 
 ## At a glance
 

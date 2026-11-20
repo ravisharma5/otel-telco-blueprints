@@ -34,11 +34,32 @@ placement:
   far-edge: {runs: [], note: "Not used: summaries don't need to run at the cell site."}
   regional: {runs: ["embedding", "reranker", "safety", "decision", "llm-small"], note: "Retrieval, the Safety and Decision checks, and the small LLM run here."}
   core: {runs: ["llm-large"], note: "The large LLM writes the summaries the Decision slot routes up."}
+idea:
+  why: "The grounded knowledge assistant already answers from versioned standards with citations, so summaries fit there rather than on a page of their own."
+  promote:
+    - "A clause-level citation check on versioned change requests"
+    - "Evidence of an audience beyond standards delegates"
+  merged_into: "UC-KNOW-01"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->
 
 # Standards and change-request summaries
+
+<!-- generated:idea start -->
+
+> **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
+
+**Why it's an idea:** The grounded knowledge assistant already answers from versioned standards with citations, so summaries fit there rather than on a page of their own.
+
+**What would promote it:**
+
+- [ ] A clause-level citation check on versioned change requests
+- [ ] Evidence of an audience beyond standards delegates
+
+Its scope now sits in [UC-KNOW-01 Grounded knowledge assistant](../../standards-knowledge/grounded-knowledge-assistant/README.md).
+
+<!-- generated:idea end -->
 
 ## At a glance
 
