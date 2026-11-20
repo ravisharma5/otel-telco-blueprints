@@ -1,6 +1,7 @@
 ---
 // Sub-tabs inside the Use cases section: the gallery and the Ideas page.
 // Counts come from explorer.json at build time; the active tab is the current page.
+// The Use cases tab lands on the gallery band, where the tabs sit, not the hero.
 import { frontmatter as copy } from '../content/copy.md';
 import { fill, ideas, useCases } from '../lib/data';
 
@@ -11,7 +12,7 @@ interface Props {
 const { active } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const tabs = [
-  { id: 'use-cases', href: base, label: fill(copy.ideas.tabs.use_cases, { count: useCases.length }) },
+  { id: 'use-cases', href: base + '#gallery', label: fill(copy.ideas.tabs.use_cases, { count: useCases.length }) },
   { id: 'ideas', href: base + 'ideas/', label: fill(copy.ideas.tabs.ideas, { count: ideas.length }) },
 ];
 ---

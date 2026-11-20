@@ -734,7 +734,7 @@ def _check_tabs(tree, data, active):
         text["use_cases"].replace("{count}", str(len(data["use_cases"]))),
         text["ideas"].replace("{count}", str(len(data["ideas"]))),
     ]
-    assert [a.attrs["href"] for a in tabs] == [BASE, BASE + "ideas/"]
+    assert [a.attrs["href"] for a in tabs] == [BASE + "#gallery", BASE + "ideas/"]
     current = [a.attrs.get("data-tab") for a in tabs if a.attrs.get("aria-current") == "page"]
     assert current == [active]
     assert all(a.attrs.get("aria-current") in (None, "page") for a in tabs)
