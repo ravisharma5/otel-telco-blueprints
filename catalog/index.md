@@ -14,6 +14,17 @@ Use cases that aren't recipes yet are listed as [exploration ideas](ideas/index.
 
 The Use cases page shows the same use cases as cards.
 
+## When not to use OTel
+
+Some problems are numeric or high-volume, so a classic method should come first. OTel then adds a gate, a check, or a readable explanation around that method's output.
+
+| Problem | Start with | Where OTel fits | In this catalog |
+|---|---|---|---|
+| Numeric optimisation, such as energy-saving windows or RF parameters | Your SON, planner, or vendor energy feature | Gate each proposal, check it against its simulation, and report | [UC-OPS-05](network-operations/ran-energy-saving/README.md) works this way: your planner proposes the windows |
+| Log volume reduction | Template mining, for example [Drain](https://jiemingzhu.github.io/pub/pjhe_icws2017.pdf), and log-pipeline rules | Summarise reduced logs centrally if you need a readable digest | [UC-OPS-10](ideas/site-log-reduction/README.md) moved to the ideas area for this reason |
+| Threshold and anomaly detection on KPIs | Thresholds and classic anomaly detection | Explain and triage a degradation your monitoring already found | [UC-OPS-04](network-operations/ran-rf-health-checks/README.md) |
+| Time-series forecasting | Your forecasting tool, called as a read tool | Read forecasts; never compute them | [UC-OPS-06](network-operations/slice-sla-assurance/README.md) |
+
 <!-- generated:catalog-by-domain start -->
 
 ## Standards and knowledge
