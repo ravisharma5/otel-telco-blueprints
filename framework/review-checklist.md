@@ -46,6 +46,8 @@ Run `make lint` from the repo root. Fix every error, and fix or justify every wa
 | CR002 | error | `clarity_reviewed` on a non-blueprint doc is not an ISO date |
 | ID001 | error | Two blueprints share an id |
 | XR001 | error | `platform_blueprints` names a platform with no blueprint (full-repo runs) |
+| IDEA001 | error | A page under `catalog/ideas/` has no `idea` object, an `idea` object sits outside that folder, or an idea page is a flagship |
+| IDEA002 | error | An idea's `merged_into` names a use case that does not exist, is itself an idea, or has an empty `also_covers` (full-repo runs) |
 | IO001 | error | File cannot be read as UTF-8 text |
 | `Blueprints.OTelTracing` | error | "OTel" used to mean tracing, for example `OTel collector` or `OTLP` |
 | `Blueprints.Unevidenced` | error | Claim words with no source, for example `proven` or bare `validated` |

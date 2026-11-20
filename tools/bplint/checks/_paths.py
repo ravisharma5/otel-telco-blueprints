@@ -38,3 +38,17 @@ def resolve(doc, rel: str, repo_root: Path) -> tuple[Path, bool]:
         base = Path(doc.abs_path).parent if doc.abs_path else root
         target = (base / path).resolve()
     return target, (target == root or root in target.parents)
+
+
+def repo_relative(doc, repo_root: Path) -> str:
+    """The doc's path relative to the repository root, with "/" separators.
+
+    Falls back to the doc's display path when it has no absolute path or sits
+    outside the root.
+    """
+    if doc.abs_path is not None:
+        root = Path(repo_root).resolve()
+        target = Path(doc.abs_path).resolve()
+        if root in target.parents:
+            return target.relative_to(root).as_posix()
+    return Path(str(doc.path)).as_posix()

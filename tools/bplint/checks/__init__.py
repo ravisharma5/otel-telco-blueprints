@@ -65,7 +65,7 @@ DOC_CHECKS.extend(
 )
 
 # Repo checks: ids first, then cross-references.
-REPO_CHECKS.extend([repo.check_ids, repo.check_refs])
+REPO_CHECKS.extend([repo.check_ids, repo.check_refs, repo.check_idea_merges])
 
 # Non-blueprint docs (config doc_globs) run only these checks.
 GENERAL_DOC_CHECKS = (frontmatter.check_type_binding, links.check, diagrams.check, clarity.check)

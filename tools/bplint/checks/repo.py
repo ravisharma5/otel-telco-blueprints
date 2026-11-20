@@ -1,6 +1,7 @@
-"""ID001, XR001: repo-level id uniqueness and platform cross-references.
+"""ID001, XR001, IDEA002: repo-level id uniqueness, platform cross-references,
+and idea merge targets.
 
-ID001 runs on every invocation. XR001 runs only on discovery runs
+ID001 runs on every invocation. XR001 and IDEA002 run only on discovery runs
 (ctx.discovery): an explicit-path run lints a subset, so a platform missing
 from that subset is not evidence of a dangling reference.
 """
@@ -74,4 +75,35 @@ def check_refs(ctx) -> list[Finding]:
                         f"platform_blueprints entry '{ref}' has no matching platform blueprint",
                     )
                 )
+    return out
+
+
+def check_idea_merges(ctx) -> list[Finding]:
+    """IDEA002: an idea's merged_into names a front-page use case that lists it in also_covers."""
+    if not getattr(ctx, "discovery", False):
+        return []
+    use_cases = [d for d in _blueprints(ctx) if d.front_matter.get("type") == "use-case"]
+    by_id = {}
+    for d in use_cases:
+        uid = d.front_matter.get("id")
+        if isinstance(uid, str):
+            by_id.setdefault(uid, d)
+    out = []
+    for doc in use_cases:
+        idea = doc.front_matter.get("idea")
+        if not isinstance(idea, dict):
+            continue
+        target = idea.get("merged_into")
+        if not isinstance(target, str):
+            continue
+        host = by_id.get(target)
+        if host is None:
+            text = f"idea.merged_into '{target}' has no matching use case"
+        elif isinstance(host.front_matter.get("idea"), dict):
+            text = f"idea.merged_into '{target}' is itself an idea; merge into a front-page use case"
+        elif not host.front_matter.get("also_covers"):
+            text = f"idea.merged_into '{target}' has an empty also_covers; list this idea there"
+        else:
+            continue
+        out.append(Finding(doc.path, _key_line(doc, "idea"), 1, "error", "IDEA002", text))
     return out

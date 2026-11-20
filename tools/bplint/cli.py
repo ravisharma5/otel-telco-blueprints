@@ -268,7 +268,7 @@ def main(argv=None) -> int:
             (p, is_bp[group], allowed_types(ctx.config, group))
             for p, group in discover_groups(ctx.config)
         ]
-        ctx.discovery = True  # full-repo run: XR001 may treat absent platforms as dangling
+        ctx.discovery = True  # full-repo run: XR001 and IDEA002 may treat absent targets as dangling
 
     findings = []
     for p, is_bp, allowed in targets:

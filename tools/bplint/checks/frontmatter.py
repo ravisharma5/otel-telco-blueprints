@@ -14,6 +14,8 @@ AS001: an empty agent_school list needs the no-course sentence in the
 At a glance Agent-school courses cell. AS002: every course number must be in
 the pinned list in tools/bplint/agent-school-courses.yaml (read locally, no
 network).
+IDEA001: a page under catalog/ideas/ needs an idea object, an idea object is
+allowed only there, and an idea page is never a flagship.
 """
 
 from __future__ import annotations
@@ -24,6 +26,7 @@ from pathlib import Path
 
 from ..loader import load_yaml
 from ..report import Finding
+from ._paths import repo_relative
 
 COURSES_FILE = Path(__file__).resolve().parents[1] / "agent-school-courses.yaml"
 NO_COURSE_SENTENCE = "None: no agent-school course covers this use case yet"
@@ -224,6 +227,23 @@ def _sandbox_findings(doc, fm) -> list[Finding]:
     ]
 
 
+IDEAS_DIR = "catalog/ideas/"
+
+
+def _idea_findings(doc, fm, ctx) -> list[Finding]:
+    """IDEA001: the idea object, the catalog/ideas/ folder, and flagship agree."""
+    in_ideas = repo_relative(doc, ctx.repo_root).startswith(IDEAS_DIR)
+    has_idea = isinstance(fm.get("idea"), dict)
+    out = []
+    if in_ideas and not has_idea:
+        out.append((_key_line(doc, "id"), "a page under catalog/ideas/ needs an idea object"))
+    if has_idea and not in_ideas:
+        out.append((_key_line(doc, "idea"), "an idea object is allowed only under catalog/ideas/"))
+    if (in_ideas or has_idea) and fm.get("flagship") is True:
+        out.append((_key_line(doc, "flagship"), "an idea page cannot be a flagship"))
+    return [Finding(doc.path, line, 1, "error", "IDEA001", text) for line, text in out]
+
+
 def _course_findings(doc, fm) -> list[Finding]:
     courses = fm.get("agent_school")
     if not isinstance(courses, list):
@@ -327,6 +347,7 @@ def check(doc, ctx) -> list[Finding]:
         out.extend(_depth_findings(doc, fm))
         out.extend(_adaptation_findings(doc, fm))
         out.extend(_sandbox_findings(doc, fm))
+        out.extend(_idea_findings(doc, fm, ctx))
     if not out:
         out.extend(_course_findings(doc, fm))
     return out
