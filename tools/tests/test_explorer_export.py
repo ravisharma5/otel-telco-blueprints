@@ -1223,3 +1223,94 @@ def test_onboarding_exported(data):
             assert state["runs_here"] is True and roles == ["llm-large"], (setup["id"], roles)
         seen.add(setup["tier"])
     assert {"regional", "core"} <= seen
+
+
+# Exploration ideas: idea pages live under catalog/ideas/ and leave the gallery.
+
+
+def test_is_idea_rule():
+    assert ex.is_idea({"idea": {"why": "x", "promote": ["y"]}}) is True
+    assert ex.is_idea({}) is False
+    assert ex.is_idea({"idea": "x"}) is False
+    assert ex.IDEAS_DIR == "ideas"
+
+
+def test_no_ideas_on_the_real_catalog(data):
+    assert data["ideas"] == []
+    assert len(data["use_cases"]) == 30
+
+
+IDEA_SOURCE = "catalog/research/kpi-rca-reasoning"
+
+
+def _with_idea(tmp_path, idea):
+    """Copy the repo inputs and move one page to catalog/ideas/<slug>/ as an idea."""
+    shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
+    shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
+    src = tmp_path / IDEA_SOURCE
+    slug = src.name
+    dest = tmp_path / "catalog" / ex.IDEAS_DIR / slug
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(src, dest)
+    page = dest / "README.md"
+    _, fm_text, rest = page.read_text(encoding="utf-8").split("---\n", 2)
+    fm = yaml.safe_load(fm_text)
+    fm["idea"] = idea
+    page.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n" + rest, encoding="utf-8")
+    return fm, slug
+
+
+def test_idea_page_leaves_the_gallery(tmp_path):
+    fm, slug = _with_idea(tmp_path, {"why": "No public evidence yet.", "promote": ["A labelled set"]})
+    built = ex.build_explorer_data(tmp_path)
+    assert fm["id"] not in {u["id"] for u in built["use_cases"]}
+    assert len(built["use_cases"]) == 29
+    matches = [i for i in built["ideas"] if i["id"] == fm["id"]]
+    assert len(matches) == 1
+    idea = matches[0]
+    assert set(idea) == {
+        "id", "title", "slug", "domain", "depth", "why", "promote", "merged_into", "docs_url",
+    }
+    assert idea["slug"] == slug and idea["title"] == fm["title"]
+    assert idea["docs_url"] == f"recipes/ideas/{slug}/"
+    assert idea["domain"] == {"id": fm["domain"], "label": ex.DOMAIN_LABELS[fm["domain"]]}
+    assert idea["depth"] == {"id": fm["depth"], "label": ex.DEPTH_LABELS[fm["depth"]]}
+    assert idea["why"] == "No public evidence yet."
+    assert idea["promote"] == ["A labelled set"]
+    assert idea["merged_into"] is None
+
+
+def test_idea_merged_into_exported(tmp_path):
+    fm, _ = _with_idea(
+        tmp_path, {"why": "Covered elsewhere.", "promote": ["Own evidence"], "merged_into": "UC-NETOPS-01"}
+    )
+    built = ex.build_explorer_data(tmp_path)
+    idea = next(i for i in built["ideas"] if i["id"] == fm["id"])
+    assert idea["merged_into"] == "UC-NETOPS-01"
+
+
+def test_idea_must_sit_in_the_ideas_folder(tmp_path):
+    shutil.copytree(REPO_ROOT / "data", tmp_path / "data")
+    shutil.copytree(REPO_ROOT / "catalog", tmp_path / "catalog")
+    _copy_serving_page(tmp_path)
+    page = tmp_path / IDEA_SOURCE / "README.md"
+    _, fm_text, rest = page.read_text(encoding="utf-8").split("---\n", 2)
+    fm = yaml.safe_load(fm_text)
+    fm["idea"] = {"why": "x", "promote": ["y"]}
+    page.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n" + rest, encoding="utf-8")
+    with pytest.raises(SystemExit) as exc:
+        ex.build_explorer_data(tmp_path)
+    assert "ideas" in str(exc.value)
+
+
+def test_try_it_checks_use_cases_only(tmp_path):
+    """A try-it id that names an idea is unknown: try-it links belong to the gallery."""
+    fm, _ = _with_idea(tmp_path, {"why": "x", "promote": ["y"]})
+    try_it = tmp_path / ex.TRY_IT_FILE
+    try_it.write_text(
+        try_it.read_text(encoding="utf-8") + f"{fm['id']}: https://example.com/x\n", encoding="utf-8"
+    )
+    with pytest.raises(SystemExit) as exc:
+        ex.build_explorer_data(tmp_path)
+    assert "unknown use-case id" in str(exc.value) and fm["id"] in str(exc.value)

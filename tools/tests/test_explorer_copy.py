@@ -323,7 +323,7 @@ def _exported_strings(repo_root=REPO_ROOT):
     from tools.site.export_explorer import build_explorer_data
 
     for path, text in _strings(build_explorer_data(repo_root)):
-        if text.startswith("https://") or path[-1] in ("url", "model_card", "red_hat_build", "recipe_url"):
+        if text.startswith("https://") or path[-1] in ("url", "model_card", "red_hat_build", "recipe_url", "docs_url"):
             continue
         yield path, text
 
