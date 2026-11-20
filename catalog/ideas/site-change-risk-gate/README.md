@@ -24,7 +24,7 @@ placement_tier: ["far-edge"]
 one_liner: "Checks live site state before a change lands on a cell site and holds risky changes. Acts within policy only on low-risk change types, once that stage is earned; OS and firmware upgrades always need approval. Depends on the Decision slot on CPU at the site and the Decision gate."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [301]
-clarity_reviewed: "2026-11-18"
+clarity_reviewed: "2026-11-20"
 card:
   goal: "change"
   summary: "Before a change lands on a cell site, reads live site state and holds the change when the site is busy or degraded."
@@ -51,7 +51,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** Rules cover most pre-change checks, and the 26B Decision model has no measured fit on cell-site CPU beside a vDU.
+**Why it's an idea.** Rules cover most pre-change checks, and the 26B Decision model has no measured fit on cell-site CPU beside a vDU.
 
 **What would promote it:**
 

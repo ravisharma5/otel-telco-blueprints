@@ -21,7 +21,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Explains a failed 5G handover or registration from rebuilt signalling and the 3GPP procedures, with citations. Informs only. Depends on your tools that rebuild each mobility event and your own failure cases."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 agent_school: []
 card:
   goal: "incidents"
@@ -35,7 +35,7 @@ placement:
   regional: {runs: ["embedding", "reranker", "safety"], note: "Retrieval over the procedures and the Safety check run here."}
   core: {runs: ["llm-large"], note: "The large LLM writes each step-by-step explanation."}
 idea:
-  why: "Signalling trace analysis covers the same traces, and the event rebuild tools are the real work."
+  why: "Signalling trace analysis covers the same traces, and most of the work is in the tools that rebuild events."
   promote:
     - "Event rebuild tools and labelled failed procedures"
     - "Measured value beyond signalling trace analysis"
@@ -50,7 +50,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** Signalling trace analysis covers the same traces, and the event rebuild tools are the real work.
+**Why it's an idea.** Signalling trace analysis covers the same traces, and most of the work is in the tools that rebuild events.
 
 **What would promote it:**
 

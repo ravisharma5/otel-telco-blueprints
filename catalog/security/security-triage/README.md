@@ -24,7 +24,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Triages alerts from your security detectors, labels each one with your alert taxonomy, and proposes containment to a human approver. Never detects threats or contains them itself. Depends on independently checked detectors, labelled alerts from your network, and a retrained Classification head."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-11"]
 also_covers: ["Signalling attack classification"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 agent_school: []
 card:
   goal: "secure"

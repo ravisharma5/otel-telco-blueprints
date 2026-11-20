@@ -21,7 +21,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Summarises 3GPP specifications and change requests with a citation for each clause, or abstains. Informs only and never changes the network. Depends on retrieval plus the Safety and Decision slots."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-09", "PB-10", "PB-11"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 agent_school: [103, 402]
 card:
   goal: "answer"
@@ -50,7 +50,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** The grounded knowledge assistant already answers from versioned standards with citations, so summaries fit there rather than on a page of their own.
+**Why it's an idea.** The grounded knowledge assistant already answers from versioned standards with citations, so summaries fit there rather than on a page of their own.
 
 **What would promote it:**
 

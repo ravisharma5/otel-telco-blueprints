@@ -24,7 +24,7 @@ placement_tier: ["regional", "core"]
 one_liner: "Gates the energy-saving windows your planner, SON, or vendor energy feature proposes for capacity booster cells. Checks each against its simulation, reports the result, and acts within policy only on booster cells, once that stage is earned; coverage cells always need approval."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-07", "PB-08", "PB-09", "PB-10", "PB-11"]
 agent_school: [302]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 card:
   goal: "sla-energy"
   summary: "Gates the booster-cell energy-saving windows your planner proposes, checks each against its simulation, reports, and acts only on low-risk cells after earning it."

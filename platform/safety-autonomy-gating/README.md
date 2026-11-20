@@ -14,7 +14,7 @@ top_decisions:
   - "Set a stage per use case and action class"
   - "Promote a stage only on evidence"
 agent_school: [201, 301, 304]
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-20"
 ---
 
 <!-- Writing rules: framework/style-guide.md. Name each component by its role and the Red Hat product used. Write no product support status. -->

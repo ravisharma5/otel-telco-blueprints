@@ -22,7 +22,7 @@ tmf_an_level_target: 2
 placement_tier: ["regional", "core"]
 one_liner: "Reasons from a detected KPI degradation to its likely root cause, and recommends parameter changes to a human approver. Never changes the network itself. Depends on your KPI data, a retrained Classification head, and your own evaluation set."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-06", "PB-07", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 agent_school: [201]
 card:
   goal: "incidents"
@@ -51,7 +51,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** RAN and RF health checks already cover KPI degradations, and open reasoning models struggled on TeleLogs without domain adaptation.
+**Why it's an idea.** RAN and RF health checks already cover KPI degradations, and open reasoning models struggled on TeleLogs without domain adaptation.
 
 **What would promote it:**
 

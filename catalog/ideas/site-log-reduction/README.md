@@ -21,7 +21,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["far-edge"]
 one_liner: "Groups repeated log lines on the cell-site server and forwards counts, samples, and new-pattern flags instead of every line. Informs only and never changes the network. Depends on the Embedding slot running on CPU at the site."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-08", "PB-10", "PB-11"]
-clarity_reviewed: "2026-11-18"
+clarity_reviewed: "2026-11-20"
 agent_school: []
 card:
   goal: "incidents"
@@ -50,7 +50,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** Template mining such as Drain is the usual baseline for log reduction, and embedding clusters can hide the rare line that matters in an outage.
+**Why it's an idea.** Template mining such as Drain is the usual baseline for log reduction, and embedding clusters can hide the rare line that matters in an outage.
 
 **What would promote it:**
 

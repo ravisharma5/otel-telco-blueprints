@@ -21,7 +21,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Labels suspect 5G core signalling that your detectors flag, such as unusual subscriber-data queries, and explains each label with the messages behind it. Informs only. Depends on labelled attack traffic from your network and a retrained Classification head."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-06", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 agent_school: []
 card:
   goal: "secure"
@@ -50,7 +50,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** The Classification head knows only TeleLogs root causes, no public labelled signalling-attack set exists to retrain it, and security alert triage already covers the flow.
+**Why it's an idea.** The Classification head knows only TeleLogs root causes, no public labelled signalling-attack set exists to retrain it, and security alert triage already covers the flow.
 
 **What would promote it:**
 

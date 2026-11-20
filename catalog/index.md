@@ -1,7 +1,7 @@
 ---
 title: "Recipes"
 doc_status: done
-clarity_reviewed: "2026-11-15"
+clarity_reviewed: "2026-11-20"
 ---
 
 # Recipes

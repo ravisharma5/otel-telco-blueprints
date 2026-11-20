@@ -21,7 +21,7 @@ autonomy_ceiling: "inform"
 placement_tier: ["regional", "core"]
 one_liner: "Answers xApp development questions with citations to O-RAN specifications and your RIC code, or abstains. Informs only and never changes code or the network. Depends on a specification and code index you build and evaluate."
 platform_blueprints: ["PB-01", "PB-02", "PB-03", "PB-04", "PB-05", "PB-06", "PB-08", "PB-11"]
-clarity_reviewed: "2026-11-17"
+clarity_reviewed: "2026-11-20"
 agent_school: []
 card:
   goal: "software"
@@ -49,7 +49,7 @@ idea:
 
 > **Exploration idea, not a recipe.** Try it, test it, and contribute back. [How to promote an idea](../index.md#promote-an-idea).
 
-**Why it's an idea:** Most operators buy xApps from vendors rather than write them, so few teams need a code assistant for them.
+**Why it's an idea.** Most operators buy xApps from vendors rather than write them, so few teams need a code assistant for them.
 
 **What would promote it:**
 

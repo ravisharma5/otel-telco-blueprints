@@ -124,7 +124,7 @@ def idea_block(idea: dict, host: dict | None) -> str:
     where = idea.get("where", idea["id"])
     parts = [
         BANNER,
-        f"**Why it's an idea:** {_line(idea['why'], where)}",
+        f"**Why it's an idea.** {_line(idea['why'], where)}",
         "**What would promote it:**",
         "\n".join(f"- [ ] {_line(p, where)}" for p in idea["promote"]),
     ]
