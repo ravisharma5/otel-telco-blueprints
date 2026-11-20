@@ -144,6 +144,18 @@ def test_idea_merged_into_host_without_also_covers_is_idea002(tmp_path):
         assert [f.code for f in out] == ["IDEA002"] and "also_covers" in out[0].message
 
 
+def test_idea_merged_into_host_not_listing_it_is_idea002(tmp_path):
+    host = _host(tmp_path, also_covers=["Some other merged scope"])
+    out = repo.check_idea_merges(_ctx(tmp_path, [host, _idea(tmp_path)]))
+    assert [f.code for f in out] == ["IDEA002"]
+    assert "does not list 'Fictional widget triage' in also_covers" in out[0].message
+
+
+def test_idea_listed_among_several_also_covers_is_clean(tmp_path):
+    host = _host(tmp_path, also_covers=["Some other merged scope", "Fictional widget triage"])
+    assert repo.check_idea_merges(_ctx(tmp_path, [host, _idea(tmp_path)])) == []
+
+
 def test_idea002_skipped_without_discovery(tmp_path):
     ctx = _ctx(tmp_path, [_idea(tmp_path, merged_into="UC-SEC-09")], discovery=False)
     assert repo.check_idea_merges(ctx) == []

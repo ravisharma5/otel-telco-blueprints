@@ -97,12 +97,16 @@ def check_idea_merges(ctx) -> list[Finding]:
         if not isinstance(target, str):
             continue
         host = by_id.get(target)
+        title = doc.front_matter.get("title")
+        covers = (host.front_matter.get("also_covers") if host is not None else None) or []
         if host is None:
             text = f"idea.merged_into '{target}' has no matching use case"
         elif isinstance(host.front_matter.get("idea"), dict):
             text = f"idea.merged_into '{target}' is itself an idea; merge into a front-page use case"
-        elif not host.front_matter.get("also_covers"):
+        elif not covers:
             text = f"idea.merged_into '{target}' has an empty also_covers; list this idea there"
+        elif not isinstance(covers, list) or title not in covers:
+            text = f"idea.merged_into '{target}' does not list '{title}' in also_covers"
         else:
             continue
         out.append(Finding(doc.path, _key_line(doc, "idea"), 1, "error", "IDEA002", text))
