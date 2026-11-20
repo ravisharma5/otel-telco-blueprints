@@ -223,3 +223,42 @@ def test_recipe_over_page_words_is_bg001(tmp_path):
     secs["Problem and value"] = words(PAGE_WORDS["recipe"] + 10)
     findings = [f for f in lint(tmp_path, render(use_case_fm(depth="recipe"), secs)) if f.code == "BG001"]
     assert len(findings) == 1 and f"budget {PAGE_WORDS['recipe']}" in findings[0].message
+
+
+# ---- idea block allowance ------------------------------------------------
+
+IDEA_WORDS = yaml.safe_load((REPO_ROOT / "tools/bplint/budgets.yaml").read_text())["types"]["use-case"][
+    "idea_block_words"
+]
+IDEA_FM = {"why": "Kept as an idea until an operator trial shows the gate works", "promote": ["A public trial"]}
+
+
+def _bg001(tmp_path, fm, secs):
+    return [f for f in lint(tmp_path, render(fm, secs)) if f.code == "BG001"]
+
+
+def test_idea_block_allowance_is_150():
+    assert IDEA_WORDS == 150
+    assert "idea_block_words" not in PAGE_WORDS
+
+
+def test_entry_with_idea_gets_the_allowance(tmp_path):
+    secs = use_case_sections()
+    secs["Problem and value"] = words(PAGE_WORDS["entry"] + IDEA_WORDS - 50)
+    assert _bg001(tmp_path, use_case_fm(idea=IDEA_FM), secs) == []
+    findings = _bg001(tmp_path, use_case_fm(), secs)
+    assert len(findings) == 1 and f"budget {PAGE_WORDS['entry']}" in findings[0].message
+
+
+def test_entry_with_idea_over_the_allowance_is_bg001(tmp_path):
+    secs = use_case_sections()
+    secs["Problem and value"] = words(PAGE_WORDS["entry"] + IDEA_WORDS + 10)
+    findings = _bg001(tmp_path, use_case_fm(idea=IDEA_FM), secs)
+    assert len(findings) == 1 and f"budget {PAGE_WORDS['entry'] + IDEA_WORDS}" in findings[0].message
+
+
+def test_recipe_with_idea_gets_the_allowance(tmp_path):
+    secs = use_case_sections()
+    secs["Problem and value"] = words(PAGE_WORDS["recipe"] + IDEA_WORDS + 10)
+    findings = _bg001(tmp_path, use_case_fm(depth="recipe", idea=IDEA_FM), secs)
+    assert len(findings) == 1 and f"budget {PAGE_WORDS['recipe'] + IDEA_WORDS}" in findings[0].message

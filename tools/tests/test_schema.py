@@ -264,3 +264,47 @@ def test_platform_layers_use_names_not_codes():
     v = _validator("platform.schema.json")
     assert _error_paths(v, dict(PLATFORM, layers=["safety-governance", "action"])) == []
     assert "layers.0" in _error_paths(v, dict(PLATFORM, layers=["L6"]))
+
+
+# ---- idea object ----------------------------------------------------------
+
+IDEA = {"why": " ".join(["word"] * 10), "promote": ["A public operator trial", "A measured gate result"]}
+
+
+def test_use_case_with_idea_passes():
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, idea=IDEA)) == []
+
+
+def test_use_case_idea_with_merged_into_passes():
+    idea = dict(IDEA, merged_into="UC-KNOW-01")
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, idea=idea)) == []
+
+
+def test_use_case_without_idea_passes():
+    assert "idea" not in USE_CASE
+    assert _error_paths(_validator("use-case.schema.json"), USE_CASE) == []
+
+
+@pytest.mark.parametrize(
+    "idea",
+    [
+        {"why": IDEA["why"]},
+        {"promote": IDEA["promote"]},
+        dict(IDEA, why=" ".join(["word"] * 31)),
+        dict(IDEA, promote=[f"item {i}" for i in range(5)]),
+        dict(IDEA, promote=[]),
+        dict(IDEA, promote=["same", "same"]),
+        dict(IDEA, promote=[" ".join(["word"] * 16)]),
+        dict(IDEA, merged_into="UC-KNOW-1"),
+        dict(IDEA, owner="someone"),
+        "an idea",
+    ],
+)
+def test_use_case_bad_idea_fails(idea):
+    paths = _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, idea=idea))
+    assert any(p == "idea" or p.startswith("idea.") for p in paths), paths
+
+
+def test_use_case_idea_limits_allow_maximums():
+    idea = {"why": " ".join(["word"] * 30), "promote": [" ".join([f"w{i}"] * 15) for i in range(4)]}
+    assert _error_paths(_validator("use-case.schema.json"), dict(USE_CASE, idea=idea)) == []
