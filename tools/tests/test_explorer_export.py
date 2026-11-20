@@ -1120,9 +1120,9 @@ def test_story_for_ran_energy_saving(data):
     story = uc["story"]
     assert story["problem"].startswith("Network energy use doesn't fall in step with traffic")
     assert len(story["steps"]) == 7
-    assert story["steps"][0] == "A scheduled run starts the planning agent hours before a low-traffic period."
+    assert story["steps"][0] == "Hours before a low-traffic period, the gate workflow reads the energy-saving windows your planner, SON, or vendor energy feature proposed."
     assert story["example"]["title"] == "a rural cluster overnight"
-    assert story["example"]["text"].startswith("The forecast for a rural cluster shows traffic on booster cell nrcell-rural-b3")
+    assert story["example"]["text"].startswith("Your planner proposes a window for booster cell nrcell-rural-b3")
 
 
 def test_story_first_sentence_helper():

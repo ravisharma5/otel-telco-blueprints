@@ -932,7 +932,7 @@ def test_story_on_ran_energy_saving_and_an_entry(explorer_dist, data, copy):
     full = _story(_page(explorer_dist, by_slug["ran-energy-saving"]))
     text = full.text()
     assert "cells stay fully powered through quiet nights" in text
-    assert "A scheduled run starts the planning agent hours before a low-traffic period." in text
+    assert "Hours before a low-traffic period, the gate workflow reads the energy-saving windows your planner, SON, or vendor energy feature proposed." in text
     assert "nrcell-rural-b3" in text
     assert len(full.find_all(lambda n: n.tag == "li")) == 7
     entry = by_slug["security-triage"]

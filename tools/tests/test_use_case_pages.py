@@ -1740,7 +1740,37 @@ def test_energy_front_matter():
     assert fm.get("tmf_an_level_target") == 3
     assert fm.get("agent_school") == [302]
     assert (fm.get("card") or {}).get("goal") == "sla-energy"
-    assert (fm.get("placement") or {}).get("far-edge", {}).get("runs") == []
+    placement = fm.get("placement") or {}
+    assert placement.get("far-edge", {}).get("runs") == []
+    assert placement.get("core", {}).get("runs") == ["llm-large"]
+    assert placement.get("regional", {}).get("runs") == ["decision", "safety"]
+    assert fm.get("placement_tier") == ["regional", "core"]
+
+
+ENERGY_SOURCES = "your planner, SON, or vendor energy feature"
+ENERGY_PLANNER_VERB = re.compile(r"(?i)(LLM|agent).{0,40}(plans|proposes|picks).{0,20}window")
+
+
+def test_energy_planner_proposes():
+    """The operator's planner proposes windows; OTel gates, checks, and reports."""
+    glance = table_with_header(ENERGY, "At a glance", ["Field", "Value"])
+    one_liner = next(r[1] for r in glance[1:] if r[0] == "One-liner")
+    assert ENERGY_SOURCES in one_liner, one_liner
+    assert ENERGY_SOURCES in flat(section_text(ENERGY, "Problem and value"))
+    steps = re.findall(r"^\d+\. .*$", section_text(ENERGY, "How it works"), re.M)
+    assert any(ENERGY_SOURCES in s for s in steps[:2]), steps[:2]
+    for line in ENERGY.read_text(encoding="utf-8").splitlines():
+        assert not ENERGY_PLANNER_VERB.search(line), line
+
+
+def test_energy_slots_large_llm_writes_report():
+    """One llm row, the large 31B at the core, writing only the energy report."""
+    table = table_with_header(ENERGY, "How it works", SLOTS_HEADER)
+    llm = [r for r in table[1:] if r[0].startswith("`llm`")]
+    assert len(llm) == 1, llm
+    assert "large" in llm[0][0] and "small" not in llm[0][0], llm
+    assert "energy report" in llm[0][2], llm
+    assert llm[0][3] == "Core", llm
 
 
 def test_energy_gate_classes():
@@ -1795,7 +1825,7 @@ def test_energy_not_in_ric_loop():
 
 def test_energy_example_ids():
     example = _energy_example()
-    for ident in ("es-req-0412", "energy-planner-agent", "nrcell-rural-b3"):
+    for ident in ("es-req-0412", "energy-gate-workflow", "nrcell-rural-b3"):
         assert ident in example, ident
     text = body(ENERGY)
     for old in REUSED_EXAMPLE_IDS + EARLIER_FLAGSHIP_IDS + ENERGY_EARLIER_IDS:
@@ -1844,7 +1874,7 @@ SLICE_EARLIER_IDS = (
     "core-rca-agent",
     "es-req-0412",
     "nrcell-rural-b3",
-    "energy-planner-agent",
+    "energy-gate-workflow",
 )
 
 
