@@ -293,8 +293,8 @@ options:
         roles: [classification, safety]
         reason: FP8 builds of Classification and Safety make room for retrieval and the Decision slot beside the 5G core at the regional site.
       - use_case: UC-OPS-05
-        roles: [safety, llm-small]
-        reason: FP8 builds of Safety and the small LLM make room for them beside the Decision slot that labels each energy-saving window.
+        roles: [safety]
+        reason: An FP8 build of Safety makes room for it beside the Decision slot that labels each energy-saving window.
       - use_case: UC-OPS-06
         roles: [safety, llm-small]
         reason: FP8 builds of Safety and the small LLM make room for retrieval and the Decision slot that labels each slice breach warning.
