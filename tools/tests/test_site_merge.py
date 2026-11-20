@@ -150,6 +150,20 @@ PINNED_MOVES: list[tuple[str, str]] = [
         "use-cases/policy-following-ops-agents/",
         "platform/safety-autonomy-gating/#policies-as-action-classes",
     ),
+    ("recipes/network-operations/site-log-reduction/", "recipes/ideas/site-log-reduction/"),
+    ("use-cases/site-log-reduction/", "recipes/ideas/site-log-reduction/"),
+    ("recipes/agentic-operations/site-change-risk-gate/", "recipes/ideas/site-change-risk-gate/"),
+    ("use-cases/site-change-risk-gate/", "recipes/ideas/site-change-risk-gate/"),
+    ("recipes/network-software/oran-ric-xapp-assistant/", "recipes/ideas/oran-ric-xapp-assistant/"),
+    ("use-cases/oran-ric-xapp-assistant/", "recipes/ideas/oran-ric-xapp-assistant/"),
+    ("recipes/security/signalling-attack-classification/", "recipes/ideas/signalling-attack-classification/"),
+    ("use-cases/signalling-attack-classification/", "recipes/ideas/signalling-attack-classification/"),
+    ("recipes/standards-knowledge/spec-summarisation/", "recipes/ideas/spec-summarisation/"),
+    ("use-cases/spec-summarisation/", "recipes/ideas/spec-summarisation/"),
+    ("recipes/research/mobility-failure-analysis/", "recipes/ideas/mobility-failure-analysis/"),
+    ("use-cases/mobility-failure-analysis/", "recipes/ideas/mobility-failure-analysis/"),
+    ("recipes/research/kpi-rca-reasoning/", "recipes/ideas/kpi-rca-reasoning/"),
+    ("use-cases/kpi-rca-reasoning/", "recipes/ideas/kpi-rca-reasoning/"),
 ]
 MOVE_OLD = "recipes/research/old-name/"
 MOVE_NEW = "recipes/network-operations/alarm-triage-adaptation/"
@@ -268,6 +282,8 @@ def test_moved_list_frozen():
     pairs = merge_site.read_moves(MOVED_PATH)
     for want in PINNED_MOVES:
         assert want in pairs, want
+    assert len(PINNED_MOVES) == 16
+    assert len(pairs) >= 16
     olds = [old for old, _ in pairs]
     assert len(set(olds)) == len(olds)
 

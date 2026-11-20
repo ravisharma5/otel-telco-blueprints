@@ -1130,38 +1130,16 @@ def test_story_first_sentence_helper():
     assert ex._sentences("One only") == ["One only"]
 
 
-# --- site change-risk gate: story and far-edge CPU state ----------------------
+# --- site change-risk gate: an idea, not in the gallery ----------------------
 
 SCG_SLUG = "site-change-risk-gate"
 
 
-def test_change_gate_story_exported(data):
-    uc = next(u for u in data["use_cases"] if u["slug"] == SCG_SLUG)
-    story = uc["story"]
-    assert story["problem"] and "The KPI" not in story["problem"]
-    page = _pages_by_id()[uc["id"]]
-    how = _section(page, "How it works").body_text
-    items = re.findall(r"^\d+\. (.+?)(?=^\d+\. |\n\n|\Z)", how, re.M | re.S)
-    assert 3 <= len(story["steps"]) <= 8
-    assert story["steps"] == [ex._sentences(_src_plain(i))[0] for i in items]
-    title = re.search(r"^### Worked example: ([^\n]+)$", how, re.M).group(1).strip()
-    assert story["example"]["title"] == title
-
-
-def test_change_gate_cpu_state(data):
-    uc = next(u for u in data["use_cases"] if u["slug"] == SCG_SLUG)
-    states = uc["states"][CPU_SETUP]
-    assert list(states) == ["any"]
-    state = states["any"]
-    assert state["runs_here"] is True
-    slots = state["cpu_fit"]["slots"]
-    assert [s["role"] for s in slots] == ["decision"]
-    weight = ex._start_variant("decision", VARIANTS, cpu=True)["weights_gb"]
-    assert weight == 17 and state["cpu_fit"]["weights_gb"] == weight
-    settings = {f["setting"] for f in state["flags"]}
-    for want in ("Decision build", "Cores for AI", "Latency test"):
-        assert want in settings, want
-    assert state["options"] == []
+def test_change_gate_is_an_idea(data):
+    assert SCG_SLUG not in {u["slug"] for u in data["use_cases"]}
+    idea = next(i for i in data["ideas"] if i["slug"] == SCG_SLUG)
+    assert idea["docs_url"] == f"recipes/ideas/{SCG_SLUG}/"
+    assert idea["merged_into"] is None
 
 
 # --- CNF upgrade checks: story and regional and core states -------------------
@@ -1235,12 +1213,21 @@ def test_is_idea_rule():
     assert ex.IDEAS_DIR == "ideas"
 
 
-def test_no_ideas_on_the_real_catalog(data):
-    assert data["ideas"] == []
-    assert len(data["use_cases"]) == 29
+def test_real_catalog_has_22_use_cases_and_7_ideas(data):
+    assert len(data["use_cases"]) == 22
+    assert len(data["ideas"]) == 7
+    assert not {u["id"] for u in data["use_cases"]} & {i["id"] for i in data["ideas"]}
+    merged = {i["id"]: i["merged_into"] for i in data["ideas"] if i["merged_into"]}
+    assert merged == {
+        "UC-SEC-02": "UC-SEC-01",
+        "UC-KNOW-02": "UC-KNOW-01",
+        "UC-RES-02": "UC-OPS-02",
+        "UC-RES-01": "UC-OPS-04",
+    }
 
 
-IDEA_SOURCE = "catalog/research/kpi-rca-reasoning"
+# A front-page page with no serving-options row and no try-it link.
+IDEA_SOURCE = "catalog/network-software/ran-core-code-assistant"
 
 
 def _with_idea(tmp_path, idea):
@@ -1265,7 +1252,7 @@ def test_idea_page_leaves_the_gallery(tmp_path):
     fm, slug = _with_idea(tmp_path, {"why": "No public evidence yet.", "promote": ["A labelled set"]})
     built = ex.build_explorer_data(tmp_path)
     assert fm["id"] not in {u["id"] for u in built["use_cases"]}
-    assert len(built["use_cases"]) == 28
+    assert len(built["use_cases"]) == 21
     matches = [i for i in built["ideas"] if i["id"] == fm["id"]]
     assert len(matches) == 1
     idea = matches[0]

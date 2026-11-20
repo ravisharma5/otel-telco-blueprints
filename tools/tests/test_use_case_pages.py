@@ -90,37 +90,37 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "agentic-operations/closed-loop-incident-handling": "UC-AGOPS-01",
     "network-operations/alarm-triage-adaptation": "UC-OPS-01",
     "business-assurance/camara-care-diagnostics": "UC-CARE-01",
-    "standards-knowledge/spec-summarisation": "UC-KNOW-02",
+    "ideas/spec-summarisation": "UC-KNOW-02",
     "standards-knowledge/oss-bss-architecture-guidance": "UC-KNOW-03",
     "network-software/ran-core-code-assistant": "UC-SW-01",
     "network-software/network-automation-review": "UC-SW-02",
-    "network-software/oran-ric-xapp-assistant": "UC-SW-03",
+    "ideas/oran-ric-xapp-assistant": "UC-SW-03",
     "network-operations/signalling-trace-analysis": "UC-OPS-02",
     "network-operations/ran-rf-health-checks": "UC-OPS-04",
     "network-operations/transport-ip-diagnostics": "UC-OPS-08",
     "network-operations/cross-domain-oss-correlation": "UC-OPS-09",
     "agentic-operations/router-core-read-only-ops": "UC-AGOPS-02",
-    "agentic-operations/site-change-risk-gate": "UC-AGOPS-04",
+    "ideas/site-change-risk-gate": "UC-AGOPS-04",
     "agentic-operations/cnf-upgrade-checks": "UC-AGOPS-05",
     "security/security-triage": "UC-SEC-01",
-    "security/signalling-attack-classification": "UC-SEC-02",
+    "ideas/signalling-attack-classification": "UC-SEC-02",
     "security/software-onboarding-cve-review": "UC-SEC-03",
     "business-assurance/broadband-digital-troubleshooting": "UC-CARE-02",
     "business-assurance/churn-risk-explanation": "UC-BIZ-01",
     "business-assurance/revenue-assurance-triage": "UC-BIZ-02",
-    "research/kpi-rca-reasoning": "UC-RES-01",
-    "research/mobility-failure-analysis": "UC-RES-02",
+    "ideas/kpi-rca-reasoning": "UC-RES-01",
+    "ideas/mobility-failure-analysis": "UC-RES-02",
     "network-operations/core-network-rca": "UC-OPS-03",
     "network-operations/ran-energy-saving": "UC-OPS-05",
     "network-operations/slice-sla-assurance": "UC-OPS-06",
     "network-operations/mop-validation": "UC-OPS-07",
-    "network-operations/site-log-reduction": "UC-OPS-10",
+    "ideas/site-log-reduction": "UC-OPS-10",
 }
 
 # The fixed values of each catalog entry ({"<domain>/<slug>": spec}). The spec
 # test checks every listed page that exists, so a row can land before its page.
 ENTRY_SPECS: dict[str, dict] = {
-    "standards-knowledge/spec-summarisation": {
+    "ideas/spec-summarisation": {
         "id": "UC-KNOW-02",
         "slots": {"embedding", "reranker", "safety", "decision", "llm"},
         "ceiling": "inform",
@@ -152,7 +152,7 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [301],
         "goal": "change",
     },
-    "network-software/oran-ric-xapp-assistant": {
+    "ideas/oran-ric-xapp-assistant": {
         "id": "UC-SW-03",
         "slots": {"embedding", "reranker", "safety", "llm"},
         "ceiling": "inform",
@@ -192,7 +192,7 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [301, 402],
         "goal": "incidents",
     },
-    "network-operations/site-log-reduction": {
+    "ideas/site-log-reduction": {
         "id": "UC-OPS-10",
         "slots": {"embedding"},
         "ceiling": "inform",
@@ -218,7 +218,7 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [],
         "goal": "secure",
     },
-    "security/signalling-attack-classification": {
+    "ideas/signalling-attack-classification": {
         "id": "UC-SEC-02",
         "slots": {"classification", "safety", "llm"},
         "ceiling": "inform",
@@ -258,7 +258,7 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [202],
         "goal": "customers",
     },
-    "research/kpi-rca-reasoning": {
+    "ideas/kpi-rca-reasoning": {
         "id": "UC-RES-01",
         "slots": {"classification", "llm", "safety", "decision"},
         "ceiling": "recommend-with-approval",
@@ -266,7 +266,7 @@ ENTRY_SPECS: dict[str, dict] = {
         "agent_school": [201],
         "goal": "incidents",
     },
-    "research/mobility-failure-analysis": {
+    "ideas/mobility-failure-analysis": {
         "id": "UC-RES-02",
         "slots": {"embedding", "reranker", "safety", "llm"},
         "ceiling": "inform",
@@ -282,7 +282,7 @@ ENTRY_SPECS: dict[str, dict] = {
 USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     "standards-knowledge/grounded-knowledge-assistant": {"Decision routing threshold": "Model owner"},
     "business-assurance/camara-care-diagnostics": {"Decision routing threshold": "Model owner"},
-    "standards-knowledge/spec-summarisation": {"Decision routing threshold": "Model owner"},
+    "ideas/spec-summarisation": {"Decision routing threshold": "Model owner"},
     "agentic-operations/router-core-read-only-ops": {"Decision routing threshold": "Model owner"},
     "network-operations/ran-energy-saving": {
         "Service KPI guard band": "Risk owner",
@@ -290,11 +290,11 @@ USE_CASE_LOCAL_PARAMS: dict[str, dict[str, str]] = {
     },
     "network-operations/slice-sla-assurance": {"SLO breach forecast horizon": "Business owner"},
     "network-operations/mop-validation": {"MOP defect recall floor": "Risk owner"},
-    "network-operations/site-log-reduction": {
+    "ideas/site-log-reduction": {
         "Raw log retention period": "Risk owner",
         "New-pattern similarity threshold": "Model owner",
     },
-    "agentic-operations/site-change-risk-gate": {"Change types eligible for ACT": "Risk owner"},
+    "ideas/site-change-risk-gate": {"Change types eligible for ACT": "Risk owner"},
     "agentic-operations/cnf-upgrade-checks": {"Change types eligible for ACT": "Risk owner"},
     "security/software-onboarding-cve-review": {
         "Open-finding severity that blocks a recommendation": "Risk owner",

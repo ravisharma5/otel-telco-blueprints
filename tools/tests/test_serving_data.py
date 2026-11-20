@@ -24,6 +24,7 @@ from referencing import Registry, Resource
 from tools.guards.patterns import PLANNING_ID_RE
 from tools.site import render_serving
 from tools.tests.conftest import REPO_ROOT
+from tools.site.export_explorer import is_idea
 from tools.tests.test_platform_pages import (
     SERVING,
     reference_design_text,
@@ -532,14 +533,17 @@ FLAGSHIP_PAGES = {
 
 
 def use_case_page_paths() -> dict[str, str]:
-    """Use-case id -> repo path for every catalog page (flagships and entries).
+    """Use-case id -> repo path for every front-page catalog page (flagships and entries).
 
-    A where_it_helps row may name any use case, because the explorer needs a
-    reason for every use case whose fit swaps in FP8 builds.
+    A where_it_helps row may name any front-page use case, because the explorer
+    needs a reason for every use case whose fit swaps in FP8 builds. Idea pages
+    are not on the front page, so a row may not name them.
     """
     out = {}
     for path in sorted((REPO_ROOT / "catalog").glob("*/*/README.md")):
         fm = yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+        if is_idea(fm):
+            continue
         out[fm["id"]] = path.relative_to(REPO_ROOT).as_posix()
     assert set(FLAGSHIP_PAGES.items()) <= set(out.items())
     return out

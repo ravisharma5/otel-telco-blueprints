@@ -30,6 +30,7 @@ from tools.site.render_bring import (
     bring_summary,
     matrix,
 )
+from tools.tests.conftest import front_page_pages
 from tools.tests.test_reference_pages import body, front_matter
 from tools.tests.test_use_case_pages import _id, page_key, use_case_pages
 
@@ -43,7 +44,8 @@ RETRAIN_HEAD = re.compile(
 )
 # A model-card fact about the OTel rerankers, not an operator fine-tune.
 CARD_FACT = re.compile(r"(?i)one-label head|full fine-tune of qwen3")
-EXPECTED_COUNTS = {"retrieval": 7, "skills": 5, "retrieval-and-skills": 7, "head-retrain": 8, "lora-if-gap": 2}
+# Rung counts on the front page; idea pages are not counted.
+EXPECTED_COUNTS = {"retrieval": 4, "skills": 4, "retrieval-and-skills": 6, "head-retrain": 6, "lora-if-gap": 2}
 
 
 def _ad(path) -> dict:
@@ -161,10 +163,10 @@ def test_rung_text_names_retrieval_only_with_the_embedding_slot(path):
 
 def test_rung_counts():
     counts = {r: 0 for r in RUNG_ORDER}
-    for p in use_case_pages():
+    for p in front_page_pages():
         counts[_ad(p).get("rung")] = counts.get(_ad(p).get("rung"), 0) + 1
     assert counts == EXPECTED_COUNTS
-    assert sum(counts.values()) == 29
+    assert sum(counts.values()) == 22
 
 
 def test_matrix_reader():
@@ -289,7 +291,7 @@ NEW_RECIPES = (
     "network-operations/ran-energy-saving",
     "network-operations/slice-sla-assurance",
     "network-operations/mop-validation",
-    "agentic-operations/site-change-risk-gate",
+    "ideas/site-change-risk-gate",
     "agentic-operations/cnf-upgrade-checks",
 )
 EXPERTISE_GAP = {

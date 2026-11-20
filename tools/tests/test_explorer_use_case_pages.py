@@ -1103,15 +1103,14 @@ def test_cpu_fit_line(explorer_dist, data, copy):
 
 
 CPU_SETUP = "far-edge-xeon6-cpu"
-FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction", "site-change-risk-gate"}
+FAR_EDGE_SLUGS = {"alarm-triage-adaptation"}
 
 
 @pytest.mark.site_output
 def test_cpu_fit_values_on_far_edge_pages(explorer_dist, data):
-    """Alarm triage sizes Classification (about 17 GB) and site log reduction sizes the
-    small CPU Embedding build (about 1.5 GB); neither shows a percent."""
+    """Alarm triage sizes Classification (about 17 GB) and shows no percent."""
     by_slug = {uc["slug"]: uc for uc in data["use_cases"]}
-    expected = {"alarm-triage-adaptation": ("Classification", 17), "site-log-reduction": ("Embedding", 1.5)}
+    expected = {"alarm-triage-adaptation": ("Classification", 17)}
     for slug, (slot_name, gb) in expected.items():
         uc = by_slug[slug]
         fit = uc["states"][CPU_SETUP]["any"]["cpu_fit"]
@@ -1142,27 +1141,7 @@ def test_nothing_here_count(explorer_dist, data):
         notes = _in_parts(tree, _key(CPU_SETUP, "any"), lambda n: n.has_class("nothing-here"))
         assert (len(notes) == 1) == (uc["slug"] not in FAR_EDGE_SLUGS), uc["slug"]
         pages += len(notes) == 1
-    assert pages == len(data["use_cases"]) - len(FAR_EDGE_SLUGS) == 26
-
-
-@pytest.mark.site_output
-def test_change_gate_page_story_and_cpu(explorer_dist, data):
-    uc = next(u for u in data["use_cases"] if u["slug"] == "site-change-risk-gate")
-    tree = _page(explorer_dist, uc)
-    text = _squash(tree.root.text())
-    story = uc["story"]
-    assert _squash(story["problem"]) in text
-    for step in story["steps"]:
-        assert _squash(step) in text, step
-    assert _squash(story["example"]["title"]) in text
-    key = _key(CPU_SETUP, "any")
-    cards = [c for c in _in_parts(tree, key, lambda n: n.has_class("tier-card")) if c.attrs.get("data-tier") == "far-edge"]
-    assert len(cards) == 1 and "Decision" in cards[0].text()
-    lines = _in_parts(tree, key, lambda n: n.has_class("cpu-fit"))
-    assert len(lines) == 1 and "17 GB" in lines[0].text()
-    tables = _in_parts(tree, key, lambda n: n.tag == "table" and n.has_class("settings-table"))
-    assert len(tables) == 1 and _squash("Decision build") in _squash(tables[0].text())
-    assert "%" not in " ".join(p.text() for p in _parts(tree, key))
+    assert pages == len(data["use_cases"]) - len(FAR_EDGE_SLUGS) == 21
 
 
 @pytest.mark.site_output

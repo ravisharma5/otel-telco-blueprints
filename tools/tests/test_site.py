@@ -503,9 +503,18 @@ def test_nav_order():
     ]
     recipes = next(item for item in CONFIG["nav"] if next(iter(item)) == "Recipes")["Recipes"]
     assert recipes[0] == {"Overview": "catalog/index.md"}
-    assert [(next(iter(g)), list(_paths(next(iter(g.values()))))) for g in recipes[1:]] == (
+    assert [(next(iter(g)), list(_paths(next(iter(g.values()))))) for g in recipes[1:-1]] == (
         _recipe_groups()
     )
+    ideas = recipes[-1]
+    assert list(ideas) == ["Ideas"]
+    children = ideas["Ideas"]
+    assert children[0] == {"Overview": "catalog/ideas/index.md"}
+    assert list(_paths(children[1:])) == _idea_paths()
+    for child in children[1:]:
+        (label, rel), = child.items()
+        fm = yaml.safe_load((REPO_ROOT / rel).read_text(encoding="utf-8").split("---", 2)[1])
+        assert label == fm["title"], rel
 
 
 def _paths(children):
@@ -522,6 +531,8 @@ def _recipe_groups():
     pages = []
     for path in sorted((REPO_ROOT / "catalog").glob("*/*/README.md")):
         fm = yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+        if fm.get("idea"):
+            continue
         pages.append((fm["domain"], fm["id"], path.relative_to(REPO_ROOT).as_posix()))
     groups = []
     for domain in schema["properties"]["domain"]["enum"]:
@@ -529,6 +540,16 @@ def _recipe_groups():
         if rows and domain != "demo":
             groups.append((DOMAIN_LABELS[domain], [rel for _uc, rel in rows]))
     return groups
+
+
+def _idea_paths():
+    """Idea page paths sorted by id."""
+    rows = []
+    for path in sorted((REPO_ROOT / "catalog/ideas").glob("*/README.md")):
+        fm = yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1])
+        rows.append((fm["id"], path.relative_to(REPO_ROOT).as_posix()))
+    assert len(rows) == 7
+    return [rel for _uc, rel in sorted(rows)]
 
 
 def test_start_here_labels():

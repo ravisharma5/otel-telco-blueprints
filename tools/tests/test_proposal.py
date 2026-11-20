@@ -369,7 +369,7 @@ def _use_case_pages():
         rel = path.relative_to(REPO_ROOT).as_posix()
         doc = parse_doc(path, path.read_text(encoding="utf-8"), display=rel)
         fm = doc.front_matter or {}
-        if fm.get("type") == "use-case" and fm.get("domain") != "demo":
+        if fm.get("type") == "use-case" and fm.get("domain") != "demo" and not fm.get("idea"):
             out.append((fm, doc))
     return sorted(out, key=lambda p: p[0]["id"])
 
@@ -547,3 +547,10 @@ def test_ideas_block_matches_idea_pages():
         assert block == ""
     else:
         assert block == ideas_line(REPO_ROOT / "catalog")
+
+
+def test_proposal_lists_22_entries_and_seven_ideas():
+    assert len(_use_case_pages()) == 22
+    assert _block("ideas").strip() == (
+        "Seven more use cases are open for contribution as [exploration ideas](../catalog/ideas/index.md)."
+    )

@@ -663,14 +663,17 @@ def test_built_script_handles_tier_safely(explorer_dist):
 
 
 # The use cases that place a role at the far edge, read from catalog front matter.
-FAR_EDGE_SLUGS = {"alarm-triage-adaptation", "site-log-reduction", "site-change-risk-gate"}
+FAR_EDGE_SLUGS = {"alarm-triage-adaptation"}
 
 
 def _far_edge_slugs_from_catalog():
+    """Front-page pages that place a role at the far edge; idea pages are not in the gallery."""
     out = set()
     for path in sorted((REPO_ROOT / "catalog").glob("*/*/README.md")):
         text = path.read_text(encoding="utf-8")
         fm = yaml.safe_load(text.split("---", 2)[1]) if text.startswith("---") else {}
+        if (fm or {}).get("idea"):
+            continue
         if ((fm or {}).get("placement") or {}).get("far-edge", {}).get("runs"):
             out.add(path.parent.name)
     return out

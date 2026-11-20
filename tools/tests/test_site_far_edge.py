@@ -27,8 +27,8 @@ VDU_LINK = "../../../architecture/placement.md#servers-shared-with-a-vdu"
 # New pages that place a CPU role at the far edge. A row may land before its
 # page; the page tests skip until it exists.
 SITE_PAGES = [
-    "network-operations/site-log-reduction",
-    "agentic-operations/site-change-risk-gate",
+    "ideas/site-log-reduction",
+    "ideas/site-change-risk-gate",
 ]
 
 RHAII_NOTES = (
@@ -163,7 +163,7 @@ def test_no_performance_numbers_on_site_pages(label, text):
 
 # ---------- Site log reduction ----------
 
-SLR = "network-operations/site-log-reduction"
+SLR = "ideas/site-log-reduction"
 PB10_ROI = "../../../platform/compliance-operating-model/README.md#staged-rollout-and-roi"
 GATE_LINK = "../../../architecture/decision-gate.md"
 CURRENCY_OR_SAVING = re.compile(r"[$€£¥]\s?\d|\d+(\.\d+)?\s?%|\bsaves? \d")
@@ -213,7 +213,7 @@ def test_site_log_reduction_governance():
 
 # ---------- Site change-risk gate ----------
 
-SCG = "agentic-operations/site-change-risk-gate"
+SCG = "ideas/site-change-risk-gate"
 PB06_STAGED = "../../../platform/safety-autonomy-gating/README.md#staged-autonomy"
 PB04_SETTINGS = "../../../platform/serving-routing-placement/README.md#key-settings-per-setup"
 TMF_AN = "https://www.tmforum.org/wp-content/uploads/2019/05/22553-Autonomous-Networks-whitepaper.pdf"

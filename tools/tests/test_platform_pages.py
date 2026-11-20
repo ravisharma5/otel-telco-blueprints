@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.tests.conftest import REPO_ROOT
+from tools.tests.conftest import REPO_ROOT, front_page_pages
 from tools.tests.test_open_source_framing import STANDARD_LINE
 from tools.tests.test_reference_pages import (  # noqa: F401  (shared with per-page modules)
     GATE_SCHEMA_PATH,
@@ -1397,8 +1397,8 @@ def test_security_fit_table_lists_every_use_case():
             path = REPO_ROOT / "catalog" / key / "README.md"
             assert (front_matter(path) or {})["sandbox"]["fit"] == fit, key
             seen.append(key)
-    assert sorted(seen) == sorted(page_key(p) for p in use_case_pages())
-    assert len(seen) == len(set(seen)) == 29
+    assert sorted(seen) == sorted(page_key(p) for p in front_page_pages())
+    assert len(seen) == len(set(seen)) == 22
 
 
 def test_security_sources_unchanged():

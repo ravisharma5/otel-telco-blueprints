@@ -2,7 +2,7 @@
 
 tools/site/render_catalog.py writes two blocks between generated markers: the
 recipes by domain, and the recipes per platform blueprint. These tests check the
-page matches front matter, lists every page once, shows the flagship merges
+page matches front matter, lists every page once, shows the merges
 (also_covers), and gives every platform blueprint an anchor that its page links.
 """
 
@@ -16,7 +16,8 @@ import pytest
 import yaml
 
 from tools.bplint.slug import github_slug
-from tools.tests.conftest import REPO_ROOT
+from tools.tests.conftest import REPO_ROOT, front_page_pages
+from tools.tests.conftest import use_case_pages as all_use_case_pages
 
 OVERVIEW = REPO_ROOT / "catalog/index.md"
 STUB = REPO_ROOT / "site-src/catalog/index.md"
@@ -31,11 +32,8 @@ def _fm(path: Path) -> dict:
 
 
 def use_case_pages() -> list[Path]:
-    return [
-        p
-        for p in sorted((REPO_ROOT / "catalog").glob("*/*/README.md"))
-        if _fm(p).get("domain") != "demo"
-    ]
+    """Front-page use-case pages: ideas and demo pages are not on the overview."""
+    return front_page_pages()
 
 
 def platform_pages() -> list[Path]:
@@ -198,19 +196,20 @@ def test_triage_language_scope():
 
 
 # Every item of the application list the catalog was built from, and every
-# agenda gap, maps to a landed page ("<domain>/<slug>"), to an also_covers
-# item on a flagship ("also_covers:<domain>/<slug>"), or to a section of a
-# platform blueprint ("platform:<folder>#<anchor>"). Generic names only.
+# agenda gap, maps to a front-page page ("<domain>/<slug>"), to an also_covers
+# item on a front-page page ("also_covers:<domain>/<slug>"), to an idea page
+# ("idea:ideas/<slug>"), or to a section of a platform blueprint
+# ("platform:<folder>#<anchor>"). Generic names only.
 COVERAGE: dict[str, str] = {
     # Standards and protocol knowledge
     "telecom standards Q&A": "also_covers:standards-knowledge/grounded-knowledge-assistant",
     "grounded RAG assistants": "also_covers:standards-knowledge/grounded-knowledge-assistant",
-    "spec summarisation": "standards-knowledge/spec-summarisation",
+    "spec summarisation": "also_covers:standards-knowledge/grounded-knowledge-assistant",
     "OSS/BSS architecture guidance": "standards-knowledge/oss-bss-architecture-guidance",
     # Network software and automation
     "RAN and core code assistants": "network-software/ran-core-code-assistant",
     "network automation": "network-software/network-automation-review",
-    "O-RAN RIC": "network-software/oran-ric-xapp-assistant",
+    "O-RAN RIC": "idea:ideas/oran-ric-xapp-assistant",
     # Network operations
     "signalling trace analysis": "network-operations/signalling-trace-analysis",
     "core network RCA": "network-operations/core-network-rca",
@@ -224,9 +223,9 @@ COVERAGE: dict[str, str] = {
     "policy-following operations agents": "platform:safety-autonomy-gating#policies-as-action-classes",
     # Under development
     "broadband digital troubleshooting": "business-assurance/broadband-digital-troubleshooting",
-    "network RCA reasoning": "research/kpi-rca-reasoning",
-    "5G mobility failure analysis": "research/mobility-failure-analysis",
-    "cybersecurity attack classification": "security/signalling-attack-classification",
+    "network RCA reasoning": "also_covers:network-operations/ran-rf-health-checks",
+    "5G mobility failure analysis": "also_covers:network-operations/signalling-trace-analysis",
+    "cybersecurity attack classification": "also_covers:security/security-triage",
     # Agenda gaps
     "churn": "business-assurance/churn-risk-explanation",
     "revenue assurance": "business-assurance/revenue-assurance-triage",
@@ -236,13 +235,17 @@ COVERAGE: dict[str, str] = {
     "transport and IETF diagnostics": "network-operations/transport-ip-diagnostics",
     "cross-domain OSS correlation": "network-operations/cross-domain-oss-correlation",
 }
-# The words each merged item must show in its flagship's also_covers list.
+# The words each merged item must show in its host's also_covers list.
 ALSO_COVERS_WORDS = {
     "telecom standards Q&A": "standards Q&A",
     "grounded RAG assistants": "Grounded RAG assistants",
     "NOC ticket triage": "NOC ticket triage",
     "closed-loop incident handling": "Closed-loop incident handling",
     "customer care diagnostics": "Customer care diagnostics",
+    "spec summarisation": "Standards and change-request summaries",
+    "network RCA reasoning": "KPI root-cause reasoning",
+    "5G mobility failure analysis": "5G mobility failure analysis",
+    "cybersecurity attack classification": "Signalling attack classification",
 }
 
 
@@ -250,15 +253,23 @@ def _pages_by_key() -> dict[str, dict]:
     return {p.relative_to(REPO_ROOT / "catalog").parent.as_posix(): _fm(p) for p in use_case_pages()}
 
 
+def _ideas_by_key() -> dict[str, dict]:
+    return {
+        p.relative_to(REPO_ROOT / "catalog").parent.as_posix(): _fm(p)
+        for p in all_use_case_pages()
+        if _fm(p).get("idea")
+    }
+
+
 def test_catalog_covers_application_list_and_gaps():
     pages = _pages_by_key()
+    ideas = _ideas_by_key()
     assert len(COVERAGE) == 27
     for item, target in COVERAGE.items():
         if target.startswith("also_covers:"):
             key = target.split(":", 1)[1]
             assert key in pages, (item, key)
             fm = pages[key]
-            assert fm.get("flagship") is True, (item, key)
             covers = fm.get("also_covers") or []
             assert any(ALSO_COVERS_WORDS[item] in c for c in covers), (item, covers)
         elif target.startswith("platform:"):
@@ -267,21 +278,24 @@ def test_catalog_covers_application_list_and_gaps():
             assert page.is_file(), (item, page)
             heads = re.findall(r"^#{1,6} (.+)$", page.read_text(encoding="utf-8"), re.M)
             assert anchor in {github_slug(h) for h in heads}, (item, anchor)
+        elif target.startswith("idea:"):
+            assert target.split(":", 1)[1] in ideas, (item, target)
         else:
             assert target in pages, (item, target)
             assert pages[target].get("flagship") is not True, (item, target)
+    # Every also_covers target is a page on the front page, never an idea.
     merged = {t.split(":", 1)[1] for t in COVERAGE.values() if t.startswith("also_covers:")}
-    flagships = {k for k, fm in pages.items() if fm.get("flagship") is True}
-    assert merged == flagships
+    assert merged <= set(pages)
+    assert not merged & set(ideas)
 
 
 def test_catalog_counts():
     pages = list(_pages_by_key().values())
-    assert len(pages) == 29
+    assert len(pages) == 22
     recipes = [fm for fm in pages if fm.get("depth") == "recipe"]
     entries = [fm for fm in pages if fm.get("depth") == "entry"]
-    assert len(recipes) == 10 and len(entries) == 19
+    assert len(recipes) == 9 and len(entries) == 13
     assert sum(1 for fm in recipes if fm.get("flagship") is True) == 4
-    assert sum(1 for fm in recipes if fm.get("flagship") is False) == 6
+    assert sum(1 for fm in recipes if fm.get("flagship") is False) == 5
     for fm in pages:
         assert fm.get("card") and fm.get("placement") and fm.get("depth"), fm.get("id")

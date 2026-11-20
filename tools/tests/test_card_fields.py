@@ -318,8 +318,8 @@ SLOTS_HEADER = ["Slot", "Checkpoint", "Role", "Placement"]
 
 
 def exported_pages():
-    """Every listed use-case page, recipe or entry; the explorer exports them all."""
-    return [REPO_ROOT / "catalog" / key / "README.md" for key in EXPECTED_USE_CASE_PAGES]
+    """Every front-page use-case page, recipe or entry; the explorer gallery exports them all."""
+    return [REPO_ROOT / "catalog" / key / "README.md" for key in EXPECTED_USE_CASE_PAGES if not key.startswith("ideas/")]
 
 
 def flagships():

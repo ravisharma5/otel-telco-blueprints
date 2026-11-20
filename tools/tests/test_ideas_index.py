@@ -95,6 +95,74 @@ def test_live_ideas_index_matches_idea_pages():
         assert BANNER in _block(path.read_text(encoding="utf-8"), "idea")
 
 
+FRONT_PAGE_IDS = {
+    "UC-KNOW-01", "UC-KNOW-03", "UC-SW-01", "UC-SW-02",
+    *(f"UC-OPS-0{n}" for n in range(1, 10)),
+    "UC-AGOPS-01", "UC-AGOPS-02", "UC-AGOPS-05", "UC-BIZ-01", "UC-BIZ-02",
+    "UC-CARE-01", "UC-CARE-02", "UC-SEC-01", "UC-SEC-03",
+}
+IDEA_IDS = {
+    "UC-OPS-10": "site-log-reduction",
+    "UC-AGOPS-04": "site-change-risk-gate",
+    "UC-SW-03": "oran-ric-xapp-assistant",
+    "UC-SEC-02": "signalling-attack-classification",
+    "UC-KNOW-02": "spec-summarisation",
+    "UC-RES-02": "mobility-failure-analysis",
+    "UC-RES-01": "kpi-rca-reasoning",
+}
+MERGED_INTO = {
+    "UC-SEC-02": "UC-SEC-01",
+    "UC-KNOW-02": "UC-KNOW-01",
+    "UC-RES-02": "UC-OPS-02",
+    "UC-RES-01": "UC-OPS-04",
+}
+
+
+def _fm(path: Path) -> dict:
+    import yaml
+
+    return yaml.safe_load(path.read_text(encoding="utf-8").split("---", 2)[1]) or {}
+
+
+def test_live_front_page_has_the_22_kept_entries():
+    ids = {_fm(p)["id"] for p in front_page_pages()}
+    assert len(ids) == 22
+    assert ids == FRONT_PAGE_IDS
+
+
+def test_live_ideas_are_the_seven_moved_entries():
+    found = {_fm(p)["id"]: p for p in idea_pages()}
+    assert {k: p.parent.name for k, p in found.items()} == IDEA_IDS
+    for path in found.values():
+        assert path.parent.parent.name == "ideas"
+    assert not (REPO_ROOT / "catalog/research").exists()
+
+
+def test_live_merged_into_values():
+    merged = {}
+    for path in idea_pages():
+        fm = _fm(path)
+        if fm["idea"].get("merged_into"):
+            merged[fm["id"]] = fm["idea"]["merged_into"]
+    assert merged == MERGED_INTO
+
+
+def test_live_every_idea_page_has_the_banner():
+    ideas = idea_pages()
+    assert len(ideas) == 7
+    for path in ideas:
+        assert BANNER in _block(path.read_text(encoding="utf-8"), "idea"), path
+
+
+def test_live_ideas_index_has_seven_rows_and_the_contributing_note():
+    text = (REPO_ROOT / "catalog/ideas/index.md").read_text(encoding="utf-8")
+    rows = [line for line in _block(text, "ideas").splitlines() if line.startswith("| [UC-")]
+    assert len(rows) == 7
+    assert "\n## Promote an idea\n" in text
+    note = text.split("\n## Promote an idea\n", 1)[1]
+    assert "pull request" in note and "lint" in note and "clarity review" in note
+
+
 def test_page_helpers_split_the_use_case_glob():
     front, ideas = front_page_pages(), idea_pages()
     assert not set(front) & set(ideas)

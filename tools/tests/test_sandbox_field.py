@@ -31,6 +31,7 @@ from tools.site.render_sandbox import (
     block,
     fit_table,
 )
+from tools.tests.conftest import front_page_pages
 from tools.tests.test_reference_pages import body, front_matter
 from tools.tests.test_use_case_pages import _id, _raw_section, page_key, use_case_pages
 
@@ -53,7 +54,8 @@ WHY_RULES = {
     "execution": re.compile(r"dry-run|dry run|check mode|validate|pars|decod|rebuild|raw|probe", re.I),
     "whole-agent": re.compile(r"within policy|write|action request", re.I),
 }
-EXPECTED_COUNTS = {"none": 20, "execution": 5, "whole-agent": 4}
+# Fit counts on the front page; idea pages are not counted.
+EXPECTED_COUNTS = {"none": 15, "execution": 4, "whole-agent": 3}
 
 
 def _sandbox(path) -> dict:
@@ -149,10 +151,10 @@ def test_why_names_the_trigger(path):
 
 def test_fit_counts():
     counts = {f: 0 for f in FIT_ORDER}
-    for p in use_case_pages():
+    for p in front_page_pages():
         counts[_sandbox(p).get("fit")] = counts.get(_sandbox(p).get("fit"), 0) + 1
     assert counts == EXPECTED_COUNTS
-    assert sum(counts.values()) == 29
+    assert sum(counts.values()) == 22
 
 
 def test_pb08_anchor_matches_slug():
