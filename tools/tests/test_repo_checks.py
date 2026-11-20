@@ -1,4 +1,4 @@
-"""Tests for repo-level checks ID001 and XR001."""
+"""Tests for repo-level checks ID001, XR001, and IDEA002."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ def _ctx(tmp_path, docs, discovery=True):
 
 
 def test_repo_checks_registered_in_order():
-    assert REPO_CHECKS == [repo.check_ids, repo.check_refs]
+    assert REPO_CHECKS == [repo.check_ids, repo.check_refs, repo.check_idea_merges]
 
 
 def test_context_discovery_defaults_false(tmp_path):
@@ -102,3 +102,48 @@ def test_cli_explicit_use_case_fixture_has_no_xr001():
     # The fixture references PB-99, which is not in the run; explicit paths skip XR001.
     rc, findings = run_bplint(FIXTURES / "valid/use-case/README.md")
     assert (rc, findings) == (0, [])
+
+
+# ---- IDEA002 -------------------------------------------------------------
+
+IDEA = {"why": "Kept as an idea until an operator trial shows the gate works", "promote": ["A public trial"]}
+
+
+def _host(tmp_path, name="catalog/security/host/README.md", **fm):
+    base = dict(id="UC-SEC-01", also_covers=["Fictional widget triage"])
+    base.update(fm)
+    return make_doc(tmp_path, render(use_case_fm(**base), use_case_sections()), name=name)
+
+
+def _idea(tmp_path, merged_into="UC-SEC-01", uid="UC-DEMO-02", name="catalog/ideas/widget/README.md"):
+    idea = dict(IDEA, merged_into=merged_into)
+    return make_doc(tmp_path, render(use_case_fm(id=uid, idea=idea), use_case_sections()), name=name)
+
+
+def test_idea_merged_into_valid_host_is_clean(tmp_path):
+    out = repo.check_idea_merges(_ctx(tmp_path, [_host(tmp_path), _idea(tmp_path)]))
+    assert out == []
+
+
+def test_idea_merged_into_missing_host_is_idea002(tmp_path):
+    out = repo.check_idea_merges(_ctx(tmp_path, [_host(tmp_path), _idea(tmp_path, merged_into="UC-SEC-09")]))
+    assert [(f.code, f.path) for f in out] == [("IDEA002", "catalog/ideas/widget/README.md")]
+    assert "'UC-SEC-09'" in out[0].message and "no matching use case" in out[0].message
+
+
+def test_idea_merged_into_another_idea_is_idea002(tmp_path):
+    host = _host(tmp_path, name="catalog/ideas/host/README.md", idea=IDEA)
+    out = repo.check_idea_merges(_ctx(tmp_path, [host, _idea(tmp_path)]))
+    assert [f.code for f in out] == ["IDEA002"] and "itself an idea" in out[0].message
+
+
+def test_idea_merged_into_host_without_also_covers_is_idea002(tmp_path):
+    for covers in (None, []):
+        host = _host(tmp_path, also_covers=covers)
+        out = repo.check_idea_merges(_ctx(tmp_path, [host, _idea(tmp_path)]))
+        assert [f.code for f in out] == ["IDEA002"] and "also_covers" in out[0].message
+
+
+def test_idea002_skipped_without_discovery(tmp_path):
+    ctx = _ctx(tmp_path, [_idea(tmp_path, merged_into="UC-SEC-09")], discovery=False)
+    assert repo.check_idea_merges(ctx) == []

@@ -532,3 +532,40 @@ def test_courses_file_pinned():
     assert str(data["checked"]) == "2026-11-15"
     assert sorted(data["courses"]) == [101, 102, 103, 104, 201, 202, 203, 301, 302, 303, 304, 401, 402, 403]
     assert all(isinstance(t, str) and t.strip() for t in data["courses"].values())
+
+
+# ---- IDEA001 -------------------------------------------------------------
+
+IDEA = {"why": "Kept as an idea until an operator trial shows the gate works", "promote": ["A public trial"]}
+IDEA_PATH = "catalog/ideas/widget/README.md"
+FRONT_PATH = "catalog/security/widget/README.md"
+
+
+def test_idea_page_with_idea_object_passes(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(idea=IDEA), use_case_sections()), name=IDEA_PATH)
+    assert codes(findings, "IDEA001") == []
+
+
+def test_idea_folder_page_without_idea_object_is_idea001(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(), use_case_sections()), name=IDEA_PATH)
+    assert codes(findings) == ["IDEA001"]
+    assert "needs an idea object" in findings[0].message
+
+
+def test_idea_object_outside_idea_folder_is_idea001(tmp_path):
+    text = render(use_case_fm(idea=IDEA), use_case_sections())
+    findings = lint(tmp_path, text, name=FRONT_PATH)
+    assert codes(findings) == ["IDEA001"]
+    assert "only under catalog/ideas/" in findings[0].message
+    assert findings[0].line == next(i for i, ln in enumerate(text.splitlines(), 1) if ln.startswith("idea:"))
+
+
+def test_flagship_idea_page_is_idea001(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(idea=IDEA, flagship=True), use_case_sections()), name=IDEA_PATH)
+    assert codes(findings, "IDEA001") == ["IDEA001"]
+    assert "cannot be a flagship" in findings[0].message
+
+
+def test_front_page_without_idea_object_has_no_idea001(tmp_path):
+    findings = lint(tmp_path, render(use_case_fm(), use_case_sections()), name=FRONT_PATH)
+    assert codes(findings, "IDEA001") == []
