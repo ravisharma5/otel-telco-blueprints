@@ -24,6 +24,8 @@ from pathlib import Path
 
 import yaml
 
+from tools.bplint.loader import split_front_matter
+
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data/serving"
 PAGE = ROOT / "platform/serving-routing-placement/README.md"
@@ -205,10 +207,9 @@ def _use_cases(catalog: Path | None = None) -> dict[str, tuple[str, str]]:
     catalog = catalog or ROOT / "catalog"
     out = {}
     for path in sorted(catalog.glob("*/*/README.md")):
-        text = path.read_text(encoding="utf-8")
-        if not text.startswith("---"):
+        fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
+        if fm is None:
             continue
-        fm = yaml.safe_load(text.split("---", 2)[1]) or {}
         if fm.get("id") and not is_idea(fm):
             out[fm["id"]] = (fm["title"], path.relative_to(catalog.parent).as_posix())
     return out

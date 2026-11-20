@@ -30,6 +30,7 @@ from pathlib import Path
 
 import yaml
 
+from tools.bplint.loader import split_front_matter
 from tools.bplint.markdown import parse_doc
 from tools.site.export_explorer import (
     DEPTH_LABELS,
@@ -208,10 +209,9 @@ def ideas_line(catalog_dir: Path | None = None) -> str:
     catalog_dir = catalog_dir or ROOT / "catalog"
     count = 0
     for path in catalog_dir.glob("*/*/README.md"):
-        text = path.read_text(encoding="utf-8")
-        if not text.startswith("---"):
+        fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
+        if fm is None:
             continue
-        fm = yaml.safe_load(text.split("---", 2)[1]) or {}
         if fm.get("type") == "use-case" and fm.get("domain") not in SKIPPED_DOMAINS and is_idea(fm):
             count += 1
     if not count:

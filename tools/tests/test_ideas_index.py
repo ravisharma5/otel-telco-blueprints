@@ -356,3 +356,37 @@ def test_render_sandbox_keeps_idea_block_but_skips_pb08(one_idea: Path, monkeypa
     idea_text = (one_idea / "ideas/alpha-log/README.md").read_text(encoding="utf-8")
     assert "| Base sandbox only" in _block(idea_text, "sandbox")
     assert "alpha-log" not in pb08.read_text(encoding="utf-8")
+
+
+# ---- front matter ends at a delimiter line, not a "---" substring -----------
+
+IDEA_DASHES = """# Ideas fields
+idea:
+  why: "Baseline --- template mining --- already does this"
+  promote: ["A measured comparison"]
+"""
+
+
+def test_dashes_in_a_value_do_not_end_front_matter(tmp_path: Path):
+    cat = tmp_path / "catalog"
+    page = _write(cat / "ideas/dashes/README.md", _page("UC-OPS-13", "Dash idea", "network-operations", IDEA_DASHES))
+    _write(cat / "ideas/index.md", INDEX_TEXT)
+    assert [i["why"] for i in render_ideas.ideas(cat)] == [
+        "Baseline --- template mining --- already does this"
+    ]
+    render_ideas.main([], catalog=cat)
+    text = page.read_text(encoding="utf-8")
+    fm, body = text.split("\n---\n", 1)
+    assert "generated:idea" not in fm  # the YAML comment line is not taken for the H1
+    assert body.lstrip("\n").startswith("# Dash idea\n\n<!-- generated:idea start -->\n")
+
+
+def test_dashes_in_a_value_do_not_break_proposal_or_serving(tmp_path: Path):
+    from tools.site import build_proposal, render_serving
+
+    cat = tmp_path / "catalog"
+    _write(cat / "network-operations/host/README.md", _page("UC-OPS-01", "Host --- recipe", "network-operations"))
+    _write(cat / "ideas/dashes/README.md", _page("UC-OPS-13", "Dash idea", "network-operations", IDEA_DASHES))
+    assert list(render_serving._use_cases(cat)) == ["UC-OPS-01"]
+    assert render_serving._use_cases(cat)["UC-OPS-01"][0] == "Host --- recipe"
+    assert build_proposal.ideas_line(cat).startswith("One more use case is")

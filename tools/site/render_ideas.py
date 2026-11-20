@@ -24,8 +24,7 @@ import re
 import sys
 from pathlib import Path
 
-import yaml
-
+from tools.bplint.loader import split_front_matter
 from tools.site.export_explorer import IDEAS_DIR, SKIPPED_DOMAINS, is_idea
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -45,10 +44,11 @@ def _fail(msg: str) -> None:
 
 
 def _front_matter(path: Path, where: str) -> dict:
-    text = path.read_text(encoding="utf-8")
-    if not text.startswith("---"):
+    # The block closes at the first line that is exactly "---", not at a "---" substring.
+    fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
+    if fm is None:
         _fail(f"{where} has no front matter")
-    return yaml.safe_load(text.split("---", 2)[1]) or {}
+    return fm
 
 
 def _cell(text: str) -> str:
@@ -154,7 +154,8 @@ def _replace(text: str, name: str, content: str, where: str) -> str:
 def render_page(text: str, block: str, where: str = "page") -> str:
     """text with its idea block replaced; markers are inserted after the H1 when both are missing."""
     if not _marker(PAGE_NAME, "start").search(text) and not _marker(PAGE_NAME, "end").search(text):
-        body_at = text.index("---", 3) + 3 if text.startswith("---") else 0
+        fm, body, _ = split_front_matter(text)
+        body_at = len(text) - len(body) if fm is not None else 0
         h1 = H1_RE.search(text, body_at)
         if h1 is None:
             _fail(f"{where}: no H1 to place the idea block after")
