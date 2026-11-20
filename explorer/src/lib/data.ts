@@ -205,7 +205,21 @@ export interface Default {
   batch: string;
 }
 
+/** An exploration idea: shown on the Ideas sub-tab, never in the gallery. */
+export interface Idea {
+  id: string;
+  title: string;
+  slug: string;
+  domain: { id: string; label: string };
+  depth: Depth;
+  why: string;
+  promote: string[];
+  merged_into: string | null;
+  docs_url: string;
+}
+
 export const useCases = data.use_cases as unknown as UseCase[];
+export const ideas = (data.ideas ?? []) as unknown as Idea[];
 export const filters = data.filters as Filters;
 export const goals = data.goals as Goal[];
 export const defaults = data.default as Default;

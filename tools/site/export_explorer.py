@@ -90,6 +90,14 @@ DOMAIN_LABELS = {
 }
 SKIPPED_DOMAINS = ("demo",)
 
+# Exploration ideas live in catalog/ideas/<slug>/ and keep their real domain.
+IDEAS_DIR = "ideas"
+
+
+def is_idea(fm: dict) -> bool:
+    """True when the page carries the idea object; every tool uses this one rule."""
+    return isinstance(fm.get("idea"), dict)
+
 # Recipe depth labels, shared with the Recipes overview (render_catalog imports them).
 DEPTH_LABELS = {"recipe": "Full recipe", "entry": "Catalog entry"}
 
@@ -711,6 +719,49 @@ def _batch_values(setup: dict) -> list[str]:
     return [CPU_BATCH] if _is_cpu(setup) else list(BATCH_VALUES)
 
 
+def _front_matter(path: Path, repo_root: Path) -> dict:
+    rel = path.relative_to(repo_root).as_posix()
+    doc = parse_doc(path, path.read_text(encoding="utf-8"), display=rel)
+    if doc.fm_error:
+        raise SystemExit(f"{rel}: front matter line {doc.fm_error[0]}: {doc.fm_error[1]}")
+    return doc.front_matter or {}
+
+
+def _idea(path: Path, repo_root: Path, fm: dict) -> dict:
+    """One Ideas sub-tab record; ideas never enter the gallery."""
+    rel = path.relative_to(repo_root).as_posix()
+    if fm.get("type") != "use-case":
+        raise SystemExit(f"{rel}: an idea page must be type use-case")
+    if path.parent.parent.name != IDEAS_DIR:
+        raise SystemExit(f"{rel}: an idea page must sit in catalog/{IDEAS_DIR}/")
+    for key in ("id", "title", "domain", "depth"):
+        _need(fm, key, rel)
+    domain, slug, idea = fm["domain"], path.parent.name, fm["idea"]
+    if domain not in DOMAIN_LABELS:
+        raise SystemExit(f"{rel}: domain {domain} has no explorer label")
+    if fm["depth"] not in DEPTH_LABELS:
+        raise SystemExit(f"{rel}: depth {fm['depth']} has no label")
+    if not isinstance(idea.get("why"), str) or not idea["why"].strip():
+        raise SystemExit(f"{rel}: idea.why must be a non-empty string")
+    promote = idea.get("promote")
+    if not isinstance(promote, list) or not promote or not all(isinstance(p, str) and p.strip() for p in promote):
+        raise SystemExit(f"{rel}: idea.promote must be a non-empty list of strings")
+    merged_into = idea.get("merged_into")
+    if merged_into is not None and not isinstance(merged_into, str):
+        raise SystemExit(f"{rel}: idea.merged_into must be a use-case id")
+    return {
+        "id": fm["id"],
+        "title": fm["title"],
+        "slug": slug,
+        "domain": {"id": domain, "label": DOMAIN_LABELS[domain]},
+        "depth": {"id": fm["depth"], "label": DEPTH_LABELS[fm["depth"]]},
+        "why": idea["why"],
+        "promote": list(promote),
+        "merged_into": merged_into,
+        "docs_url": f"recipes/{IDEAS_DIR}/{slug}/",
+    }
+
+
 def _use_case(path: Path, repo_root: Path, data: dict) -> dict | None:
     rel = path.relative_to(repo_root).as_posix()
     doc = parse_doc(path, path.read_text(encoding="utf-8"), display=rel)
@@ -867,9 +918,13 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
     data = _serving_data(repo_root)
     data["goal_ids"] = _goal_ids(repo_root)
     data["try_it"] = _try_it(repo_root)
-    use_cases = []
+    use_cases, ideas = [], []
     for path in sorted((repo_root / "catalog").glob("*/*/README.md")):
         if path.parent.parent.name in SKIPPED_DOMAINS:
+            continue
+        fm = _front_matter(path, repo_root)
+        if is_idea(fm):
+            ideas.append(_idea(path, repo_root, fm))
             continue
         uc = _use_case(path, repo_root, data)
         if uc is not None:
@@ -883,6 +938,14 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
         values = [u[key] for u in use_cases]
         if len(set(values)) != len(values):
             raise SystemExit(f"catalog: use-case {key} values must be unique")
+    ideas.sort(key=lambda i: i["id"])
+    for key in ("id", "slug"):
+        values = [i[key] for i in ideas]
+        if len(set(values)) != len(values):
+            raise SystemExit(f"catalog/{IDEAS_DIR}: idea {key} values must be unique")
+    shared = sorted({i["slug"] for i in ideas} & {u["slug"] for u in use_cases})
+    if shared:
+        raise SystemExit(f"catalog/{IDEAS_DIR}: idea slug also used by a use case: {', '.join(shared)}")
     domains = {u["domain"] for u in use_cases}
     stages = {u["stage"]["id"] for u in use_cases}
     depths = {u["depth"]["id"] for u in use_cases}
@@ -921,6 +984,7 @@ def build_explorer_data(repo_root: Path = ROOT) -> dict:
             "changes": [c for c in CHANGE_ORDER if c in changes],
         },
         "use_cases": use_cases,
+        "ideas": ideas,
     }
 
 
