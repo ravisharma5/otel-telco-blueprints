@@ -100,7 +100,6 @@ EXPECTED_USE_CASE_PAGES: dict[str, str] = {
     "network-operations/transport-ip-diagnostics": "UC-OPS-08",
     "network-operations/cross-domain-oss-correlation": "UC-OPS-09",
     "agentic-operations/router-core-read-only-ops": "UC-AGOPS-02",
-    "agentic-operations/policy-following-ops-agents": "UC-AGOPS-03",
     "agentic-operations/site-change-risk-gate": "UC-AGOPS-04",
     "agentic-operations/cnf-upgrade-checks": "UC-AGOPS-05",
     "security/security-triage": "UC-SEC-01",
@@ -210,14 +209,6 @@ ENTRY_SPECS: dict[str, dict] = {
         "tmf": None,
         "agent_school": [101, 401],
         "goal": "incidents",
-    },
-    "agentic-operations/policy-following-ops-agents": {
-        "id": "UC-AGOPS-03",
-        "slots": {"llm", "decision", "safety"},
-        "ceiling": "recommend-with-approval",
-        "tmf": 2,
-        "agent_school": [301, 303, 401],
-        "goal": "change",
     },
     "security/security-triage": {
         "id": "UC-SEC-01",

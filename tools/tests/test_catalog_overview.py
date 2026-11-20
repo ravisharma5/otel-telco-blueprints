@@ -198,8 +198,9 @@ def test_triage_language_scope():
 
 
 # Every item of the application list the catalog was built from, and every
-# agenda gap, maps to a landed page ("<domain>/<slug>") or to an also_covers
-# item on a flagship ("also_covers:<domain>/<slug>"). Generic names only.
+# agenda gap, maps to a landed page ("<domain>/<slug>"), to an also_covers
+# item on a flagship ("also_covers:<domain>/<slug>"), or to a section of a
+# platform blueprint ("platform:<folder>#<anchor>"). Generic names only.
 COVERAGE: dict[str, str] = {
     # Standards and protocol knowledge
     "telecom standards Q&A": "also_covers:standards-knowledge/grounded-knowledge-assistant",
@@ -220,7 +221,7 @@ COVERAGE: dict[str, str] = {
     "closed-loop incident handling": "also_covers:agentic-operations/closed-loop-incident-handling",
     "customer care diagnostics": "also_covers:business-assurance/camara-care-diagnostics",
     "router and 5G core operations": "agentic-operations/router-core-read-only-ops",
-    "policy-following operations agents": "agentic-operations/policy-following-ops-agents",
+    "policy-following operations agents": "platform:safety-autonomy-gating#policies-as-action-classes",
     # Under development
     "broadband digital troubleshooting": "business-assurance/broadband-digital-troubleshooting",
     "network RCA reasoning": "research/kpi-rca-reasoning",
@@ -260,6 +261,12 @@ def test_catalog_covers_application_list_and_gaps():
             assert fm.get("flagship") is True, (item, key)
             covers = fm.get("also_covers") or []
             assert any(ALSO_COVERS_WORDS[item] in c for c in covers), (item, covers)
+        elif target.startswith("platform:"):
+            folder, anchor = target.split(":", 1)[1].split("#", 1)
+            page = REPO_ROOT / "platform" / folder / "README.md"
+            assert page.is_file(), (item, page)
+            heads = re.findall(r"^#{1,6} (.+)$", page.read_text(encoding="utf-8"), re.M)
+            assert anchor in {github_slug(h) for h in heads}, (item, anchor)
         else:
             assert target in pages, (item, target)
             assert pages[target].get("flagship") is not True, (item, target)
@@ -270,10 +277,10 @@ def test_catalog_covers_application_list_and_gaps():
 
 def test_catalog_counts():
     pages = list(_pages_by_key().values())
-    assert len(pages) == 30
+    assert len(pages) == 29
     recipes = [fm for fm in pages if fm.get("depth") == "recipe"]
     entries = [fm for fm in pages if fm.get("depth") == "entry"]
-    assert len(recipes) == 10 and len(entries) == 20
+    assert len(recipes) == 10 and len(entries) == 19
     assert sum(1 for fm in recipes if fm.get("flagship") is True) == 4
     assert sum(1 for fm in recipes if fm.get("flagship") is False) == 6
     for fm in pages:

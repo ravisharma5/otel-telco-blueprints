@@ -1237,7 +1237,7 @@ def test_is_idea_rule():
 
 def test_no_ideas_on_the_real_catalog(data):
     assert data["ideas"] == []
-    assert len(data["use_cases"]) == 30
+    assert len(data["use_cases"]) == 29
 
 
 IDEA_SOURCE = "catalog/research/kpi-rca-reasoning"
@@ -1265,7 +1265,7 @@ def test_idea_page_leaves_the_gallery(tmp_path):
     fm, slug = _with_idea(tmp_path, {"why": "No public evidence yet.", "promote": ["A labelled set"]})
     built = ex.build_explorer_data(tmp_path)
     assert fm["id"] not in {u["id"] for u in built["use_cases"]}
-    assert len(built["use_cases"]) == 29
+    assert len(built["use_cases"]) == 28
     matches = [i for i in built["ideas"] if i["id"] == fm["id"]]
     assert len(matches) == 1
     idea = matches[0]

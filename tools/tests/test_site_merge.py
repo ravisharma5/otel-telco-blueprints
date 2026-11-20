@@ -141,7 +141,16 @@ def test_legacy_list_frozen():
 
 MOVED_PATH = REPO_ROOT / "tools/site/moved-urls.txt"
 # Every pair here must stay in moved-urls.txt; later catalog moves extend this set.
-PINNED_MOVES: list[tuple[str, str]] = []
+PINNED_MOVES: list[tuple[str, str]] = [
+    (
+        "recipes/agentic-operations/policy-following-ops-agents/",
+        "platform/safety-autonomy-gating/#policies-as-action-classes",
+    ),
+    (
+        "use-cases/policy-following-ops-agents/",
+        "platform/safety-autonomy-gating/#policies-as-action-classes",
+    ),
+]
 MOVE_OLD = "recipes/research/old-name/"
 MOVE_NEW = "recipes/network-operations/alarm-triage-adaptation/"
 MOVE_TITLE = "Adaptation ladder on alarm and root-cause triage"

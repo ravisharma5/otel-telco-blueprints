@@ -2,3 +2,5 @@
 # One pair per line: old path, then new path, both relative to the site root with a
 # trailing slash. Only the new path may end in one #fragment.
 # tools/site/merge_site.py writes a redirect page at each old path.
+recipes/agentic-operations/policy-following-ops-agents/ platform/safety-autonomy-gating/#policies-as-action-classes
+use-cases/policy-following-ops-agents/ platform/safety-autonomy-gating/#policies-as-action-classes

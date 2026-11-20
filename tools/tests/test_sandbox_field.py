@@ -53,7 +53,7 @@ WHY_RULES = {
     "execution": re.compile(r"dry-run|dry run|check mode|validate|pars|decod|rebuild|raw|probe", re.I),
     "whole-agent": re.compile(r"within policy|write|action request", re.I),
 }
-EXPECTED_COUNTS = {"none": 20, "execution": 5, "whole-agent": 5}
+EXPECTED_COUNTS = {"none": 20, "execution": 5, "whole-agent": 4}
 
 
 def _sandbox(path) -> dict:
@@ -152,7 +152,7 @@ def test_fit_counts():
     for p in use_case_pages():
         counts[_sandbox(p).get("fit")] = counts.get(_sandbox(p).get("fit"), 0) + 1
     assert counts == EXPECTED_COUNTS
-    assert sum(counts.values()) == 30
+    assert sum(counts.values()) == 29
 
 
 def test_pb08_anchor_matches_slug():
