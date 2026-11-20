@@ -11,8 +11,9 @@ interface Props {
 
 const { title, current = '' } = Astro.props;
 const base = import.meta.env.BASE_URL;
-// Use-case pages sit in the Use cases section: its link is the current section, not the page.
-const SECTION_OF: Record<string, string> = { 'use-case': '' };
+// Use-case pages and the Ideas sub-tab sit in the Use cases section: its link is the
+// current section, not the page.
+const SECTION_OF: Record<string, string> = { 'use-case': '', ideas: '' };
 const ariaCurrent = (path: string) =>
   path === current ? 'page' : SECTION_OF[current] === path ? 'true' : undefined;
 ---

@@ -429,6 +429,25 @@ use_case:
       - Governance and RACI
       - Readiness questions
       - Sources
+# Ideas sub-tab inside the Use cases section. Idea text (title, why, promote items)
+# comes from each idea page's front matter through explorer.json.
+ideas:
+  page_title: "{title} · {site}"
+  # Tab strip above the gallery and at the top of the Ideas page. {count} is the
+  # number of gallery use cases or ideas, filled at build time from explorer.json.
+  tabs:
+    label: Use cases and ideas
+    use_cases: "Use cases ({count})"
+    ideas: "Ideas ({count})"
+  headings:
+    title: Exploration ideas
+    why: Why it's an idea
+    promote: What would promote it
+  notes:
+    intro: These are exploration ideas for operators to try, test, and contribute back. They aren't vetted recipes.
+    contribute: Each idea page lists the evidence that would promote it to a recipe, so you know what to bring back.
+  buttons:
+    open: Open the idea
 ---
 
 <!-- Strings live in the front matter above; this body is not rendered. -->

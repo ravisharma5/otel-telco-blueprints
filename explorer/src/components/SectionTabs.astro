@@ -1,0 +1,42 @@
+---
+// Sub-tabs inside the Use cases section: the gallery and the Ideas page.
+// Counts come from explorer.json at build time; the active tab is the current page.
+import { frontmatter as copy } from '../content/copy.md';
+import { fill, ideas, useCases } from '../lib/data';
+
+interface Props {
+  active: 'use-cases' | 'ideas';
+}
+
+const { active } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const tabs = [
+  { id: 'use-cases', href: base, label: fill(copy.ideas.tabs.use_cases, { count: useCases.length }) },
+  { id: 'ideas', href: base + 'ideas/', label: fill(copy.ideas.tabs.ideas, { count: ideas.length }) },
+];
+---
+<nav class="section-tabs" aria-label={copy.ideas.tabs.label}>
+  <ul>
+    {tabs.map((tab) => (
+      <li>
+        <a href={tab.href} data-tab={tab.id} aria-current={tab.id === active ? 'page' : undefined}>{tab.label}</a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .section-tabs { margin: 0 0 var(--space-lg); border-bottom: 1px solid var(--color-border); }
+  .section-tabs ul { display: flex; gap: var(--space-lg); margin: 0; padding: 0; list-style: none; }
+  .section-tabs a {
+    display: inline-block; padding: var(--space-sm) 0;
+    color: var(--color-text-muted); text-decoration: none;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .section-tabs a:hover { color: var(--color-text); }
+  .section-tabs a[aria-current='page'] {
+    color: var(--color-text); font-weight: var(--weight-bold);
+    border-bottom-color: var(--color-primary);
+  }
+  .section-tabs a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+</style>

@@ -1,0 +1,86 @@
+---
+// Ideas sub-tab: exploration ideas kept out of the gallery. Each card links the
+// idea's docs page; ideas get no use-cases/<slug>/ page.
+import Base from '../layouts/Base.astro';
+import SectionTabs from '../components/SectionTabs.astro';
+import { frontmatter as copy } from '../content/copy.md';
+import { fill, ideas } from '../lib/data';
+
+const base = import.meta.env.BASE_URL;
+const text = copy.ideas;
+const sep = copy.home.gallery.counts.separator;
+---
+<Base title={fill(copy.ideas.page_title, { title: text.headings.title, site: copy.site.name })} current="ideas">
+  <section class="band ideas" aria-labelledby="ideas-title">
+    <SectionTabs active="ideas" />
+    <h1 id="ideas-title">{text.headings.title}</h1>
+    <p class="lede">{text.notes.intro}</p>
+    <p class="contribute">{text.notes.contribute}</p>
+    <ul class="idea-grid">
+      {ideas.map((idea) => (
+        <li class="idea-card" data-idea={idea.slug}>
+          <span class="eyebrow">{idea.id}{sep}{idea.domain.label}</span>
+          <h2>{idea.title}</h2>
+          <h3>{text.headings.why}</h3>
+          <p>{idea.why}</p>
+          <h3>{text.headings.promote}</h3>
+          <ul class="promote">
+            {idea.promote.map((item) => <li>{item}</li>)}
+          </ul>
+          <a class="open" href={base + idea.docs_url}>{text.buttons.open} <span aria-hidden="true">→</span></a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .band {
+    max-width: var(--content-max-home);
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-xl);
+  }
+  h1 {
+    margin: 0 0 var(--space-md);
+    font-size: var(--text-display); line-height: var(--leading-display);
+    letter-spacing: var(--tracking-tight);
+  }
+  .lede, .contribute { max-width: var(--prose-max); margin: 0 0 var(--space-md); color: var(--color-text-muted); }
+  .contribute { margin-bottom: var(--space-xl); font-size: var(--text-label); line-height: var(--leading-label); }
+  ul { margin: 0; padding: 0; list-style: none; }
+  .idea-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: var(--space-lg);
+  }
+  .idea-card {
+    display: flex; flex-direction: column; gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  }
+  .eyebrow {
+    color: var(--color-text-muted); font-weight: var(--weight-bold);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  h2 { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+  h3 {
+    margin: var(--space-xs) 0 0; color: var(--color-text-muted);
+    font-size: var(--text-label); line-height: var(--leading-label);
+  }
+  .idea-card p { margin: 0; }
+  .promote { list-style: disc; padding-left: var(--space-lg); }
+  .open {
+    margin-top: auto; padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-primary-text); text-decoration: none;
+    font-size: var(--text-label); font-weight: var(--weight-bold); line-height: var(--leading-label);
+  }
+  .open:hover { text-decoration: underline; }
+  .open:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  @media (max-width: 639px) {
+    .band { padding: var(--space-3xl) var(--space-md); }
+    h1 { font-size: var(--text-heading); line-height: var(--leading-heading); }
+    .idea-card { padding: var(--space-md); }
+  }
+</style>

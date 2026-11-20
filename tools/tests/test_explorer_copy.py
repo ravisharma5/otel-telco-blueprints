@@ -437,3 +437,31 @@ def test_cpu_copy_keys(path, limit, placeholders):
     assert not SPEED.search(node), node
     # The CPU sub-line drops the GPU batch sentence.
     assert "{batch}" not in node
+
+
+def test_ideas_copy():
+    """Ideas sub-tab copy: tab labels take a count, and the intro says these are not recipes."""
+    ideas = _copy()["ideas"]
+    assert "{title}" in ideas["page_title"] and "{site}" in ideas["page_title"]
+    tabs = ideas["tabs"]
+    assert tabs["label"]
+    assert tabs["use_cases"].startswith("Use cases") and "{count}" in tabs["use_cases"]
+    assert tabs["ideas"].startswith("Ideas") and "{count}" in tabs["ideas"]
+    for key in ("title", "why", "promote"):
+        assert 0 < _words(ideas["headings"][key]) <= LIMITS["headings"], key
+    intro = ideas["notes"]["intro"]
+    assert _words(intro) <= LIMITS["notes"], intro
+    for word in ("try", "test", "contribute"):
+        assert word in intro, word
+    assert re.search(r"(?i)\b(?:not|aren't)\b[^.]*\brecipes\b", intro), intro
+    assert 0 < _words(ideas["notes"]["contribute"]) <= LIMITS["notes"]
+    assert 0 < _words(ideas["buttons"]["open"]) <= LIMITS["buttons"]
+
+
+def test_no_ideas_prose_in_astro_files():
+    samples = [text for _, text in _strings(_copy()["ideas"]) if _words(text) >= 3 and "{" not in text]
+    assert samples
+    for astro in EXPLORER_SRC.rglob("*.astro"):
+        text = astro.read_text(encoding="utf-8")
+        for sample in samples:
+            assert sample not in text, f"{astro.relative_to(REPO_ROOT)} hard-codes: {sample}"

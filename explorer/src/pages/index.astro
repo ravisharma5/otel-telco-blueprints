@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import GoalTile from '../components/GoalTile.astro';
 import UseCaseCard from '../components/UseCaseCard.astro';
 import FilterChips from '../components/FilterChips.astro';
+import SectionTabs from '../components/SectionTabs.astro';
 import { frontmatter as copy } from '../content/copy.md';
 import { goals, useCases } from '../lib/data';
 
@@ -43,6 +44,7 @@ const steps = how.steps.headings.map((title, i) => ({ n: i + 1, title, body: how
   </section>
 
   <section class="band gallery" id="gallery" aria-labelledby="gallery-title">
+    <SectionTabs active="use-cases" />
     <h2 id="gallery-title">{copy.home.gallery.headings.title}</h2>
     <FilterChips />
     <ul class="card-grid">
