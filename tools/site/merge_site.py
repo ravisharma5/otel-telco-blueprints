@@ -57,7 +57,10 @@ MOVED_NEW = re.compile(r"^[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*/(?:#[a-z0-9
 PROPOSAL_PDF = "proposal/otel-telco-blueprints-proposal.pdf"
 SKIP_SCHEMES = ("http:", "https:", "mailto:", "tel:", "data:", "javascript:")
 
-REDIRECT = """<!doctype html>
+def _redirect_template(script: str) -> str:
+    """Redirect page template; the caller supplies the script line."""
+    return (
+        """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -65,16 +68,21 @@ REDIRECT = """<!doctype html>
 <link rel="canonical" href="{canonical}">
 <meta name="robots" content="noindex">
 <meta http-equiv="refresh" content="0; url={rel}">
-<script>location.replace("{rel}" + location.hash)</script>
+<script>"""
+        + script
+        + """</script>
 </head>
 <body>
 <p>This page moved to <a href="{rel}">{title}</a>.</p>
 </body>
 </html>
 """
+    )
 
+
+REDIRECT = _redirect_template('location.replace("{rel}" + location.hash)')
 # A fragment target already names its anchor, so the script must not add location.hash.
-REDIRECT_FRAGMENT = REDIRECT.replace('location.replace("{rel}" + location.hash)', 'location.replace("{rel}")')
+REDIRECT_FRAGMENT = _redirect_template('location.replace("{rel}")')
 
 
 # ---------- merge ----------

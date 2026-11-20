@@ -218,6 +218,14 @@ def test_move_fragment_target_has_one_hash(tmp_path):
         assert url.count("#") <= 1, url
 
 
+def test_redirect_templates_differ_only_in_script():
+    plain, frag = merge_site.REDIRECT, merge_site.REDIRECT_FRAGMENT
+    assert 'location.replace("{rel}" + location.hash)' in plain
+    assert "location.hash" not in frag and 'location.replace("{rel}")' in frag
+    strip = re.compile(r"<script>.*?</script>")
+    assert strip.sub("", plain) == strip.sub("", frag)
+
+
 def test_move_missing_target_fails(tmp_path):
     with pytest.raises(SystemExit) as exc:
         merge_site.write_moves(tmp_path, [(MOVE_OLD, MOVE_NEW + "#x")], SITE_URL)
