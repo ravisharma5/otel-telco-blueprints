@@ -299,3 +299,26 @@ def test_catalog_counts():
     assert sum(1 for fm in recipes if fm.get("flagship") is False) == 5
     for fm in pages:
         assert fm.get("card") and fm.get("placement") and fm.get("depth"), fm.get("id")
+
+
+# ---------- when not to use OTel ----------
+
+CLASSIC_HEADER = "| Problem | Start with | Where OTel fits | In this catalog |"
+DRAIN_URL = "https://jiemingzhu.github.io/pub/pjhe_icws2017.pdf"
+
+
+def test_classic_methods_first():
+    """The hand-written overview points numeric and detection problems at classic methods first."""
+    text = OVERVIEW.read_text(encoding="utf-8")
+    generated = text.index("<!-- generated:catalog-by-domain start -->")
+    heading = text.find("\n## When not to use OTel\n")
+    assert 0 <= heading < generated, "add '## When not to use OTel' above the generated block"
+    part = text[heading:generated]
+    assert CLASSIC_HEADER in part
+    rows = [ln for ln in part.splitlines() if ln.startswith("| ") and ln != CLASSIC_HEADER]
+    assert len(rows) >= 4, rows
+    joined = "\n".join(rows).lower()
+    for word in ("energy", "log", "threshold", "forecast"):
+        assert word in joined, word
+    for target in ("network-operations/ran-energy-saving/README.md", "ideas/site-log-reduction/README.md", DRAIN_URL):
+        assert f"({target})" in part, target
