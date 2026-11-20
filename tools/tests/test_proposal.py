@@ -336,6 +336,7 @@ BLOCKS = (
     "catalog",
     "flagships",
     "evidence-summary",
+    "ideas",
 )
 BASIS = ("model card", "research", "Red Hat guidance", "industry use case", "project documentation")
 
@@ -505,3 +506,44 @@ def test_proposal_framing():
         assert word not in text.lower(), word
     # Tool contracts are technical; commercial terms never appear.
     assert not re.search(r"\b(price|prices|commercial terms|licen[cs]e fee|SLA credit)\b", text, re.I)
+
+
+# ---- ideas line -------------------------------------------------------
+
+
+def _idea_catalog(root: Path, count: int) -> Path:
+    cat = root / "catalog"
+    for n in range(count):
+        page = cat / f"ideas/idea-{n}/README.md"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(
+            "---\n"
+            f'id: "UC-OPS-{20 + n}"\ntype: "use-case"\ntitle: "Idea {n}"\ndomain: "network-operations"\n'
+            'depth: "entry"\nidea:\n  why: "Not yet shown"\n  promote: ["Evidence"]\n'
+            f"---\n\n# Idea {n}\n",
+            encoding="utf-8",
+        )
+    return cat
+
+
+def test_ideas_line_counts_ideas(tmp_path):
+    from tools.site.build_proposal import ideas_line
+
+    assert ideas_line(_idea_catalog(tmp_path / "none", 0)) == ""
+    assert ideas_line(_idea_catalog(tmp_path / "seven", 7)) == (
+        "Seven more use cases are open for contribution as [exploration ideas](../catalog/ideas/index.md)."
+    )
+    assert ideas_line(_idea_catalog(tmp_path / "one", 1)) == (
+        "One more use case is open for contribution as [exploration ideas](../catalog/ideas/index.md)."
+    )
+
+
+def test_ideas_block_matches_idea_pages():
+    from tools.site.build_proposal import ideas_line
+    from tools.tests.conftest import idea_pages
+
+    block = _block("ideas").strip()
+    if not idea_pages():
+        assert block == ""
+    else:
+        assert block == ideas_line(REPO_ROOT / "catalog")

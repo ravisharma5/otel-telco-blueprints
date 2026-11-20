@@ -225,3 +225,66 @@ def test_unknown_merge_host_fails(catalog: Path):
     page.write_text(page.read_text(encoding="utf-8").replace('"UC-OPS-01"\n', '"UC-OPS-99"\n'), encoding="utf-8")
     with pytest.raises(SystemExit, match="UC-OPS-99"):
         render_ideas.main([], catalog=catalog)
+
+
+# ---- front-page outputs skip idea pages ------------------------------------
+
+SANDBOX_BODY = "Intro line.\n\n### Sandbox\n\n<!-- generated:sandbox start -->\n<!-- generated:sandbox end -->\n"
+
+
+@pytest.fixture
+def one_idea(tmp_path: Path) -> Path:
+    cat = tmp_path / "catalog"
+    _write(cat / "ideas/alpha-log/README.md", _page("UC-AGOPS-09", "Site log reduction", "agentic-operations", IDEA_PLAIN, SANDBOX_BODY))
+    return cat
+
+
+def test_render_catalog_skips_ideas(one_idea: Path):
+    from tools.site import render_catalog
+
+    _write(one_idea / "network-operations/host-page/README.md", _page("UC-OPS-01", "Host recipe", "network-operations"))
+    assert [u["id"] for u in render_catalog.use_cases(one_idea)] == ["UC-OPS-01"]
+
+
+def test_render_serving_skips_ideas(one_idea: Path):
+    from tools.site import render_serving
+
+    _write(one_idea / "network-operations/host-page/README.md", _page("UC-OPS-01", "Host recipe", "network-operations"))
+    assert list(render_serving._use_cases(one_idea)) == ["UC-OPS-01"]
+
+
+def test_build_proposal_skips_ideas(one_idea: Path, monkeypatch):
+    from tools.site import build_proposal
+
+    monkeypatch.setattr(build_proposal, "ROOT", one_idea.parent)
+
+    # The idea page has no Sources table, so reading it would fail the run.
+    assert build_proposal.use_cases(one_idea) == []
+
+
+def test_render_sandbox_keeps_idea_block_but_skips_pb08(one_idea: Path, monkeypatch):
+    from tools.site import render_bring, render_sandbox
+
+    root = one_idea.parent
+    _write(one_idea / "network-operations/host-page/README.md", _page("UC-OPS-01", "Host recipe", "network-operations", body=SANDBOX_BODY))
+    pb08 = _write(
+        root / "platform/security-identity-sandbox/README.md",
+        "# PB-08\n\n<!-- generated:sandbox-fit start -->\n<!-- generated:sandbox-fit end -->\n",
+    )
+    seen: list[list[str]] = []
+    real_fit_table = render_sandbox.fit_table
+
+    def spy(entries):
+        seen.append([fm["id"] for fm, _ in entries])
+        return real_fit_table(entries)
+
+    monkeypatch.setattr(render_sandbox, "ROOT", root)
+    monkeypatch.setattr(render_sandbox, "CATALOG", one_idea)
+    monkeypatch.setattr(render_sandbox, "PB08", pb08)
+    monkeypatch.setattr(render_sandbox, "pages", lambda: render_bring.pages(one_idea))
+    monkeypatch.setattr(render_sandbox, "fit_table", spy)
+    assert render_sandbox.main([]) == 0
+    assert seen == [["UC-OPS-01"]]
+    idea_text = (one_idea / "ideas/alpha-log/README.md").read_text(encoding="utf-8")
+    assert "| Base sandbox only" in _block(idea_text, "sandbox")
+    assert "alpha-log" not in pb08.read_text(encoding="utf-8")
