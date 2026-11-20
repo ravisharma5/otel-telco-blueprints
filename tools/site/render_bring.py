@@ -35,8 +35,7 @@ import re
 import sys
 from pathlib import Path
 
-import yaml
-
+from tools.bplint.loader import split_front_matter
 from tools.bplint.slug import github_slug
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -273,9 +272,11 @@ def _marker(edge: str) -> re.Pattern[str]:
 
 
 def _front_matter(text: str, where: str) -> dict:
-    if not text.startswith("---"):
+    # The block closes at the first line that is exactly "---", not at a "---" substring.
+    fm, _, _ = split_front_matter(text)
+    if fm is None:
         _fail(f"{where} has no front matter")
-    return yaml.safe_load(text.split("---", 2)[1]) or {}
+    return fm
 
 
 def has_markers(text: str) -> bool:

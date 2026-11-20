@@ -23,8 +23,7 @@ import re
 import sys
 from pathlib import Path
 
-import yaml
-
+from tools.bplint.loader import split_front_matter
 from tools.bplint.slug import github_slug
 from tools.site.export_explorer import DEPTH_LABELS, DOMAIN_LABELS, SKIPPED_DOMAINS, is_idea
 
@@ -38,10 +37,11 @@ NAMES = ("catalog-by-domain", "catalog-by-platform")
 
 
 def _front_matter(path: Path) -> dict:
-    text = path.read_text(encoding="utf-8")
-    if not text.startswith("---"):
+    # The block closes at the first line that is exactly "---", not at a "---" substring.
+    fm, _, _ = split_front_matter(path.read_text(encoding="utf-8"))
+    if fm is None:
         raise SystemExit(f"render_catalog: {path.relative_to(ROOT)} has no front matter")
-    return yaml.safe_load(text.split("---", 2)[1]) or {}
+    return fm
 
 
 def _cell(text: str) -> str:

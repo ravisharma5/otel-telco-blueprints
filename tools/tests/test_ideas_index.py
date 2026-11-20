@@ -390,3 +390,12 @@ def test_dashes_in_a_value_do_not_break_proposal_or_serving(tmp_path: Path):
     assert list(render_serving._use_cases(cat)) == ["UC-OPS-01"]
     assert render_serving._use_cases(cat)["UC-OPS-01"][0] == "Host --- recipe"
     assert build_proposal.ideas_line(cat).startswith("One more use case is")
+
+
+def test_dashes_in_a_value_do_not_break_catalog_or_bring_front_matter(tmp_path: Path):
+    from tools.site import render_bring, render_catalog
+
+    text = _page("UC-OPS-01", "Host --- recipe", "network-operations")
+    page = _write(tmp_path / "catalog/network-operations/host/README.md", text)
+    assert render_catalog._front_matter(page)["title"] == "Host --- recipe"
+    assert render_bring._front_matter(text, "host")["title"] == "Host --- recipe"
