@@ -4,3 +4,17 @@
 # tools/site/merge_site.py writes a redirect page at each old path.
 recipes/agentic-operations/policy-following-ops-agents/ platform/safety-autonomy-gating/#policies-as-action-classes
 use-cases/policy-following-ops-agents/ platform/safety-autonomy-gating/#policies-as-action-classes
+recipes/network-operations/site-log-reduction/ recipes/ideas/site-log-reduction/
+use-cases/site-log-reduction/ recipes/ideas/site-log-reduction/
+recipes/agentic-operations/site-change-risk-gate/ recipes/ideas/site-change-risk-gate/
+use-cases/site-change-risk-gate/ recipes/ideas/site-change-risk-gate/
+recipes/network-software/oran-ric-xapp-assistant/ recipes/ideas/oran-ric-xapp-assistant/
+use-cases/oran-ric-xapp-assistant/ recipes/ideas/oran-ric-xapp-assistant/
+recipes/security/signalling-attack-classification/ recipes/ideas/signalling-attack-classification/
+use-cases/signalling-attack-classification/ recipes/ideas/signalling-attack-classification/
+recipes/standards-knowledge/spec-summarisation/ recipes/ideas/spec-summarisation/
+use-cases/spec-summarisation/ recipes/ideas/spec-summarisation/
+recipes/research/mobility-failure-analysis/ recipes/ideas/mobility-failure-analysis/
+use-cases/mobility-failure-analysis/ recipes/ideas/mobility-failure-analysis/
+recipes/research/kpi-rca-reasoning/ recipes/ideas/kpi-rca-reasoning/
+use-cases/kpi-rca-reasoning/ recipes/ideas/kpi-rca-reasoning/

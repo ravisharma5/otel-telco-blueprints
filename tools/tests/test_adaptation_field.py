@@ -135,6 +135,10 @@ def test_expertise_follows_slots(path):
     assert "golden-set" in exp
 
 
+def _fm_is_idea(path) -> bool:
+    return bool((front_matter(path) or {}).get("idea"))
+
+
 @PAGES
 def test_rung_text_names_retrieval_only_with_the_embedding_slot(path):
     """The generated rung text, the proposal row, and the explorer label say retrieval only when the page retrieves."""
@@ -146,11 +150,14 @@ def test_rung_text_names_retrieval_only_with_the_embedding_slot(path):
     summary = next(ln for ln in m.group(1).splitlines() if ln.startswith("| ") and not ln.startswith("| Model change |"))
     model_change = summary.strip().strip("|").split("|")[0]
     rung = _ad(path).get("rung")
-    link = "../catalog/" + page_key(path) + "/README.md)"
-    proposal = (PB11.parents[2] / "proposal/index.md").read_text(encoding="utf-8")
-    row = next(ln for ln in proposal.splitlines() if ln.startswith("| [") and link in ln and "You bring:" in ln)
-    bring_cell = row.strip().strip("|").split("|")[-1].split(". You bring:")[0]
-    for text in (model_change, RUNG_LABELS[rung], bring_cell):
+    texts = [model_change, RUNG_LABELS[rung]]
+    if not _fm_is_idea(path):
+        # The proposal lists front-page pages only, so idea pages have no row there.
+        link = "../catalog/" + page_key(path) + "/README.md)"
+        proposal = (PB11.parents[2] / "proposal/index.md").read_text(encoding="utf-8")
+        row = next(ln for ln in proposal.splitlines() if ln.startswith("| [") and link in ln and "You bring:" in ln)
+        texts.append(row.strip().strip("|").split("|")[-1].split(". You bring:")[0])
+    for text in texts:
         # "after retrieval and skills" is the LoRA rule on the ladder, not a claim that this page retrieves
         claim = text.split("after retrieval")[0]
         assert ("retrieval" in claim.lower()) == retrieves or rung in {"head-retrain", "lora-if-gap"}, (
