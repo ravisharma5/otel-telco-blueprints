@@ -137,6 +137,132 @@ def test_legacy_list_frozen():
     assert entries == sorted(set(entries))
 
 
+# ---------- moved URLs ----------
+
+MOVED_PATH = REPO_ROOT / "tools/site/moved-urls.txt"
+# Every pair here must stay in moved-urls.txt; later catalog moves extend this set.
+PINNED_MOVES: list[tuple[str, str]] = []
+MOVE_OLD = "recipes/research/old-name/"
+MOVE_NEW = "recipes/network-operations/alarm-triage-adaptation/"
+MOVE_TITLE = "Adaptation ladder on alarm and root-cause triage"
+
+
+def test_read_moves_pairs(tmp_path):
+    f = tmp_path / "moved.txt"
+    f.write_text("# header\n\n  a/ b/  \n# c/ d/\nx/y/ z/#frag\n", encoding="utf-8")
+    assert merge_site.read_moves(f) == [("a/", "b/"), ("x/y/", "z/#frag")]
+
+
+@pytest.mark.parametrize("line", ["a/", "a/ b/ c/"])
+def test_read_moves_rejects_wrong_field_count(tmp_path, line):
+    f = tmp_path / "moved.txt"
+    f.write_text(line + "\n", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        merge_site.read_moves(f)
+
+
+def _move(site, old=MOVE_OLD, new=MOVE_NEW):
+    _write(site / new.split("#", 1)[0] / "index.html", "<p>recipe</p>")
+    merge_site.write_moves(site, [(old, new)], SITE_URL)
+    return (site / old / "index.html").read_text(encoding="utf-8")
+
+
+def test_move_stub_shape(tmp_path):
+    html = _move(tmp_path)
+    rel = "../../../" + MOVE_NEW
+    assert html.lower().startswith("<!doctype html>")
+    assert f'<meta http-equiv="refresh" content="0; url={rel}">' in html
+    assert f'<link rel="canonical" href="{SITE_URL}{MOVE_NEW}">' in html
+    assert '<meta name="robots" content="noindex">' in html
+    assert f'location.replace("{rel}" + location.hash)' in html
+    assert f"<title>Moved: {MOVE_TITLE}</title>" in html
+    assert "?" not in html and "location.search" not in html
+
+
+def test_move_fragment_target_has_one_hash(tmp_path):
+    new = MOVE_NEW + "#what-you-need"
+    html = _move(tmp_path, new=new)
+    rel = "../../../" + new
+    assert f'location.replace("{rel}")' in html
+    assert "location.hash" not in html
+    assert f'<meta http-equiv="refresh" content="0; url={rel}">' in html
+    assert f'<link rel="canonical" href="{SITE_URL}{new}">' in html
+    script = re.search(r"<script>(.*?)</script>", html).group(1)
+    assert script.count("#") == 1, script
+    for url in re.findall(r'(?:href|url)=([^">]+)', html):
+        assert url.count("#") <= 1, url
+
+
+def test_move_missing_target_fails(tmp_path):
+    with pytest.raises(SystemExit) as exc:
+        merge_site.write_moves(tmp_path, [(MOVE_OLD, MOVE_NEW + "#x")], SITE_URL)
+    assert "target" in str(exc.value) and "is missing" in str(exc.value)
+    assert MOVE_NEW in str(exc.value)
+
+
+def test_move_old_still_built_fails(tmp_path):
+    _write(tmp_path / MOVE_OLD / "index.html", "<p>old</p>")
+    with pytest.raises(SystemExit) as exc:
+        _move(tmp_path)
+    assert "is still built; it must only redirect" in str(exc.value)
+
+
+@pytest.mark.parametrize(
+    "old,new",
+    [
+        ("Recipes/x/", MOVE_NEW),
+        ("recipes/x", MOVE_NEW),
+        ("/recipes/x/", MOVE_NEW),
+        ("recipes/x/#frag", MOVE_NEW),
+        ("recipes/../x/", MOVE_NEW),
+        (MOVE_OLD, "Recipes/x/"),
+        (MOVE_OLD, "recipes/x"),
+        (MOVE_OLD, "/recipes/x/"),
+        (MOVE_OLD, "https://example.com/"),
+        (MOVE_OLD, "recipes/x/?q=1"),
+        (MOVE_OLD, "recipes/x/#a#b"),
+        (MOVE_OLD, "recipes/x/#Frag"),
+    ],
+)
+def test_move_rejects_bad_pairs(tmp_path, old, new):
+    with pytest.raises(SystemExit):
+        merge_site.write_moves(tmp_path, [(old, new)], SITE_URL)
+
+
+def test_moved_title_sources(tmp_path):
+    def page(rel, title):
+        _write(tmp_path / rel, f'---\ntitle: "{title}"\n---\n# x\n')
+
+    page("catalog/ideas/some-idea/README.md", "Idea <one>")
+    page("catalog/research/kpi/README.md", "Recipe two")
+    page("platform/serving/README.md", "Platform three")
+    assert merge_site._moved_title("recipes/ideas/some-idea/", tmp_path) == "Idea <one>"
+    assert merge_site._moved_title("recipes/research/kpi/#a", tmp_path) == "Recipe two"
+    assert merge_site._moved_title("platform/serving/", tmp_path) == "Platform three"
+    with pytest.raises(SystemExit) as exc:
+        merge_site._moved_title("explorer/x/", tmp_path)
+    assert "no source page" in str(exc.value)
+
+
+def test_move_title_is_escaped(tmp_path):
+    _write(tmp_path / "src/catalog/ideas/some-idea/README.md", '---\ntitle: "A <b> & \\"q\\""\n---\n')
+    site = tmp_path / "site"
+    _write(site / "recipes/ideas/some-idea/index.html", "<p>x</p>")
+    merge_site.write_moves(site, [(MOVE_OLD, "recipes/ideas/some-idea/")], SITE_URL, root=tmp_path / "src")
+    html = (site / MOVE_OLD / "index.html").read_text(encoding="utf-8")
+    assert "<b>" not in html and "&lt;b&gt; &amp;" in html
+
+
+def test_moved_list_frozen():
+    text = MOVED_PATH.read_text(encoding="utf-8")
+    assert "Use cases moved by the catalog focus change. Frozen: never remove a line." in text.splitlines()[0]
+    pairs = merge_site.read_moves(MOVED_PATH)
+    for want in PINNED_MOVES:
+        assert want in pairs, want
+    olds = [old for old, _ in pairs]
+    assert len(set(olds)) == len(olds)
+
+
 # ---------- link check ----------
 
 
@@ -198,7 +324,7 @@ def test_built_pdf_never_optional(tmp_path, monkeypatch):
 def test_no_planning_ids_in_merge_files():
     from tools.guards.patterns import PLANNING_ID_RE
 
-    for rel in ("tools/site/merge_site.py", "tools/site/legacy-urls.txt"):
+    for rel in ("tools/site/merge_site.py", "tools/site/legacy-urls.txt", "tools/site/moved-urls.txt"):
         text = (REPO_ROOT / rel).read_text(encoding="utf-8")
         assert not PLANNING_ID_RE.search(text), rel
         assert not re.search(r"(?i)\bphase [0-9]", text), rel

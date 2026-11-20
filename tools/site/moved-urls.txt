@@ -1,0 +1,4 @@
+# Use cases moved by the catalog focus change. Frozen: never remove a line.
+# One pair per line: old path, then new path, both relative to the site root with a
+# trailing slash. Only the new path may end in one #fragment.
+# tools/site/merge_site.py writes a redirect page at each old path.
