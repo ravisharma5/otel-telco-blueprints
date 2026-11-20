@@ -194,16 +194,23 @@ def options_table(page_text: str, data_dir: Path = DATA_DIR) -> str:
     return _table(OPTION_COLUMNS, rows)
 
 
-def _use_cases() -> dict[str, tuple[str, str]]:
-    """Use-case id -> (title, path relative to the repository root)."""
+def _use_cases(catalog: Path | None = None) -> dict[str, tuple[str, str]]:
+    """Front-page use-case id -> (title, path relative to the repository root).
+
+    Idea pages are skipped, so an idea id left in the serving data fails loudly.
+    """
+    # Imported here: export_explorer imports this module, so a top-level import is a cycle.
+    from tools.site.export_explorer import is_idea
+
+    catalog = catalog or ROOT / "catalog"
     out = {}
-    for path in sorted((ROOT / "catalog").glob("*/*/README.md")):
+    for path in sorted(catalog.glob("*/*/README.md")):
         text = path.read_text(encoding="utf-8")
         if not text.startswith("---"):
             continue
         fm = yaml.safe_load(text.split("---", 2)[1]) or {}
-        if fm.get("id"):
-            out[fm["id"]] = (fm["title"], path.relative_to(ROOT).as_posix())
+        if fm.get("id") and not is_idea(fm):
+            out[fm["id"]] = (fm["title"], path.relative_to(catalog.parent).as_posix())
     return out
 
 

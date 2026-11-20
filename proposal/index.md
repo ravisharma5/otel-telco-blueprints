@@ -164,6 +164,10 @@ A full recipe adds a worked example and deploy steps. A catalog entry fits on on
 
 <!-- generated:catalog end -->
 
+<!-- generated:ideas start -->
+
+<!-- generated:ideas end -->
+
 ## Flagship recipes
 
 <!-- generated:flagships start -->

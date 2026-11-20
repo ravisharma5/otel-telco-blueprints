@@ -37,6 +37,7 @@ from tools.site.export_explorer import (
     EXPORTER_TABLE_HEADERS,
     SKIPPED_DOMAINS,
     _plain,
+    is_idea,
 )
 from tools.site.render_bring import bring_summary
 from tools.site.render_catalog import domain_order
@@ -58,6 +59,7 @@ NAMES = (
     "catalog",
     "flagships",
     "evidence-summary",
+    "ideas",
 )
 LINK_RE = re.compile(r"\]\(([^)]+)\)")
 
@@ -152,7 +154,7 @@ def platform(pbs: list[dict]) -> str:
 
 
 def use_cases(catalog_dir: Path | None = None) -> list[dict]:
-    """Every published use case, sorted by id, with what the blocks need."""
+    """Every front-page use case (no ideas), sorted by id, with what the blocks need."""
     catalog_dir = catalog_dir or ROOT / "catalog"
     header = EXPORTER_TABLE_HEADERS["parameters"]
     lower = {b.lower(): b for b in BASIS}
@@ -160,7 +162,7 @@ def use_cases(catalog_dir: Path | None = None) -> list[dict]:
     for path in sorted(catalog_dir.glob("*/*/README.md")):
         rel, doc = _doc(path)
         fm = doc.front_matter or {}
-        if fm.get("type") != "use-case" or fm.get("domain") in SKIPPED_DOMAINS:
+        if fm.get("type") != "use-case" or fm.get("domain") in SKIPPED_DOMAINS or is_idea(fm):
             continue
         if fm.get("depth") not in DEPTH_LABELS:
             _fail(f"{rel}: depth {fm.get('depth')!r} has no label")
@@ -196,6 +198,27 @@ def use_cases(catalog_dir: Path | None = None) -> list[dict]:
             }
         )
     return sorted(out, key=lambda u: u["id"])
+
+
+NUMBER_WORDS = ("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
+
+
+def ideas_line(catalog_dir: Path | None = None) -> str:
+    """One sentence with the idea count and a link to the ideas index, or "" with no ideas."""
+    catalog_dir = catalog_dir or ROOT / "catalog"
+    count = 0
+    for path in catalog_dir.glob("*/*/README.md"):
+        text = path.read_text(encoding="utf-8")
+        if not text.startswith("---"):
+            continue
+        fm = yaml.safe_load(text.split("---", 2)[1]) or {}
+        if fm.get("type") == "use-case" and fm.get("domain") not in SKIPPED_DOMAINS and is_idea(fm):
+            count += 1
+    if not count:
+        return ""
+    number = NUMBER_WORDS[count - 1] if count <= len(NUMBER_WORDS) else str(count)
+    noun = "use case is" if count == 1 else "use cases are"
+    return f"{number} more {noun} open for contribution as [exploration ideas](../catalog/ideas/index.md)."
 
 
 def catalog(ucs: list[dict]) -> str:
@@ -260,8 +283,10 @@ def blocks(root: Path = ROOT) -> dict[str, str]:
         "catalog": catalog(ucs),
         "flagships": flagships(ucs),
         "evidence-summary": evidence_summary(ucs, checked),
+        "ideas": ideas_line(root / "catalog"),
     }
-    return {name: f"\n{bodies[name]}\n\n" for name in NAMES}
+    # An empty body (no ideas yet) leaves one blank line between the markers.
+    return {name: f"\n{bodies[name]}\n\n" if bodies[name] else "\n" for name in NAMES}
 
 
 # ---- markers and CLI -------------------------------------------------------

@@ -6,7 +6,7 @@ The overview (catalog/index.md) holds two generated blocks between marker lines:
     <!-- generated:catalog-by-platform start -->  one H3 per platform blueprint
 
 Each block reads id, title, domain, depth, also_covers, and platform_blueprints
-from every catalog/*/*/README.md (the demo domain is skipped). Only the text
+from every catalog/*/*/README.md (the demo domain and idea pages are skipped). Only the text
 between a start and an end marker is replaced. A missing or duplicated marker
 stops the run.
 
@@ -26,7 +26,7 @@ from pathlib import Path
 import yaml
 
 from tools.bplint.slug import github_slug
-from tools.site.export_explorer import DEPTH_LABELS, DOMAIN_LABELS, SKIPPED_DOMAINS
+from tools.site.export_explorer import DEPTH_LABELS, DOMAIN_LABELS, SKIPPED_DOMAINS, is_idea
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "catalog"
@@ -57,11 +57,11 @@ def domain_order() -> list[str]:
 
 
 def use_cases(catalog: Path = CATALOG) -> list[dict]:
-    """Every published use-case page, sorted by id, with its path relative to catalog/."""
+    """Every front-page use-case page (no ideas), sorted by id, with its path relative to catalog/."""
     out = []
     for path in sorted(catalog.glob("*/*/README.md")):
         fm = _front_matter(path)
-        if fm.get("domain") in SKIPPED_DOMAINS:
+        if fm.get("domain") in SKIPPED_DOMAINS or is_idea(fm):
             continue
         rel = path.relative_to(catalog).as_posix()
         if fm.get("domain") not in DOMAIN_LABELS:

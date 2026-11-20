@@ -16,7 +16,8 @@ in that section:
     <!-- generated:sandbox-fit start -->
     <!-- generated:sandbox-fit end -->
 
-It lists every use case by fit, with a link back to each catalog page.
+It lists every front-page use case by fit (idea pages are left out), with a
+link back to each catalog page.
 Only the text between the markers is replaced. A missing or duplicated marker
 stops the run.
 
@@ -145,12 +146,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="exit 1 if a block drifts")
     args = parser.parse_args(argv)
+    # Imported here: export_explorer imports this module, so a top-level import is a cycle.
+    from tools.site.export_explorer import is_idea
+
     stale = []
     entries = []
     for path in pages():
         rel = path.relative_to(ROOT).as_posix()
         old = path.read_text(encoding="utf-8")
-        entries.append((_front_matter(old, rel), _key(path)))
+        fm = _front_matter(old, rel)
+        if not is_idea(fm):  # idea pages keep their own block but stay off the PB-08 list
+            entries.append((fm, _key(path)))
         new = render(old, rel)
         if new == old:
             continue
