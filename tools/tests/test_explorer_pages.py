@@ -704,3 +704,123 @@ def test_far_edge_use_cases_listed(explorer_dist):
     tagged = {slug for slug, card in by_slug.items() if "far-edge" in card.attrs["data-tiers"].split()}
     assert tagged == FAR_EDGE_SLUGS
     assert {uc["slug"] for uc in data["use_cases"]} >= FAR_EDGE_SLUGS
+
+
+# ---------- Ideas sub-tab (site_output) ----------
+#
+# The Use cases section has two sub-tabs: the gallery (home page) and ideas/. Ideas
+# never appear in the gallery and get no use-cases/<slug>/ page; each idea card links
+# its docs page under recipes/ideas/.
+
+IDEAS_PAGE = "ideas/index.html"
+
+
+def _tree(explorer_dist, page):
+    tree = _Tree()
+    tree.feed((explorer_dist / page).read_text(encoding="utf-8"))
+    return tree
+
+
+def _section_tabs(tree):
+    navs = tree.root.find_all(lambda n: n.tag == "nav" and n.has_class("section-tabs"))
+    assert len(navs) == 1, "expected one section-tabs nav"
+    return navs[0].find_all(lambda n: n.tag == "a")
+
+
+def _check_tabs(tree, data, active):
+    tabs = _section_tabs(tree)
+    text = _copy()["ideas"]["tabs"]
+    assert [a.text() for a in tabs] == [
+        text["use_cases"].replace("{count}", str(len(data["use_cases"]))),
+        text["ideas"].replace("{count}", str(len(data["ideas"]))),
+    ]
+    assert [a.attrs["href"] for a in tabs] == [BASE, BASE + "ideas/"]
+    current = [a.attrs.get("data-tab") for a in tabs if a.attrs.get("aria-current") == "page"]
+    assert current == [active]
+    assert all(a.attrs.get("aria-current") in (None, "page") for a in tabs)
+
+
+def _idea_cards(tree):
+    return tree.root.find_all(lambda n: n.tag == "li" and n.has_class("idea-card"))
+
+
+@pytest.mark.site_output
+def test_home_tabs_mark_use_cases(explorer_dist):
+    data = _data()
+    assert (len(data["use_cases"]), len(data["ideas"])) == (22, 7)
+    tree = _home(explorer_dist)
+    _check_tabs(tree, data, "use-cases")
+    # The tabs sit inside the gallery band, above its heading.
+    tabs = tree.root.find_all(lambda n: n.tag == "nav" and n.has_class("section-tabs"))[0]
+    heading = tree.root.find_all(lambda n: n.attrs.get("id") == "gallery-title")[0]
+    assert tabs.parent.attrs.get("id") == "gallery" and tabs.order < heading.order
+
+
+@pytest.mark.site_output
+def test_gallery_holds_no_idea(explorer_dist):
+    data = _data()
+    idea_slugs = {i["slug"] for i in data["ideas"]}
+    assert idea_slugs and len(idea_slugs) == 7
+    tree = _home(explorer_dist)
+    cards = _cards(tree)
+    assert len(cards) == len(data["use_cases"]) == 22
+    assert not {c.attrs["data-card"] for c in cards} & idea_slugs
+    hrefs = [a.attrs.get("href", "") for c in cards for a in c.find_all(lambda n: n.tag == "a")]
+    assert not [h for h in hrefs if any(f"/{s}/" in h for s in idea_slugs)]
+    assert not _idea_cards(tree)
+
+
+@pytest.mark.site_output
+def test_no_use_case_page_for_an_idea(explorer_dist):
+    for idea in _data()["ideas"]:
+        assert not (explorer_dist / "use-cases" / idea["slug"]).exists(), idea["slug"]
+
+
+@pytest.mark.site_output
+def test_ideas_page(explorer_dist):
+    data = _data()
+    text = _copy()["ideas"]
+    assert (explorer_dist / IDEAS_PAGE).is_file()
+    tree = _tree(explorer_dist, IDEAS_PAGE)
+    _check_tabs(tree, data, "ideas")
+    title = tree.root.find_all(lambda n: n.tag == "title")[0].text()
+    assert title == f"{text['headings']['title']} · {_copy()['site']['name']}"
+    h1 = tree.root.find_all(lambda n: n.tag == "h1")
+    assert [h.text() for h in h1] == [text["headings"]["title"]]
+    paragraphs = [n.text() for n in tree.root.find_all(lambda n: n.tag == "p")]
+    assert text["notes"]["intro"] in paragraphs
+    assert text["notes"]["contribute"] in paragraphs
+
+    cards = _idea_cards(tree)
+    assert len(cards) == len(data["ideas"]) == 7
+    by_slug = {c.attrs["data-idea"]: c for c in cards}
+    assert list(by_slug) == [i["slug"] for i in data["ideas"]]
+    for idea in data["ideas"]:
+        card = by_slug[idea["slug"]]
+        body = card.text()
+        for value in (idea["id"], idea["title"], idea["domain"]["label"], idea["why"]):
+            assert value in body, f"{idea['slug']}: missing {value!r}"
+        heads = [h.text() for h in card.find_all(lambda n: n.tag == "h3")]
+        assert heads == [text["headings"]["why"], text["headings"]["promote"]]
+        lists = card.find_all(lambda n: n.tag == "ul" and n.has_class("promote"))
+        assert len(lists) == 1
+        items = [c.text() for c in lists[0].children if isinstance(c, _Node) and c.tag == "li"]
+        assert items == idea["promote"] and items
+        links = card.find_all(lambda n: n.tag == "a")
+        assert [a.attrs["href"] for a in links] == [BASE + idea["docs_url"]]
+        assert idea["docs_url"] == f"recipes/ideas/{idea['slug']}/"
+        assert text["buttons"]["open"] in links[0].text()
+
+
+@pytest.mark.site_output
+def test_ideas_page_header_nav(explorer_dist):
+    # The header stays the six docs nav items; Use cases is the current section.
+    page = _parse(explorer_dist / IDEAS_PAGE)
+    links = [(href, t) for href, t in page.nav_links if t in NAV]
+    assert [t for _, t in links] == NAV
+    assert [href for href, _ in links] == [BASE + p for p in NAV_PATHS]
+    tree = _tree(explorer_dist, IDEAS_PAGE)
+    header = tree.root.find_all(lambda n: n.tag == "nav" and n.attrs.get("id") == "site-nav")[0]
+    marks = {a.text(): a.attrs.get("aria-current") for a in header.find_all(lambda n: n.tag == "a")}
+    assert marks["Use cases"] == "true"
+    assert all(v is None for k, v in marks.items() if k != "Use cases")

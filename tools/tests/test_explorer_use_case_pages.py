@@ -849,8 +849,16 @@ def test_toggle_hidden_and_section_nav_current(explorer_dist, data, copy):
         assert all(a.attrs.get("aria-current") == "true" for a in nav), uc["slug"]
     home = _Tree()
     home.feed((explorer_dist / "index.html").read_text(encoding="utf-8"))
-    links = home.root.find_all(lambda n: n.tag == "a" and n.attrs.get("aria-current"))
+    header = home.root.find_all(lambda n: n.tag == "nav" and n.attrs.get("id") == "site-nav")
+    assert len(header) == 1
+    links = header[0].find_all(lambda n: n.tag == "a" and n.attrs.get("aria-current"))
     assert [(a.text().strip(), a.attrs["aria-current"]) for a in links] == [(use_cases["label"], "page")]
+    # Outside the header, only the Use cases sub-tab is marked current.
+    others = [
+        a for a in home.root.find_all(lambda n: n.tag == "a" and n.attrs.get("aria-current"))
+        if a not in links
+    ]
+    assert [(a.attrs.get("data-tab"), a.attrs["aria-current"]) for a in others] == [("use-cases", "page")]
 
 
 TRY_IT_URL = "https://github.com/ravisharma5/otel-telco-blueprints-impl/tree/main/closed-loop-incident-handling"
@@ -1166,4 +1174,8 @@ def test_no_option_cards_when_nothing_runs(explorer_dist, data, copy):
             assert len(notes) == 1 and notes[0].text() == note, (uc["slug"], key)
             counts = _in_parts(tree, key, lambda n: n.has_class("count-number"))
             assert counts and counts[0].text() == "0", (uc["slug"], key)
-    assert seen
+    if not seen:
+        # The site change-risk gate (far edge only) was the one gallery use case with
+        # a GPU state that places nothing; it is now an idea. Skip visibly until a
+        # gallery use case has such a state again.
+        pytest.skip("no gallery use case has a GPU state with nothing placed at its tier")

@@ -207,3 +207,60 @@ def test_contributor_page_title(site_dir):
     html = (site_dir / "templates/index.html").read_text(encoding="utf-8")
     assert re.search(r'<h1 id="write-a-blueprint">Write a blueprint<', html)
     assert "<title>Write a blueprint" in html
+
+
+MOVED_PATH = REPO_ROOT / "tools/site/moved-urls.txt"
+
+
+def test_every_moved_url_redirects(site_dir):
+    pairs = merge_site.read_moves(MOVED_PATH)
+    assert len(pairs) == 16
+    fragments = 0
+    for old, new in pairs:
+        page = site_dir / old / "index.html"
+        assert page.is_file(), f"no redirect for {old}"
+        data = page.read_bytes()
+        assert len(data) < REDIRECT_MAX_BYTES, f"{old} is not a short stub"
+        html = data.decode("utf-8")
+        assert "md-content" not in html and "site-header" not in html, f"{old} is a built page, not a stub"
+        assert '<meta name="robots" content="noindex">' in html
+        m = REFRESH.search(html)
+        assert m, f"{old} has no meta refresh"
+        url = m.group(1)
+        path, _, fragment = url.partition("#")
+        target = posixpath.normpath(posixpath.join(old, path))
+        expected, _, want_fragment = new.partition("#")
+        assert target == expected.rstrip("/"), f"{old} -> {target}, expected {expected}"
+        if want_fragment:
+            fragments += 1
+            assert url.count("#") == 1 and fragment == want_fragment, url
+            assert html.count("#") == html.count(f"#{want_fragment}"), f"{old}: stray # in stub"
+            assert "+ location.hash" not in html
+        else:
+            assert "#" not in url
+            assert "+ location.hash" in html
+        assert (site_dir / target / "index.html").is_file(), f"{old} -> {target} missing"
+    assert fragments == 2
+
+
+def test_idea_use_case_urls_are_stubs(site_dir):
+    from tools.site.export_explorer import build_explorer_data
+
+    ideas = build_explorer_data(REPO_ROOT)["ideas"]
+    assert len(ideas) == 7
+    for idea in ideas:
+        stub = site_dir / "use-cases" / idea["slug"] / "index.html"
+        assert stub.is_file(), idea["slug"]
+        assert stub.stat().st_size < REDIRECT_MAX_BYTES, idea["slug"]
+        html = stub.read_text(encoding="utf-8")
+        assert '<meta name="robots" content="noindex">' in html, idea["slug"]
+        assert (site_dir / idea["docs_url"] / "index.html").is_file(), idea["docs_url"]
+
+
+def test_ideas_tab_links_resolve(site_dir):
+    html = (site_dir / "ideas/index.html").read_text(encoding="utf-8")
+    links = sorted({h for h, _ in _anchors(html) if h and "/recipes/ideas/" in h})
+    assert len(links) == 7
+    for href in links:
+        rel = href.removeprefix("/otel-telco-blueprints/")
+        assert (site_dir / rel / "index.html").is_file(), href
